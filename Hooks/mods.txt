@@ -1,0 +1,14 @@
+# This is a comment.
+# Put the name of every module you *want* 
+# to be loaded on a line of it's own.
+# Like so:
+load_mod
+quit
+# Instead of removing them, you can comment them out:
+# debug
+help
+# Disabling auth or chanusertracker is a bad idea!
+auth
+chanusertracker
+# hop
+ships
