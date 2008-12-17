@@ -23,11 +23,12 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-import Core.db as db, re, urllib2
-session = db.Session()
+import re, urllib2
+import Core.db as DB
+session = DB.Session()
 
 stats = urllib2.urlopen("http://game.planetarion.com/manual.php?page=stats").read()
-session.execute(db.Maps.Ship.__table__.delete())
+session.execute(DB.Maps.Ship.__table__.delete())
 
 regex = r'^<tr class="(Ter|Cath|Xan|Zik|Etd)">.+?(\w+)</td>' # race & name
 regex += r'<td>(\w+)</td>' # class
@@ -55,7 +56,7 @@ keys = ['race', 'name', 'class_', 't1', 't2', 't3', 'type', 'init',
 		'guns', 'armor', 'damage', 'empres', 'metal', 'crystal', 'eonium']
 
 for line in sre.findall(stats):
-	ship = db.Maps.Ship()
+	ship = DB.Maps.Ship()
 	line = list(line)
 	for index, key in enumerate(keys):
 		if line[index] in mapping:
