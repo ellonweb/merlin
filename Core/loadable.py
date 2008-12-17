@@ -23,7 +23,7 @@
 
 import re
 from exceptions_ import ParseError, PNickParseError, UserError
-from modules import M
+#from modules import M
 
 # ########################################################################### #
 # ##############################    LOADABLE    ############################# #

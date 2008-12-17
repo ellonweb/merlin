@@ -24,7 +24,7 @@
 
 from .variables import usercache
 from exceptions_ import PNickParseError, UserError
-from modules import M
+#from modules import M
 
 Channels = {}
 Nicks = {}

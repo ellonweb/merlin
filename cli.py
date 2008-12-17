@@ -18,15 +18,14 @@ The line is run as though it was:
 import merlin
 import Core.connection as connection
 import sys
+from variables import *
 
 class PhonyConnection(connection.Connection):
     """Used for testing purposes."""
     
-    def __init__(self, serv, port):
-
-        self.serv = serv
-        self.port = port
-
+    def __init__(self):
+        pass
+    
     def connect(self):
         
         return
@@ -44,6 +43,7 @@ class Cli(merlin.Bot):
 
     def __init__(self):
 
+        self.details = {"nick": nick, "pass": passw}
         self.conn = PhonyConnection()
 
 if __name__ == "__main__":

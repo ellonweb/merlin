@@ -34,3 +34,5 @@ class _modules(object):
 		self.loadable = reload(self.loadable)
 
 M = _modules()
+chanusertracker.M = M
+loadable.M = M

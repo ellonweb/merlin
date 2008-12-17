@@ -1,0 +1,21 @@
+Wed Dec 17 14:01:59 2008 Error:
+Traceback (most recent call last):
+  File "/home/robb/merlin/merlin.py", line 77, in run
+    cb.callback(parsed_line)
+  File "/home/robb/merlin/Core/callbacks.py", line 35, in callback
+    callback(message)
+  File "/home/robb/merlin/Hooks/chanusertracker.py", line 133, in inviteme
+    if msg[0] == "!inviteme":
+IndexError: list index out of range
+
+Arguments that caused error: [#ascendancy] <~finnrobi@qebab.users.netgamers.org PRIVMSG #ascendancy :> Wed Dec 17 14:02:28 2008 Error:
+Traceback (most recent call last):
+  File "/home/robb/merlin/merlin.py", line 77, in run
+    cb.callback(parsed_line)
+  File "/home/robb/merlin/Core/callbacks.py", line 35, in callback
+    callback(message)
+  File "/home/robb/merlin/Hooks/chanusertracker.py", line 133, in inviteme
+    if msg[0] == "!inviteme":
+IndexError: list index out of range
+
+Arguments that caused error: [#ascendancy] <~finnrobi@qebab.users.netgamers.org PRIVMSG #ascendancy :> 
