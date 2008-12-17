@@ -33,3 +33,16 @@ Traceback (most recent call last):
 NameError: global name 'like' is not defined
 
 Arguments that caused error: [#ascendancy] <ellonweb> !ship arp
+Wed Dec 17 15:23:57 2008 Error:
+Traceback (most recent call last):
+  File "F:\Code\Git\merlin\merlin.py", line 77, in run
+    cb.callback(parsed_line)
+  File "F:\Code\Git\merlin\Core\callbacks.py", line 35, in callback
+    callback(message)
+  File "F:\Code\Git\merlin\Core\loadable.py", line 46, in __call__
+    self.execute(message)
+  File "F:\Code\Git\merlin\Hooks\ships\eff.py", line 65, in execute
+    session = message.db.Session()
+AttributeError: 'Action' object has no attribute 'db'
+
+Arguments that caused error: [#ascendancy] <ellonweb> !eff 10 harp

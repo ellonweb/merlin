@@ -40,6 +40,7 @@ class stop(loadable):
 			return
 		
 		num, name, attacker = params.groups()
+		attacker = attacker or "t1"
 		
 		num = self.short2num(num)
 		ship = M.DB.Maps.Ship.load(name=name)
@@ -52,12 +53,13 @@ class stop(loadable):
 		else:
 			message.alert("No Ship called: %s" % (name,))
 			return
-		efficiency = effs[attacker or "t1"]
-		attacker_class = getattr(message.db.Maps.Ship, attacker or "t1")
-		session = message.db.Session()
-		attackers = session.query(message.db.Maps.Ship).filter(attacker_class == ship.class_)
+		efficiency = effs[attacker]
+		attacker_class = getattr(M.DB.Maps.Ship, attacker)
+		session = M.DB.Session()
+		attackers = session.query(M.DB.Maps.Ship).filter(attacker_class == ship.class_)
+		session.close()
 		if attackers.count() == 0:
-			message.reply("%s is not hit by anything as category (%s)" % (ship.name,attacker))
+			message.reply("%s is not hit by anything as that category (%s)" % (ship.name,attacker))
 			return
 		if ship.class_ == "Roids":
 			reply="Capturing"
@@ -72,7 +74,6 @@ class stop(loadable):
 			else:
 				needed=int((math.ceil(float(total_armor)/attacker.damage))/efficiency)
 			reply+="%s: %s (%s) " % (attacker.name,needed,self.num2short(attacker.total_cost*needed/100))
-		session.close()
 		message.reply(reply)
 
 callbacks = [("PRIVMSG", stop())]

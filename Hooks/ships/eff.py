@@ -40,14 +40,15 @@ class eff(loadable):
 			return
 		
 		num, name, target = params.groups()
+		target = target or "t1"
 		
 		ship = M.DB.Maps.Ship.load(name=name)
 		num = self.short2num(num)
 		if ship is None:
 			message.alert("No Ship called: %s" % (name,))
 			return
-		efficiency = effs[target or "t1"]
-		target_class = getattr(ship, target or "t1")
+		efficiency = effs[target]
+		target_class = getattr(ship, target)
 		if ship.damage:
 			total_damage = ship.damage * num
 		if ship.t1 == "Roids":
@@ -62,8 +63,9 @@ class eff(loadable):
 				num, ship.name, self.num2short(num*ship.total_cost/100),
 				killed, self.num2short(killed*1500),))
 			return
-		session = message.db.Session()
-		targets = session.query(message.db.Maps.Ship).filter(message.db.Maps.Ship.class_ == target_class)
+		session = M.DB.Session()
+		targets = session.query(M.DB.Maps.Ship).filter(M.DB.Maps.Ship.class_ == target_class)
+		session.close()
 		if targets.count() == 0:
 			message.reply("%s does not have any targets in that category (%s)" % (ship.name,target))
 			return
@@ -82,7 +84,6 @@ class eff(loadable):
 			else:
 				killed=int(efficiency * total_damage/target.armor)
 			reply+="%s: %s (%s) " % (target.name,killed,self.num2short(target.total_cost*killed/100))
-		session.close()
 		message.reply(reply)
 
 callbacks = [("PRIVMSG", eff())]
