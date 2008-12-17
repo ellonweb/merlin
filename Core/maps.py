@@ -108,10 +108,10 @@ class Ship(Base):
 			Q = Q.filter(Ship.id == id)
 		if name is not None:
 			if Q.filter(Ship.name.like(name)).count() < 1:
-				if Q.filter(Ship.name.like(like("%"+name+"%"))) < 1 and name[-1].lower()=="s":
-					Q = Q.filter(Ship.name.like(like("%"+name[:-1]+"%")))
+				if Q.filter(Ship.name.like("%"+name+"%")) < 1 and name[-1].lower()=="s":
+					Q = Q.filter(Ship.name.like("%"+name[:-1]+"%"))
 				else:
-					Q = Q.filter(Ship.name.like(like("%"+name+"%")))
+					Q = Q.filter(Ship.name.like("%"+name+"%"))
 			else:
 				Q = Q.filter(Ship.name.like(name))
 		ship = Q.first()

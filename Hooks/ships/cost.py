@@ -41,7 +41,7 @@ class cost(loadable):
 		
 		num, name = params.groups()
 		
-		ship = M.DB.Maps.Ship.load(name)
+		ship = M.DB.Maps.Ship.load(name=name)
 		if ship is None:
 			message.alert("No Ship called: %s" % (name,))
 			return

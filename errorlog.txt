@@ -18,4 +18,18 @@ Traceback (most recent call last):
     if msg[0] == "!inviteme":
 IndexError: list index out of range
 
-Arguments that caused error: [#ascendancy] <~finnrobi@qebab.users.netgamers.org PRIVMSG #ascendancy :> 
+Arguments that caused error: [#ascendancy] <~finnrobi@qebab.users.netgamers.org PRIVMSG #ascendancy :> Wed Dec 17 15:01:22 2008 Error:
+Traceback (most recent call last):
+  File "F:\Code\Git\merlin\merlin.py", line 77, in run
+    cb.callback(parsed_line)
+  File "F:\Code\Git\merlin\Core\callbacks.py", line 35, in callback
+    callback(message)
+  File "F:\Code\Git\merlin\Core\loadable.py", line 46, in __call__
+    self.execute(message)
+  File "F:\Code\Git\merlin\Hooks\ships\ship.py", line 44, in execute
+    ship = M.DB.Maps.Ship.load(name=name)
+  File "F:\Code\Git\merlin\Core\maps.py", line 111, in load
+    if Q.filter(Ship.name.like(like("%"+name+"%"))) < 1 and name[-1].lower()=="s":
+NameError: global name 'like' is not defined
+
+Arguments that caused error: [#ascendancy] <ellonweb> !ship arp

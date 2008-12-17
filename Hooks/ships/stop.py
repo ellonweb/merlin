@@ -42,7 +42,7 @@ class stop(loadable):
 		num, name, attacker = params.groups()
 		
 		num = self.short2num(num)
-		ship = M.DB.Maps.Ship.load(name)
+		ship = M.DB.Maps.Ship.load(name=name)
 		if "asteroids".rfind(name.lower()) > -1:
 			total_armor = 50 * num
 		elif "constructions".rfind(name.lower()) > -1:

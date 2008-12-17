@@ -24,7 +24,7 @@ class prod(loadable):
             return
         num, name, factories = params.groups()
 
-        ship = M.DB.Maps.Ship.load(name)
+        ship = M.DB.Maps.Ship.load(name=name)
         if ship is None:
             message.alert("%s is not a ship." % name)
         num = self.short2num(num)
