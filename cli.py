@@ -6,13 +6,13 @@ Usage:
 When running the program, the argv is used as a prefix
 for every line sent to the bot, and the output is
 written to stdout. That's to say, if I call the program like this:
-./cli-bot.py :~qebab@qebab.users.netgamers.org PRIVMSG #ascendancy :
+./cli.py :qebab!qebab@qebab.users.netgamers.org PRIVMSG #ascendancy :
 It will hang on stdin for input, and when it gets a line it will concatenate
 the input with this, so that for instance:
-./cli-bot.py :~qebab@qebab.users.netgamers.org PRIVMSG #ascendancy :
+./cli.py :qebab!qebab@qebab.users.netgamers.org PRIVMSG #ascendancy :
 > !eff 3k harpy
 The line is run as though it was:
-:~qebab@qebab.users.netgamers.org PRIVMSG #ascendancy :!eff 3k harpy
+:qebab!qebab@qebab.users.netgamers.org PRIVMSG #ascendancy :!eff 3k harpy
 """
 
 import merlin
