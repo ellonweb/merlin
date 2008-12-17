@@ -64,7 +64,7 @@ class User(Base):
 		return user
 	
 	@validates('passwd')
-	def hash_paswd(self, key, passwd):
+	def hash_passwd(self, key, passwd):
 		return func.MD5(passwd)
 
 def user_access_function(num):
