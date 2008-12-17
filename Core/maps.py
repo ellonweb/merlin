@@ -52,7 +52,7 @@ class User(Base):
 			Q = Q.filter(User.id == id)
 		if name is not None:
 			if (exact is not True) and Q.filter(User.name.like(name)).count() < 1:
-				Q = Q.filter(User.name.like(like("%"+name+"%")))
+				Q = Q.filter(User.name.like("%"+name+"%"))
 			else:
 				Q = Q.filter(User.name.like(name))
 		if passwd is not None:
