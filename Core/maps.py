@@ -35,13 +35,22 @@ class User(Base):
 	active = Column(Boolean, default=True)
 	access = Column(Integer)
 	#planet_id - reference to planet_canon - on delete cascade
-	email = Column(String) # regex constraint here would be cool, can sqla do that? <-- yes it can, see passwd validation below
+	email = Column(String)
 	phone = Column(String)
 	pubphone = Column(Boolean, default=False) # Asc
 	sponsor = Column(String) # Asc
 	#invites = Column - check >=0 # Asc
 	quits = Column(Integer) # Asc
 	stay = Column(Boolean) # Asc
+	
+	@validates('passwd')
+	def valid_passwd(self, key, passwd):
+		return func.MD5(passwd)
+	
+	@validates('email')
+	def valid_email(self, key, email):
+		#assert some_regex match email
+		return email
 	
 	@staticmethod
 	def load(id=None, name=None, passwd=None, exact=True, active=True):
@@ -51,10 +60,10 @@ class User(Base):
 		if id is not None:
 			Q = Q.filter(User.id == id)
 		if name is not None:
-			if (exact is not True) and Q.filter(User.name.like(name)).count() < 1:
-				Q = Q.filter(User.name.like("%"+name+"%"))
+			if Q.filter(User.name.ilike(name)).count() > 0 or (exact is True):
+				Q = Q.filter(User.name.ilike(name))
 			else:
-				Q = Q.filter(User.name.like(name))
+				Q = Q.filter(User.name.ilike("%"+name+"%"))
 		if passwd is not None:
 			Q = Q.filter(User.passwd == func.MD5(passwd))
 		if active is True:
@@ -62,21 +71,17 @@ class User(Base):
 		user = Q.first()
 		session.close()
 		return user
-	
-	@validates('passwd')
-	def hash_passwd(self, key, passwd):
-		return func.MD5(passwd)
-
 def user_access_function(num):
 	# Function generator for access check
 	def func(self):
 		if self.access & num == num:
 			return True
 	return func
-
-# Bind user access functions
 for lvl, num in access.items():
+	# Bind user access functions
 	setattr(User, "is_"+lvl, user_access_function(num))
+	
+
 
 class Ship(Base):
 	__tablename__ = 'ships'
@@ -107,13 +112,12 @@ class Ship(Base):
 		if id is not None:
 			Q = Q.filter(Ship.id == id)
 		if name is not None:
-			if Q.filter(Ship.name.like(name)).count() < 1:
-				if Q.filter(Ship.name.like("%"+name+"%")) < 1 and name[-1].lower()=="s":
-					Q = Q.filter(Ship.name.like("%"+name[:-1]+"%"))
-				else:
-					Q = Q.filter(Ship.name.like("%"+name+"%"))
+			if Q.filter(Ship.name.ilike(name)).count() > 0:
+				Q = Q.filter(Ship.name.ilike(name))
+			elif Q.filter(Ship.name.ilike("%"+name+"%")) > 0 or (name[-1].lower()!="s"):
+				Q = Q.filter(Ship.name.ilike("%"+name+"%"))
 			else:
-				Q = Q.filter(Ship.name.like(name))
+				Q = Q.filter(Ship.name.ilike("%"+name[:-1]+"%"))
 		ship = Q.first()
 		session.close()
 		return ship
