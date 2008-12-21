@@ -20,4 +20,4 @@
 # owners.
 
 # List of package modules
-__all__ = ["adduser","edituser","phone","whois","pref"] # "Traditional"
+__all__ = ["sponsor","unsponsor","gimp"] # Asc

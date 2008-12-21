@@ -5,7 +5,7 @@ from .variables import access
 from .Core.modules import M
 loadable = M.loadable.loadable
 
-class unsponsor(loadable.loadable):
+class unsponsor(loadable):
     """Unsponsor one of your gimps."""
     def __init__(self):
         loadable.__init__(self)
