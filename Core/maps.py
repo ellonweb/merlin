@@ -21,7 +21,9 @@
 
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relation, backref
+from math import ceil
+from time import time
 from .variables import access
 
 Base = declarative_base()
@@ -39,18 +41,21 @@ class User(Base):
 	phone = Column(String)
 	pubphone = Column(Boolean, default=False) # Asc
 	sponsor = Column(String) # Asc
-	#invites = Column - check >=0 # Asc
+	invites = Column(Integer) # Asc
 	quits = Column(Integer) # Asc
 	stay = Column(Boolean) # Asc
 	
 	@validates('passwd')
 	def valid_passwd(self, key, passwd):
 		return func.MD5(passwd)
-	
 	@validates('email')
 	def valid_email(self, key, email):
 		#assert some_regex match email
 		return email
+	@validates('invites')
+	def valid_invites(self, key, invites):
+		assert invites > 0
+		return invites
 	
 	@staticmethod
 	def load(id=None, name=None, passwd=None, exact=True, active=True):
@@ -80,6 +85,36 @@ def user_access_function(num):
 for lvl, num in access.items():
 	# Bind user access functions
 	setattr(User, "is_"+lvl, user_access_function(num))
+	
+
+
+class Gimp(Base):
+	__tablename__ = 'sponsor'
+	
+	id = Column(Integer, primary_key=True)
+	sponsor_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+	sponsor = relation(User, backref=backref('gimps', order_by=id))
+	name = Column(String)
+	comment = Column(Text)
+	timestamp = Column(Float)
+	wait = 36*60*60 #seconds
+	
+	def __init__(self, sponsor, name, comment):
+		self.sponsor_id = sponsor.id
+		self.name = name
+		self.comment = comment
+		self.timestamp = time()
+	def hoursleft(self):
+		return -ceil((time()-(self.timestamp+self.wait))/60/60)
+	
+	@staticmethod
+	def load(name):
+		session = Session()
+		Q = session.query(Gimp)
+		Q = Q.filter(Gimp.name.ilike(name))
+		gimp = Q.first()
+		session.close()
+		return gimp
 	
 
 
