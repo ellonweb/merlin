@@ -125,14 +125,14 @@ def auth(message):
 		except UserError:
 			message.alert("You don't have access to this command")
 
-def inviteme(message):
+def letmein(message):
 	"""Invites the user to the private channel, if they provide their username and password"""
 	# P redundancy
 	
 	msg = message.get_msg().split()
-	if msg[0] == "!inviteme":
+	if msg[0] == "!letmein":
 		if len(msg) != 3:
-			message.alert("!inviteme user pass")
+			message.alert("!letmein user pass")
 			return
 		try:
 			user = M.CUT.auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
@@ -142,4 +142,4 @@ def inviteme(message):
 		except UserError:
 			message.alert("You don't have access to this command")
 
-callbacks = [("JOIN", join), ("332", topic), ("353", names), ("PART", part), ("KICK", kick), ("QUIT", quit), ("NICK", nick), ("330", pnick), ("PRIVMSG", flush), ("PRIVMSG", inviteme), ("PRIVMSG", auth)]
+callbacks = [("JOIN", join), ("332", topic), ("353", names), ("PART", part), ("KICK", kick), ("QUIT", quit), ("NICK", nick), ("330", pnick), ("PRIVMSG", flush), ("PRIVMSG", letmein), ("PRIVMSG", auth)]
