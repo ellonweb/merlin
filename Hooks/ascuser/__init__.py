@@ -20,4 +20,5 @@
 # owners.
 
 # List of package modules
-__all__ = ["sponsor","unsponsor","gimp","getanewdaddy","handout","invite"] # Asc
+__all__ = ["sponsor","unsponsor","gimp","invite","getanewdaddy",
+			"handout","aids","whois","quitter","quits"] # Asc
