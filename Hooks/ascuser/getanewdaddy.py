@@ -12,7 +12,7 @@ class getanewdaddy(loadable):
         self.access = access['member']
         self.paramre = re.compile(r"\s([\w-]+)")
         self.usage += " pnick"
-
+        
     def execute(self, message):
         user, params = loadable.execute(self, message) or (None,None)
         if not params:

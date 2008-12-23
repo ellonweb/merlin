@@ -10,7 +10,7 @@ class gimp(loadable):
     def __init__(self):
         loadable.__init__(self)
         self.access = access['member']
-        self.paramre = re.compile(r"(?:\s([\w-]+))")
+        self.paramre = re.compile(r"(?:\s([\w-]+))?")
         self.usage += " [pnick]"
         
     def execute(self, message):
