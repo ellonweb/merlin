@@ -6,7 +6,7 @@ from .Core.modules import M
 loadable = M.loadable.loadable
 
 class sponsor(loadable):
-    """Sponsor a new recruit that you will take responsibility for. You can invite your gimp after a set time period."""
+    """Sponsor a new recruit that you will take responsibility for. You can invite them after a set time period."""
     def __init__(self):
         loadable.__init__(self)
         self.access = access['member']
@@ -24,7 +24,7 @@ class sponsor(loadable):
         
         # do stuff here
         member = M.DB.Maps.User.load(name=pnick, active=True)
-        if member is not None:
+        if (member is not None) and member.is_member():
             message.alert("A user with that pnick already exists!")
             return
         gimp = M.DB.Maps.Gimp.load(name=recruit)
