@@ -21,3 +21,4 @@
 
 # List of package modules
 __all__ = ["adduser","edituser","phone","whois","pref"] # "Traditional"
+__all__ = ["adduser","edituser","ascuser","pref"] # Asc
