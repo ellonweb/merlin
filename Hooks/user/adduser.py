@@ -32,7 +32,7 @@ class adduser(loadable):
 	
 	def __init__(self):
 		loadable.__init__(self)
-		self.access = access['admin'] | access['hc']
+		self.access = access['admin'] | access.get('hc',0)
 		self.paramre = re.compile(r"\s([\w-]+)")
 		self.usage += " pnick [access]*"
 	

@@ -31,7 +31,7 @@ class edituser(loadable):
 	
 	def __init__(self):
 		loadable.__init__(self)
-		self.access = access['admin'] | access['hc']
+		self.access = access['admin'] | access.get('hc',0)
 		self.paramre = re.compile(r"\s([\w-]+)\s(.+)")
 		self.usage += " user [set=[access,]*] [unset=[access,]*] [active=1]"
 	
