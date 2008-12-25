@@ -28,11 +28,23 @@ from .variables import access
 
 Base = declarative_base()
 
+# This PhoneFriend table is a slightly hackish solution (as is the relation defined in User), but it works.
+# Many2Many relations do not work with declarative, so it has to be defined just as the table.
+# However, string alternatives for column attributes only work when using declarative.
+# The former problem is unlikely to be fixed (requires some major changes in design), the latter is more likely:
+# [03:25] <zzzeek__> its a straightforward feature add to have the table name work within the string version
+# Keep an eye on CHANGES to see if this is ever implemented.
+# There is another option, which I haven't looked into yet:
+# [03:24] <zzzeek__> its not documented but you could set primaryjoin to be a callable which returns the correct result
+PhoneFriend = Table('phonefriends', Base.metadata, 
+	Column('user_id', Integer, ForeignKey("users.id", ondelete='cascade')),
+	Column('friend_id', Integer, ForeignKey("users.id", ondelete='cascade'))
+)
 class User(Base):
 	__tablename__ = 'users'
 	
 	id = Column(Integer, primary_key=True)
-	name = Column(String) # pnick <- we could have two separate field for user and pnick, don't think it's needed
+	name = Column(String) # pnick
 	passwd = Column(String)
 	active = Column(Boolean, default=True)
 	access = Column(Integer)
@@ -40,6 +52,8 @@ class User(Base):
 	email = Column(String)
 	phone = Column(String)
 	pubphone = Column(Boolean, default=False) # Asc
+	phonefriends = relation("User", secondary=PhoneFriend, primaryjoin=PhoneFriend.c.user_id==id,
+									secondaryjoin=PhoneFriend.c.friend_id==id) # Asc
 	sponsor = Column(String) # Asc
 	invites = Column(Integer) # Asc
 	quits = Column(Integer) # Asc
@@ -93,7 +107,7 @@ class Gimp(Base):
 	
 	id = Column(Integer, primary_key=True)
 	sponsor_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
-	sponsor = relation(User, backref=backref('gimps', order_by=id))
+	sponsor = relation(User, primaryjoin=sponsor_id==User.id, backref=backref('gimps', order_by=id))
 	name = Column(String)
 	comment = Column(Text)
 	timestamp = Column(Float)

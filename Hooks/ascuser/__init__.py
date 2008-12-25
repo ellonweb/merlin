@@ -21,4 +21,4 @@
 
 # List of package modules
 __all__ = ["sponsor","unsponsor","gimp","invite","getanewdaddy",
-			"handout","aids","whois","quitter","quits"] # Asc
+			"handout","aids","whois","quitter","quits","phone"] # Asc
