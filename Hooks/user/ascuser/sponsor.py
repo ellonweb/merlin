@@ -18,6 +18,9 @@ class sponsor(loadable):
         if not params:
             return
 
+        #message.reply("Fuck off and stop watering down this elitist shithole.")
+        #return
+
         # assign param variables
         recruit=params.group(1)
         comment=params.group(2)
