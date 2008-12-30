@@ -24,6 +24,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import validates, relation, backref
 from math import ceil
 from time import time
+import hashlib
 from .variables import access
 
 Base = declarative_base()
@@ -61,7 +62,7 @@ class User(Base):
 	
 	@validates('passwd')
 	def valid_passwd(self, key, passwd):
-		return func.MD5(passwd)
+		return User.hasher(passwd)
 	@validates('email')
 	def valid_email(self, key, email):
 		#assert some_regex match email
@@ -70,6 +71,12 @@ class User(Base):
 	def valid_invites(self, key, invites):
 		assert invites > 0
 		return invites
+	
+	@staticmethod
+	def hasher(passwd):
+		# *Every* user password operation should go through this function
+		# This can be easily adapted to use SHA1 instead, or add salts
+		return hashlib.md5(passwd).hexdigest()
 	
 	@staticmethod
 	def load(id=None, name=None, passwd=None, exact=True, active=True):
@@ -84,7 +91,7 @@ class User(Base):
 			else:
 				Q = Q.filter(User.name.ilike("%"+name+"%"))
 		if passwd is not None:
-			Q = Q.filter(User.passwd == func.MD5(passwd))
+			Q = Q.filter(User.passwd == User.hasher(passwd))
 		if active is True:
 			Q = Q.filter(User.active == True)
 		user = Q.first()

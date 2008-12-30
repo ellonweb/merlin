@@ -31,8 +31,8 @@ admins = ("ellonweb",)
 # DB info, e.g.
 #  postgres://user:password@host:port/database
 #  mysql://user:password@host:port/database
+#  sqlite:///relative/path/to/database.sqlite
 # http://www.sqlalchemy.org/docs/05/dbengine.html#create-engine-url-arguments
-# Don't use SQLite!
 DBeng = "sqlite:///testdb.sqlite"
 
 # Channels
