@@ -111,7 +111,7 @@ class Gimp(Base):
 	name = Column(String)
 	comment = Column(Text)
 	timestamp = Column(Float)
-	wait = 36*60*60 #seconds
+	wait = 36 #hours. use 0 for invite mode, -1 for recruitment closed
 	
 	def __init__(self, sponsor, name, comment):
 		self.sponsor_id = sponsor.id
@@ -119,7 +119,7 @@ class Gimp(Base):
 		self.comment = comment
 		self.timestamp = time()
 	def hoursleft(self):
-		return -ceil((time()-(self.timestamp+self.wait))/60/60)
+		return -ceil((time()-(self.timestamp+(self.wait*60*60)))/60/60)
 	
 	@staticmethod
 	def load(name):
