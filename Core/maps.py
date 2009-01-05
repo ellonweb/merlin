@@ -22,6 +22,7 @@
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import validates, relation, backref
+from sqlalchemy.sql.functions import current_timestamp
 from math import ceil
 from time import time
 import hashlib
@@ -29,32 +30,21 @@ from .variables import access
 
 Base = declarative_base()
 
-# This PhoneFriend table is a slightly hackish solution (as is the relation defined in User), but it works.
-# Many2Many relations do not work with declarative, so it has to be defined just as the table.
-# However, string alternatives for column attributes only work when using declarative.
-# The former problem is unlikely to be fixed (requires some major changes in design), the latter is more likely:
-# [03:25] <zzzeek__> its a straightforward feature add to have the table name work within the string version
-# Keep an eye on CHANGES to see if this is ever implemented.
-# There is another option, which I haven't looked into yet:
-# [03:24] <zzzeek__> its not documented but you could set primaryjoin to be a callable which returns the correct result
-PhoneFriend = Table('phonefriends', Base.metadata, 
-	Column('user_id', Integer, ForeignKey("users.id", ondelete='cascade')),
-	Column('friend_id', Integer, ForeignKey("users.id", ondelete='cascade'))
-)
+# ########################################################################### #
+# #############################    USER TABLES    ########################### #
+# ########################################################################### #
+
 class User(Base):
 	__tablename__ = 'users'
-	
 	id = Column(Integer, primary_key=True)
 	name = Column(String) # pnick
 	passwd = Column(String)
 	active = Column(Boolean, default=True)
 	access = Column(Integer)
-	#planet_id - reference to planet_canon - on delete cascade
+	planet_id = Column(Integer, ForeignKey('planet.id', ondelete='set null'))
 	email = Column(String)
 	phone = Column(String)
 	pubphone = Column(Boolean, default=False) # Asc
-	phonefriends = relation("User", secondary=PhoneFriend, primaryjoin=PhoneFriend.c.user_id==id,
-									secondaryjoin=PhoneFriend.c.friend_id==id) # Asc
 	sponsor = Column(String) # Asc
 	invites = Column(Integer) # Asc
 	quits = Column(Integer) # Asc
@@ -106,15 +96,21 @@ def user_access_function(num):
 for lvl, num in access.items():
 	# Bind user access functions
 	setattr(User, "is_"+lvl, user_access_function(num))
-	
 
+class PhoneFriend(Base):
+	__tablename__ = 'phonefriends'
+	id = Column(Integer, primary_key=True)
+	user_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
+	friend_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
+
+User.phonefriends = relation(User,  secondary=PhoneFriend.__table__,
+								  primaryjoin=PhoneFriend.user_id   == User.id,
+								secondaryjoin=PhoneFriend.friend_id == User.id) # Asc
 
 class Gimp(Base):
 	__tablename__ = 'sponsor'
-	
 	id = Column(Integer, primary_key=True)
-	sponsor_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
-	sponsor = relation(User, primaryjoin=sponsor_id==User.id, backref=backref('gimps', order_by=id))
+	sponsor_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
 	name = Column(String)
 	comment = Column(Text)
 	timestamp = Column(Float)
@@ -136,12 +132,143 @@ class Gimp(Base):
 		gimp = Q.first()
 		session.close()
 		return gimp
-	
 
+Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gimps')
+
+# ########################################################################### #
+# #############################    DUMP TABLES    ########################### #
+# ########################################################################### #
+
+class Updates(Base):
+	__tablename__ = 'updates'
+	id = Column(Integer, primary_key=True)
+	tick = Column(Integer, unique=True)
+	planets = Column(Integer)
+	galaxies = Column(Integer)
+	alliances = Column(Integer)
+	timestamp = Column(DateTime, default=current_timestamp())
+class Planet(Base):
+	__tablename__ = 'planet'
+	id = Column(Integer, primary_key=True)
+	x = Column(Integer)
+	y = Column(Integer)
+	z = Column(Integer)
+	galaxy_coords = ForeignKeyConstraint(('planet.x', 'planet.y'), ('galaxy.x', 'galaxy.y'))
+	planetname = Column(String)
+	rulername = Column(String)
+	race = Column(String)
+	size = Column(Integer)
+	score = Column(Integer)
+	value = Column(Integer)
+	score_rank = Column(Integer)
+	value_rank = Column(Integer)
+	size_rank = Column(Integer)
+	xp = Column(Integer)
+	xp_rank = Column(Integer)
+	idle = Column(Integer)
+	vdiff = Column(Integer)
+Planet.coords = Index('planet_coords_index', Planet.__table__.c.x, Planet.__table__.c.y, Planet.__table__.c.z)
+User.planet = relation(Planet, primaryjoin=User.planet_id==Planet.id)
+class PlanetHistory(Base):
+	__tablename__ = 'planet_history'
+	tick = Column(Integer, ForeignKey('updates.tick', ondelete='cascade'), primary_key=True)
+	id = Column(Integer, ForeignKey('planet.id'), primary_key=True)
+	x = Column(Integer)
+	y = Column(Integer)
+	z = Column(Integer)
+	galaxy_coords = ForeignKeyConstraint(('planet_history.tick', 'planet_history.x', 'planet_history.y'), ('galaxy_history.tick', 'galaxy_history.x', 'galaxy_history.y'))
+	planetname = Column(String)
+	rulername = Column(String)
+	race = Column(String)
+	size = Column(Integer)
+	score = Column(Integer)
+	value = Column(Integer)
+	score_rank = Column(Integer)
+	value_rank = Column(Integer)
+	size_rank = Column(Integer)
+	xp = Column(Integer)
+	xp_rank = Column(Integer)
+	idle = Column(Integer)
+	vdiff = Column(Integer)
+class PlanetExiles(Base):
+	__tablename__ = 'planet_exiles'
+	key = Column(Integer, primary_key=True)
+	tick = Column(Integer, ForeignKey('updates.tick', ondelete='cascade'))
+	id = Column(Integer, ForeignKey('planet.id'))
+	oldx = Column(Integer)
+	oldy = Column(Integer)
+	oldz = Column(Integer)
+	newx = Column(Integer)
+	newy = Column(Integer)
+	newz = Column(Integer)
+class Galaxy(Base):
+	__tablename__ = 'galaxy'
+	id = Column(Integer, primary_key=True)
+	x = Column(Integer)
+	y = Column(Integer)
+	name = Column(String)
+	size = Column(Integer)
+	score = Column(Integer)
+	value = Column(Integer)
+	score_rank = Column(Integer)
+	value_rank = Column(Integer)
+	size_rank = Column(Integer)
+	xp = Column(Integer)
+	xp_rank = Column(Integer)
+Galaxy.coords = Index('galaxy_coords_index', Galaxy.__table__.c.x, Galaxy.__table__.c.y)
+Planet.galaxy = relation(Galaxy, primaryjoin=and_(Galaxy.x==Planet.x, Galaxy.y==Planet.y), foreign_keys=(Planet.x, Planet.y), backref=backref('planets', primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), foreign_keys=(Planet.x, Planet.y)))
+class GalaxyHistory(Base):
+	__tablename__ = 'galaxy_history'
+	tick = Column(Integer, ForeignKey('updates.tick', ondelete='cascade'), primary_key=True)
+	id = Column(Integer, ForeignKey('galaxy.id'), primary_key=True)
+	x = Column(Integer)
+	y = Column(Integer)
+	name = Column(String)
+	size = Column(Integer)
+	score = Column(Integer)
+	value = Column(Integer)
+	score_rank = Column(Integer)
+	value_rank = Column(Integer)
+	size_rank = Column(Integer)
+	xp = Column(Integer)
+	xp_rank = Column(Integer)
+PlanetHistory.galaxy = relation(GalaxyHistory, primaryjoin=and_(GalaxyHistory.tick==PlanetHistory.tick, GalaxyHistory.x==PlanetHistory.x, GalaxyHistory.y==PlanetHistory.y), foreign_keys=(PlanetHistory.tick, PlanetHistory.x, PlanetHistory.y), backref=backref('planets', primaryjoin=and_(PlanetHistory.tick==GalaxyHistory.tick, PlanetHistory.x==GalaxyHistory.x, PlanetHistory.y==GalaxyHistory.y), foreign_keys=(PlanetHistory.tick, PlanetHistory.x, PlanetHistory.y)))
+class Alliance(Base):
+	__tablename__ = 'alliance'
+	id = Column(Integer, primary_key=True)
+	name = Column(String)
+	size = Column(Integer)
+	members = Column(Integer)
+	score = Column(Integer)
+	score_rank = Column(Integer)
+	size_rank = Column(Integer)
+	members_rank = Column(Integer)
+	score_avg = Column(Integer)
+	size_avg = Column(Integer)
+	score_avg_rank = Column(Integer)
+	size_avg_rank = Column(Integer)
+class AllianceHistory(Base):
+	__tablename__ = 'alliance_history'
+	tick = Column(Integer, ForeignKey('updates.tick', ondelete='cascade'), primary_key=True)
+	id = Column(Integer, ForeignKey('alliance.id'), primary_key=True)
+	name = Column(String)
+	size = Column(Integer)
+	members = Column(Integer)
+	score = Column(Integer)
+	score_rank = Column(Integer)
+	size_rank = Column(Integer)
+	members_rank = Column(Integer)
+	score_avg = Column(Integer)
+	size_avg = Column(Integer)
+	score_avg_rank = Column(Integer)
+	size_avg_rank = Column(Integer)
+
+# ########################################################################### #
+# #############################    SHIP TABLE    ############################ #
+# ########################################################################### #
 
 class Ship(Base):
 	__tablename__ = 'ships'
-	
 	id = Column(Integer, primary_key=True)
 	name = Column(String)
 	class_ = Column(String)
