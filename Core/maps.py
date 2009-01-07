@@ -150,7 +150,7 @@ class Updates(Base):
 	@staticmethod
 	def current_tick():
 		session = Session()
-		tick = session.query(max(Updates.tick)).first()[0] or 0
+		tick = session.query(max(Updates.tick)).scalar() or 0
 		session.close()
 		return tick
 class Planet(Base):

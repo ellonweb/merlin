@@ -310,11 +310,13 @@ while True:
         print "Copy planet ids from history in %.3f seconds" % (t2,)
         t1=time.time()
 
+        planet_new_id_search.drop(checkfirst=True)
+        planet_old_id_search.drop(checkfirst=True)
+        planet_new_id_search.create()
+        planet_old_id_search.create()
         while True:
             if session.execute(DB.Maps.Updates.__table__.count()).scalar() < 1:
                 break
-            planet_new_id_search.create()
-            planet_old_id_search.create()
             def load_planet_id_search():
                 session.execute(planet_new_id_search.delete())
                 session.execute(planet_old_id_search.delete())
@@ -354,8 +356,8 @@ while True:
                                         planet_new_id_search.value BETWEEN planet_old_id_search.value - (2* planet_old_id_search.vdiff) AND planet_old_id_search.value + (2* planet_old_id_search.vdiff)
                                       );"""))
             break
-        planet_new_id_search.drop(checkfirst=True)
-        planet_old_id_search.drop(checkfirst=True)
+        planet_new_id_search.drop()
+        planet_old_id_search.drop()
         session.commit()
 
         t2=time.time()-t1
@@ -372,6 +374,10 @@ while True:
         print "Generate new planet ids in %.3f seconds" % (t2,)
         t1=time.time()
 
+        planet_size_rank.drop(checkfirst=True)
+        planet_score_rank.drop(checkfirst=True)
+        planet_value_rank.drop(checkfirst=True)
+        planet_xp_rank.drop(checkfirst=True)
         planet_size_rank.create()
         planet_score_rank.create()
         planet_value_rank.create()
@@ -387,7 +393,7 @@ while True:
         planet_value_rank.drop()
         planet_xp_rank.drop()
         session.execute(text("UPDATE planet SET vdiff = planet.value - (SELECT value FROM planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :tick);", bindparams=[bindparam("tick",last_tick)]))
-        session.execute(text("UPDATE planet SET idle = 1 + (SELECT idle FROM planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :tick AND planet.vdiff >= planet_history.vdiff -1 AND planet.vdiff <= planet_history.vdiff +1 AND planet.xp - planet_history.xp = 1);", bindparams=[bindparam("tick",last_tick)]))
+        session.execute(text("UPDATE planet SET idle = COALESCE(1 + (SELECT idle FROM planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :tick AND planet.vdiff BETWEEN planet_history.vdiff -1 AND planet_history.vdiff +1 AND planet.xp - planet_history.xp = 0), 1);", bindparams=[bindparam("tick",last_tick)]))
         session.commit()
 
         t2=time.time()-t1
@@ -415,6 +421,10 @@ while True:
         print "Generate new galaxy ids in %.3f seconds" % (t2,)
         t1=time.time()
 
+        galaxy_size_rank.drop(checkfirst=True)
+        galaxy_score_rank.drop(checkfirst=True)
+        galaxy_value_rank.drop(checkfirst=True)
+        galaxy_xp_rank.drop(checkfirst=True)
         galaxy_size_rank.create()
         galaxy_score_rank.create()
         galaxy_value_rank.create()
@@ -456,6 +466,11 @@ while True:
         print "Generate new alliance ids in %.3f seconds" % (t2,)
         t1=time.time()
 
+        alliance_size_rank.drop(checkfirst=True)
+        alliance_members_rank.drop(checkfirst=True)
+        alliance_score_rank.drop(checkfirst=True)
+        alliance_size_avg_rank.drop(checkfirst=True)
+        alliance_score_avg_rank.drop(checkfirst=True)
         alliance_size_rank.create()
         alliance_members_rank.create()
         alliance_score_rank.create()
@@ -483,6 +498,7 @@ while True:
 # ##################   HISTORY: EVERYTHING BECOMES FINAL   ################## #
 # ########################################################################### #
 
+        planet_tick=3
         session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz, newx, newy, newz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z, planet.x, planet.y, planet.z FROM planet, planet_history WHERE planet.id = planet_history.id AND (planet.x != planet_history.x OR planet.y != planet_history.y OR planet.z != planet_history.z);", bindparams=[bindparam("tick",planet_tick)]))
         session.execute(text("INSERT INTO planet_history (tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff) SELECT :tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff FROM planet ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick)]))
         session.execute(text("INSERT INTO galaxy_history (tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank) SELECT :tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank FROM galaxy ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick)]))
