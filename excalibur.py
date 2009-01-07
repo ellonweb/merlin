@@ -12,7 +12,7 @@ planet_new_id_search = Table('planet_new_id_search', DB.Maps.Base.metadata,
     Column('x', Integer, primary_key=True),
     Column('y', Integer, primary_key=True),
     Column('z', Integer, primary_key=True),
-    Column('race', String),
+    Column('race', String(3)),
     Column('size', Integer),
     Column('score', Integer),
     Column('value', Integer),
@@ -22,7 +22,7 @@ planet_old_id_search = Table('planet_old_id_search', DB.Maps.Base.metadata,
     Column('x', Integer, primary_key=True),
     Column('y', Integer, primary_key=True),
     Column('z', Integer, primary_key=True),
-    Column('race', String),
+    Column('race', String(3)),
     Column('size', Integer),
     Column('score', Integer),
     Column('value', Integer),
@@ -30,153 +30,51 @@ planet_old_id_search = Table('planet_old_id_search', DB.Maps.Base.metadata,
     Column('vdiff', Integer))
 planet_size_rank = Table('planet_size_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('x', Integer),
-    Column('y', Integer),
-    Column('z', Integer),
-    Column('planetname', String),
-    Column('rulername', String),
-    Column('race', String),
     Column('size', Integer),
-    Column('score', Integer),
-    Column('value', Integer),
-    Column('xp', Integer),
     Column('size_rank', Integer, primary_key=True))
 planet_score_rank = Table('planet_score_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('x', Integer),
-    Column('y', Integer),
-    Column('z', Integer),
-    Column('planetname', String),
-    Column('rulername', String),
-    Column('race', String),
-    Column('size', Integer),
     Column('score', Integer),
-    Column('value', Integer),
-    Column('xp', Integer),
-    Column('size_rank', Integer),
     Column('score_rank', Integer, primary_key=True))
 planet_value_rank = Table('planet_value_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('x', Integer),
-    Column('y', Integer),
-    Column('z', Integer),
-    Column('planetname', String),
-    Column('rulername', String),
-    Column('race', String),
-    Column('size', Integer),
-    Column('score', Integer),
     Column('value', Integer),
-    Column('xp', Integer),
-    Column('size_rank', Integer),
-    Column('score_rank', Integer),
     Column('value_rank', Integer, primary_key=True))
 planet_xp_rank = Table('planet_xp_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('x', Integer),
-    Column('y', Integer),
-    Column('z', Integer),
-    Column('planetname', String),
-    Column('rulername', String),
-    Column('race', String),
-    Column('size', Integer),
-    Column('score', Integer),
-    Column('value', Integer),
     Column('xp', Integer),
-    Column('size_rank', Integer),
-    Column('score_rank', Integer),
-    Column('value_rank', Integer),
     Column('xp_rank', Integer, primary_key=True))
 galaxy_size_rank = Table('galaxy_size_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('x', Integer),
-    Column('y', Integer),
-    Column('name', String),
     Column('size', Integer),
-    Column('score', Integer),
-    Column('value', Integer),
-    Column('xp', Integer),
     Column('size_rank', Integer, primary_key=True))
 galaxy_score_rank = Table('galaxy_score_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('x', Integer),
-    Column('y', Integer),
-    Column('name', String),
-    Column('size', Integer),
     Column('score', Integer),
-    Column('value', Integer),
-    Column('xp', Integer),
-    Column('size_rank', Integer),
     Column('score_rank', Integer, primary_key=True))
 galaxy_value_rank = Table('galaxy_value_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('x', Integer),
-    Column('y', Integer),
-    Column('name', String),
-    Column('size', Integer),
-    Column('score', Integer),
     Column('value', Integer),
-    Column('xp', Integer),
-    Column('size_rank', Integer),
-    Column('score_rank', Integer),
     Column('value_rank', Integer, primary_key=True))
 galaxy_xp_rank = Table('galaxy_xp_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('x', Integer),
-    Column('y', Integer),
-    Column('name', String),
-    Column('size', Integer),
-    Column('score', Integer),
-    Column('value', Integer),
     Column('xp', Integer),
-    Column('size_rank', Integer),
-    Column('score_rank', Integer),
-    Column('value_rank', Integer),
     Column('xp_rank', Integer, primary_key=True))
 alliance_size_rank = Table('alliance_size_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('name', String),
     Column('size', Integer),
-    Column('members', Integer),
-    Column('score', Integer),
-    Column('size_avg', Integer),
-    Column('score_avg', Integer),
-    Column('score_rank', Integer),
     Column('size_rank', Integer, primary_key=True))
 alliance_members_rank = Table('alliance_members_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('name', String),
-    Column('size', Integer),
     Column('members', Integer),
-    Column('score', Integer),
-    Column('size_avg', Integer),
-    Column('score_avg', Integer),
-    Column('size_rank', Integer),
-    Column('score_rank', Integer),
     Column('members_rank', Integer, primary_key=True))
 alliance_size_avg_rank = Table('alliance_size_avg_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('name', String),
-    Column('size', Integer),
-    Column('members', Integer),
-    Column('score', Integer),
     Column('size_avg', Integer),
-    Column('score_avg', Integer),
-    Column('size_rank', Integer),
-    Column('members_rank', Integer),
-    Column('score_rank', Integer),
     Column('size_avg_rank', Integer, primary_key=True))
 alliance_score_avg_rank = Table('alliance_score_avg_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('name', String),
-    Column('size', Integer),
-    Column('members', Integer),
-    Column('score', Integer),
-    Column('size_avg', Integer),
     Column('score_avg', Integer),
-    Column('size_rank', Integer),
-    Column('members_rank', Integer),
-    Column('score_rank', Integer),
-    Column('size_avg_rank', Integer),
     Column('score_avg_rank', Integer, primary_key=True))
 
 t_start=time.time()
@@ -270,7 +168,7 @@ while True:
         session.execute(DB.Maps.Alliance.__table__.delete())
         for line in alliances:
             a=line.strip().split("\t")
-            session.execute(DB.Maps.Alliance.__table__.insert().values(score_rank=a[0],name=unicode(a[1].strip("\""),encoding='latin-1'),size=a[2],members=a[3],score=a[4]))
+            session.execute(DB.Maps.Alliance.__table__.insert().values(score_rank=a[0],name=unicode(a[1].strip("\""),encoding='latin-1'),size=a[2],members=a[3],score=a[4],size_avg=int(a[2])/int(a[3]),score_avg=int(a[4])/int(a[3])))
 
         t2=time.time()-t1
         print "Inserted dumps in %.3f seconds" % (t2,)
@@ -359,12 +257,16 @@ while True:
         planet_score_rank.create()
         planet_value_rank.create()
         planet_xp_rank.create()
-        session.execute(text("INSERT INTO planet_size_rank (id, x, y, z, planetname, rulername, race, size, score, value, xp) SELECT id, x, y, z, planetname, rulername, race, size, score, value, xp FROM planet ORDER BY size DESC;"))
-        session.execute(text("INSERT INTO planet_score_rank (id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank) SELECT id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank FROM planet_size_rank ORDER BY score DESC;"))
-        session.execute(text("INSERT INTO planet_value_rank (id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank) SELECT id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank FROM planet_score_rank ORDER BY value DESC;"))
-        session.execute(text("INSERT INTO planet_xp_rank (id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank) SELECT id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank FROM planet_value_rank ORDER BY xp DESC;"))
-        session.execute(DB.Maps.Planet.__table__.delete())
-        session.execute(text("INSERT INTO planet (id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank) SELECT id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank FROM planet_xp_rank ORDER BY id ASC;"))
+        session.execute(text("INSERT INTO planet_size_rank (id, size) SELECT id, size FROM planet ORDER BY size DESC;"))
+        session.execute(text("INSERT INTO planet_score_rank (id, score) SELECT id, score FROM planet ORDER BY score DESC;"))
+        session.execute(text("INSERT INTO planet_value_rank (id, value) SELECT id, value FROM planet ORDER BY value DESC;"))
+        session.execute(text("INSERT INTO planet_xp_rank (id, xp) SELECT id, xp FROM planet ORDER BY xp DESC;"))
+        session.execute(text("""UPDATE planet SET
+                                    size_rank = (SELECT size_rank FROM planet_size_rank WHERE planet.id = planet_size_rank.id),
+                                    score_rank = (SELECT score_rank FROM planet_score_rank WHERE planet.id = planet_score_rank.id),
+                                    value_rank = (SELECT value_rank FROM planet_value_rank WHERE planet.id = planet_value_rank.id),
+                                    xp_rank = (SELECT xp_rank FROM planet_xp_rank WHERE planet.id = planet_xp_rank.id)
+                            """))
         planet_size_rank.drop()
         planet_score_rank.drop()
         planet_value_rank.drop()
@@ -406,12 +308,16 @@ while True:
         galaxy_score_rank.create()
         galaxy_value_rank.create()
         galaxy_xp_rank.create()
-        session.execute(text("INSERT INTO galaxy_size_rank (id, x, y, name, size, score, value, xp) SELECT id, x, y, name, size, score, value, xp FROM galaxy ORDER BY size DESC;"))
-        session.execute(text("INSERT INTO galaxy_score_rank (id, x, y, name, size, score, value, xp, size_rank) SELECT id, x, y, name, size, score, value, xp, size_rank FROM galaxy_size_rank ORDER BY score DESC;"))
-        session.execute(text("INSERT INTO galaxy_value_rank (id, x, y, name, size, score, value, xp, size_rank, score_rank) SELECT id, x, y, name, size, score, value, xp, size_rank, score_rank FROM galaxy_score_rank ORDER BY value DESC;"))
-        session.execute(text("INSERT INTO galaxy_xp_rank (id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank) SELECT id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank FROM galaxy_value_rank ORDER BY xp DESC;"))
-        session.execute(DB.Maps.Galaxy.__table__.delete())
-        session.execute(text("INSERT INTO galaxy (id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank) SELECT id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank FROM galaxy_xp_rank ORDER BY id ASC;"))
+        session.execute(text("INSERT INTO galaxy_size_rank (id, size) SELECT id, size FROM galaxy ORDER BY size DESC;"))
+        session.execute(text("INSERT INTO galaxy_score_rank (id, score) SELECT id, score FROM galaxy ORDER BY score DESC;"))
+        session.execute(text("INSERT INTO galaxy_value_rank (id, value) SELECT id, value FROM galaxy ORDER BY value DESC;"))
+        session.execute(text("INSERT INTO galaxy_xp_rank (id, xp) SELECT id, xp FROM galaxy ORDER BY xp DESC;"))
+        session.execute(text("""UPDATE galaxy SET
+                                    size_rank = (SELECT size_rank FROM galaxy_size_rank WHERE galaxy.id = galaxy_size_rank.id),
+                                    score_rank = (SELECT score_rank FROM galaxy_score_rank WHERE galaxy.id = galaxy_score_rank.id),
+                                    value_rank = (SELECT value_rank FROM galaxy_value_rank WHERE galaxy.id = galaxy_value_rank.id),
+                                    xp_rank = (SELECT xp_rank FROM galaxy_xp_rank WHERE galaxy.id = galaxy_xp_rank.id)
+                            """))
         galaxy_size_rank.drop()
         galaxy_score_rank.drop()
         galaxy_value_rank.drop()
@@ -451,12 +357,16 @@ while True:
         alliance_members_rank.create()
         alliance_size_avg_rank.create()
         alliance_score_avg_rank.create()
-        session.execute(text("INSERT INTO alliance_size_rank (id, name, size, members, score, size_avg, score_avg, score_rank) SELECT id, name, size, members, score, size/members, score/members, score_rank FROM alliance ORDER BY size DESC;"))
-        session.execute(text("INSERT INTO alliance_members_rank (id, name, size, members, score, size_avg, score_avg, size_rank, score_rank) SELECT id, name, size, members, score, size_avg, score_avg, size_rank, score_rank FROM alliance_size_rank ORDER BY members DESC;"))
-        session.execute(text("INSERT INTO alliance_size_avg_rank (id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank) SELECT id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank FROM alliance_members_rank ORDER BY size_avg DESC;"))
-        session.execute(text("INSERT INTO alliance_score_avg_rank (id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank) SELECT id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank FROM alliance_size_avg_rank ORDER BY score_avg DESC;"))
-        session.execute(DB.Maps.Alliance.__table__.delete())
-        session.execute(text("INSERT INTO alliance (id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank) SELECT id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank FROM alliance_score_avg_rank ORDER BY id ASC;"))
+        session.execute(text("INSERT INTO alliance_size_rank (id, size) SELECT id, size FROM alliance ORDER BY size DESC;"))
+        session.execute(text("INSERT INTO alliance_members_rank (id, members) SELECT id, members FROM alliance ORDER BY members DESC;"))
+        session.execute(text("INSERT INTO alliance_size_avg_rank (id, size_avg) SELECT id, size_avg FROM alliance ORDER BY size_avg DESC;"))
+        session.execute(text("INSERT INTO alliance_score_avg_rank (id, score_avg) SELECT id, score_avg FROM alliance ORDER BY score_avg DESC;"))
+        session.execute(text("""UPDATE alliance SET
+                                    size_rank = (SELECT size_rank FROM alliance_size_rank WHERE alliance.id = alliance_size_rank.id),
+                                    members_rank = (SELECT members_rank FROM alliance_members_rank WHERE alliance.id = alliance_members_rank.id),
+                                    size_avg_rank = (SELECT size_avg_rank FROM alliance_size_avg_rank WHERE alliance.id = alliance_size_avg_rank.id),
+                                    score_avg_rank = (SELECT score_avg_rank FROM alliance_score_avg_rank WHERE alliance.id = alliance_score_avg_rank.id)
+                            """))
         alliance_size_rank.drop()
         alliance_members_rank.drop()
         alliance_size_avg_rank.drop()
