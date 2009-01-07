@@ -55,9 +55,7 @@ class adduser(loadable):
 				acc = acc | access[lvl]
 				perm += " " + lvl
 		session = M.DB.Session()
-		member = M.DB.Maps.User()
-		member.name, member.access = pnick, acc
-		session.add(member)
+		session.add(M.DB.Maps.User(name=pnick, access=acc))
 		session.commit()
 		session.close()
 		message.reply("Added user %s with permissions: %s" % (pnick, perm,))

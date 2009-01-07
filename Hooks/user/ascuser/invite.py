@@ -35,8 +35,7 @@ class invite(loadable):
         # check if the user already exists
         recruit = M.DB.Maps.User.load(name=gimp.name, exact=True, active=False)
         if recruit is None:
-            recruit = M.DB.Maps.User()
-            recruit.name = gimp.name
+            recruit = M.DB.Maps.User(name=gimp.name)
         recruit.active = True
         recruit.access |= access['member']
 		recruit.sponsor = user.name

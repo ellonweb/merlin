@@ -47,7 +47,7 @@ class sponsor(loadable):
             return
         session = M.DB.Session()
         session.add(user)
-        session.add(M.DB.Maps.Gimp(user, recruit, comment))
+        session.add(M.DB.Maps.Gimp(sponsor_id=user.id, name=recruit, comment=comment))
         session.commit()
         session.close()
 		if M.DB.Maps.Gimps.wait == 0:

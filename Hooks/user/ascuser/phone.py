@@ -50,7 +50,7 @@ class phone(loadable):
             if member in friends:
                 reply="%s can already access your phone number."%(member.name,)
             else:
-                session.execute(M.DB.Maps.PhoneFriend.__table__.insert().values(user_id=user.id,friend_id=member.id))
+                session.add(M.DB.Maps.PhoneFriend(user_id=user.id,friend_id=member.id))
                 session.commit()
                 reply="Added %s to the list of people able to view your phone number."%(member.name,)
             session.close()

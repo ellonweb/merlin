@@ -37,15 +37,15 @@ Base = declarative_base()
 class User(Base):
 	__tablename__ = 'users'
 	id = Column(Integer, primary_key=True)
-	name = Column(String) # pnick
-	passwd = Column(String)
+	name = Column(String(15)) # pnick
+	passwd = Column(String(32))
 	active = Column(Boolean, default=True)
 	access = Column(Integer)
 	planet_id = Column(Integer, ForeignKey('planet.id', ondelete='set null'))
-	email = Column(String)
-	phone = Column(String)
+	email = Column(String(32))
+	phone = Column(String(32))
 	pubphone = Column(Boolean, default=False) # Asc
-	sponsor = Column(String) # Asc
+	sponsor = Column(String(15)) # Asc
 	invites = Column(Integer) # Asc
 	quits = Column(Integer) # Asc
 	stay = Column(Boolean) # Asc
@@ -111,16 +111,11 @@ class Gimp(Base):
 	__tablename__ = 'sponsor'
 	id = Column(Integer, primary_key=True)
 	sponsor_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
-	name = Column(String)
-	comment = Column(Text)
-	timestamp = Column(Float)
+	name = Column(String(15))
+	comment = Column(String(512))
+	timestamp = Column(Float, default=time)
 	wait = 36 #hours. use 0 for invite mode, -1 for recruitment closed
 	
-	def __init__(self, sponsor, name, comment):
-		self.sponsor_id = sponsor.id
-		self.name = name
-		self.comment = comment
-		self.timestamp = time()
 	def hoursleft(self):
 		return -ceil((time()-(self.timestamp+(self.wait*60*60)))/60/60)
 	
@@ -160,9 +155,9 @@ class Planet(Base):
 	y = Column(Integer, primary_key=True)
 	z = Column(Integer, primary_key=True)
 	galaxy_coords = ForeignKeyConstraint(('planet.x', 'planet.y'), ('galaxy.x', 'galaxy.y'))
-	planetname = Column(String)
-	rulername = Column(String)
-	race = Column(String)
+	planetname = Column(String(20))
+	rulername = Column(String(20))
+	race = Column(String(3))
 	size = Column(Integer)
 	score = Column(Integer)
 	value = Column(Integer)
@@ -182,9 +177,9 @@ class PlanetHistory(Base):
 	y = Column(Integer)
 	z = Column(Integer)
 	galaxy_coords = ForeignKeyConstraint(('planet_history.tick', 'planet_history.x', 'planet_history.y'), ('galaxy_history.tick', 'galaxy_history.x', 'galaxy_history.y'))
-	planetname = Column(String)
-	rulername = Column(String)
-	race = Column(String)
+	planetname = Column(String(20))
+	rulername = Column(String(20))
+	race = Column(String(3))
 	size = Column(Integer)
 	score = Column(Integer)
 	value = Column(Integer)
@@ -211,7 +206,7 @@ class Galaxy(Base):
 	id = Column(Integer, index=True, autoincrement=False)
 	x = Column(Integer, primary_key=True)
 	y = Column(Integer, primary_key=True)
-	name = Column(String)
+	name = Column(String(64))
 	size = Column(Integer)
 	score = Column(Integer)
 	value = Column(Integer)
@@ -228,7 +223,7 @@ class GalaxyHistory(Base):
 	id = Column(Integer, ForeignKey('galaxy.id'), primary_key=True)
 	x = Column(Integer)
 	y = Column(Integer)
-	name = Column(String)
+	name = Column(String(64))
 	size = Column(Integer)
 	score = Column(Integer)
 	value = Column(Integer)
@@ -241,7 +236,7 @@ PlanetHistory.galaxy = relation(GalaxyHistory, primaryjoin=and_(GalaxyHistory.ti
 class Alliance(Base):
 	__tablename__ = 'alliance'
 	id = Column(Integer, index=True)
-	name = Column(String, primary_key=True)
+	name = Column(String(20), primary_key=True)
 	size = Column(Integer)
 	members = Column(Integer)
 	score = Column(Integer)
@@ -256,7 +251,7 @@ class AllianceHistory(Base):
 	__tablename__ = 'alliance_history'
 	tick = Column(Integer, ForeignKey('updates.tick', ondelete='cascade'), primary_key=True)
 	id = Column(Integer, ForeignKey('alliance.id'), primary_key=True)
-	name = Column(String)
+	name = Column(String(20))
 	size = Column(Integer)
 	members = Column(Integer)
 	score = Column(Integer)
@@ -275,12 +270,12 @@ class AllianceHistory(Base):
 class Ship(Base):
 	__tablename__ = 'ships'
 	id = Column(Integer, primary_key=True)
-	name = Column(String)
-	class_ = Column(String)
-	t1 = Column(String)
-	t2 = Column(String)
-	t3 = Column(String)
-	type = Column(String)
+	name = Column(String(30))
+	class_ = Column(String(10))
+	t1 = Column(String(10))
+	t2 = Column(String(10))
+	t3 = Column(String(10))
+	type = Column(String(5))
 	init = Column(Integer)
 	guns = Column(Integer)
 	armor = Column(Integer)
@@ -290,7 +285,7 @@ class Ship(Base):
 	crystal = Column(Integer)
 	eonium = Column(Integer)
 	total_cost = Column(Integer)
-	race = Column(String)
+	race = Column(String(10))
 	
 	@staticmethod
 	def load(id=None, name=None):
