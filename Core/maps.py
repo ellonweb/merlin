@@ -22,7 +22,7 @@
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import validates, relation, backref
-from sqlalchemy.sql.functions import current_timestamp
+from sqlalchemy.sql.functions import current_timestamp, max
 from math import ceil
 from time import time
 import hashlib
@@ -147,12 +147,18 @@ class Updates(Base):
 	galaxies = Column(Integer)
 	alliances = Column(Integer)
 	timestamp = Column(DateTime, default=current_timestamp())
+	@staticmethod
+	def current_tick():
+		session = Session()
+		tick = session.query(max(Updates.tick)).first()[0] or 0
+		session.close()
+		return tick
 class Planet(Base):
 	__tablename__ = 'planet'
-	id = Column(Integer, primary_key=True)
-	x = Column(Integer)
-	y = Column(Integer)
-	z = Column(Integer)
+	id = Column(Integer, index=True, autoincrement=False)
+	x = Column(Integer, primary_key=True)
+	y = Column(Integer, primary_key=True)
+	z = Column(Integer, primary_key=True)
 	galaxy_coords = ForeignKeyConstraint(('planet.x', 'planet.y'), ('galaxy.x', 'galaxy.y'))
 	planetname = Column(String)
 	rulername = Column(String)
@@ -160,14 +166,13 @@ class Planet(Base):
 	size = Column(Integer)
 	score = Column(Integer)
 	value = Column(Integer)
+	xp = Column(Integer)
+	size_rank = Column(Integer)
 	score_rank = Column(Integer)
 	value_rank = Column(Integer)
-	size_rank = Column(Integer)
-	xp = Column(Integer)
 	xp_rank = Column(Integer)
 	idle = Column(Integer)
 	vdiff = Column(Integer)
-Planet.coords = Index('planet_coords_index', Planet.__table__.c.x, Planet.__table__.c.y, Planet.__table__.c.z)
 User.planet = relation(Planet, primaryjoin=User.planet_id==Planet.id)
 class PlanetHistory(Base):
 	__tablename__ = 'planet_history'
@@ -183,10 +188,10 @@ class PlanetHistory(Base):
 	size = Column(Integer)
 	score = Column(Integer)
 	value = Column(Integer)
+	xp = Column(Integer)
+	size_rank = Column(Integer)
 	score_rank = Column(Integer)
 	value_rank = Column(Integer)
-	size_rank = Column(Integer)
-	xp = Column(Integer)
 	xp_rank = Column(Integer)
 	idle = Column(Integer)
 	vdiff = Column(Integer)
@@ -203,17 +208,17 @@ class PlanetExiles(Base):
 	newz = Column(Integer)
 class Galaxy(Base):
 	__tablename__ = 'galaxy'
-	id = Column(Integer, primary_key=True)
-	x = Column(Integer)
-	y = Column(Integer)
+	id = Column(Integer, index=True, autoincrement=False)
+	x = Column(Integer, primary_key=True)
+	y = Column(Integer, primary_key=True)
 	name = Column(String)
 	size = Column(Integer)
 	score = Column(Integer)
 	value = Column(Integer)
+	xp = Column(Integer)
+	size_rank = Column(Integer)
 	score_rank = Column(Integer)
 	value_rank = Column(Integer)
-	size_rank = Column(Integer)
-	xp = Column(Integer)
 	xp_rank = Column(Integer)
 Galaxy.coords = Index('galaxy_coords_index', Galaxy.__table__.c.x, Galaxy.__table__.c.y)
 Planet.galaxy = relation(Galaxy, primaryjoin=and_(Galaxy.x==Planet.x, Galaxy.y==Planet.y), foreign_keys=(Planet.x, Planet.y), backref=backref('planets', primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), foreign_keys=(Planet.x, Planet.y)))
@@ -227,26 +232,26 @@ class GalaxyHistory(Base):
 	size = Column(Integer)
 	score = Column(Integer)
 	value = Column(Integer)
+	xp = Column(Integer)
+	size_rank = Column(Integer)
 	score_rank = Column(Integer)
 	value_rank = Column(Integer)
-	size_rank = Column(Integer)
-	xp = Column(Integer)
 	xp_rank = Column(Integer)
 PlanetHistory.galaxy = relation(GalaxyHistory, primaryjoin=and_(GalaxyHistory.tick==PlanetHistory.tick, GalaxyHistory.x==PlanetHistory.x, GalaxyHistory.y==PlanetHistory.y), foreign_keys=(PlanetHistory.tick, PlanetHistory.x, PlanetHistory.y), backref=backref('planets', primaryjoin=and_(PlanetHistory.tick==GalaxyHistory.tick, PlanetHistory.x==GalaxyHistory.x, PlanetHistory.y==GalaxyHistory.y), foreign_keys=(PlanetHistory.tick, PlanetHistory.x, PlanetHistory.y)))
 class Alliance(Base):
 	__tablename__ = 'alliance'
-	id = Column(Integer, primary_key=True)
-	name = Column(String)
+	id = Column(Integer, index=True)
+	name = Column(String, primary_key=True)
 	size = Column(Integer)
 	members = Column(Integer)
 	score = Column(Integer)
-	score_rank = Column(Integer)
 	size_rank = Column(Integer)
 	members_rank = Column(Integer)
-	score_avg = Column(Integer)
+	score_rank = Column(Integer)
 	size_avg = Column(Integer)
-	score_avg_rank = Column(Integer)
+	score_avg = Column(Integer)
 	size_avg_rank = Column(Integer)
+	score_avg_rank = Column(Integer)
 class AllianceHistory(Base):
 	__tablename__ = 'alliance_history'
 	tick = Column(Integer, ForeignKey('updates.tick', ondelete='cascade'), primary_key=True)
@@ -255,13 +260,13 @@ class AllianceHistory(Base):
 	size = Column(Integer)
 	members = Column(Integer)
 	score = Column(Integer)
-	score_rank = Column(Integer)
 	size_rank = Column(Integer)
 	members_rank = Column(Integer)
-	score_avg = Column(Integer)
+	score_rank = Column(Integer)
 	size_avg = Column(Integer)
-	score_avg_rank = Column(Integer)
+	score_avg = Column(Integer)
 	size_avg_rank = Column(Integer)
+	score_avg_rank = Column(Integer)
 
 # ########################################################################### #
 # #############################    SHIP TABLE    ############################ #

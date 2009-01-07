@@ -24,10 +24,11 @@
 # owners.
 
 import re, urllib2
+from variables import urlStats
 import Core.db as DB
 session = DB.Session()
 
-stats = urllib2.urlopen("http://game.planetarion.com/manual.php?page=stats").read()
+stats = urllib2.urlopen(urlStats).read()
 session.execute(DB.Maps.Ship.__table__.delete())
 
 regex = r'^<tr class="(Ter|Cath|Xan|Zik|Etd)">.+?(\w+)</td>' # race & name

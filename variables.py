@@ -56,3 +56,9 @@ usercache = "join" # on command or on join
 
 # Address for RoBoCoP socket
 robocop = "../RoBoCoP"
+
+# URLs
+urlStats = "http://game.planetarion.com/manual.php?page=stats"
+urlPlanet = "http://game.planetarion.com/botfiles/planet_listing.txt"
+urlGalaxy = "http://game.planetarion.com/botfiles/galaxy_listing.txt"
+urlAlliance = "http://game.planetarion.com/botfiles/alliance_listing.txt"
