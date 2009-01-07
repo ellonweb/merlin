@@ -140,6 +140,7 @@ alliance_size_rank = Table('alliance_size_rank', DB.Maps.Base.metadata,
     Column('score', Integer),
     Column('size_avg', Integer),
     Column('score_avg', Integer),
+    Column('score_rank', Integer),
     Column('size_rank', Integer, primary_key=True))
 alliance_members_rank = Table('alliance_members_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
@@ -150,18 +151,8 @@ alliance_members_rank = Table('alliance_members_rank', DB.Maps.Base.metadata,
     Column('size_avg', Integer),
     Column('score_avg', Integer),
     Column('size_rank', Integer),
+    Column('score_rank', Integer),
     Column('members_rank', Integer, primary_key=True))
-alliance_score_rank = Table('alliance_score_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('name', String),
-    Column('size', Integer),
-    Column('members', Integer),
-    Column('score', Integer),
-    Column('size_avg', Integer),
-    Column('score_avg', Integer),
-    Column('size_rank', Integer),
-    Column('members_rank', Integer),
-    Column('score_rank', Integer, primary_key=True))
 alliance_size_avg_rank = Table('alliance_size_avg_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
     Column('name', String),
@@ -264,39 +255,25 @@ while True:
         print "Loaded dumps from webserver in %.3f seconds" % (t2,)
         t1=time.time()
 
-        p_list=[]
+        session = DB.Session()
+
+        session.execute(DB.Maps.Planet.__table__.delete())
         for line in planets:
             p=line.strip().split("\t")
-            tmp_plan=DB.Maps.Planet(x=p[0],y=p[1],z=p[2],planetname=unicode(p[3].strip("\""),encoding='latin-1'),rulername=unicode(p[4].strip("\""),encoding='latin-1'),race=p[5],size=p[6],score=p[7],value=p[8],xp=p[9])
-            p_list.append(tmp_plan)
+            session.execute(DB.Maps.Planet.__table__.insert().values(x=p[0],y=p[1],z=p[2],planetname=unicode(p[3].strip("\""),encoding='latin-1'),rulername=unicode(p[4].strip("\""),encoding='latin-1'),race=p[5],size=p[6],score=p[7],value=p[8],xp=p[9]))
 
-        g_list=[]
+        session.execute(DB.Maps.Galaxy.__table__.delete())
         for line in galaxies:
             g=line.strip().split("\t")
-            tmp_gal=DB.Maps.Galaxy(x=g[0],y=g[1],name=unicode(g[2].strip("\""),encoding='latin-1'),size=g[3],score=g[4],value=g[5],xp=g[6])
-            g_list.append(tmp_gal)
+            session.execute(DB.Maps.Galaxy.__table__.insert().values(x=g[0],y=g[1],name=unicode(g[2].strip("\""),encoding='latin-1'),size=g[3],score=g[4],value=g[5],xp=g[6]))
 
-        a_list=[]
+        session.execute(DB.Maps.Alliance.__table__.delete())
         for line in alliances:
             a=line.strip().split("\t")
-            tmp_all=DB.Maps.Alliance(score_rank=a[0],name=unicode(a[1].strip("\""),encoding='latin-1'),size=a[2],members=a[3],score=a[4])
-            a_list.append(tmp_all)
+            session.execute(DB.Maps.Alliance.__table__.insert().values(score_rank=a[0],name=unicode(a[1].strip("\""),encoding='latin-1'),size=a[2],members=a[3],score=a[4]))
 
         t2=time.time()-t1
-        print "Parsed dumps into objects in %.3f seconds" % (t2,)
-        t1=time.time()
-
-        session = DB.Session()
-        session.execute(DB.Maps.Planet.__table__.delete())
-        session.execute(DB.Maps.Galaxy.__table__.delete())
-        session.execute(DB.Maps.Alliance.__table__.delete())
-        session.add_all(p_list)
-        session.add_all(g_list)
-        session.add_all(a_list)
-        session.commit()
-
-        t2=time.time()-t1
-        print "Inserted objects in %.3f seconds" % (t2,)
+        print "Inserted dumps in %.3f seconds" % (t2,)
         t1=time.time()
 
 # ########################################################################### #
@@ -468,24 +445,20 @@ while True:
 
         alliance_size_rank.drop(checkfirst=True)
         alliance_members_rank.drop(checkfirst=True)
-        alliance_score_rank.drop(checkfirst=True)
         alliance_size_avg_rank.drop(checkfirst=True)
         alliance_score_avg_rank.drop(checkfirst=True)
         alliance_size_rank.create()
         alliance_members_rank.create()
-        alliance_score_rank.create()
         alliance_size_avg_rank.create()
         alliance_score_avg_rank.create()
-        session.execute(text("INSERT INTO alliance_size_rank (id, name, size, members, score, size_avg, score_avg) SELECT id, name, size, members, score, size/members, score/members FROM alliance ORDER BY size DESC;"))
-        session.execute(text("INSERT INTO alliance_members_rank (id, name, size, members, score, size_avg, score_avg, size_rank) SELECT id, name, size, members, score, size_avg, score_avg, size_rank FROM alliance_size_rank ORDER BY members DESC;"))
-        session.execute(text("INSERT INTO alliance_score_rank (id, name, size, members, score, size_avg, score_avg, size_rank, members_rank) SELECT id, name, size, members, score, size_avg, score_avg, size_rank, members_rank FROM alliance_members_rank ORDER BY score DESC;"))
-        session.execute(text("INSERT INTO alliance_size_avg_rank (id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank) SELECT id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank FROM alliance_score_rank ORDER BY size_avg DESC;"))
+        session.execute(text("INSERT INTO alliance_size_rank (id, name, size, members, score, size_avg, score_avg, score_rank) SELECT id, name, size, members, score, size/members, score/members, score_rank FROM alliance ORDER BY size DESC;"))
+        session.execute(text("INSERT INTO alliance_members_rank (id, name, size, members, score, size_avg, score_avg, size_rank, score_rank) SELECT id, name, size, members, score, size_avg, score_avg, size_rank, score_rank FROM alliance_size_rank ORDER BY members DESC;"))
+        session.execute(text("INSERT INTO alliance_size_avg_rank (id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank) SELECT id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank FROM alliance_members_rank ORDER BY size_avg DESC;"))
         session.execute(text("INSERT INTO alliance_score_avg_rank (id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank) SELECT id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank FROM alliance_size_avg_rank ORDER BY score_avg DESC;"))
         session.execute(DB.Maps.Alliance.__table__.delete())
         session.execute(text("INSERT INTO alliance (id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank) SELECT id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank FROM alliance_score_avg_rank ORDER BY id ASC;"))
         alliance_size_rank.drop()
         alliance_members_rank.drop()
-        alliance_score_rank.drop()
         alliance_size_avg_rank.drop()
         alliance_score_avg_rank.drop()
         session.commit()
