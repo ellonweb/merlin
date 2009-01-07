@@ -23,7 +23,6 @@
 
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker, clear_mappers
-from sqlalchemy.sql.functions import max
 from .variables import DBeng
 
 engine = create_engine(DBeng)#, echo=True)
