@@ -150,7 +150,7 @@ class Updates(Base):
 		return tick
 class Planet(Base):
 	__tablename__ = 'planet'
-	id = Column(Integer, index=True, autoincrement=False)
+	id = Column(Integer, index=True, unique=True)
 	x = Column(Integer, primary_key=True)
 	y = Column(Integer, primary_key=True)
 	z = Column(Integer, primary_key=True)
@@ -203,7 +203,7 @@ class PlanetExiles(Base):
 	newz = Column(Integer)
 class Galaxy(Base):
 	__tablename__ = 'galaxy'
-	id = Column(Integer, index=True, autoincrement=False)
+	id = Column(Integer, index=True, unique=True)
 	x = Column(Integer, primary_key=True)
 	y = Column(Integer, primary_key=True)
 	name = Column(String(64))
@@ -215,7 +215,6 @@ class Galaxy(Base):
 	score_rank = Column(Integer)
 	value_rank = Column(Integer)
 	xp_rank = Column(Integer)
-Galaxy.coords = Index('galaxy_coords_index', Galaxy.__table__.c.x, Galaxy.__table__.c.y)
 Planet.galaxy = relation(Galaxy, primaryjoin=and_(Galaxy.x==Planet.x, Galaxy.y==Planet.y), foreign_keys=(Planet.x, Planet.y), backref=backref('planets', primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), foreign_keys=(Planet.x, Planet.y)))
 class GalaxyHistory(Base):
 	__tablename__ = 'galaxy_history'
@@ -235,7 +234,7 @@ class GalaxyHistory(Base):
 PlanetHistory.galaxy = relation(GalaxyHistory, primaryjoin=and_(GalaxyHistory.tick==PlanetHistory.tick, GalaxyHistory.x==PlanetHistory.x, GalaxyHistory.y==PlanetHistory.y), foreign_keys=(PlanetHistory.tick, PlanetHistory.x, PlanetHistory.y), backref=backref('planets', primaryjoin=and_(PlanetHistory.tick==GalaxyHistory.tick, PlanetHistory.x==GalaxyHistory.x, PlanetHistory.y==GalaxyHistory.y), foreign_keys=(PlanetHistory.tick, PlanetHistory.x, PlanetHistory.y)))
 class Alliance(Base):
 	__tablename__ = 'alliance'
-	id = Column(Integer, index=True)
+	id = Column(Integer, index=True, unique=True)
 	name = Column(String(20), primary_key=True)
 	size = Column(Integer)
 	members = Column(Integer)

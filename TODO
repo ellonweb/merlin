@@ -1,0 +1,47 @@
+Excalibur
+    rework order of code
+        commit as infrequent as possible
+    drop/readd FKs or
+    make FKs deferabble in maps
+    merge initial inserts into one query, faster?
+        multirow insert not fully supported
+        UNION ALL a bunch of SELECTs with the data
+        probably not faster
+
+remove tabs, replace with 4 spaces - see PEP 8
+
+Channel access min/max system
+
+update LICENSE in all files (some files don't have any license atm)
+    add jester to the list of (C) names: a _lot_ of code is copy/pasted straight from munin
+
+loadable.execute decorators
+    @require_access_level(access['member'])
+    @require_access_level(0)
+    @execute
+    def execute(self, message, user, params):
+
+Hooks.request
+    scan requests
+    !request p/au/etc x.y.z [dists]
+    !request cancel id
+    robocop interface
+        msg #chan "ellonweb has requested a p scan of x:y:z. <url>"
+    add a "dists" column to Planet(History) (or maybe a new table)?
+        fill in data from scan requests ("ellonweb informs that atleast n dists are needed")
+        provide data when requesting a scan: "x:y:z had n dists at tick ..."
+
+Hooks.scan
+    scans ala munin
+    robocop interface
+    chanusertracker interface
+        pm all known users that their scan is done
+    add a "dists" column to Planet(History) (or maybe a new table)?
+        fill in data from completed scans
+
+Hooks.blocked
+    more manual info for "dists" column
+    @require_access_level(access.get('scan',access['member']))
+
+Hooks.intel
+    ala munin

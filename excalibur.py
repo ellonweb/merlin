@@ -231,6 +231,7 @@ while True:
                                         planet_new_id_search.value BETWEEN planet_old_id_search.value - (2* planet_old_id_search.vdiff) AND planet_old_id_search.value + (2* planet_old_id_search.vdiff)
                                       );"""))
             break
+        session.commit()
         planet_new_id_search.drop()
         planet_old_id_search.drop()
         session.commit()
@@ -267,6 +268,7 @@ while True:
                                     value_rank = (SELECT value_rank FROM planet_value_rank WHERE planet.id = planet_value_rank.id),
                                     xp_rank = (SELECT xp_rank FROM planet_xp_rank WHERE planet.id = planet_xp_rank.id)
                             """))
+        session.commit()
         planet_size_rank.drop()
         planet_score_rank.drop()
         planet_value_rank.drop()
@@ -318,6 +320,7 @@ while True:
                                     value_rank = (SELECT value_rank FROM galaxy_value_rank WHERE galaxy.id = galaxy_value_rank.id),
                                     xp_rank = (SELECT xp_rank FROM galaxy_xp_rank WHERE galaxy.id = galaxy_xp_rank.id)
                             """))
+        session.commit()
         galaxy_size_rank.drop()
         galaxy_score_rank.drop()
         galaxy_value_rank.drop()
@@ -367,6 +370,7 @@ while True:
                                     size_avg_rank = (SELECT size_avg_rank FROM alliance_size_avg_rank WHERE alliance.id = alliance_size_avg_rank.id),
                                     score_avg_rank = (SELECT score_avg_rank FROM alliance_score_avg_rank WHERE alliance.id = alliance_score_avg_rank.id)
                             """))
+        session.commit()
         alliance_size_rank.drop()
         alliance_members_rank.drop()
         alliance_size_avg_rank.drop()
@@ -381,7 +385,7 @@ while True:
 # ##################   HISTORY: EVERYTHING BECOMES FINAL   ################## #
 # ########################################################################### #
 
-        # planet_tick = 1
+        # planet_tick = last_tick + 1
         session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz, newx, newy, newz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z, planet.x, planet.y, planet.z FROM planet, planet_history WHERE planet.id = planet_history.id AND (planet.x != planet_history.x OR planet.y != planet_history.y OR planet.z != planet_history.z);", bindparams=[bindparam("tick",planet_tick)]))
         session.execute(text("INSERT INTO planet_history (tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff) SELECT :tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff FROM planet ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick)]))
         session.execute(text("INSERT INTO galaxy_history (tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank) SELECT :tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank FROM galaxy ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick)]))

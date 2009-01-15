@@ -25,7 +25,7 @@ from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker, clear_mappers
 from .variables import DBeng
 
-engine = create_engine(DBeng)#, echo=True)
+engine = create_engine(DBeng)#, echo='debug')
 
 Session = sessionmaker(bind=engine)
 
