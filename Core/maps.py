@@ -154,7 +154,7 @@ class Planet(Base):
 	x = Column(Integer, primary_key=True)
 	y = Column(Integer, primary_key=True)
 	z = Column(Integer, primary_key=True)
-	galaxy_coords = ForeignKeyConstraint(('planet.x', 'planet.y'), ('galaxy.x', 'galaxy.y'))
+	galaxy_coords = ForeignKeyConstraint(('planet.x', 'planet.y'), ('galaxy.x', 'galaxy.y'), deferrable=True)
 	planetname = Column(String(20))
 	rulername = Column(String(20))
 	race = Column(String(3))
@@ -171,12 +171,12 @@ class Planet(Base):
 User.planet = relation(Planet, primaryjoin=User.planet_id==Planet.id)
 class PlanetHistory(Base):
 	__tablename__ = 'planet_history'
-	tick = Column(Integer, ForeignKey('updates.tick', ondelete='cascade'), primary_key=True)
-	id = Column(Integer, ForeignKey('planet.id'), primary_key=True)
+	tick = Column(Integer, ForeignKey('updates.tick', deferrable=True, ondelete='cascade'), primary_key=True)
+	id = Column(Integer, ForeignKey('planet.id', deferrable=True), primary_key=True)
 	x = Column(Integer)
 	y = Column(Integer)
 	z = Column(Integer)
-	galaxy_coords = ForeignKeyConstraint(('planet_history.tick', 'planet_history.x', 'planet_history.y'), ('galaxy_history.tick', 'galaxy_history.x', 'galaxy_history.y'))
+	galaxy_coords = ForeignKeyConstraint(('planet_history.tick', 'planet_history.x', 'planet_history.y'), ('galaxy_history.tick', 'galaxy_history.x', 'galaxy_history.y'), deferrable=True)
 	planetname = Column(String(20))
 	rulername = Column(String(20))
 	race = Column(String(3))
@@ -193,8 +193,8 @@ class PlanetHistory(Base):
 class PlanetExiles(Base):
 	__tablename__ = 'planet_exiles'
 	key = Column(Integer, primary_key=True)
-	tick = Column(Integer, ForeignKey('updates.tick', ondelete='cascade'))
-	id = Column(Integer, ForeignKey('planet.id'))
+	tick = Column(Integer, ForeignKey('updates.tick', deferrable=True, ondelete='cascade'))
+	id = Column(Integer, ForeignKey('planet.id', deferrable=True))
 	oldx = Column(Integer)
 	oldy = Column(Integer)
 	oldz = Column(Integer)
@@ -218,8 +218,8 @@ class Galaxy(Base):
 Planet.galaxy = relation(Galaxy, primaryjoin=and_(Galaxy.x==Planet.x, Galaxy.y==Planet.y), foreign_keys=(Planet.x, Planet.y), backref=backref('planets', primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), foreign_keys=(Planet.x, Planet.y)))
 class GalaxyHistory(Base):
 	__tablename__ = 'galaxy_history'
-	tick = Column(Integer, ForeignKey('updates.tick', ondelete='cascade'), primary_key=True)
-	id = Column(Integer, ForeignKey('galaxy.id'), primary_key=True)
+	tick = Column(Integer, ForeignKey('updates.tick', deferrable=True, ondelete='cascade'), primary_key=True)
+	id = Column(Integer, ForeignKey('galaxy.id', deferrable=True), primary_key=True)
 	x = Column(Integer)
 	y = Column(Integer)
 	name = Column(String(64))
@@ -248,8 +248,8 @@ class Alliance(Base):
 	score_avg_rank = Column(Integer)
 class AllianceHistory(Base):
 	__tablename__ = 'alliance_history'
-	tick = Column(Integer, ForeignKey('updates.tick', ondelete='cascade'), primary_key=True)
-	id = Column(Integer, ForeignKey('alliance.id'), primary_key=True)
+	tick = Column(Integer, ForeignKey('updates.tick', deferrable=True, ondelete='cascade'), primary_key=True)
+	id = Column(Integer, ForeignKey('alliance.id', deferrable=True), primary_key=True)
 	name = Column(String(20))
 	size = Column(Integer)
 	members = Column(Integer)

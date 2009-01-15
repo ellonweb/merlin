@@ -1,12 +1,5 @@
 Excalibur
-    rework order of code
-        commit as infrequent as possible
-    drop/readd FKs or
-    make FKs deferabble in maps
-    merge initial inserts into one query, faster?
-        multirow insert not fully supported
-        UNION ALL a bunch of SELECTs with the data
-        probably not faster
+    drop/readd FKs
 
 remove tabs, replace with 4 spaces - see PEP 8
 
