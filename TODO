@@ -1,5 +1,5 @@
-Excalibur
-    drop/readd FKs
+Core.maps
+    add history relation, e.g. planet.history(tick)
 
 remove tabs, replace with 4 spaces - see PEP 8
 
