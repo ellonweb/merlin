@@ -21,7 +21,7 @@
 
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import validates, relation, backref
+from sqlalchemy.orm import validates, relation, backref, dynamic_loader
 from sqlalchemy.sql.functions import current_timestamp, max
 from math import ceil
 from time import time
@@ -168,6 +168,8 @@ class Planet(Base):
 	xp_rank = Column(Integer)
 	idle = Column(Integer)
 	vdiff = Column(Integer)
+	def history(self, tick):
+		return self.history_loader.filter_by(tick=tick).first()
 User.planet = relation(Planet, primaryjoin=User.planet_id==Planet.id)
 class PlanetHistory(Base):
 	__tablename__ = 'planet_history'
@@ -192,6 +194,7 @@ class PlanetHistory(Base):
 	xp_rank = Column(Integer)
 	idle = Column(Integer)
 	vdiff = Column(Integer)
+Planet.history_loader = dynamic_loader(PlanetHistory, primaryjoin=PlanetHistory.id==Planet.id, foreign_keys=(Planet.id))
 class PlanetExiles(Base):
 	__tablename__ = 'planet_exiles'
 	key = Column(Integer, primary_key=True)
@@ -219,6 +222,8 @@ class Galaxy(Base):
 	score_rank = Column(Integer)
 	value_rank = Column(Integer)
 	xp_rank = Column(Integer)
+	def history(self, tick):
+		return self.history_loader.filter_by(tick=tick).first()
 Planet.galaxy = relation(Galaxy, primaryjoin=and_(Galaxy.x==Planet.x, Galaxy.y==Planet.y), foreign_keys=(Planet.x, Planet.y), backref=backref('planets', primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), foreign_keys=(Planet.x, Planet.y)))
 class GalaxyHistory(Base):
 	__tablename__ = 'galaxy_history'
@@ -238,6 +243,7 @@ class GalaxyHistory(Base):
 	value_rank = Column(Integer)
 	xp_rank = Column(Integer)
 PlanetHistory.galaxy = relation(GalaxyHistory, primaryjoin=and_(GalaxyHistory.tick==PlanetHistory.tick, GalaxyHistory.x==PlanetHistory.x, GalaxyHistory.y==PlanetHistory.y), foreign_keys=(PlanetHistory.tick, PlanetHistory.x, PlanetHistory.y), backref=backref('planets', primaryjoin=and_(PlanetHistory.tick==GalaxyHistory.tick, PlanetHistory.x==GalaxyHistory.x, PlanetHistory.y==GalaxyHistory.y), foreign_keys=(PlanetHistory.tick, PlanetHistory.x, PlanetHistory.y)))
+Galaxy.history_loader = dynamic_loader(GalaxyHistory, primaryjoin=GalaxyHistory.id==Galaxy.id, foreign_keys=(Galaxy.id))
 class Alliance(Base):
 	__tablename__ = 'alliance'
 	id = Column(Integer, index=True, unique=True)
@@ -252,6 +258,8 @@ class Alliance(Base):
 	score_avg = Column(Integer)
 	size_avg_rank = Column(Integer)
 	score_avg_rank = Column(Integer)
+	def history(self, tick):
+		return self.history_loader.filter_by(tick=tick).first()
 class AllianceHistory(Base):
 	__tablename__ = 'alliance_history'
 	tick = Column(Integer, primary_key=True, autoincrement=False)
@@ -269,6 +277,7 @@ class AllianceHistory(Base):
 	score_avg = Column(Integer)
 	size_avg_rank = Column(Integer)
 	score_avg_rank = Column(Integer)
+Alliance.history_loader = dynamic_loader(AllianceHistory, primaryjoin=AllianceHistory.id==Alliance.id, foreign_keys=(Alliance.id))
 
 # ########################################################################### #
 # #############################    SHIP TABLE    ############################ #

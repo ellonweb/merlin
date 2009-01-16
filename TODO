@@ -1,12 +1,9 @@
-Core.maps
-    add history relation, e.g. planet.history(tick)
-
 remove tabs, replace with 4 spaces - see PEP 8
-
-Channel access min/max system
 
 update LICENSE in all files (some files don't have any license atm)
     add jester to the list of (C) names: a _lot_ of code is copy/pasted straight from munin
+
+Channel access min/max system
 
 loadable.execute decorators
     @require_access_level(access['member'])
