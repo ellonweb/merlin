@@ -30,15 +30,12 @@ class pref(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.access = 0
         self.paramre = re.compile(r"\s(.+)")
         self.usage += " [planet=x.y.z] [pass=password] [email=my.email@address.com] [phone=999]"
         self.emailre = re.compile("^([\w.]+@[\w.]+)")
     
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run_with_access()
+    def execute(self, message, user, params):
         
         params = self.split_opts(params.group(1))
         pl = pw = em = ph = ""

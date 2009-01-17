@@ -34,10 +34,8 @@ class cost(loadable):
         self.paramre = re.compile(r"\s(\d+[km]?)\s(\w+)")
         self.usage += " number ship"
     
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run
+    def execute(self, message, user, params):
         
         num, name = params.groups()
         

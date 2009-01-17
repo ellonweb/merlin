@@ -3,12 +3,6 @@ update LICENSE in all files (some files don't have any license atm)
 
 Channel access min/max system
 
-loadable.execute decorators
-    @require_access_level(access['member'])
-    @require_access_level(0)
-    @execute
-    def execute(self, message, user, params):
-
 Hooks.request
     scan requests
     !request p/au/etc x.y.z [dists]

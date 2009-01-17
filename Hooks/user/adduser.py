@@ -32,14 +32,11 @@ class adduser(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.access = access['admin'] | access.get('hc',0)
         self.paramre = re.compile(r"\s([\w-]+)")
         self.usage += " pnick [access]*"
     
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run_with_access(access['admin'] | access.get('hc',0))
+    def execute(self, message, user, params):
         
         pnick = params.group(1)
         

@@ -9,14 +9,11 @@ class getanewdaddy(loadable):
     """Remove sponsorship of a member. Their access will be reduced "galmate" level. Anyone is free to sponsor the person back under the usual conditions. This isn't a kick and it's not final.""" 
     def __init__(self):
         loadable.__init__(self)
-        self.access = access['member']
         self.paramre = re.compile(r"\s([\w-]+)")
         self.usage += " pnick"
         
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run_with_access(access['member'])
+    def execute(self, message, user, params):
 
         # do stuff here
         idiot = M.DB.Maps.User.load(name=params.group(1))

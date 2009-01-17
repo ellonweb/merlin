@@ -34,10 +34,8 @@ class eff(loadable):
         self.paramre = re.compile(r"\s(\d+[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
         self.usage += " number ship [t1|t2|t3]"
     
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run
+    def execute(self, message, user, params):
         
         num, name, target = params.groups()
         target = target or "t1"

@@ -31,15 +31,11 @@ class phone(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.access = access['hc'] | access['dc'] # "Traditional"
-        #self.access = access['member'] # Asc <- pubphone settings need implementing
         self.paramre = re.compile(r"\s([\w-]+)")
         self.usage += " user"
     
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run_with_access(access['hc'] | access['dc'])
+    def execute(self, message, user, params):
         
         username = params.group(1)
         

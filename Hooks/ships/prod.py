@@ -17,11 +17,9 @@ class prod(loadable):
         self.paramre = re.compile(r"\s(\d+[km]?)\s(\S+)\s(\d+)")
         self.usage += " <number> <ship> <factories>."
 
-    def execute(self, message):
-
-        user, params = loadable.execute(self, message) or (None, None)
-        if params is None:
-            return
+    @loadable.run
+    def execute(self, message, user, params):
+        
         num, name, factories = params.groups()
 
         ship = M.DB.Maps.Ship.load(name=name)

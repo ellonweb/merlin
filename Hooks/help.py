@@ -34,10 +34,8 @@ class help(loadable):
         self.paramre = self.commandre
         self.usage += " [command]"
     
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run
+    def execute(self, message, user, params):
         
         if len(message.get_msg().split()) == 1:
             modules = {}

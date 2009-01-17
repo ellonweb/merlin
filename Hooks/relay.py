@@ -31,14 +31,11 @@ class relay(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.access = access['admin']
         self.robore = re.compile(r"\s(\S+?)\s(.+)")
         self.usage += " message"
     
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run_with_access(access['admin'])
+    def execute(self, message, user, params):
         self.relay(message, message.get_nick(), params.group(1))
     
     def robocop(self, message):

@@ -34,10 +34,8 @@ class ship(loadable):
         self.paramre = re.compile(r"\s(\w+)")
         self.usage += " name"
     
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run
+    def execute(self, message, user, params):
         
         name = params.group(1)
         

@@ -6,14 +6,11 @@ class phone(loadable):
     """Lookup someone's phone number or set permissions for who can view your number if you've not set public (pref)"""
     def __init__(self):
         loadable.__init__(self)
-        self.access = 0 # any registered user can use this, even gal mates
         self.paramre = re.compile(r"\s(list|allow|deny|show)(?:\s([\w-]+))?",re.I)
         self.usage += " <list|allow|deny|show> [pnick]"
         
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run_with_access() # any registered user can use this, even gal mates
+    def execute(self, message, user, params):
 
         # assign param variables
         command=m.group(1)

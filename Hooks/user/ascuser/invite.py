@@ -9,14 +9,11 @@ class invite(loadable):
     """This command adds a recruit to the private channel and gives them access to me. Since this is done automatically, make sure P is online and responding before you do this. You should also make sure that you correctly typed the person's pnick when you sponsored them."""
     def __init__(self):
         loadable.__init__(self)
-        self.access = access['member']
         self.paramre = re.compile(r"\s([\w-]+)")
         self.usage += " pnick"
         
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run_with_access(access['member'])
+    def execute(self, message, user, params):
 
         # assign param variables
         recruit=params.group(1)

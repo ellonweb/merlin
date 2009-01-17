@@ -9,14 +9,11 @@ class handout(loadable):
     """Handout invites to active members."""
     def __init__(self):
         loadable.__init__(self)
-        self.access = access['admin']
         self.paramre = re.compile(r"(?:\s(\d+))?(?:\s([\w-]+))?")
         self.usage += " [number] [pnick]"
         
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run_with_access(access['admin'])
+    def execute(self, message, user, params):
 
         # assign param variables 
         num_invites=int(param.group(1) or 1)

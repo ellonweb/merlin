@@ -14,14 +14,11 @@ class sponsor(loadable):
             self.__doc__ = """This command is used to sponsor a new recruit. When you sponsor someone, you suggest them for recuitment to the alliance and state that you will make sure they're at home and don't fuck up. Once you've sponsored someone, make sure you speak to others about your possible invite, it is your responsibility to guarantee that they will be welcome.
                               After %s hours you may use the !invite command to add them to the channel and %s. You may at any point withdraw your sponsorship by using the unsponsor command. You may view currently pending sponsorships with !gimp. If you have any questions, good luck finding useful answers.""" % (M.DB.Maps.Gimp.wait, nick,)
         loadable.__init__(self)
-        self.access = access['member']
         self.paramre = re.compile(r"\s([\w-]+)\s(.*)")
         self.usage += " pnick comments"
         
-    def execute(self, message):
-        user, params = loadable.execute(self, message) or (None,None)
-        if not params:
-            return
+    @loadable.run_with_access(access['member'])
+    def execute(self, message, user, params):
 
         if M.DB.Maps.Gimp.wait < 0:
             message.reply("Fuck off and stop watering down this elitist shithole.")

@@ -45,6 +45,34 @@ class loadable(object):
     def __call__(self, message):
         self.execute(message)
     
+    @staticmethod
+    def run_with_access(level=0):
+        def wrapper(f):
+            def execute(self, message):
+                self.access = level
+                userparams = loadable.execute(self, message)
+                if userparams:
+                    f(self, message, *userparams)
+            return execute
+        return wrapper
+    
+    @staticmethod
+    def with_access(level):
+        def wrapper(f):
+            def execute(self, message):
+                self.access = level
+                f(self, message)
+            return execute
+        return wrapper
+    
+    @staticmethod
+    def run(f):
+        def execute(self, message):
+            userparams = loadable.execute(self, message)
+            if userparams:
+                f(self, message, *userparams)
+        return execute
+    
     def execute(self, message):
         m = self.commandre.search(message.get_msg())
         if not m:
