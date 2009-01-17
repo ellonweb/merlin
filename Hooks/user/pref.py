@@ -26,42 +26,42 @@ from .Core.modules import M
 loadable = M.loadable.loadable
 
 class pref(loadable):
-	"""Set your planet, password for the webby, email and phone number; order doesn't matter"""
-	
-	def __init__(self):
-		loadable.__init__(self)
-		self.access = 0
-		self.paramre = re.compile(r"\s(.+)")
-		self.usage += " [planet=x.y.z] [pass=password] [email=my.email@address.com] [phone=999]"
-		self.emailre = re.compile("^([\w.]+@[\w.]+)")
-	
-	def execute(self, message):
-		user, params = loadable.execute(self, message) or (None,None)
-		if not params:
-			return
-		
-		params = self.split_opts(params.group(1))
-		pl = pw = em = ph = ""
-		for opt, val in params.items():
-			if opt == "planet":
-				m = self.planet_coordre.search(val)
-				if m:
-					#target = Planet(coords=m.groups()) <-- load the planet, check it exists and all that
-					pl = val
-					#user.hash = target.hash <-- planet_id, planet_cannon etc
-			if opt == "pass":
-				pw = val
-				user.passwd = pw
-			if opt == "email" and self.emailre.search(val):
-				em = val
-				user.email = em
-			if opt == "phone":
-				ph = val
-				user.phone = ph
-		session = M.DB.Session()
-		session.add(user)
-		session.commit()
-		session.close()
-		message.reply("Updated your preferences: planet=%s pass=%s email=%s phone=%s" % (pl,pw,em,ph,))
-	
+    """Set your planet, password for the webby, email and phone number; order doesn't matter"""
+    
+    def __init__(self):
+        loadable.__init__(self)
+        self.access = 0
+        self.paramre = re.compile(r"\s(.+)")
+        self.usage += " [planet=x.y.z] [pass=password] [email=my.email@address.com] [phone=999]"
+        self.emailre = re.compile("^([\w.]+@[\w.]+)")
+    
+    def execute(self, message):
+        user, params = loadable.execute(self, message) or (None,None)
+        if not params:
+            return
+        
+        params = self.split_opts(params.group(1))
+        pl = pw = em = ph = ""
+        for opt, val in params.items():
+            if opt == "planet":
+                m = self.planet_coordre.search(val)
+                if m:
+                    #target = Planet(coords=m.groups()) <-- load the planet, check it exists and all that
+                    pl = val
+                    #user.hash = target.hash <-- planet_id, planet_cannon etc
+            if opt == "pass":
+                pw = val
+                user.passwd = pw
+            if opt == "email" and self.emailre.search(val):
+                em = val
+                user.email = em
+            if opt == "phone":
+                ph = val
+                user.phone = ph
+        session = M.DB.Session()
+        session.add(user)
+        session.commit()
+        session.close()
+        message.reply("Updated your preferences: planet=%s pass=%s email=%s phone=%s" % (pl,pw,em,ph,))
+    
 callbacks = [("PRIVMSG", pref())]
