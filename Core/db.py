@@ -30,12 +30,12 @@ engine = create_engine(DBeng)#, echo='debug')
 Session = sessionmaker(bind=engine)
 
 def reload_mappings():
-	Maps.Base.metadata.clear()
-	clear_mappers()
-	reload(Maps)
-	Maps.Base.metadata.bind = engine
-	Maps.Base.metadata.create_all()
-	Maps.Session = Session
+    Maps.Base.metadata.clear()
+    clear_mappers()
+    reload(Maps)
+    Maps.Base.metadata.bind = engine
+    Maps.Base.metadata.create_all()
+    Maps.Session = Session
 
 import maps as Maps
 reload_mappings()

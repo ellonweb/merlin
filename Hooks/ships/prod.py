@@ -47,3 +47,5 @@ class prod(loadable):
         feud_ticks = int(1.2 * math.ceil((feud + 10000 * factories) / output))
 
         return ticks, feud_ticks
+
+callbacks = [("PRIVMSG", prod())]

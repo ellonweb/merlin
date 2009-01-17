@@ -28,16 +28,16 @@ from Hooks.relaybot import channels
 addr = "../RoBoCoP"
 
 def relay(message):
-	if message.get_chan() in channels:
-		send(message.get_nick(), message.get_msg())
+    if message.get_chan() in channels:
+        send(message.get_nick(), message.get_msg())
 
 def send(nick, msg):
-	try:
-		s=socket.socket(socket.AF_UNIX)
-		s.connect((addr))
-		s.send("!relay %s %s" % (nick, msg,) + "\n")
-		s.close()
-	except socket.error:
-		pass
+    try:
+        s=socket.socket(socket.AF_UNIX)
+        s.connect((addr))
+        s.send("!relay %s %s" % (nick, msg,) + "\n")
+        s.close()
+    except socket.error:
+        pass
 
 callbacks = [("PRIVMSG", relay)]

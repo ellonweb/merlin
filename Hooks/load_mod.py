@@ -27,81 +27,81 @@ from .Core.exceptions_ import LoadFailure, PNickParseError
 from .Core.modules import M
 
 def loadmod(message):
-	"""Load a module, dynamically."""
-	
-	msg = message.get_msg()
-	if msg[:8] == "!loadmod":
-		try:
-			if message.get_pnick() in admins:
-				for mod in msg.split()[1:]:
-					message.alert(load(mod, message))
-			else:
-				message.alert("You don't have access for that.")
-		except PNickParseError:
-			message.alert("You don't have access for that.")
+    """Load a module, dynamically."""
+    
+    msg = message.get_msg()
+    if msg[:8] == "!loadmod":
+        try:
+            if message.get_pnick() in admins:
+                for mod in msg.split()[1:]:
+                    message.alert(load(mod, message))
+            else:
+                message.alert("You don't have access for that.")
+        except PNickParseError:
+            message.alert("You don't have access for that.")
 
 def addmod(message):
-	"""Add a module."""
+    """Add a module."""
 
-	msg = message.get_msg()
-	if msg[:7] == "!addmod":
-		try:
-			if message.get_pnick() in admins:
-				for mod in msg.split()[1:]:
-					open(os.path.join("Hooks/mods.txt"), "a").write(mod)
-					message.alert(load(mod, message))
-			else:
-				message.alert("You don't have access for that.")
-		except PNickParseError:
-			message.alert("You don't have access for that.")
+    msg = message.get_msg()
+    if msg[:7] == "!addmod":
+        try:
+            if message.get_pnick() in admins:
+                for mod in msg.split()[1:]:
+                    open(os.path.join("Hooks/mods.txt"), "a").write(mod)
+                    message.alert(load(mod, message))
+            else:
+                message.alert("You don't have access for that.")
+        except PNickParseError:
+            message.alert("You don't have access for that.")
 
 def load(mod, message):
-	# Stuff is parsed, and we'll try loading the module
-	try:
-		message.callbackmod.reload_mod(mod)
-	except LoadFailure, e:
-		return e
-	except SyntaxError:
-		sys.stderr.write("%s%s" % (traceback.format_exc(), "\n"))
-		sys.stderr.flush()
-		return "There is a syntax error in your module... Printing traceback to stderr."
-	except ImportError, e:
-		return e
+    # Stuff is parsed, and we'll try loading the module
+    try:
+        message.callbackmod.reload_mod(mod)
+    except LoadFailure, e:
+        return e
+    except SyntaxError:
+        sys.stderr.write("%s%s" % (traceback.format_exc(), "\n"))
+        sys.stderr.flush()
+        return "There is a syntax error in your module... Printing traceback to stderr."
+    except ImportError, e:
+        return e
 
-	return "Module %s loaded successfully." % mod
+    return "Module %s loaded successfully." % mod
 
 def unloadmod(message):
-	"""Unload a module. Privileged users only. Syntax: !unload name."""
+    """Unload a module. Privileged users only. Syntax: !unload name."""
 
-	msg = message.get_msg()
-	if msg[:10] == "!unloadmod":
-		try:
-			if message.get_pnick() in admins:
-				for mod in msg.split()[1:]:
-					message.callbackmod.unload_mod(mod)
-					message.alert("Unloaded everything matching %s." % mod)
-			else:
-				message.alert("You don't have access for that.")
-		except PNickParseError:
-			message.alert("You don't have access for that.")
+    msg = message.get_msg()
+    if msg[:10] == "!unloadmod":
+        try:
+            if message.get_pnick() in admins:
+                for mod in msg.split()[1:]:
+                    message.callbackmod.unload_mod(mod)
+                    message.alert("Unloaded everything matching %s." % mod)
+            else:
+                message.alert("You don't have access for that.")
+        except PNickParseError:
+            message.alert("You don't have access for that.")
 
 def reload(message):
-	"""Reload DB. Reload Loadable."""
-	
-	msg = message.get_msg()
-	if msg[:7] == "!reload":
-		try:
-			if message.get_pnick() in admins:
-				# Shortcut for both: !reloadable db
-				if "db" in msg:
-					M.reload_db()
-					message.alert("Reloaded the DB mappings.")
-				if "loadable" in msg:
-					M.reload_loadable()
-					message.alert("Reloaded the Loadable.")
-			else:
-				message.alert("You don't have access for that.")
-		except PNickParseError:
-			message.alert("You don't have access for that.")
+    """Reload DB. Reload Loadable."""
+    
+    msg = message.get_msg()
+    if msg[:7] == "!reload":
+        try:
+            if message.get_pnick() in admins:
+                # Shortcut for both: !reloadable db
+                if "db" in msg:
+                    M.reload_db()
+                    message.alert("Reloaded the DB mappings.")
+                if "loadable" in msg:
+                    M.reload_loadable()
+                    message.alert("Reloaded the Loadable.")
+            else:
+                message.alert("You don't have access for that.")
+        except PNickParseError:
+            message.alert("You don't have access for that.")
 
 callbacks = [("PRIVMSG", loadmod), ("PRIVMSG", addmod), ("PRIVMSG", unloadmod)]

@@ -25,19 +25,19 @@ from .variables import nick, admins
 from .Core.exceptions_ import RebootConnection, PNickParseError
 
 def hop(message):
-	"""Get the bot to quit and reconnect"""
-	
-	if message.get_msg() == "!hop":
-		try:
-			if message.get_pnick() in admins:
-				dohop()
-			else:
-				message.alert("You don't have access for that.")
-		except PNickParseError:
-			message.alert("You don't have access for that.")
+    """Get the bot to quit and reconnect"""
+    
+    if message.get_msg() == "!hop":
+        try:
+            if message.get_pnick() in admins:
+                dohop()
+            else:
+                message.alert("You don't have access for that.")
+        except PNickParseError:
+            message.alert("You don't have access for that.")
 
 def dohop():
-	# This is a separate function for legacy reasons
-	raise RebootConnection
+    # This is a separate function for legacy reasons
+    raise RebootConnection
 
 callbacks = [("PRIVMSG", hop)]

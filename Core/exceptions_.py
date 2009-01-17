@@ -22,23 +22,23 @@
 # owners.
 
 class RebootConnection(Exception):
-	pass
+    pass
 
 class ParseError(Exception):
-	pass
+    pass
 
 class ChanParseError(ParseError):
-	pass
+    pass
 
 class MsgParseError(ParseError):
-	pass
+    pass
 
 class PNickParseError(ParseError):
-	pass
+    pass
 
 class LoadFailure(Exception):
-	pass
+    pass
 
 class UserError(Exception):
-	pass
-	
+    pass
+    

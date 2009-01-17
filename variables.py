@@ -38,18 +38,18 @@ DBeng = "postgres://Elliot@localhost:5432/merlin"
 
 # Channels
 channels = {
-	'private'	: "#ascendancy", # priv channel needed for !inviteme
+    'private'    : "#ascendancy", # priv channel needed for !inviteme
 }
 
 # Access levels
 access = {
-	'member'	: 1, # member access needed for !inviteme
-	'scanner'	: 2,
-	'intel'		: 4,
-	'dc'		: 8,
-	'bc'		: 16,
-	'hc'		: 32,
-	'admin'		: 64
+    'member'    : 1, # member access needed for !inviteme
+    'scanner'   : 2,
+    'intel'     : 4,
+    'dc'        : 8,
+    'bc'        : 16,
+    'hc'        : 32,
+    'admin'     : 64
 }
 
 # User Tracking

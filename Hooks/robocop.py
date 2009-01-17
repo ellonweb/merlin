@@ -26,76 +26,76 @@ from .variables import admins, robocop as addr
 from .Core.exceptions_ import PNickParseError
 
 def run():
-	try:
-		os.remove(addr)
-	except OSError:
-		pass
-	message = threading.currentThread().message
-	server = SocketServer.UnixStreamServer((addr), handler)
-	message.alert("RoBoCoP is now running.")
-	while not threading.currentThread().killcop:
-		server.handle_request()
-	try:
-		os.remove(addr)
-	except OSError:
-		pass
-	message = threading.currentThread().message
-	message.alert("RoBoCoP has been killed.")
+    try:
+        os.remove(addr)
+    except OSError:
+        pass
+    message = threading.currentThread().message
+    server = SocketServer.UnixStreamServer((addr), handler)
+    message.alert("RoBoCoP is now running.")
+    while not threading.currentThread().killcop:
+        server.handle_request()
+    try:
+        os.remove(addr)
+    except OSError:
+        pass
+    message = threading.currentThread().message
+    message.alert("RoBoCoP has been killed.")
 
 class handler(SocketServer.StreamRequestHandler):
-	def handle(self):
-		message = threading.currentThread().message
-		s = self.request
-		f = s.makefile('rb')
-		while 1:
-			l = f.readline()
-			if not l: break
-			message._msg = l
-			message.callbackmod.robocop(message)
+    def handle(self):
+        message = threading.currentThread().message
+        s = self.request
+        f = s.makefile('rb')
+        while 1:
+            l = f.readline()
+            if not l: break
+            message._msg = l
+            message.callbackmod.robocop(message)
 
 def robocop(message):
-	"Start the RoBoCoP server"
-	if message.get_msg() == "!robocop":
-		try:
-			if message.get_pnick() in admins:
-				startcop(message)
-			else:
-				message.alert("You don't have access for that.")
-		except PNickParseError:
-			message.alert("You don't have access for that.")
+    "Start the RoBoCoP server"
+    if message.get_msg() == "!robocop":
+        try:
+            if message.get_pnick() in admins:
+                startcop(message)
+            else:
+                message.alert("You don't have access for that.")
+        except PNickParseError:
+            message.alert("You don't have access for that.")
 
 def startcop(message):
-	if message.get_msg() in ("is now your hidden host", "!robocop"):
-		for thread in threading.enumerate():
-			if thread.getName() == "RoBoCoP":
-				message.alert("RoBoCoP is already running.")
-				return
-		thread = threading.Thread(name="RoBoCoP", target=run)
-		thread.setDaemon(1)
-		thread.message = message
-		thread.killcop = False
-		thread.start()
+    if message.get_msg() in ("is now your hidden host", "!robocop"):
+        for thread in threading.enumerate():
+            if thread.getName() == "RoBoCoP":
+                message.alert("RoBoCoP is already running.")
+                return
+        thread = threading.Thread(name="RoBoCoP", target=run)
+        thread.setDaemon(1)
+        thread.message = message
+        thread.killcop = False
+        thread.start()
 
 def killcop(message):
-	"Stop the RoBoCoP server"
-	if message.get_msg() == "!killcop":
-		try:
-			if message.get_pnick() in admins:
-				for thread in threading.enumerate():
-					if thread.getName() == "RoBoCoP":
-						thread.message = message
-						thread.killcop = True
-						copkiller = socket.socket(socket.AF_UNIX)
-						try:
-							copkiller.connect((addr))
-							copkiller.close()
-						except socket.error:
-							pass
-						return
-				message.alert("RoBoCoP is already dead.")
-			else:
-				message.alert("You don't have access for that.")
-		except PNickParseError:
-			message.alert("You don't have access for that.")
+    "Stop the RoBoCoP server"
+    if message.get_msg() == "!killcop":
+        try:
+            if message.get_pnick() in admins:
+                for thread in threading.enumerate():
+                    if thread.getName() == "RoBoCoP":
+                        thread.message = message
+                        thread.killcop = True
+                        copkiller = socket.socket(socket.AF_UNIX)
+                        try:
+                            copkiller.connect((addr))
+                            copkiller.close()
+                        except socket.error:
+                            pass
+                        return
+                message.alert("RoBoCoP is already dead.")
+            else:
+                message.alert("You don't have access for that.")
+        except PNickParseError:
+            message.alert("You don't have access for that.")
 
 callbacks = [("396", startcop), ("PRIVMSG", robocop), ("PRIVMSG", killcop)]

@@ -29,100 +29,100 @@ from exceptions_ import ParseError, PNickParseError, UserError
 # ##############################    LOADABLE    ############################# #
 # ########################################################################### #
 class loadable(object):
-	""
-	
-	def __init__(self):
-		self.access = -1
-		self.coordre = re.compile(r"(\d+)[. :\-](\d+)(?:[. :\-](\d+))?")
-		self.planet_coordre = re.compile(r"(\d+)[. :\-](\d+)[. :\-](\d+)")
-		self.commandre = re.compile(r"^[!|.|\-|~|@]"+self.__class__.__name__,re.IGNORECASE)
-		self.paramre = self.commandre
-		self.robore = self.paramre
-		self.helpre = re.compile(r"^[!|.|\-|~|@]help "+self.__class__.__name__,re.IGNORECASE)
-		self.usage = self.__class__.__name__
-		self.helptext = self.__doc__
-	
-	def __call__(self, message):
-		self.execute(message)
-	
-	def execute(self, message):
-		m = self.commandre.search(message.get_msg())
-		if not m:
-			m = self.helpre.search(message.get_msg())
-			if m:
-				self.help(message)
-			return
-		try:
-			user = self.has_access(message)
-			if not user:
-				raise UserError
-			m = self.paramre.search(message.get_msg())
-			if not m:
-				raise ParseError
-			return user, m
-		except PNickParseError:
-			message.alert("You need to login and set mode +x to use this command")
-		except UserError:
-			message.alert("You don't have access to this command")
-		except ParseError:
-			message.alert(self.usage)
-		return
-	
-	def has_access(self, message):
-		if self.access == -1:
-			return 1
-		user = M.CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
-		if user is None:
-			raise UserError
-		if self.access == 0 or user.access & self.access > 0:
-			return user
-		return
+    ""
+    
+    def __init__(self):
+        self.access = -1
+        self.coordre = re.compile(r"(\d+)[. :\-](\d+)(?:[. :\-](\d+))?")
+        self.planet_coordre = re.compile(r"(\d+)[. :\-](\d+)[. :\-](\d+)")
+        self.commandre = re.compile(r"^[!|.|\-|~|@]"+self.__class__.__name__,re.IGNORECASE)
+        self.paramre = self.commandre
+        self.robore = self.paramre
+        self.helpre = re.compile(r"^[!|.|\-|~|@]help "+self.__class__.__name__,re.IGNORECASE)
+        self.usage = self.__class__.__name__
+        self.helptext = self.__doc__
+    
+    def __call__(self, message):
+        self.execute(message)
+    
+    def execute(self, message):
+        m = self.commandre.search(message.get_msg())
+        if not m:
+            m = self.helpre.search(message.get_msg())
+            if m:
+                self.help(message)
+            return
+        try:
+            user = self.has_access(message)
+            if not user:
+                raise UserError
+            m = self.paramre.search(message.get_msg())
+            if not m:
+                raise ParseError
+            return user, m
+        except PNickParseError:
+            message.alert("You need to login and set mode +x to use this command")
+        except UserError:
+            message.alert("You don't have access to this command")
+        except ParseError:
+            message.alert(self.usage)
+        return
+    
+    def has_access(self, message):
+        if self.access == -1:
+            return 1
+        user = M.CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
+        if user is None:
+            raise UserError
+        if self.access == 0 or user.access & self.access > 0:
+            return user
+        return
 
-	def help(self, message):
-		try:
-			if not self.has_access(message):
-				raise UserError
-			message.reply(self.usage + "\n" + (self.helptext or ""))
-		except PNickParseError:
-			message.alert("You need to login and set mode +x to use this command")
-		except UserError:
-			message.alert("You don't have access to this command")
-		return
-	
-	def robocop(self, message):
-		m = self.commandre.search(message.get_msg())
-		if not m:
-			return
-		m = self.robore.search(message.get_msg())
-		return m
-	
-	def split_opts(self,params):
-		param_dict={}
-		for s in params.split():
-			a=s.split('=')
-			if len(a) != 2:
-				continue
-			param_dict[a[0].lower()]=a[1]
-		return param_dict
-	
-	def num2short(self,num):
-		try:
-			if num/1000000 > 1:
-				return str(round(num/1000000.0,1))+"m"
-			elif num/1000 > 1:
-				return str(round(num/1000.0,1))+"k"
-			else:
-				return str(round(num))
-		except:
-			raise ValueError
-	
-	def short2num(self,short):
-		try:
-			if short[-1].lower()=='m':
-				return int(short[:-1]) *1000000
-			elif short[-1].lower()=='k':
-				return int(short[:-1]) *1000
-			else:
-				return int(short)
-		except:
-			raise ValueError
+    def help(self, message):
+        try:
+            if not self.has_access(message):
+                raise UserError
+            message.reply(self.usage + "\n" + (self.helptext or ""))
+        except PNickParseError:
+            message.alert("You need to login and set mode +x to use this command")
+        except UserError:
+            message.alert("You don't have access to this command")
+        return
+    
+    def robocop(self, message):
+        m = self.commandre.search(message.get_msg())
+        if not m:
+            return
+        m = self.robore.search(message.get_msg())
+        return m
+    
+    def split_opts(self,params):
+        param_dict={}
+        for s in params.split():
+            a=s.split('=')
+            if len(a) != 2:
+                continue
+            param_dict[a[0].lower()]=a[1]
+        return param_dict
+    
+    def num2short(self,num):
+        try:
+            if num/1000000 > 1:
+                return str(round(num/1000000.0,1))+"m"
+            elif num/1000 > 1:
+                return str(round(num/1000.0,1))+"k"
+            else:
+                return str(round(num))
+        except:
+            raise ValueError
+    
+    def short2num(self,short):
+        try:
+            if short[-1].lower()=='m':
+                return int(short[:-1]) *1000000
+            elif short[-1].lower()=='k':
+                return int(short[:-1]) *1000
+            else:
+                return int(short)
+        except:
+            raise ValueError

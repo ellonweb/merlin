@@ -33,61 +33,61 @@ import Core.modules
 
 # Check the errorlog file exists, if not create it
 try:
-	open("errorlog.txt", "r")
+    open("errorlog.txt", "r")
 except IOError:
-	open("errorlog.txt", "w").close()
+    open("errorlog.txt", "w").close()
 
 class Bot(object):
-	# Main bot container
-	
-	def __init__(self):
-		# Initialize the bot
-	
-		self.server = server
-		self.port = port
-		self.details = {"nick":nick, "pass":passw}
-		
-		self.conn = conn(self.server, self.port)
-		self.conn.connect()
-		
-		self.run()
-	
-	def run(self):
-		# Run the bot
-		
-		self.conn.write("NICK %s" % self.details["nick"])
-		self.conn.write("USER %s 0 * : %s" % (self.details["nick"], self.details["nick"]))
-		
-		# Initialise the bot with the modules that are supposed to be loaded at startup
-		for line in open(os.path.join("Hooks/mods.txt")):
-			mod = line.split("#")[0]
-			if mod:
-				cb.reload_mod(mod.strip())
-			
-		# The beast begins
-		while True:
-			# Read the next line
-			line = self.conn.read()
-			if not line:
-				return
-			
-			# Parse and process the line
-			parsed_line = parse(line, self.conn, self.details["nick"], cb)
-			try:
-				cb.callback(parsed_line)
-				self.details["nick"] = parsed_line.botnick
-			except SystemExit:
-				raise
-			except KeyboardInterrupt:
-				raise
-			except RebootConnection:
-				raise
-			except:
-				open("errorlog.txt", "a").write(asctime()+" Error:\n%s" % format_exc())
-				open("errorlog.txt", "a").write("\nArguments that caused error: %s" % parsed_line)
-				print "ERROR RIGHT HERE!!"
-				print format_exc()
-				parsed_line.alert("An exception occured and has been logged.")
+    # Main bot container
+    
+    def __init__(self):
+        # Initialize the bot
+    
+        self.server = server
+        self.port = port
+        self.details = {"nick":nick, "pass":passw}
+        
+        self.conn = conn(self.server, self.port)
+        self.conn.connect()
+        
+        self.run()
+    
+    def run(self):
+        # Run the bot
+        
+        self.conn.write("NICK %s" % self.details["nick"])
+        self.conn.write("USER %s 0 * : %s" % (self.details["nick"], self.details["nick"]))
+        
+        # Initialise the bot with the modules that are supposed to be loaded at startup
+        for line in open(os.path.join("Hooks/mods.txt")):
+            mod = line.split("#")[0]
+            if mod:
+                cb.reload_mod(mod.strip())
+            
+        # The beast begins
+        while True:
+            # Read the next line
+            line = self.conn.read()
+            if not line:
+                return
+            
+            # Parse and process the line
+            parsed_line = parse(line, self.conn, self.details["nick"], cb)
+            try:
+                cb.callback(parsed_line)
+                self.details["nick"] = parsed_line.botnick
+            except SystemExit:
+                raise
+            except KeyboardInterrupt:
+                raise
+            except RebootConnection:
+                raise
+            except:
+                open("errorlog.txt", "a").write(asctime()+" Error:\n%s" % format_exc())
+                open("errorlog.txt", "a").write("\nArguments that caused error: %s" % parsed_line)
+                print "ERROR RIGHT HERE!!"
+                print format_exc()
+                parsed_line.alert("An exception occured and has been logged.")
 
 if __name__ == "__main__":
-	Bot() # Start the bot here, if we're the main module.
+    Bot() # Start the bot here, if we're the main module.

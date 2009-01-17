@@ -28,74 +28,74 @@ from exceptions_ import ChanParseError, MsgParseError, PNickParseError
 pnickre = re.compile(r"^:.+!.+@(.+)\.users.netgamers.org")
 
 class Message(object):
-	# The message object will be passed around to callbacks for inspection and ability to write to the server
-	
-	def __init__(self, line, botnick):
-		# A raw irc line and a connection
-		self.line = line
-		self.botnick = botnick
-		self._chanerror = False # Will be set to True on failure to parse.
-		self._msgerror = False # Will be set to True on failure to parse.
-		self.parse(line)
-	
-	def parse(self, line):
-		# Parse the irc line
-		self._nick = line.split("!")[0][1:]
-		self._hostmask = line.split()[0][1:]
-		self._command = line.split()[1]
-		
-		# Channel
-		try:
-			chan = ":"+line.split(":")[1] # The ":" is added after the split etc, just to make the .find()s return the right result
-			hash = max(chan.find("#"),0) or len(line)
-			amp = max(chan.find("&"),0) or len(line)
-			if not hash == amp: # There's no # or &, ie both lines returned len(line)
-				self._channel = line[min(hash,amp):].split()[0]
-			else: # This should almost certainly give the bot's nick
-				self._channel = line.split()[2]
-		except IndexError:
-			self._chanerror = True
-		
-		# Message
-		try:
-			self._msg = line[line.index(":",1)+1:]
-		except ValueError:
-			self._msgerror = True
-	
-	def get_nick(self):
-		# Return a parsed nick
-		return self._nick
-	
-	def get_hostmask(self):
-		# Return a parsed hostmask
-		return self._hostmask
-	
-	def get_command(self):
-		# Return the command
-		return self._command
+    # The message object will be passed around to callbacks for inspection and ability to write to the server
+    
+    def __init__(self, line, botnick):
+        # A raw irc line and a connection
+        self.line = line
+        self.botnick = botnick
+        self._chanerror = False # Will be set to True on failure to parse.
+        self._msgerror = False # Will be set to True on failure to parse.
+        self.parse(line)
+    
+    def parse(self, line):
+        # Parse the irc line
+        self._nick = line.split("!")[0][1:]
+        self._hostmask = line.split()[0][1:]
+        self._command = line.split()[1]
+        
+        # Channel
+        try:
+            chan = ":"+line.split(":")[1] # The ":" is added after the split etc, just to make the .find()s return the right result
+            hash = max(chan.find("#"),0) or len(line)
+            amp = max(chan.find("&"),0) or len(line)
+            if not hash == amp: # There's no # or &, ie both lines returned len(line)
+                self._channel = line[min(hash,amp):].split()[0]
+            else: # This should almost certainly give the bot's nick
+                self._channel = line.split()[2]
+        except IndexError:
+            self._chanerror = True
+        
+        # Message
+        try:
+            self._msg = line[line.index(":",1)+1:]
+        except ValueError:
+            self._msgerror = True
+    
+    def get_nick(self):
+        # Return a parsed nick
+        return self._nick
+    
+    def get_hostmask(self):
+        # Return a parsed hostmask
+        return self._hostmask
+    
+    def get_command(self):
+        # Return the command
+        return self._command
 
-	def get_chan(self):
-		# Return a channel. Raises ParseError on failure
-		if self._chanerror: # Raise a ParseError: Some RAWs do not containt a target
-			raise ChanParseError("Could not parse target.")
-		return self._channel
-	
-	def reply_target(self):
-		# Return the proper target to reply to
-		if self._chanerror:
-			raise ChanParseError("Could not parse target.")
-		return self._channel if (self._channel != self.botnick) else self.get_nick()
-	
-	def get_pnick(self):
-		#Return the pnick. Raises ParseError on failure
-		match = pnickre.search(self.line)
-		if not match: # Raise a ParseError: User hasn't authed with P
-			raise PNickParseError("Could not parse P-nick.")
-		return match.group(1)
-	
-	def get_msg(self):
-		# Return the message part of a line. Raises ParseError on failure		
-		if self._msgerror: # Raise a ParseError: Some RAWs do not containt a target
-			raise MsgParseError("Could not parse line.")
-		return self._msg
-	
+    def get_chan(self):
+        # Return a channel. Raises ParseError on failure
+        if self._chanerror: # Raise a ParseError: Some RAWs do not containt a target
+            raise ChanParseError("Could not parse target.")
+        return self._channel
+    
+    def reply_target(self):
+        # Return the proper target to reply to
+        if self._chanerror:
+            raise ChanParseError("Could not parse target.")
+        return self._channel if (self._channel != self.botnick) else self.get_nick()
+    
+    def get_pnick(self):
+        #Return the pnick. Raises ParseError on failure
+        match = pnickre.search(self.line)
+        if not match: # Raise a ParseError: User hasn't authed with P
+            raise PNickParseError("Could not parse P-nick.")
+        return match.group(1)
+    
+    def get_msg(self):
+        # Return the message part of a line. Raises ParseError on failure        
+        if self._msgerror: # Raise a ParseError: Some RAWs do not containt a target
+            raise MsgParseError("Could not parse line.")
+        return self._msg
+    

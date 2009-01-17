@@ -39,37 +39,37 @@ regex += r'.+?(\d+|\-)</td>'*8 # some numbers
 regex += r'.+?</tr>$' # end of the line
 sre = re.compile(regex,re.I|re.M)
 
-mapping = {	"Fi": "Fighter",
-			"Co": "Corvette",
-			"Fr": "Frigate",
-			"De": "Destroyer",
-			"Cr": "Cruiser",
-			"Bs": "Battleship",
-			"Ro": "Roids",
-			"St": "Struct",
-			"Ter": "Terran",
-			"Etd": "Eitraides",
-			"Cath": "Cathaar",
-			"Zik": "Zikonian",
-			"Xan": "Xandathrii"}
+mapping = {    "Fi": "Fighter",
+            "Co": "Corvette",
+            "Fr": "Frigate",
+            "De": "Destroyer",
+            "Cr": "Cruiser",
+            "Bs": "Battleship",
+            "Ro": "Roids",
+            "St": "Struct",
+            "Ter": "Terran",
+            "Etd": "Eitraides",
+            "Cath": "Cathaar",
+            "Zik": "Zikonian",
+            "Xan": "Xandathrii"}
 
 keys = ['race', 'name', 'class_', 't1', 't2', 't3', 'type', 'init',
-		'guns', 'armor', 'damage', 'empres', 'metal', 'crystal', 'eonium']
+        'guns', 'armor', 'damage', 'empres', 'metal', 'crystal', 'eonium']
 
 for line in sre.findall(stats):
-	ship = DB.Maps.Ship()
-	line = list(line)
-	for index, key in enumerate(keys):
-		if line[index] in mapping:
-			line[index] = mapping[line[index]]
-		elif line[index].isdigit():
-			line[index] = int(line[index])
-		if line[index] != '-':
-			setattr(ship,key,line[index])
-	ship.total_cost = ship.metal + ship.crystal + ship.eonium
-	print "%12s%12s%12s%12s" % (ship.name, ship.class_, ship.race, ship.type,)
-	
-	session.add(ship)
+    ship = DB.Maps.Ship()
+    line = list(line)
+    for index, key in enumerate(keys):
+        if line[index] in mapping:
+            line[index] = mapping[line[index]]
+        elif line[index].isdigit():
+            line[index] = int(line[index])
+        if line[index] != '-':
+            setattr(ship,key,line[index])
+    ship.total_cost = ship.metal + ship.crystal + ship.eonium
+    print "%12s%12s%12s%12s" % (ship.name, ship.class_, ship.race, ship.type,)
+    
+    session.add(ship)
 
 session.commit()
 session.close()

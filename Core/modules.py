@@ -24,14 +24,14 @@
 import chanusertracker, db, loadable
 
 class _modules(object):
-	def __init__(self):
-		self.CUT = chanusertracker
-		self.DB = db
-		self.loadable = loadable
-	def reload_db(self):
-		self.DB.reload_mappings()
-	def reload_loadable(self):
-		self.loadable = reload(self.loadable)
+    def __init__(self):
+        self.CUT = chanusertracker
+        self.DB = db
+        self.loadable = loadable
+    def reload_db(self):
+        self.DB.reload_mappings()
+    def reload_loadable(self):
+        self.loadable = reload(self.loadable)
 
 M = _modules()
 chanusertracker.M = M

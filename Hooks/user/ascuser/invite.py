@@ -38,7 +38,7 @@ class invite(loadable):
             recruit = M.DB.Maps.User(name=gimp.name)
         recruit.active = True
         recruit.access |= access['member']
-		recruit.sponsor = user.name
+        recruit.sponsor = user.name
         session = M.DB.Session()
         session.add(recruit)
         session.delete(gimp)

@@ -27,35 +27,35 @@ loadable = M.loadable.loadable
 from Hooks.ships import feud, effs
 
 class cost(loadable):
-	"""Calculates the cost of producing the specified number of ships"""
-	
-	def __init__(self):
-		loadable.__init__(self)
-		self.paramre = re.compile(r"\s(\d+[km]?)\s(\w+)")
-		self.usage += " number ship"
-	
-	def execute(self, message):
-		user, params = loadable.execute(self, message) or (None,None)
-		if not params:
-			return
-		
-		num, name = params.groups()
-		
-		ship = M.DB.Maps.Ship.load(name=name)
-		if ship is None:
-			message.alert("No Ship called: %s" % (name,))
-			return
-		
-		num = self.short2num(num)
-		reply="Buying %s %s will cost %s metal, %s crystal and %s eonium."%(num,ship.name,
-				self.num2short(ship.metal*num),
-				self.num2short(ship.crystal*num),
-				self.num2short(ship.eonium*num))
-		reply+=" Feudalism: %s metal, %s crystal and %s eonium."%(
-				self.num2short(ship.metal*.86*num),
-				self.num2short(ship.crystal*.86*num),
-				self.num2short(ship.eonium*.86*num))
-		reply+=" It will add %s value"%(self.num2short(ship.total_cost*num/100),)
-		message.reply(reply)
+    """Calculates the cost of producing the specified number of ships"""
+    
+    def __init__(self):
+        loadable.__init__(self)
+        self.paramre = re.compile(r"\s(\d+[km]?)\s(\w+)")
+        self.usage += " number ship"
+    
+    def execute(self, message):
+        user, params = loadable.execute(self, message) or (None,None)
+        if not params:
+            return
+        
+        num, name = params.groups()
+        
+        ship = M.DB.Maps.Ship.load(name=name)
+        if ship is None:
+            message.alert("No Ship called: %s" % (name,))
+            return
+        
+        num = self.short2num(num)
+        reply="Buying %s %s will cost %s metal, %s crystal and %s eonium."%(num,ship.name,
+                self.num2short(ship.metal*num),
+                self.num2short(ship.crystal*num),
+                self.num2short(ship.eonium*num))
+        reply+=" Feudalism: %s metal, %s crystal and %s eonium."%(
+                self.num2short(ship.metal*.86*num),
+                self.num2short(ship.crystal*.86*num),
+                self.num2short(ship.eonium*.86*num))
+        reply+=" It will add %s value"%(self.num2short(ship.total_cost*num/100),)
+        message.reply(reply)
 
 callbacks = [("PRIVMSG", cost())]

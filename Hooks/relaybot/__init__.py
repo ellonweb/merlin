@@ -25,5 +25,5 @@ __all__ = ["relay","relayhopper"]
 # Relay channels
 # You should configure P to autoinvite the bot to your channels
 channels = frozenset((
-			,
+            ,
 ))

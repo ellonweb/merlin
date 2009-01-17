@@ -27,26 +27,26 @@ from .Core.modules import M
 loadable = M.loadable.loadable
 
 class phone(loadable):
-	"""Used to view a user's phone number"""
-	
-	def __init__(self):
-		loadable.__init__(self)
-		self.access = access['hc'] | access['dc'] # "Traditional"
-		#self.access = access['member'] # Asc <- pubphone settings need implementing
-		self.paramre = re.compile(r"\s([\w-]+)")
-		self.usage += " user"
-	
-	def execute(self, message):
-		user, params = loadable.execute(self, message) or (None,None)
-		if not params:
-			return
-		
-		username = params.group(1)
-		
-		member = M.DB.Maps.User.load(name=username, exact=False)
-		if member is None:
-			message.alert("No such user '%s'" % (username,))
-			return
-		message.reply("User %s phone: %s" % (member.name, member.phone,))
-	
+    """Used to view a user's phone number"""
+    
+    def __init__(self):
+        loadable.__init__(self)
+        self.access = access['hc'] | access['dc'] # "Traditional"
+        #self.access = access['member'] # Asc <- pubphone settings need implementing
+        self.paramre = re.compile(r"\s([\w-]+)")
+        self.usage += " user"
+    
+    def execute(self, message):
+        user, params = loadable.execute(self, message) or (None,None)
+        if not params:
+            return
+        
+        username = params.group(1)
+        
+        member = M.DB.Maps.User.load(name=username, exact=False)
+        if member is None:
+            message.alert("No such user '%s'" % (username,))
+            return
+        message.reply("User %s phone: %s" % (member.name, member.phone,))
+    
 callbacks = [("PRIVMSG", phone())]

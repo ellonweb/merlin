@@ -27,57 +27,57 @@ from .Core.callbacks import callbacks as cb
 from .variables import admins
 
 def raw(message):
-	"""Send a raw message to the server."""
-	
-	msg = message.get_msg()
-	if msg[:4] == "!raw":
-		try:
-			if message.get_pnick() in admins:
-				message.write(msg[5:])
-			else:
-				message.alert("You don't have access for that.")
-		except PNickParseError:
-			message.alert("You don't have access for that.")
+    """Send a raw message to the server."""
+    
+    msg = message.get_msg()
+    if msg[:4] == "!raw":
+        try:
+            if message.get_pnick() in admins:
+                message.write(msg[5:])
+            else:
+                message.alert("You don't have access for that.")
+        except PNickParseError:
+            message.alert("You don't have access for that.")
 
 def debug(message):
-	"""Execute a statement. Warning: Playing with this is risky!"""
-	
-	msg = message.get_msg()
-	if msg[:6] == "!debug":
-		try:
-			if message.get_pnick() in admins:
-				try:
-					exec(msg[7:])
-				except:
-					message.alert(traceback.format_exc())
-			else:
-				message.alert("You don't have access for that.")
-		except PNickParseError:
-			message.alert("You don't have access for that.")
+    """Execute a statement. Warning: Playing with this is risky!"""
+    
+    msg = message.get_msg()
+    if msg[:6] == "!debug":
+        try:
+            if message.get_pnick() in admins:
+                try:
+                    exec(msg[7:])
+                except:
+                    message.alert(traceback.format_exc())
+            else:
+                message.alert("You don't have access for that.")
+        except PNickParseError:
+            message.alert("You don't have access for that.")
 
 def viewlog(message):
-	"""Sends the error log to an admin."""
-	
-	if message.get_msg() == "!viewlog":
-		try:
-			if message.get_pnick() in admins:
-				message.reply(open("errorlog.txt","r").read()+"\nDone")
-			else:
-				message.alert("You don't have access for that.")
-		except PNickParseError:
-			message.alert("You don't have access for that.")
+    """Sends the error log to an admin."""
+    
+    if message.get_msg() == "!viewlog":
+        try:
+            if message.get_pnick() in admins:
+                message.reply(open("errorlog.txt","r").read()+"\nDone")
+            else:
+                message.alert("You don't have access for that.")
+        except PNickParseError:
+            message.alert("You don't have access for that.")
 
 def clearlog(message):
-	"""Sends the error log to an admin."""
-	
-	if message.get_msg() == "!clearlog":
-		try:
-			if message.get_pnick() in admins:
-				open("errorlog.txt","w").close()
-				message.reply("Done")
-			else:
-				message.alert("You don't have access for that.")
-		except PNickParseError:
-			message.alert("You don't have access for that.")
+    """Sends the error log to an admin."""
+    
+    if message.get_msg() == "!clearlog":
+        try:
+            if message.get_pnick() in admins:
+                open("errorlog.txt","w").close()
+                message.reply("Done")
+            else:
+                message.alert("You don't have access for that.")
+        except PNickParseError:
+            message.alert("You don't have access for that.")
 
 callbacks = [("PRIVMSG", raw), ("PRIVMSG", debug), ("PRIVMSG", viewlog), ("PRIVMSG", clearlog)]

@@ -27,31 +27,31 @@ from .Core.modules import M
 loadable = M.loadable.loadable
 
 class whois(loadable):
-	"""Used to view a user's details"""
-	
-	def __init__(self):
-		loadable.__init__(self)
-		self.access = access['admin'] | access['hc'] # "Traditional"
-		#self.access = access['member'] # Asc
-		self.paramre = re.compile(r"\s([\w-]+)")
-		self.usage += " user"
-	
-	def execute(self, message):
-		user, params = loadable.execute(self, message) or (None,None)
-		if not params:
-			return
-		
-		username = params.group(1)
-		
-		member = M.DB.Maps.User.load(name=username, exact=False)
-		if member is None:
-			message.alert("No such user '%s'" % (username,))
-			return
-		acc = ""
-		for lvl in access.keys():
-			if getattr(member, "is_"+lvl)():
-				acc += " " + lvl
-		
-		message.reply("User %s is: %s%s" % (member.name, acc,))
-	
+    """Used to view a user's details"""
+    
+    def __init__(self):
+        loadable.__init__(self)
+        self.access = access['admin'] | access['hc'] # "Traditional"
+        #self.access = access['member'] # Asc
+        self.paramre = re.compile(r"\s([\w-]+)")
+        self.usage += " user"
+    
+    def execute(self, message):
+        user, params = loadable.execute(self, message) or (None,None)
+        if not params:
+            return
+        
+        username = params.group(1)
+        
+        member = M.DB.Maps.User.load(name=username, exact=False)
+        if member is None:
+            message.alert("No such user '%s'" % (username,))
+            return
+        acc = ""
+        for lvl in access.keys():
+            if getattr(member, "is_"+lvl)():
+                acc += " " + lvl
+        
+        message.reply("User %s is: %s%s" % (member.name, acc,))
+    
 callbacks = [("PRIVMSG", whois())]

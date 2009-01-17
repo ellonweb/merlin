@@ -27,27 +27,27 @@ from .Core.modules import M
 loadable = M.loadable.loadable
 
 class relay(loadable):
-	"""Relays a message"""
-	
-	def __init__(self):
-		loadable.__init__(self)
-		self.access = access['admin']
-		self.robore = re.compile(r"\s(\S+?)\s(.+)")
-		self.usage += " message"
-	
-	def execute(self, message):
-		user, params = loadable.execute(self, message) or (None,None)
-		if not params:
-			return
-		self.relay(message, message.get_nick(), params.group(1))
-	
-	def robocop(self, message):
-		params = loadable.robocop(self, message)
-		if not params:
-			return
-		self.relay(message, params.group(1), params.group(2))
-	
-	def relay(self, message, nick, msg):
-		message.privmsg(r"04,01 %s Reports: 08,01%s " % (nick, msg.replace("\t"," "),), channels['off'])
+    """Relays a message"""
+    
+    def __init__(self):
+        loadable.__init__(self)
+        self.access = access['admin']
+        self.robore = re.compile(r"\s(\S+?)\s(.+)")
+        self.usage += " message"
+    
+    def execute(self, message):
+        user, params = loadable.execute(self, message) or (None,None)
+        if not params:
+            return
+        self.relay(message, message.get_nick(), params.group(1))
+    
+    def robocop(self, message):
+        params = loadable.robocop(self, message)
+        if not params:
+            return
+        self.relay(message, params.group(1), params.group(2))
+    
+    def relay(self, message, nick, msg):
+        message.privmsg(r"04,01 %s Reports: 08,01%s " % (nick, msg.replace("\t"," "),), channels['off'])
 
 callbacks = [("PRIVMSG", relay())]

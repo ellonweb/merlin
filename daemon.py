@@ -31,28 +31,28 @@ MAXFD = 1024 # Max file descriptors. You probably don't want to touch.
 REDIRECT_TO = "io.txt" # Where to write to.
 
 def make_daemon(func): # func can be any callable that takes no parameters.
-	"""This makes a daemon that will call func and run until it returns."""
+    """This makes a daemon that will call func and run until it returns."""
 
-	pid = os.fork()
+    pid = os.fork()
 
-	if pid == 0:
+    if pid == 0:
 
-		os.setsid()
+        os.setsid()
 
-		pid = os.fork()
+        pid = os.fork()
 
-		if pid == 0:
-			os.chdir(WORKDIR)
-			os.umask(UMASK)
+        if pid == 0:
+            os.chdir(WORKDIR)
+            os.umask(UMASK)
 
-		else:
-			os._exit(0)
-		
-	else:
-		os._exit(0)
+        else:
+            os._exit(0)
+        
+    else:
+        os._exit(0)
 
-	fd = os.open(REDIRECT_TO, os.O_RDWR)
-	os.dup2(fd,1)
-	os.dup2(fd,2)
+    fd = os.open(REDIRECT_TO, os.O_RDWR)
+    os.dup2(fd,1)
+    os.dup2(fd,2)
 
-	return func()
+    return func()

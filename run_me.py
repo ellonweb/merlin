@@ -35,10 +35,10 @@ from subprocess import Popen
 from variables import nick
 
 try:
-	daemon.make_daemon(merlin.Bot) # Bot now running as daemon.
+    daemon.make_daemon(merlin.Bot) # Bot now running as daemon.
 except socket.error:
-	print format_exc()
-	sleep(30)
+    print format_exc()
+    sleep(30)
 except RebootConnection:
-	pass
+    pass
 sys.exit(Popen(["./%s.py" % (nick.lower(),)]))
