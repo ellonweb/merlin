@@ -30,10 +30,10 @@ def join(message):
     # Someone is joining a channel
     if message.get_nick() == message.botnick:
         # Bot is joining the channel, so add a new object to the dict
-        M.CUT.channels[message.get_chan()] = M.CUT.Channel(message.get_chan())
+        M.CUT.Channels[message.get_chan()] = M.CUT.Channel(message.get_chan())
     else:
         # Someone is joining a channel we're in
-        M.CUT.channels[message.get_chan()].addnick(message.get_nick())
+        M.CUT.Channels[message.get_chan()].addnick(message.get_nick())
         if usercache == "join":
             try:
                 # Set the user's pnick
@@ -43,13 +43,13 @@ def join(message):
 
 def topic(message):
     # Topic of a channel is set
-    M.CUT.channels[message.get_chan()].topic = message.get_msg()
+    M.CUT.Channels[message.get_chan()].topic = message.get_msg()
 
 def names(message):
     # List of users in a channel
     for nick in message.get_msg().split():
         if nick[0] in ("@","+"): nick = nick[1:]
-        M.CUT.channels[message.get_chan()].addnick(nick)
+        M.CUT.Channels[message.get_chan()].addnick(nick)
         if usercache == "join":
             # Use whois to get the user's pnick
             message.write("WHOIS %s" % (nick,))
@@ -58,32 +58,32 @@ def part(message):
     # Someone is leaving a channel
     if message.get_nick() == message.botnick:
         # Bot is leaving the channel
-        del M.CUT.channels[message.get_chan()]
+        del M.CUT.Channels[message.get_chan()]
     else:
         # Someone is leaving a channel we're in
-        M.CUT.channels[message.get_chan()].remnick(message.get_nick())
+        M.CUT.Channels[message.get_chan()].remnick(message.get_nick())
 
 def kick(message):
     # Someone is kicked
     kname = message.line.split()[3]
     if message.botnick == kname:
         # Bot is kicked from the channel
-        del M.CUT.channels[message.get_chan()]
+        del M.CUT.Channels[message.get_chan()]
     else:
         # Someone is kicked from a channel we're in
-        M.CUT.channels[message.get_chan()].remnick(kname)
+        M.CUT.Channels[message.get_chan()].remnick(kname)
 
 def quit(message):
     # Someone is quitting
     if message.get_nick() != message.botnick:
         # It's not the bot that's quitting
-        M.CUT.nicks[message.get_nick()].quit()
+        M.CUT.Nicks[message.get_nick()].quit()
 
 def nick(message):
     # Someone is changing their nick
     nnick = message.get_msg()
     if nnick() != message.botnick:
-        M.CUT.nicks[message.get_nick()].nick(nnick)
+        M.CUT.Nicks[message.get_nick()].nick(nnick)
 
 def pnick(message):
     # Part of a WHOIS result
@@ -99,7 +99,7 @@ def flush(message):
     if message.get_msg() == "!flush":
         try:
             if message.get_pnick() in admins:
-                for chan in M.CUT.channels.values():
+                for chan in M.CUT.Channels.values():
                     for nick in chan.nicks[:]:
                         chan.remnick(nick)
                     message.write("NAMES %s" % (chan.chan,))
@@ -113,8 +113,9 @@ def auth(message):
     """Authenticates the user, if they provide their username and password"""
     # P redundancy
     
-    msg = message.get_msg().split()
-    if msg[0] == "!auth":
+    msg = message.get_msg()
+    if msg[:5] == "!auth":
+        msg = msg.split()
         if len(msg) != 3:
             message.alert("!auth user pass")
             return
@@ -129,8 +130,9 @@ def letmein(message):
     """Invites the user to the private channel, if they provide their username and password"""
     # P redundancy
     
-    msg = message.get_msg().split()
-    if msg[0] == "!letmein":
+    msg = message.get_msg()
+    if message.get_msg()[:8] == "!letmein":
+        msg = msg.split()
         if len(msg) != 3:
             message.alert("!letmein user pass")
             return

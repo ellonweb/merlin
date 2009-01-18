@@ -24,6 +24,7 @@
 import traceback
 from .Core.exceptions_ import PNickParseError
 from .Core.callbacks import callbacks as cb
+from .Core.modules import M
 from .variables import admins
 
 def raw(message):

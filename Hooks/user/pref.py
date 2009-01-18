@@ -32,7 +32,6 @@ class pref(loadable):
         loadable.__init__(self)
         self.paramre = re.compile(r"\s(.+)")
         self.usage += " [planet=x.y.z] [pass=password] [email=my.email@address.com] [phone=999]"
-        self.emailre = re.compile("^([\w.]+@[\w.]+)")
     
     @loadable.run_with_access()
     def execute(self, message, user, params):
@@ -41,20 +40,20 @@ class pref(loadable):
         pl = pw = em = ph = ""
         for opt, val in params.items():
             if opt == "planet":
-                m = self.planet_coordre.search(val)
+                m = self.planet_coordre.match(val)
                 if m:
-                    #target = Planet(coords=m.groups()) <-- load the planet, check it exists and all that
                     pl = val
-                    #user.hash = target.hash <-- planet_id, planet_cannon etc
+                    planet = M.DB.Maps.Planet.load(*m.groups())
+                    user.planet_id = planet.id
             if opt == "pass":
-                pw = val
-                user.passwd = pw
-            if opt == "email" and self.emailre.search(val):
-                em = val
-                user.email = em
+                user.passwd = pw = val
+            if opt == "email":
+                try:
+                    user.email = em = val
+                except AssertionError:
+                    pass
             if opt == "phone":
-                ph = val
-                user.phone = ph
+                user.phone = ph = val
         session = M.DB.Session()
         session.add(user)
         session.commit()

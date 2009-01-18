@@ -46,7 +46,7 @@ class adduser(loadable):
             return
         acc = 0
         perm = ""
-        for lvl in message.get_msg().split()[2:]:
+        for lvl in message.get_msg().replace(","," ").split()[2:]:
             lvl = lvl.lower()
             if access.has_key(lvl) and (message.get_pnick() in admins or user.access/2 >= access[lvl]):
                 acc = acc | access[lvl]

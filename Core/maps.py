@@ -26,6 +26,7 @@ from sqlalchemy.sql.functions import current_timestamp, max
 from math import ceil
 from time import time
 import hashlib
+import re
 from .variables import access
 
 Base = declarative_base()
@@ -49,13 +50,14 @@ class User(Base):
     invites = Column(Integer) # Asc
     quits = Column(Integer) # Asc
     stay = Column(Boolean) # Asc
+    emailre = re.compile("^([\w.-]+@[\w.-]+)")
     
     @validates('passwd')
     def valid_passwd(self, key, passwd):
         return User.hasher(passwd)
     @validates('email')
     def valid_email(self, key, email):
-        #assert some_regex match email
+        assert self.emailre.match(email)
         return email
     @validates('invites')
     def valid_invites(self, key, invites):
@@ -170,6 +172,14 @@ class Planet(Base):
     vdiff = Column(Integer)
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
+    @staticmethod
+    def load(x,y,z):
+        session = Session()
+        Q = session.query(Planet)
+        Q = Q.filter_by(x=x, y=y, z=z)
+        planet = Q.first()
+        session.close()
+        return planet
 User.planet = relation(Planet, primaryjoin=User.planet_id==Planet.id)
 class PlanetHistory(Base):
     __tablename__ = 'planet_history'
@@ -226,6 +236,13 @@ class Galaxy(Base):
         return self.history_loader.filter_by(tick=tick).first()
     def planet(self, z):
         return self.planet_loader.filter_by(z=z).first()
+    def load(x,y):
+        session = Session()
+        Q = session.query(Galaxy)
+        Q = Q.filter_by(x=x, y=y)
+        galaxy = Q.first()
+        session.close()
+        return galaxy
 Planet.galaxy = relation(Galaxy, primaryjoin=and_(Galaxy.x==Planet.x, Galaxy.y==Planet.y), foreign_keys=(Planet.x, Planet.y), backref=backref('planets', primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), foreign_keys=(Planet.x, Planet.y)))
 Galaxy.planet_loader = dynamic_loader(Planet, primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), foreign_keys=(Galaxy.x, Galaxy.y))
 class GalaxyHistory(Base):
@@ -266,6 +283,13 @@ class Alliance(Base):
     score_avg_rank = Column(Integer)
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
+    def load(name):
+        session = Session()
+        Q = session.query(Alliance)
+        Q = Q.filter_by(name=name)
+        alliance = Q.first()
+        session.close()
+        return alliance
 class AllianceHistory(Base):
     __tablename__ = 'alliance_history'
     tick = Column(Integer, primary_key=True, autoincrement=False)

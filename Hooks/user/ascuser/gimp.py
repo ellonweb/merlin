@@ -24,7 +24,7 @@ class gimp(loadable):
             if gimp is None:
                 message.alert("No gimp with that pnick exists!")
                 return
-            message.reply("Gimp: %s, Sponsor: %s, Waiting: %d more hours, Comment: %s" % (gimp.name,gimp.sponsor.name,gimp.hoursleft(),gimp.comment)
+            message.reply("Gimp: %s, Sponsor: %s, Waiting: %d more hours, Comment: %s" % (gimp.name,gimp.sponsor.name,gimp.hoursleft(),gimp.comment))
             return
         else:
             session = M.DB.Session()

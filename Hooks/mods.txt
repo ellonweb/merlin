@@ -10,5 +10,9 @@ help
 # Disabling auth or chanusertracker is a bad idea!
 auth
 chanusertracker
+# robocop
 # hop
+# relay
+# relaybot
+user
 ships

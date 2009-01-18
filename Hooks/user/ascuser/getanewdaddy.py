@@ -31,7 +31,7 @@ class getanewdaddy(loadable):
         message.privmsg('p','remuser #%s %s'%(channels['private'], idiot.name,))
         message.privmsg('p',"ban #%s *!*@%s.users.netgamers.org Your sponsor doesn't like you anymore"%(channels['private'], idiot.name,))
         if idiot.sponsor != user.name:
-            message.privmsg('p',"note send %s Some admin has removed you for whatever reason. If you still wish to be a member, go ahead and find someone else to sponsor you back."%(idiot.name,)))
+            message.privmsg('p',"note send %s Some admin has removed you for whatever reason. If you still wish to be a member, go ahead and find someone else to sponsor you back."%(idiot.name,))
             message.reply("%s has been reduced to \"galmate\" level and removed from the channel. %s is no longer %s's sponsor. If anyone else would like to sponsor that person back, they may."%(idiot.name,idiot.sponsor,idiot.name))
         else:
             message.privmsg('p',"note send %s Your sponsor (%s) no longer wishes to be your sponsor. If you still wish to be a member, go ahead and find someone else to sponsor you back."%(idiot.name,user.name,))

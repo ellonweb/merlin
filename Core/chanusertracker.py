@@ -61,8 +61,10 @@ class Channel(object):
             if len(nick.channels) == 0:
                 try:
                     del Nicks[nick.name]
+                # Might occur when the bot is quitting
                 except AttributeError:
-                    # Might occur when the bot is quitting
+                    pass
+                except TypeError:
                     pass
     
 
@@ -90,9 +92,11 @@ class Nick(object):
                 self.user.nicks.remove(self)
                 if len(self.user.nicks) == 0:
                     del Users[self.user.name]
-            except AttributeError:
                 # Might occur when the bot is quitting
-                pass
+                except AttributeError:
+                    pass
+                except TypeError:
+                    pass
     
 
 class User(object):

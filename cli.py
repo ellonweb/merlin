@@ -13,6 +13,10 @@ the input with this, so that for instance:
 > !eff 3k harpy
 The line is run as though it was:
 :qebab!qebab@qebab.users.netgamers.org PRIVMSG #ascendancy :!eff 3k harpy
+
+Once running, you might need to run these two commands:
+!debug M.CUT.Channels['#ascendancy'] = M.CUT.Channel('#ascendancy')
+!debug M.CUT.Channels['#ascendancy'].addnick(message.get_nick())
 """
 
 import merlin

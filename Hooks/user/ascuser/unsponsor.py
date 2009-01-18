@@ -32,6 +32,6 @@ class unsponsor(loadable):
         session.delete(gimp)
         session.commit()
         session.close()
-        message.reply("You have unsponsored '%s'." % (recruit,)
+        message.reply("You have unsponsored '%s'." % (recruit,))
     
 callbacks = [("PRIVMSG", unsponsor())]

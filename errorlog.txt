@@ -46,3 +46,25 @@ Traceback (most recent call last):
 AttributeError: 'Action' object has no attribute 'db'
 
 Arguments that caused error: [#ascendancy] <ellonweb> !eff 10 harp
+Sun Jan 18 00:00:18 2009 Error:
+Traceback (most recent call last):
+  File "F:\Code\Git\merlin\merlin.py", line 77, in run
+    cb.callback(parsed_line)
+  File "F:\Code\Git\merlin\Core\callbacks.py", line 35, in callback
+    callback(message)
+  File "F:\Code\Git\merlin\Hooks\chanusertracker.py", line 133, in letmein
+    if msg[0] == "!letmein":
+IndexError: list index out of range
+
+Arguments that caused error: [#ascendancy] <ell> 
+Sun Jan 18 00:00:18 2009 Error:
+Traceback (most recent call last):
+  File "F:\Code\Git\merlin\merlin.py", line 77, in run
+    cb.callback(parsed_line)
+  File "F:\Code\Git\merlin\Core\callbacks.py", line 35, in callback
+    callback(message)
+  File "F:\Code\Git\merlin\Hooks\chanusertracker.py", line 133, in letmein
+    if msg[0] == "!letmein":
+IndexError: list index out of range
+
+Arguments that caused error: [#ascendancy] <ell> 

@@ -34,7 +34,7 @@ admins = ("ellonweb",)
 #  sqlite:///relative/path/to/database.sqlite
 # http://www.sqlalchemy.org/docs/05/dbengine.html#create-engine-url-arguments
 DBeng = "sqlite:///testdb.sqlite"
-DBeng = "postgres://Elliot@localhost:5432/merlin"
+#DBeng = "postgres://Elliot@localhost:5432/merlin"
 
 # Channels
 channels = {
