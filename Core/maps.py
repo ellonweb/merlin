@@ -236,6 +236,7 @@ class Galaxy(Base):
         return self.history_loader.filter_by(tick=tick).first()
     def planet(self, z):
         return self.planet_loader.filter_by(z=z).first()
+    @staticmethod
     def load(x,y):
         session = Session()
         Q = session.query(Galaxy)
@@ -283,10 +284,14 @@ class Alliance(Base):
     score_avg_rank = Column(Integer)
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
+    @staticmethod
     def load(name):
         session = Session()
         Q = session.query(Alliance)
-        Q = Q.filter_by(name=name)
+        if Q.filter(Alliance.name.ilike(name)).count() > 0:
+            Q = Q.filter(Alliance.name.ilike(name))
+        else:
+            Q = Q.filter(Alliance.name.ilike("%"+name+"%"))
         alliance = Q.first()
         session.close()
         return alliance
@@ -308,6 +313,29 @@ class AllianceHistory(Base):
     size_avg_rank = Column(Integer)
     score_avg_rank = Column(Integer)
 Alliance.history_loader = dynamic_loader(AllianceHistory, primaryjoin=AllianceHistory.id==Alliance.id, foreign_keys=(Alliance.id))
+
+# ########################################################################### #
+# ############################    INTEL TABLE    ############################ #
+# ########################################################################### #
+
+class Intel(Base):
+    __tablename__ = 'intel'
+    planet_id = Column(Integer, primary_key=True, autoincrement=False)
+    alliance_id = Column(Integer, index=True)
+    nick = Column(String(20))
+    fakenick = Column(String(20))
+    defwhore = Column(Boolean, default=False)
+    covop = Column(Boolean, default=False)
+    scanner = Column(Boolean, default=False)
+    dists = Column(Integer)
+    bg = Column(String(25))
+    gov = Column(String(20))
+    relay = Column(Boolean, default=False)
+    reportchan = Column(String(30))
+    comment = Column(String(512))
+Planet.intel = relation(Intel, primaryjoin=Intel.planet_id==Planet.id, foreign_keys=(Planet.id,))
+Planet.alliance = relation(Alliance, secondary=Intel.__table__, primaryjoin=Intel.planet_id==Planet.id, secondaryjoin=Alliance.id==Intel.alliance_id, foreign_keys=(Intel.planet_id, Intel.alliance_id), uselist=False)
+Alliance.planets = relation(Planet, secondary=Intel.__table__, primaryjoin=Intel.alliance_id==Alliance.id, secondaryjoin=Planet.id==Intel.planet_id, foreign_keys=(Intel.planet_id, Intel.alliance_id))
 
 # ########################################################################### #
 # #############################    SHIP TABLE    ############################ #

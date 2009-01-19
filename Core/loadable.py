@@ -84,7 +84,7 @@ class loadable(object):
             user = self.has_access(message)
             if not user:
                 raise UserError
-            m = self.paramre.search(message.get_msg())
+            m = self.params_match(message)
             if not m:
                 raise ParseError
             return user, m
@@ -105,7 +105,10 @@ class loadable(object):
         if self.access == 0 or user.access & self.access > 0:
             return user
         return
-
+    
+    def params_match(self, message):
+        return self.paramre.search(message.get_msg())
+    
     def help(self, message):
         try:
             if not self.has_access(message):

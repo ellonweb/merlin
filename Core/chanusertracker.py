@@ -92,11 +92,11 @@ class Nick(object):
                 self.user.nicks.remove(self)
                 if len(self.user.nicks) == 0:
                     del Users[self.user.name]
-                # Might occur when the bot is quitting
-                except AttributeError:
-                    pass
-                except TypeError:
-                    pass
+            # Might occur when the bot is quitting
+            except AttributeError:
+                pass
+            except TypeError:
+                pass
     
 
 class User(object):

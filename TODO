@@ -9,7 +9,7 @@ Hooks.request
     !request cancel id
     robocop interface
         msg #chan "ellonweb has requested a p scan of x:y:z. <url>"
-    add a "dists" column to Planet(History) (or maybe a new table)?
+    intel.dists
         fill in data from scan requests ("ellonweb informs that atleast n dists are needed")
         provide data when requesting a scan: "x:y:z had n dists at tick ..."
 
@@ -18,12 +18,9 @@ Hooks.scan
     robocop interface
     chanusertracker interface
         pm all known users that their scan is done
-    add a "dists" column to Planet(History) (or maybe a new table)?
+    intel.dists
         fill in data from completed scans
 
 Hooks.blocked
-    more manual info for "dists" column
+    more manual info for intel.dists
     @require_access_level(access.get('scan',access['member']))
-
-Hooks.intel
-    ala munin
