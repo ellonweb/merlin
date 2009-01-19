@@ -3,6 +3,8 @@ update LICENSE in all files (some files don't have any license atm)
 
 Channel access min/max system
 
+reloading loadable is unsafe, needs fixing
+
 Hooks.request
     scan requests
     !request p/au/etc x.y.z [dists]

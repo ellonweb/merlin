@@ -33,4 +33,5 @@ __all__ = ["load_mod",
            "ships",
            "user",
            "intel",
+           "search",
            ]
