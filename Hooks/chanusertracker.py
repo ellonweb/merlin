@@ -24,8 +24,9 @@
 from .variables import admins, channels, access, usercache
 from .Core.exceptions_ import PNickParseError, UserError
 from .Core.modules import M
+callback = M.loadable.callback
 
-# Callback functions
+@callback('JOIN')
 def join(message):
     # Someone is joining a channel
     if message.get_nick() == message.botnick:
@@ -41,10 +42,12 @@ def join(message):
             except PNickParseError:
                 pass
 
+@callback('332')
 def topic(message):
     # Topic of a channel is set
     M.CUT.Channels[message.get_chan()].topic = message.get_msg()
 
+@callback('353')
 def names(message):
     # List of users in a channel
     for nick in message.get_msg().split():
@@ -54,6 +57,7 @@ def names(message):
             # Use whois to get the user's pnick
             message.write("WHOIS %s" % (nick,))
 
+@callback('PART')
 def part(message):
     # Someone is leaving a channel
     if message.get_nick() == message.botnick:
@@ -63,6 +67,7 @@ def part(message):
         # Someone is leaving a channel we're in
         M.CUT.Channels[message.get_chan()].remnick(message.get_nick())
 
+@callback('KICK')
 def kick(message):
     # Someone is kicked
     kname = message.line.split()[3]
@@ -73,18 +78,21 @@ def kick(message):
         # Someone is kicked from a channel we're in
         M.CUT.Channels[message.get_chan()].remnick(kname)
 
+@callback('QUIT')
 def quit(message):
     # Someone is quitting
     if message.get_nick() != message.botnick:
         # It's not the bot that's quitting
         M.CUT.Nicks[message.get_nick()].quit()
 
+@callback('NICK')
 def nick(message):
     # Someone is changing their nick
     nnick = message.get_msg()
     if nnick() != message.botnick:
         M.CUT.Nicks[message.get_nick()].nick(nnick)
 
+@callback('330')
 def pnick(message):
     # Part of a WHOIS result
     if message.get_msg() == "is logged in as":
@@ -93,6 +101,7 @@ def pnick(message):
         # Set the user's pnick
         M.CUT.get_user(nick, pnick=pnick)
 
+@callback('PRIVMSG')
 def flush(message):
     """Flush entire usercache"""
     
@@ -109,6 +118,7 @@ def flush(message):
         except PNickParseError:
             message.alert("You don't have access for that.")
 
+@callback('PRIVMSG')
 def auth(message):
     """Authenticates the user, if they provide their username and password"""
     # P redundancy
@@ -126,6 +136,7 @@ def auth(message):
         except UserError:
             message.alert("You don't have access to this command")
 
+@callback('PRIVMSG')
 def letmein(message):
     """Invites the user to the private channel, if they provide their username and password"""
     # P redundancy
@@ -143,5 +154,3 @@ def letmein(message):
                 message.invite(message.get_nick(), channels['private'])
         except UserError:
             message.alert("You don't have access to this command")
-
-callbacks = [("JOIN", join), ("332", topic), ("353", names), ("PART", part), ("KICK", kick), ("QUIT", quit), ("NICK", nick), ("330", pnick), ("PRIVMSG", flush), ("PRIVMSG", letmein), ("PRIVMSG", auth)]

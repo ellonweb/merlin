@@ -157,3 +157,18 @@ class loadable(object):
                 return int(short)
         except:
             raise ValueError
+
+# ########################################################################### #
+# ##############################    CALLBACK    ############################# #
+# ########################################################################### #
+class function(object):
+    def __init__(self, hook, trigger):
+        self.__name__ = hook.__name__
+        self.hook = hook
+        self.trigger = trigger
+    def __call__(self, message):
+        self.hook(message)
+def callback(trigger):
+    def wrapper(hook):
+        return function(hook, trigger)
+    return wrapper

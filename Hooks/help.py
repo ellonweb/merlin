@@ -68,5 +68,3 @@ class help(loadable):
                             message.reply(callback.__doc__)
                 except PNickParseError:
                     continue
-    
-callbacks = [("PRIVMSG", help())]

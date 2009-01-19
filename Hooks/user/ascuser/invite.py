@@ -44,5 +44,3 @@ class invite(loadable):
         message.privmsg('P',"adduser #%s %s 399" %(channels['private'], recruit.name,))
         message.privmsg('P',"modinfo #%s automode %s op" %(channels['private'], recruit.name,))
         reply="You have successfully invited '%s'. The gimp is now your responsibility. If they fuck up and didn't know, it's your fault. So teach them well." % (recruit.name,)
-    
-callbacks = [("PRIVMSG", invite())]

@@ -40,5 +40,3 @@ class handout(loadable):
             session.commit()
             session.close()
             message.reply("Added %d invites to all members" %(num_invites,))
-    
-callbacks = [("PRIVMSG", handout())]

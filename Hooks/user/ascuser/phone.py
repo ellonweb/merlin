@@ -95,5 +95,3 @@ class phone(loadable):
             else:
                 message.alert("%s hasn't shared his phone number. What a paranoid cunt ."%(member.name,))
             return
-    
-callbacks = [("PRIVMSG", phone())]

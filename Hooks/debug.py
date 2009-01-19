@@ -22,11 +22,13 @@
 # owners.
 
 import traceback
+from .variables import admins
 from .Core.exceptions_ import PNickParseError
 from .Core.callbacks import callbacks as cb
 from .Core.modules import M
-from .variables import admins
+callback = M.loadable.callback
 
+@callback('PRIVMSG')
 def raw(message):
     """Send a raw message to the server."""
     
@@ -40,6 +42,7 @@ def raw(message):
         except PNickParseError:
             message.alert("You don't have access for that.")
 
+@callback('PRIVMSG')
 def debug(message):
     """Execute a statement. Warning: Playing with this is risky!"""
     
@@ -56,6 +59,7 @@ def debug(message):
         except PNickParseError:
             message.alert("You don't have access for that.")
 
+@callback('PRIVMSG')
 def viewlog(message):
     """Sends the error log to an admin."""
     
@@ -68,6 +72,7 @@ def viewlog(message):
         except PNickParseError:
             message.alert("You don't have access for that.")
 
+@callback('PRIVMSG')
 def clearlog(message):
     """Sends the error log to an admin."""
     
@@ -80,5 +85,3 @@ def clearlog(message):
                 message.alert("You don't have access for that.")
         except PNickParseError:
             message.alert("You don't have access for that.")
-
-callbacks = [("PRIVMSG", raw), ("PRIVMSG", debug), ("PRIVMSG", viewlog), ("PRIVMSG", clearlog)]

@@ -33,5 +33,3 @@ class unsponsor(loadable):
         session.commit()
         session.close()
         message.reply("You have unsponsored '%s'." % (recruit,))
-    
-callbacks = [("PRIVMSG", unsponsor())]

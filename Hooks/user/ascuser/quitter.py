@@ -26,5 +26,3 @@ class quitter(loadable):
         session.commit()
         session.close()
         message.reply("That whining loser %s has now quit %d times." % (whore.name,whore.quits))
-    
-callbacks = [("PRIVMSG", quitter())]

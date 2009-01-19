@@ -49,5 +49,3 @@ class whois(loadable):
                 acc += " " + lvl
         
         message.reply("User %s is: %s%s" % (member.name, acc,))
-    
-callbacks = [("PRIVMSG", whois())]

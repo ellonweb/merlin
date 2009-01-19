@@ -55,5 +55,3 @@ class cost(loadable):
                 self.num2short(ship.eonium*.86*num))
         reply+=" It will add %s value"%(self.num2short(ship.total_cost*num/100),)
         message.reply(reply)
-
-callbacks = [("PRIVMSG", cost())]

@@ -83,5 +83,3 @@ class eff(loadable):
                 killed=int(efficiency * total_damage/target.armor)
             reply+="%s: %s (%s) " % (target.name,killed,self.num2short(target.total_cost*killed/100))
         message.reply(reply)
-
-callbacks = [("PRIVMSG", eff())]

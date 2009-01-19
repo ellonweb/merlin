@@ -24,5 +24,3 @@ class quits(loadable):
             message.reply("%s is a stalwart defender of his honor" % (whore.name,))
         else:
             message.reply("%s is a whining loser who has quit %d times." % (whore.name,whore.quits))
-    
-callbacks = [("PRIVMSG", quits())]

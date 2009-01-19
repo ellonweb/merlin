@@ -57,5 +57,3 @@ class ship(loadable):
             reply+=" D/C: %s |"%((ship.damage*10000)/ship.total_cost,)
         reply+=" A/C: %s"%((ship.armor*10000)/ship.total_cost,)
         message.reply(reply)
-
-callbacks = [("PRIVMSG", ship())]

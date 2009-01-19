@@ -36,5 +36,3 @@ class whois(loadable):
         reply=reply%(whore.name,whore.sponsor,whore.invites,['','s'][whore.invites!=1])
 
         message.reply(reply)
-    
-callbacks = [("PRIVMSG", whois())]

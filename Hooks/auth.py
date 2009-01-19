@@ -24,11 +24,15 @@
 import re
 from .variables import nick, passw, admins, channels
 from .Core.exceptions_ import PNickParseError
+from .Core.modules import M
+callback = M.loadable.callback
 
+@callback('433')
 def altnick(message):
     # Need to register with an alternate nick
     message.nick(message.botnick+"2")
 
+@callback('376')
 def connected(message):
     # Successfully connected to the IRC server
     message.write("MODE %s +ix" % message.botnick)
@@ -37,6 +41,7 @@ def connected(message):
         message.privmsg("RECOVER %s %s %s" % (nick, nick, passw), "P@cservice.netgamers.org")
     else: login(message)
 
+@callback('NOTICE')
 def PNS(message):
     # Message from P or NickServ
     if message.get_hostmask() in ("P!cservice@netgamers.org","NS!NickServ@netgamers.org"):
@@ -52,17 +57,20 @@ def login(message):
     # Login
     message.privmsg("LOGIN %s %s" % (nick, passw), "P@cservice.netgamers.org")
 
+@callback('396')
 def loggedin(message):
     # Authentication complete
     if "is now your hidden host" == message.get_msg():
         for chan in channels.values():
             message.privmsg("INVITE %s" % (chan,), "P")
 
+@callback('INVITE')
 def pinvite(message):
     # P invites us to a channel
     if message.get_hostmask() == "P!cservice@netgamers.org":
         message.join(message.get_msg())
 
+@callback('PRIVMSG')
 def secure(message):
     """Secures the PNick of the bot."""
     if not message.get_msg() == "!secure":
@@ -75,5 +83,3 @@ def secure(message):
             message.alert("You don't have access for that.")
     except PNickParseError:
         message.alert("You don't have access for that.")
-
-callbacks = [("433", altnick), ("376", connected), ("NOTICE", PNS), ("396", loggedin), ("INVITE", pinvite), ("PRIVMSG", secure)]

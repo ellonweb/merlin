@@ -37,5 +37,3 @@ class gimp(loadable):
                     reply += (" (gimp:%s,sponsor:%s (%d hours left))" % (gimp.name,gimp.sponsor.name,gimp.hoursleft()))
                 message.reply(reply)
             session.close()
-    
-callbacks = [("PRIVMSG", gimp())]

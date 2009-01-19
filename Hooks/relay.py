@@ -46,5 +46,3 @@ class relay(loadable):
     
     def relay(self, message, nick, msg):
         message.privmsg(r"04,01 %s Reports: 08,01%s " % (nick, msg.replace("\t"," "),), channels['off'])
-
-callbacks = [("PRIVMSG", relay())]

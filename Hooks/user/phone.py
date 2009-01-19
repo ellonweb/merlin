@@ -44,5 +44,3 @@ class phone(loadable):
             message.alert("No such user '%s'" % (username,))
             return
         message.reply("User %s phone: %s" % (member.name, member.phone,))
-    
-callbacks = [("PRIVMSG", phone())]

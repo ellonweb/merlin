@@ -24,6 +24,8 @@
 import os, socket, SocketServer, threading
 from .variables import admins, robocop as addr
 from .Core.exceptions_ import PNickParseError
+from .Core.modules import M
+callback = M.loadable.callback
 
 def run():
     try:
@@ -53,6 +55,7 @@ class handler(SocketServer.StreamRequestHandler):
             message._msg = l
             message.callbackmod.robocop(message)
 
+@callback('PRIVMSG')
 def robocop(message):
     "Start the RoBoCoP server"
     if message.get_msg() == "!robocop":
@@ -64,6 +67,7 @@ def robocop(message):
         except PNickParseError:
             message.alert("You don't have access for that.")
 
+@callback('396')
 def startcop(message):
     if message.get_msg() in ("is now your hidden host", "!robocop"):
         for thread in threading.enumerate():
@@ -76,6 +80,7 @@ def startcop(message):
         thread.killcop = False
         thread.start()
 
+@callback('PRIVMSG')
 def killcop(message):
     "Stop the RoBoCoP server"
     if message.get_msg() == "!killcop":
@@ -97,5 +102,3 @@ def killcop(message):
                 message.alert("You don't have access for that.")
         except PNickParseError:
             message.alert("You don't have access for that.")
-
-callbacks = [("396", startcop), ("PRIVMSG", robocop), ("PRIVMSG", killcop)]

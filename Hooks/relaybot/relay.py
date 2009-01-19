@@ -24,9 +24,12 @@
 import socket
 from .variables import robocop as addr
 from Hooks.relaybot import channels
+from .Core.modules import M
+callback = M.loadable.callback
 
 addr = "../RoBoCoP"
 
+@callback('PRIVMSG')
 def relay(message):
     if message.get_chan() in channels:
         send(message.get_nick(), message.get_msg())

@@ -59,5 +59,3 @@ class pref(loadable):
         session.commit()
         session.close()
         message.reply("Updated your preferences: planet=%s pass=%s email=%s phone=%s" % (pl,pw,em,ph,))
-    
-callbacks = [("PRIVMSG", pref())]

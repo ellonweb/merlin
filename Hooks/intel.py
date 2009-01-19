@@ -114,5 +114,3 @@ class intel(loadable):
         if ret:
             return "Information stored for %s:%s:%s -" % (planet.x, planet.y, planet.z,) + ret
         return None
-    
-callbacks = [("PRIVMSG", intel())]

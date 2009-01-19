@@ -23,7 +23,10 @@
 
 from .variables import nick, admins
 from .Core.exceptions_ import RebootConnection, PNickParseError
+from .Core.modules import M
+callback = M.loadable.callback
 
+@callback('PRIVMSG')
 def hop(message):
     """Get the bot to quit and reconnect"""
     
@@ -39,5 +42,3 @@ def hop(message):
 def dohop():
     # This is a separate function for legacy reasons
     raise RebootConnection
-
-callbacks = [("PRIVMSG", hop)]

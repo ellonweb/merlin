@@ -73,5 +73,3 @@ class stop(loadable):
                 needed=int((math.ceil(float(total_armor)/attacker.damage))/efficiency)
             reply+="%s: %s (%s) " % (attacker.name,needed,self.num2short(attacker.total_cost*needed/100))
         message.reply(reply)
-
-callbacks = [("PRIVMSG", stop())]

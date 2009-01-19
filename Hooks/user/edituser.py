@@ -71,5 +71,3 @@ class edituser(loadable):
             for nick in M.CUT.Users[member.name].nicks:
                 nick.user = None
             del M.CUT.Users[member.name]
-
-callbacks = [("PRIVMSG", edituser())]

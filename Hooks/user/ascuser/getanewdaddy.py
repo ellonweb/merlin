@@ -37,5 +37,3 @@ class getanewdaddy(loadable):
             message.privmsg('p',"note send %s Your sponsor (%s) no longer wishes to be your sponsor. If you still wish to be a member, go ahead and find someone else to sponsor you back."%(idiot.name,user.name,))
             message.reply("%s has been reduced to \"galmate\" level and removed from the channel. You are no longer %s's sponsor. If anyone else would like to sponsor that person back, they may."%(idiot.name,idiot.name))
         return
-    
-callbacks = [("PRIVMSG", getanewdaddy())]

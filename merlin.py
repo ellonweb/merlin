@@ -30,6 +30,7 @@ from Core.actions import Action as parse
 from Core.exceptions_ import RebootConnection
 import Core.callbacks as cb
 import Core.modules
+import Hooks
 
 # Check the errorlog file exists, if not create it
 try:
@@ -59,10 +60,8 @@ class Bot(object):
         self.conn.write("USER %s 0 * : %s" % (self.details["nick"], self.details["nick"]))
         
         # Initialise the bot with the modules that are supposed to be loaded at startup
-        for line in open(os.path.join("Hooks/mods.txt")):
-            mod = line.split("#")[0]
-            if mod:
-                cb.reload_mod(mod.strip())
+        for mod in Hooks.__all__:
+            cb.reload_mod(mod)
             
         # The beast begins
         while True:

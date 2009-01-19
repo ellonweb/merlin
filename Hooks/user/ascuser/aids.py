@@ -52,5 +52,3 @@ class aids(loadable):
                     reply+=" "+bitch
 
         message.reply(reply)
-    
-callbacks = [("PRIVMSG", aids())]

@@ -27,6 +27,8 @@ from .variables import nick, admins
 from .Core.exceptions_ import PNickParseError
 from Hooks.relaybot import channels
 import relay
+from .Core.modules import M
+callback = M.loadable.callback
 
 class RepeatTimer(threading._Timer):
     def run(self):
@@ -46,6 +48,7 @@ def hop(message = None):
         message.join(channel)
         sleep(5)
 
+@callback('PRIVMSG')
 def relayhopper(message):
     "Start the RelayHopper"
     if message.get_msg() == "!relayhopper":
@@ -57,6 +60,7 @@ def relayhopper(message):
         except PNickParseError:
             message.alert("You don't have access for that.")
 
+@callback('396')
 def starthopper(message):
     if message.get_msg() in ("is now your hidden host", "!relayhopper"):
         for thread in threading.enumerate():
@@ -71,6 +75,7 @@ def starthopper(message):
         thread.message = message
         thread.start()
 
+@callback('PRIVMSG')
 def stophopper(message):
     "Stop the RelayHopper"
     if message.get_msg() == "!stophopper":
@@ -87,17 +92,17 @@ def stophopper(message):
         except PNickParseError:
             message.alert("You don't have access for that.")
 
-def secchan(message):
-    channel = None
-    if (message.get_command() == "MODE" \
-     and message.get_hostmask() == "P!cservice@netgamers.org" \
-     and message.line.split()[3:5] == ["+o", message.botnick]):
-        channel = message.line.split()[2]
-    if (message.get_command() == "366" \
-     and message.line.split()[2] == message.botnick):
-        channel = message.line.split()[3]
-    if channel:
-        if channel in channels:
-            message.write("MODE %s +is" % (channel,))
+def secchan(message, channel):
+    if channel in channels:
+        message.write("MODE %s +is" % (channel,))
 
-callbacks = [("396", starthopper), ("MODE", secchan), ("366", secchan), ("PRIVMSG", relayhopper), ("PRIVMSG", stophopper)]
+@callback('MODE')
+def secchan_mode(message):
+    if (message.get_hostmask() == "P!cservice@netgamers.org" and
+        message.line.split()[3:5] == ["+o", message.botnick]):
+        secchan(message, message.line.split()[2])
+
+@callback('366')
+def secchan_366(message):
+    if (message.line.split()[2] == message.botnick):
+        secchan(message, message.line.split()[3])

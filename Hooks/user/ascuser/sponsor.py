@@ -51,5 +51,3 @@ class sponsor(loadable):
             message.reply("You have sponsored '%s' (MAKE SURE THIS IS THE RECRUIT'S PNICK.) When you have ensured that there are no objections you may use the !invite command to make them a member." % (recruit,))
         else:
             message.reply("You have sponsored '%s' (MAKE SURE THIS IS THE RECRUIT'S PNICK.) In %s hours you may use the !invite command to make them a member. It is your responsibility to get feedback about their suitability as a member in this period." % (recruit,M.DB.Maps.Gimp.wait,))
-    
-callbacks = [("PRIVMSG", sponsor())]

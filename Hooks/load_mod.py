@@ -25,7 +25,9 @@ import traceback, sys, os
 from .variables import admins
 from .Core.exceptions_ import LoadFailure, PNickParseError
 from .Core.modules import M
+callback = M.loadable.callback
 
+@callback('PRIVMSG')
 def loadmod(message):
     """Load a module, dynamically."""
     
@@ -40,6 +42,7 @@ def loadmod(message):
         except PNickParseError:
             message.alert("You don't have access for that.")
 
+@callback('PRIVMSG')
 def addmod(message):
     """Add a module."""
 
@@ -70,6 +73,7 @@ def load(mod, message):
 
     return "Module %s loaded successfully." % mod
 
+@callback('PRIVMSG')
 def unloadmod(message):
     """Unload a module. Privileged users only. Syntax: !unload name."""
 
@@ -85,6 +89,7 @@ def unloadmod(message):
         except PNickParseError:
             message.alert("You don't have access for that.")
 
+@callback('PRIVMSG')
 def reload(message):
     """Reload DB. Reload Loadable."""
     
@@ -103,5 +108,3 @@ def reload(message):
                 message.alert("You don't have access for that.")
         except PNickParseError:
             message.alert("You don't have access for that.")
-
-callbacks = [("PRIVMSG", loadmod), ("PRIVMSG", addmod), ("PRIVMSG", unloadmod)]

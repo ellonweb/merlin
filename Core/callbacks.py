@@ -23,6 +23,7 @@
 
 import os
 from exceptions_ import LoadFailure
+from modules import M
 
 callbacks = []
 
@@ -66,11 +67,13 @@ def load_callbacks(module_name, mod):# = None):
         for submodule_name in mod.__all__:
             subm = module_name+"."+submodule_name
             new_callbacks += load_callbacks(subm, load_mod(subm))
-    elif "callbacks" in dir(mod):
-        for event, callback in mod.callbacks:
-            new_callbacks.append((event, callback,))
     else:
-        raise LoadFailure("Module doesn't define callbacks.")
+        for object in dir(mod):
+            callback = getattr(mod, object)
+            if isinstance(callback, type) and issubclass(callback, M.loadable.loadable) and (callback is not M.loadable.loadable):
+                new_callbacks.append(("PRIVMSG", callback(),))
+            if isinstance(callback, M.loadable.function):
+                new_callbacks.append((callback.trigger, callback,))
     return new_callbacks
 
 def add_callbacks(module_name, new_callbacks):

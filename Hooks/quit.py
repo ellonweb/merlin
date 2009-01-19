@@ -24,7 +24,10 @@
 import sys
 from .variables import admins
 from .Core.exceptions_ import PNickParseError
+from .Core.modules import M
+callback = M.loadable.callback
 
+@callback('PRIVMSG')
 def quit(message):
     """Does exactly what one would think it does."""
     
@@ -37,5 +40,3 @@ def quit(message):
                 message.alert("You don't have access for that.")
         except PNickParseError:
             message.alert("You don't have access for that.")
-
-callbacks = [("PRIVMSG", quit)]

@@ -64,5 +64,3 @@ class adduser(loadable):
         except PNickParseError:
             pass
         return loadable.has_access(self,message)
-    
-callbacks = [("PRIVMSG", adduser())]
