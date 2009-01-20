@@ -41,9 +41,10 @@ class search(loadable):
         session = M.DB.Session()
         Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, M.DB.Maps.Alliance)
         Q = Q.join((M.DB.Maps.Intel, M.DB.Maps.Intel.planet_id==M.DB.Maps.Planet.id))
-        Q = Q.join((M.DB.Maps.Alliance,M.DB.Maps.Alliance.id==M.DB.Maps.Intel.alliance_id))
+        Q = Q.outerjoin((M.DB.Maps.Alliance, M.DB.Maps.Alliance.id==M.DB.Maps.Intel.alliance_id))
         Q = Q.filter(M.DB.or_(M.DB.Maps.Intel.nick.ilike(param), M.DB.Maps.Alliance.name.ilike(param)))
         result = Q[:6]
+        session.close()
         if len(result) < 1:
             message.reply("No planets in intel matching nick or alliance: %s"%(params.group(1),))
             return
@@ -63,4 +64,3 @@ class search(loadable):
         if len(result) > 5:
             replies[-1]+=" (Too many results to list, please refine your search)"
         message.reply("\n".join(replies))
-        session.close()
