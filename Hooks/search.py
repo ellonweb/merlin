@@ -46,18 +46,19 @@ class search(loadable):
         result = Q[:6]
         if len(result) < 1:
             message.reply("No planets in intel matching nick or alliance: %s"%(params.group(1),))
+            return
         replies = []
         for planet, intel, alliance in result[:5]:
             reply="%s:%s:%s (%s)" % (planet.x,planet.y,planet.z,planet.race)
             reply+=" Score: %s Value: %s Size: %s" % (planet.score,planet.value,planet.size)
-            if planet.intel.nick:
-                reply+=" Nick: %s" % (planet.intel.nick,)
-            if planet.alliance:
-                reply+=" Alliance: %s" % (planet.alliance.name,)
-            if planet.intel.reportchan:
-                reply+=" Reportchan: %s" % (planet.intel.reportchan,)
-            if planet.intel.comment:
-                reply+=" Comment: %s" % (planet.comment,)
+            if intel.nick:
+                reply+=" Nick: %s" % (intel.nick,)
+            if alliance:
+                reply+=" Alliance: %s" % (alliance.name,)
+            if intel.reportchan:
+                reply+=" Reportchan: %s" % (intel.reportchan,)
+            if intel.comment:
+                reply+=" Comment: %s" % (intel.comment,)
             replies.append(reply)
         if len(result) > 5:
             replies[-1]+=" (Too many results to list, please refine your search)"
