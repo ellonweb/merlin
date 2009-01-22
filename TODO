@@ -26,3 +26,80 @@ Hooks.scan
 Hooks.blocked
     more manual info for intel.dists
     @require_access_level(access.get('scan',access['member']))
+
+Quotes and slogans:
+    addquote, 
+    quote, 
+    remquote, 
+    addslogan, 
+    slogan, 
+    remslogan, 
+
+Scans:
+    au, 
+    dev, 
+    jgp, 
+    news, 
+    planet, 
+    scans, 
+    unit, 
+
+Bookings:
+    bitches, 
+    book, 
+    status, 
+    unbook, 
+
+Access and Channels:
+    addchan, 
+    galchan, 
+    remchan, 
+    galmate, 
+
+Intel:
+    bumchums, 
+    details, 
+    info, 
+    spam, 
+
+Penis:
+    apenis, 
+    bigdicks, 
+    epenis, 
+    galpenis, 
+
+Simple calcs and lookups:
+    bashee, 
+    basher, 
+    exile, 
+    launch, 
+    lookup, 
+    maxcap, 
+    roidcost, 
+    roidsave, 
+    xp, 
+
+Growth:
+    exp, 
+    value, 
+
+Target search:
+    cunts, 
+    idler, 
+    victim, 
+    whore, 
+
+
+afford, 
+b, 
+bcalc, 
+c, 
+cookie, 
+defcalls, 
+f, 
+i, 
+prop, 
+rprod, 
+s, 
+surprisesex, 
+topcunts, 
