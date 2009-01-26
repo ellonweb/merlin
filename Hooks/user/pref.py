@@ -22,6 +22,7 @@
 # owners.
 
 import re
+from .variables import alliance
 from .Core.modules import M
 loadable = M.loadable.loadable
 
@@ -36,6 +37,9 @@ class pref(loadable):
     @loadable.run_with_access()
     def execute(self, message, user, params):
         
+        session = M.DB.Session()
+        session.add(user)
+        
         params = self.split_opts(params.group(1))
         pl = pw = em = ph = ""
         for opt, val in params.items():
@@ -44,7 +48,14 @@ class pref(loadable):
                 if m:
                     pl = val
                     planet = M.DB.Maps.Planet.load(*m.groups())
+                    if planet is None:
+                        continue
                     user.planet_id = planet.id
+                    if user.is_member():
+                        a = M.DB.Maps.Alliance.load(alliance)
+                        if alliance is not None:
+                            session.add(planet)
+                            planet.intel.alliance_id = a.id
             if opt == "pass":
                 user.passwd = pw = val
             if opt == "email":
@@ -54,8 +65,6 @@ class pref(loadable):
                     pass
             if opt == "phone":
                 user.phone = ph = val
-        session = M.DB.Session()
-        session.add(user)
         session.commit()
         session.close()
         message.reply("Updated your preferences: planet=%s pass=%s email=%s phone=%s" % (pl,pw,em,ph,))

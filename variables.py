@@ -28,6 +28,8 @@ port = 6667
 # Admins for special commands
 admins = ("ellonweb",)
 
+alliance = "Ascendancy"
+
 # DB info, e.g.
 #  postgres://user:password@host:port/database
 #  mysql://user:password@host:port/database
