@@ -85,9 +85,8 @@ class intel(loadable):
             if (opt in self.options) and (val in self.nulls):
                 setattr(planet.intel, opt, None)
                 continue
-            if opt in ("nick","fakenick","bg","gov","reportchan","comment"):
+            if opt in ("nick","fakenick","bg","gov","reportchan"):
                 setattr(planet.intel, opt, val)
-                continue
             if opt in ("defwhore","covop","scanner","relay"):
                 if val in self.true:
                     setattr(planet.intel, opt, True)
@@ -98,6 +97,8 @@ class intel(loadable):
                     planet.intel.dists = int(val)
                 except ValueError:
                     pass
+            if opt == "comment":
+                planet.intel.comment = message.get_msg().split("comment=")[1]
         session.commit()
         message.reply(self.intel(planet) or "No information stored for %s:%s:%s" % (planet.x, planet.y, planet.z,))
         session.close()
