@@ -33,7 +33,7 @@ class intel(loadable):
         self.paramre = self.coordre
         self.usage += " x.y[.z] [option=value]+"
         self.options = ['alliance', 'nick', 'fakenick', 'defwhore', 'covop', 'scanner', 'dists', 'bg', 'gov', 'relay', 'reportchan', 'comment']
-        self.nulls = ["<>",".","-"]
+        self.nulls = ["<>",".","-","?"]
         self.true = ["1","yes","y","true","t"]
         self.false = ["0","no","n","false","f"]
         self.__doc__ += ", ".join(self.options)
