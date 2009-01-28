@@ -65,9 +65,9 @@ class edituser(loadable):
         session = M.DB.Session()
         session.add(member)
         session.commit()
-        session.close()
         message.reply("Editted user %s set: %s unset: %s active: %s" % (member.name, sperm, uperm, active,))
         if (not member.active) and M.CUT.Users.has_key(member.name):
             for nick in M.CUT.Users[member.name].nicks:
                 nick.user = None
             del M.CUT.Users[member.name]
+        session.close()
