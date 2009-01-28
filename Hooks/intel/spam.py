@@ -1,4 +1,4 @@
-# Info
+# SPAM!
 
 # This file is part of Merlin.
  
@@ -22,7 +22,6 @@
 # owners.
 
 import re
-from sqlalchemy.sql.functions import count, sum
 from .variables import access
 from .Core.modules import M
 loadable = M.loadable.loadable
