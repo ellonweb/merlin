@@ -43,17 +43,4 @@ class ship(loadable):
         if ship is None:
             message.alert("No Ship called: %s" % (name,))
             return
-        
-        reply="%s is class %s | Target 1: %s |"%(ship.name,ship.class_,ship.t1)
-        if ship.t2:
-            reply+=" Target 2: %s |"%(ship.t2,)
-        if ship.t3:
-            reply+=" Target 3: %s |"%(ship.t3,)
-        reply+=" Type: %s | Init: %s |"%(ship.type,ship.init)
-        reply+=" EMPres: %s |"%(ship.empres,)
-        if ship.type=='Emp':
-            reply+=" Guns: %s |"%(ship.guns,)
-        else:
-            reply+=" D/C: %s |"%((ship.damage*10000)/ship.total_cost,)
-        reply+=" A/C: %s"%((ship.armor*10000)/ship.total_cost,)
-        message.reply(reply)
+        message.reply(ship)

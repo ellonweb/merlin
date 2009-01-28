@@ -180,6 +180,24 @@ class Planet(Base):
         planet = Q.first()
         session.close()
         return planet
+    def __str__(self):
+        retstr="%s:%s:%s (%s) '%s' of '%s' " % (self.x,self.y,self.z,self.race,self.rulername,self.planetname)
+        retstr+="Score: %s (%s) " % (self.score,self.score_rank)
+        retstr+="Value: %s (%s) " % (self.value,self.value_rank)
+        retstr+="Size: %s (%s) " % (self.size,self.size_rank)
+        retstr+="XP: %s (%s) " % (self.xp,self.xp_rank)
+        retstr+="Idle: %s " % (self.idle,)
+        return retstr
+    def bravery(self, target):
+        victim_val = target.value
+        attacker_val = self.value
+        victim_score = target.score
+        attacker_score = self.score
+        bravery = max(0,(min(2,float(victim_val)/attacker_val)-0.4 ) * (min(2,float(victim_score)/attacker_score)-0.6))
+        bravery *= 10
+        return bravery
+    def maxcap(self):
+        return self.size/4
 User.planet = relation(Planet, primaryjoin=User.planet_id==Planet.id)
 class PlanetHistory(Base):
     __tablename__ = 'planet_history'
@@ -244,6 +262,13 @@ class Galaxy(Base):
         galaxy = Q.first()
         session.close()
         return galaxy
+    def __str__(self):
+        retstr="%s:%s '%s' " % (self.x,self.y,self.name)
+        retstr+="Score: %s (%s) " % (self.score,self.score_rank)
+        retstr+="Value: %s (%s) " % (self.value,self.value_rank)
+        retstr+="Size: %s (%s) " % (self.size,self.size_rank)
+        retstr+="XP: %s (%s) " % (self.xp,self.xp_rank)
+        return retstr
 Planet.galaxy = relation(Galaxy, primaryjoin=and_(Galaxy.x==Planet.x, Galaxy.y==Planet.y), foreign_keys=(Planet.x, Planet.y), backref=backref('planets', primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), foreign_keys=(Planet.x, Planet.y)))
 Galaxy.planet_loader = dynamic_loader(Planet, primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), foreign_keys=(Galaxy.x, Galaxy.y))
 class GalaxyHistory(Base):
@@ -295,6 +320,11 @@ class Alliance(Base):
         alliance = Q.first()
         session.close()
         return alliance
+    def __str__(self):
+        retstr="'%s' Members: %s (%s) " % (self.name,self.members,self.members_rank)
+        retstr+="Score: %s (%s) Avg: %s (%s) " % (self.score,self.score_rank,self.score_avg,self.score_avg_rank)
+        retstr+="Size: %s (%s) Avg: %s (%s)" % (self.size,self.size_rank,self.size_avg,self.size_avg_rank)
+        return retstr
 class AllianceHistory(Base):
     __tablename__ = 'alliance_history'
     tick = Column(Integer, primary_key=True, autoincrement=False)
@@ -333,7 +363,36 @@ class Intel(Base):
     relay = Column(Boolean, default=False)
     reportchan = Column(String(30))
     comment = Column(String(512))
+    def __str__(self):
+        ret = "" 
+        if self.nick:
+            ret += " nick=%s" % (self.nick,)
+        if self.alliance is not None:
+            ret += " alliance=%s" % (self.alliance.name,)
+        if self.fakenick:
+            ret += "fakenick=%s"%(self.fakenick,)
+        if self.defwhore:
+            ret += "defwhore=%s"%(self.defwhore,)
+        if self.covop:
+            ret += "covop=%s"%(self.covop,)
+        if self.scanner:
+            ret += "scanner=%s"%(self.scanner,)
+        if self.dists:
+            ret += "dists=%s"%(self.dists,)
+        if self.bg:
+            ret += "bg=%s"%(self.bg,)
+        if self.gov:
+            ret += "gov=%s"%(self.gov,)
+        if self.relay:
+            ret += "relay=%s"%(self.relay,)
+        if self.reportchan:
+            ret += "reportchan=%s"%(self.reportchan,)
+        if self.comment:
+            ret += "comment=%s"%(self.comment,)
+        return ret
 Planet.intel = relation(Intel, primaryjoin=Intel.planet_id==Planet.id, foreign_keys=(Planet.id,))
+Intel.planet = relation(Planet, primaryjoin=Planet.id==Intel.planet_id, foreign_keys=(Intel.planet_id,))
+Intel.alliance = relation(Alliance, primaryjoin=Alliance.id==Intel.alliance_id, foreign_keys=(Intel.alliance_id,))
 Planet.alliance = relation(Alliance, secondary=Intel.__table__, primaryjoin=Intel.planet_id==Planet.id, secondaryjoin=Alliance.id==Intel.alliance_id, foreign_keys=(Intel.planet_id, Intel.alliance_id), uselist=False)
 Alliance.planets = relation(Planet, secondary=Intel.__table__, primaryjoin=Intel.alliance_id==Alliance.id, secondaryjoin=Planet.id==Intel.planet_id, foreign_keys=(Intel.planet_id, Intel.alliance_id))
 
@@ -360,7 +419,6 @@ class Ship(Base):
     eonium = Column(Integer)
     total_cost = Column(Integer)
     race = Column(String(10))
-    
     @staticmethod
     def load(id=None, name=None):
         assert id or name
@@ -378,3 +436,17 @@ class Ship(Base):
         ship = Q.first()
         session.close()
         return ship
+    def __str__(self):
+        reply="%s is class %s | Target 1: %s |"%(self.name,self.class_,self.t1)
+        if self.t2:
+            reply+=" Target 2: %s |"%(self.t2,)
+        if self.t3:
+            reply+=" Target 3: %s |"%(self.t3,)
+        reply+=" Type: %s | Init: %s |"%(self.type,self.init)
+        reply+=" EMPres: %s |"%(self.empres,)
+        if self.type=='Emp':
+            reply+=" Guns: %s |"%(self.guns,)
+        else:
+            reply+=" D/C: %s |"%((self.damage*10000)/self.total_cost,)
+        reply+=" A/C: %s"%((self.armor*10000)/self.total_cost,)
+        return reply

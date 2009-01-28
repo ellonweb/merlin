@@ -51,7 +51,7 @@ class intel(loadable):
             reply = []
             for planet in galaxy.planets:
                 if planet.intel is not None:
-                    intel = self.intel(planet)
+                    intel = "Information stored for %s:%s:%s -"% (planet.x, planet.y, planet.z,) +str(planet.intel) if str(planet.intel) else None
                     if intel:
                         reply.append(intel)
             if reply:
@@ -100,18 +100,5 @@ class intel(loadable):
             if opt == "comment":
                 planet.intel.comment = message.get_msg().split("comment=")[1]
         session.commit()
-        message.reply(self.intel(planet) or "No information stored for %s:%s:%s" % (planet.x, planet.y, planet.z,))
+        message.reply(("Information stored for %s:%s:%s -"+str(planet.intel) if str(planet.intel) else "No information stored for %s:%s:%s") % (planet.x, planet.y, planet.z,))
         session.close()
-    
-    def intel(self, planet):
-        ret = "" 
-        if planet.intel.nick:
-            ret += " nick=%s" % (planet.intel.nick,)
-        if planet.alliance is not None:
-            ret += " alliance=%s" % (planet.alliance.name,)
-        for opt in self.options[2:]:
-            if getattr(planet.intel, opt):
-                ret += " %s=%s" % (opt, getattr(planet.intel, opt))
-        if ret:
-            return "Information stored for %s:%s:%s -" % (planet.x, planet.y, planet.z,) + ret
-        return None
