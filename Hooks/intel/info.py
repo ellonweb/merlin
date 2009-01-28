@@ -1,4 +1,4 @@
-# bumchums
+# Info
 
 # This file is part of Merlin.
  
@@ -22,18 +22,18 @@
 # owners.
 
 import re
-from sqlalchemy.sql.functions import count
+from sqlalchemy.sql.functions import count, sum
 from .variables import access
 from .Core.modules import M
 loadable = M.loadable.loadable
 
-class bumchums(loadable):
+class info(loadable):
     """Pies"""
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = re.compile(r"\s([\w-]+)(?:\s(\d+))?")
-        self.usage += " alliance number"
+        self.paramre = re.compile(r"\s([\w-]+)")
+        self.usage += " alliance (All information taken from intel, for tag information use the lookup command)"
     
     @loadable.run_with_access(access.get('hc',0) | access.get('intel',access['member']))
     def execute(self, message, user, params):
@@ -42,20 +42,20 @@ class bumchums(loadable):
         if alliance is None:
             message.reply("No alliance matching '%s' found"%(params.group(1),))
             return
-        bums = int(params.group(2) or 1)
+        
         session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, count())
+        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, count(), sum(M.DB.Maps.Planet.value),
+                          sum(M.DB.Maps.Planet.score), sum(M.DB.Maps.Planet.size), sum(M.DB.Maps.Planet.xp))
         Q = Q.join((M.DB.Maps.Intel, M.DB.Maps.Intel.planet_id==M.DB.Maps.Planet.id))
         Q = Q.filter(M.DB.Maps.Intel.alliance_id==alliance.id)
-        Q = Q.group_by(M.DB.Maps.Planet.x, M.DB.Maps.Planet.y)
-        Q = Q.having(count() >= bums)
-        result = Q.all()
+        Q = Q.group_by(M.DB.Maps.Intel.alliance_id)
+        result = Q.first()
         session.close()
-        if len(result) < 1:
-            message.reply("No galaxies with at least %s bumchums from %s"%(bums,alliance.name,))
+        if result is None:
+            message.reply("No planets in intel match alliance %s"%(alliance.name,))
             return
-        prev=[]
-        for planet, intel, chums in result:
-            prev.append("%s:%s (%s)"%(planet.x, planet.y, chums))
-        reply="Galaxies with at least %s bums from %s: "%(bums,alliance.name)+ ' | '.join(prev)
+        planet, intel, members, value, score, size, xp = result
+        reply="%s Members: %s, Value: %s, Avg: %s," % (alliance.name,members,value,value/members)
+        reply+=" Score: %s, Avg: %s," % (score,score/members) 
+        reply+=" Size: %s, Avg: %s, XP: %s, Avg: %s" % (size,size/members,xp,xp/members)
         message.reply(reply)

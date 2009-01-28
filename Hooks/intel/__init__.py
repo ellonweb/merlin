@@ -20,4 +20,4 @@
 # owners.
 
 # List of package modules
-__all__ = ["intel","search","bumchums"]
+__all__ = ["intel","search","bumchums","info"]
