@@ -71,7 +71,7 @@ class User(Base):
         return hashlib.md5(passwd).hexdigest()
     
     @staticmethod
-    def load(id=None, name=None, passwd=None, exact=True, active=True):
+    def load(name=None, id=None, passwd=None, exact=True, active=True):
         assert id or name
         session = Session()
         Q = session.query(User)
