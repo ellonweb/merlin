@@ -205,7 +205,7 @@ while True:
 
         for line in galaxies:
             g=line.strip().split("\t")
-            g_list.append("SELECT %s, %s, '%s', %s, %s, %s, %s" % (g[0], g[1], g[2], g[3], g[4], g[5], g[6],))
+            g_list.append("SELECT %s, %s, '%s', %s, %s, %s, %s" % (g[0], g[1], g[2].strip("\""), g[3], g[4], g[5], g[6],))
         galaxy_insert = unicode(''.join((galaxy_insert, ' UNION ALL '.join(g_list),";",)), encoding='latin-1')
 
         for line in alliances:
@@ -426,5 +426,17 @@ session.execute(DB.Maps.epenis.__table__.delete())
 session.execute(text("INSERT INTO epenis (user_id, penis) SELECT users.id, planet.score - planet_history.score FROM users, planet, planet_history WHERE users.planet_id = planet.id AND planet.id = planet_history.id AND planet_history.tick = :tick ORDER BY planet.score - planet_history.score DESC;", bindparams=[bindparam("tick",history_tick)]))
 t2=time.time()-t1
 print "epenis in %.3f seconds" % (t2,)
+t1=time.time()
+session.execute(DB.Maps.galpenis.__table__.delete())
+session.execute(text("INSERT INTO galpenis (galaxy_id, penis) SELECT galaxy.id, galaxy.score - galaxy_history.score FROM galaxy, galaxy_history WHERE galaxy.id = galaxy_history.id AND galaxy_history.tick = :tick ORDER BY galaxy.score - galaxy_history.score DESC;", bindparams=[bindparam("tick",history_tick)]))
+t2=time.time()-t1
+print "galpenis in %.3f seconds" % (t2,)
+t1=time.time()
+session.execute(DB.Maps.apenis.__table__.delete())
+session.execute(text("INSERT INTO apenis (alliance_id, penis) SELECT alliance.id, alliance.score - alliance_history.score FROM alliance, alliance_history WHERE alliance.id = alliance_history.id AND alliance_history.tick = :tick ORDER BY alliance.score - alliance_history.score DESC;", bindparams=[bindparam("tick",history_tick)]))
+t2=time.time()-t1
+print "galpenis in %.3f seconds" % (t2,)
 session.commit()
 session.close()
+t1=time.time()-t_start
+print "Total penis time: %.3f seconds" % (t1,)
