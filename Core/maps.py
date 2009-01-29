@@ -397,6 +397,17 @@ Planet.alliance = relation(Alliance, secondary=Intel.__table__, primaryjoin=Inte
 Alliance.planets = relation(Planet, secondary=Intel.__table__, primaryjoin=Intel.alliance_id==Alliance.id, secondaryjoin=Planet.id==Intel.planet_id, foreign_keys=(Intel.planet_id, Intel.alliance_id))
 
 # ########################################################################### #
+# ############################    PENIS CACHE    ############################ #
+# ########################################################################### #
+
+class epenis(Base):
+    __tablename__ = 'epenis'
+    rank = Column(Integer, primary_key=True)
+    user_id = Column(Integer, index=True)
+    penis = Column(Integer)
+User.epenis = relation(epenis, primaryjoin=epenis.user_id==User.id, foreign_keys=(User.id,))
+
+# ########################################################################### #
 # #############################    SHIP TABLE    ############################ #
 # ########################################################################### #
 

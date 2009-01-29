@@ -415,3 +415,16 @@ alliance_size_rank.drop()
 alliance_members_rank.drop()
 alliance_size_avg_rank.drop()
 alliance_score_avg_rank.drop()
+
+del max # sqlalchemy max function is imported for previous stuff
+last_tick = DB.Maps.Updates.current_tick()
+history_tick = max(last_tick-72, 1)
+session = DB.Session()
+t_start=time.time()
+t1=t_start
+session.execute(DB.Maps.epenis.__table__.delete())
+session.execute(text("INSERT INTO epenis (user_id, penis) SELECT users.id, planet.score - planet_history.score FROM users, planet, planet_history WHERE users.planet_id = planet.id AND planet.id = planet_history.id AND planet_history.tick = :tick ORDER BY planet.score - planet_history.score DESC;", bindparams=[bindparam("tick",history_tick)]))
+t2=time.time()-t1
+print "epenis in %.3f seconds" % (t2,)
+session.commit()
+session.close()
