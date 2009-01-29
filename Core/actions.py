@@ -27,9 +27,9 @@ from exceptions_ import ParseError
 class Action(messages.Message):
     # This object holds the parse, and will enable users to send messages to the server on a higher level
     
-    def __init__(self, line, conn, nick, callbackmod):
+    def __init__(self, line, conn, nick, alliance, callbackmod):
         # The object takes a line as a parameter
-        messages.Message.__init__(self, line, nick)
+        messages.Message.__init__(self, line, nick, alliance)
         self.connection = conn
         self.callbackmod = callbackmod
     

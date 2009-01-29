@@ -22,7 +22,6 @@
 # owners.
 
 import re
-from .variables import alliance
 from .Core.modules import M
 loadable = M.loadable.loadable
 
@@ -57,9 +56,9 @@ class pref(loadable):
                             planet.intel = M.DB.Maps.Intel(planet_id=planet.id)
                             session.add(planet.intel)
                         planet.intel.nick = user.name
-                        a = M.DB.Maps.Alliance.load(alliance)
+                        alliance = M.DB.Maps.Alliance.load(message.botally)
                         if alliance is not None:
-                            planet.intel.alliance_id = a.id
+                            planet.intel.alliance_id = alliance.id
             if opt == "pass":
                 user.passwd = pw = val
             if opt == "email":

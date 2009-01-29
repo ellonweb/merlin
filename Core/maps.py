@@ -406,6 +406,18 @@ class epenis(Base):
     user_id = Column(Integer, index=True)
     penis = Column(Integer)
 User.epenis = relation(epenis, primaryjoin=epenis.user_id==User.id, foreign_keys=(User.id,))
+class galpenis(Base):
+    __tablename__ = 'galpenis'
+    rank = Column(Integer, primary_key=True)
+    galaxy_id = Column(Integer, index=True)
+    penis = Column(Integer)
+Galaxy.galpenis = relation(galpenis, primaryjoin=galpenis.galaxy_id==Galaxy.id, foreign_keys=(Galaxy.id,))
+class apenis(Base):
+    __tablename__ = 'apenis'
+    rank = Column(Integer, primary_key=True)
+    alliance_id = Column(Integer, index=True)
+    penis = Column(Integer)
+Alliance.apenis = relation(apenis, primaryjoin=apenis.alliance_id==Alliance.id, foreign_keys=(Alliance.id,))
 
 # ########################################################################### #
 # #############################    SHIP TABLE    ############################ #

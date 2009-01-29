@@ -71,7 +71,7 @@ class Bot(object):
                 return
             
             # Parse and process the line
-            parsed_line = parse(line, self.conn, self.details["nick"], cb)
+            parsed_line = parse(line, self.conn, self.details["nick"], alliance, cb)
             try:
                 cb.callback(parsed_line)
                 self.details["nick"] = parsed_line.botnick
