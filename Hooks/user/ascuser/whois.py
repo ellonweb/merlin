@@ -16,14 +16,14 @@ class whois(loadable):
     def execute(self, message, user, params):
 
         # assign param variables 
-        search=m.group(1)
+        search=params.group(1)
 
         # do stuff here
         if search.lower() == nick.lower():
             message.reply("I am %s. Hear me roar." % (nick,))
             return
 
-        whore = M.DB.Maps.User.load(nick=search,exact=False)
+        whore = M.DB.Maps.User.load(name=search,exact=False)
         if whore is None:
             message.reply("No users matching '%s'"%(search,))
             return

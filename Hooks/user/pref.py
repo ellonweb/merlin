@@ -46,13 +46,16 @@ class pref(loadable):
             if opt == "planet":
                 m = self.planet_coordre.match(val)
                 if m:
-                    pl = val
                     planet = M.DB.Maps.Planet.load(*m.groups())
                     if planet is None:
                         continue
+                    pl = val
                     user.planet_id = planet.id
                     if user.is_member():
                         session.add(planet)
+                        if planet.intel is None:
+                            planet.intel = M.DB.Maps.Intel(planet_id=planet.id)
+                            session.add(planet.intel)
                         planet.intel.nick = user.name
                         a = M.DB.Maps.Alliance.load(alliance)
                         if alliance is not None:
