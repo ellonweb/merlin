@@ -48,9 +48,9 @@ class details(loadable):
             attacker = user.planet
             reply="Target "
             reply+="%s:%s:%s (%s|%s) "%(target.x,target.y,target.z,
-                                        self.num2short(target.value*100),self.num2short(target.score*100))
+                                        self.num2short(target.value),self.num2short(target.score))
             reply+="| Attacker %s:%s:%s (%s|%s) "%(attacker.x,attacker.y,attacker.z,
-                                                   self.num2short(attacker.value*100),self.num2short(attacker.score*100))
+                                                   self.num2short(attacker.value),self.num2short(attacker.score))
             bravery = attacker.bravery(target)
             reply+="| Bravery: %.2f " % (bravery,)
             cap=target.maxcap()
