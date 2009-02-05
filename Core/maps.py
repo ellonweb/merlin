@@ -405,7 +405,7 @@ class Target(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, index=True)
     planet_id = Column(Integer, index=True)
-    tick = Column(Integer)    
+    tick = Column(Integer)
 Target.user = relation(User, primaryjoin=User.id==Target.user_id, foreign_keys=(Target.user_id))
 Target.planet = relation(Planet, primaryjoin=Planet.id==Target.planet_id, foreign_keys=(Target.planet_id))
 User.bookings_loader = dynamic_loader(Target, primaryjoin=Target.user_id==User.id, foreign_keys=(Target.user_id))
