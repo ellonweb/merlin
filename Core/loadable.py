@@ -30,6 +30,8 @@ from exceptions_ import ParseError, PNickParseError, UserError
 # ########################################################################### #
 class loadable(object):
     ""
+    PParseError = "You need to login and set mode +x to use this command"
+    AccessError = "You don't have access to this command"
     
     def __init__(self):
         self.access = -1
@@ -89,9 +91,9 @@ class loadable(object):
                 raise ParseError
             return user, m
         except PNickParseError:
-            message.alert("You need to login and set mode +x to use this command")
+            message.alert(self.PParseError)
         except UserError:
-            message.alert("You don't have access to this command")
+            message.alert(self.AccessError)
         except ParseError:
             message.alert(self.usage)
         return
@@ -115,9 +117,9 @@ class loadable(object):
                 raise UserError
             message.reply(self.usage + "\n" + (self.helptext or ""))
         except PNickParseError:
-            message.alert("You need to login and set mode +x to use this command")
+            message.alert(self.PParseError)
         except UserError:
-            message.alert("You don't have access to this command")
+            message.alert(self.AccessError)
         return
     
     def robocop(self, message):
