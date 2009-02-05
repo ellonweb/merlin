@@ -397,6 +397,31 @@ Planet.alliance = relation(Alliance, secondary=Intel.__table__, primaryjoin=Inte
 Alliance.planets = relation(Planet, secondary=Intel.__table__, primaryjoin=Intel.alliance_id==Alliance.id, secondaryjoin=Planet.id==Intel.planet_id, foreign_keys=(Intel.planet_id, Intel.alliance_id))
 
 # ########################################################################### #
+# #############################    BOOKINGS    ############################## #
+# ########################################################################### #
+
+class Target(Base):
+    __tablename__ = 'target'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, index=True)
+    planet_id = Column(Integer, index=True)
+    tick = Column(Integer)    
+Target.user = relation(User, primaryjoin=User.id==Target.user_id, foreign_keys=(Target.user_id))
+Target.planet = relation(Planet, primaryjoin=Planet.id==Target.planet_id, foreign_keys=(Target.planet_id))
+User.bookings_loader = dynamic_loader(Target, primaryjoin=Target.user_id==User.id, foreign_keys=(Target.user_id))
+Planet.bookings_loader = dynamic_loader(Target, primaryjoin=Target.planet_id==Planet.id, foreign_keys=(Target.planet_id))
+Alliance.bookings_loader = dynamic_loader(Target, secondary=Intel.__table__, primaryjoin=Intel.alliance_id==Alliance.id, secondaryjoin=Target.planet_id==Intel.planet_id, foreign_keys=(Intel.planet_id, Intel.alliance_id))
+def bookings(self, tick=None):
+    if tick is not None:
+        return self.bookings_loader.filter_by(tick=tick).all()
+    else:
+        return self.bookings_loader.filter(Target.tick > Updates.current_tick()).all()
+User.bookings = bookings
+Planet.bookings = bookings
+Alliance.bookings = bookings
+del bookings
+
+# ########################################################################### #
 # ############################    PENIS CACHE    ############################ #
 # ########################################################################### #
 
