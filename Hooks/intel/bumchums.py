@@ -22,7 +22,6 @@
 # owners.
 
 import re
-from sqlalchemy.sql.functions import count
 from .variables import access
 from .Core.modules import M
 loadable = M.loadable.loadable
@@ -44,11 +43,11 @@ class bumchums(loadable):
             return
         bums = int(params.group(2) or 1)
         session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, count())
+        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, M.DB.SQL.f.count())
         Q = Q.join((M.DB.Maps.Intel, M.DB.Maps.Intel.planet_id==M.DB.Maps.Planet.id))
         Q = Q.filter(M.DB.Maps.Intel.alliance_id==alliance.id)
         Q = Q.group_by(M.DB.Maps.Planet.x, M.DB.Maps.Planet.y)
-        Q = Q.having(count() >= bums)
+        Q = Q.having(M.DB.SQL.f.count() >= bums)
         result = Q.all()
         session.close()
         if len(result) < 1:

@@ -1,11 +1,10 @@
 #!/usr/local/bin/python
 
-import re, urllib2, time, traceback
+import re, sys, time, traceback, urllib2
 from variables import urlPlanet, urlGalaxy, urlAlliance
 import Core.db as DB
 from sqlalchemy import Table, Column, Integer, String
 from sqlalchemy.sql import text, bindparam
-from sqlalchemy.sql.functions import max
 
 planet_new_id_search = Table('planet_new_id_search', DB.Maps.Base.metadata,
     Column('id', Integer),
@@ -276,7 +275,7 @@ while True:
         print "Lost planet ids match up in %.3f seconds" % (t2,)
         t1=time.time()
 
-        p_id = session.query(max(DB.Maps.PlanetHistory.id)).scalar() or 0
+        p_id = session.query(DB.SQL.f.max(DB.Maps.PlanetHistory.id)).scalar() or 0
         for planet in session.query(DB.Maps.Planet).filter_by(id=None):
             p_id += 1
             planet.id = p_id
@@ -313,7 +312,7 @@ while True:
         print "Copy galaxy ids from history in %.3f seconds" % (t2,)
         t1=time.time()
 
-        g_id = session.query(max(DB.Maps.GalaxyHistory.id)).scalar() or 0
+        g_id = session.query(DB.SQL.f.max(DB.Maps.GalaxyHistory.id)).scalar() or 0
         for galaxy in session.query(DB.Maps.Galaxy).filter_by(id=None):
             g_id += 1
             galaxy.id = g_id
@@ -348,7 +347,7 @@ while True:
         print "Copy alliance ids from history in %.3f seconds" % (t2,)
         t1=time.time()
 
-        a_id = session.query(max(DB.Maps.AllianceHistory.id)).scalar() or 0
+        a_id = session.query(DB.SQL.f.max(DB.Maps.AllianceHistory.id)).scalar() or 0
         for alliance in session.query(DB.Maps.Alliance).filter_by(id=None):
             a_id += 1
             alliance.id = a_id
@@ -416,7 +415,6 @@ alliance_members_rank.drop()
 alliance_size_avg_rank.drop()
 alliance_score_avg_rank.drop()
 
-del max # sqlalchemy max function is imported for previous stuff
 last_tick = DB.Maps.Updates.current_tick()
 history_tick = max(last_tick-72, 1)
 session = DB.Session()

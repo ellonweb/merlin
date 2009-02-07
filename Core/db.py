@@ -21,8 +21,12 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
+import sys
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker, clear_mappers
+import sqlalchemy.sql as SQL
+import sqlalchemy.sql.functions
+SQL.f = sys.modules['sqlalchemy.sql.functions']
 from .variables import DBeng
 
 engine = create_engine(DBeng)#, echo='debug')

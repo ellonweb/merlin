@@ -22,7 +22,6 @@
 # owners.
 
 import re
-from sqlalchemy.sql.functions import count, sum
 from .variables import access
 from .Core.modules import M
 loadable = M.loadable.loadable
@@ -44,8 +43,8 @@ class info(loadable):
             return
         
         session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, count(), sum(M.DB.Maps.Planet.value),
-                          sum(M.DB.Maps.Planet.score), sum(M.DB.Maps.Planet.size), sum(M.DB.Maps.Planet.xp))
+        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, M.DB.SQL.f.count(), M.DB.SQL.f.sum(M.DB.Maps.Planet.value),
+                          M.DB.SQL.f.sum(M.DB.Maps.Planet.score), M.DB.SQL.f.sum(M.DB.Maps.Planet.size), M.DB.SQL.f.sum(M.DB.Maps.Planet.xp))
         Q = Q.join((M.DB.Maps.Intel, M.DB.Maps.Intel.planet_id==M.DB.Maps.Planet.id))
         Q = Q.filter(M.DB.Maps.Intel.alliance_id==alliance.id)
         Q = Q.group_by(M.DB.Maps.Intel.alliance_id)

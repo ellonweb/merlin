@@ -19,14 +19,17 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
+import hashlib
+from math import ceil
+import re
+import sys
+from time import time
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import validates, relation, backref, dynamic_loader
-from sqlalchemy.sql.functions import current_timestamp, max
-from math import ceil
-from time import time
-import hashlib
-import re
+import sqlalchemy.sql as SQL
+import sqlalchemy.sql.functions
+SQL.f = sys.modules['sqlalchemy.sql.functions']
 from .variables import access
 
 Base = declarative_base()
@@ -143,11 +146,11 @@ class Updates(Base):
     planets = Column(Integer)
     galaxies = Column(Integer)
     alliances = Column(Integer)
-    timestamp = Column(DateTime, default=current_timestamp())
+    timestamp = Column(DateTime, default=SQL.f.current_timestamp())
     @staticmethod
     def current_tick():
         session = Session()
-        tick = session.query(max(Updates.tick)).scalar() or 0
+        tick = session.query(SQL.f.max(Updates.tick)).scalar() or 0
         session.close()
         return tick
 class Planet(Base):
@@ -193,8 +196,8 @@ class Planet(Base):
         attacker_val = self.value
         victim_score = target.score
         attacker_score = self.score
-        bravery = max(0,(min(2,float(victim_val)/attacker_val)-0.4 ) * (min(2,float(victim_score)/attacker_score)-0.6))
-        bravery *= 10
+        bravery = max(0,( min(2,float(victim_val)/attacker_val)-0.4 ) * (min(2,float(victim_score)/attacker_score)-0.6))
+        bravery *= 10.0
         return bravery
     def maxcap(self):
         return self.size/4
