@@ -152,11 +152,12 @@ class loadable(object):
     def short2num(self,short):
         try:
             if short[-1].lower()=='m':
-                return int(short[:-1]) *1000000
+                ret = float(short[:-1]) *1000000
             elif short[-1].lower()=='k':
-                return int(short[:-1]) *1000
+                ret = float(short[:-1]) *1000
             else:
-                return int(short)
+                ret = float(short)
+            return int(ret)
         except:
             raise ValueError
 

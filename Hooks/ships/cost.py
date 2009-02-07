@@ -31,7 +31,7 @@ class cost(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = re.compile(r"\s(\d+[km]?)\s(\w+)")
+        self.paramre = re.compile(r"\s(\d+(?:.\d+)?[km]?)\s(\w+)")
         self.usage += " number ship"
     
     @loadable.run

@@ -31,7 +31,7 @@ class stop(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = re.compile(r"\s(\d+[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
+        self.paramre = re.compile(r"\s(\d+(?:.\d+)?[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
         self.usage += " number ship [t1|t2|t3]"
     
     @loadable.run
