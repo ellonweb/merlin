@@ -20,20 +20,4 @@
 # owners.
 
 # List of package modules
-__all__ = ["load_mod",
-           "quit",
-#           "debug",
-           "help",
-           "auth",
-           "chanusertracker",
-#           "robocop",
-#           "hop",
-#           "relay",
-#           "relaybot",
-           "ships",
-           "user",
-           "intel",
-           "details",
-           "growth",
-           "target",
-           ]
+__all__ = ["bitches"]
