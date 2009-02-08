@@ -43,9 +43,9 @@ class info(loadable):
             return
         
         session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, M.DB.SQL.f.count(), M.DB.SQL.f.sum(M.DB.Maps.Planet.value),
+        Q = session.query(M.DB.SQL.f.count(), M.DB.SQL.f.sum(M.DB.Maps.Planet.value),
                           M.DB.SQL.f.sum(M.DB.Maps.Planet.score), M.DB.SQL.f.sum(M.DB.Maps.Planet.size), M.DB.SQL.f.sum(M.DB.Maps.Planet.xp))
-        Q = Q.join((M.DB.Maps.Intel, M.DB.Maps.Intel.planet_id==M.DB.Maps.Planet.id))
+        Q = Q.join(M.DB.Maps.Planet.intel)
         Q = Q.filter(M.DB.Maps.Intel.alliance_id==alliance.id)
         Q = Q.group_by(M.DB.Maps.Intel.alliance_id)
         result = Q.first()
@@ -53,7 +53,7 @@ class info(loadable):
         if result is None:
             message.reply("No planets in intel match alliance %s"%(alliance.name,))
             return
-        planet, intel, members, value, score, size, xp = result
+        members, value, score, size, xp = result
         reply="%s Members: %s, Value: %s, Avg: %s," % (alliance.name,members,value,value/members)
         reply+=" Score: %s, Avg: %s," % (score,score/members) 
         reply+=" Size: %s, Avg: %s, XP: %s, Avg: %s" % (size,size/members,xp,xp/members)

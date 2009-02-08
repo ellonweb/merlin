@@ -40,8 +40,8 @@ class search(loadable):
         param = "%"+params.group(1)+"%"
         session = M.DB.Session()
         Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, M.DB.Maps.Alliance)
-        Q = Q.join((M.DB.Maps.Intel, M.DB.Maps.Intel.planet_id==M.DB.Maps.Planet.id))
-        Q = Q.outerjoin((M.DB.Maps.Alliance, M.DB.Maps.Alliance.id==M.DB.Maps.Intel.alliance_id))
+        Q = Q.join(M.DB.Maps.Planet.intel)
+        Q = Q.outerjoin(M.DB.Maps.Intel.alliance)
         Q = Q.filter(M.DB.or_(M.DB.Maps.Intel.nick.ilike(param), M.DB.Maps.Alliance.name.ilike(param)))
         result = Q[:6]
         session.close()

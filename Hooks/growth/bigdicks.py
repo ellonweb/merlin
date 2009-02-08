@@ -41,7 +41,7 @@ class bigdicks(loadable):
             return
         session = M.DB.Session()
         Q = session.query(M.DB.Maps.User, M.DB.Maps.epenis)
-        Q = Q.join((M.DB.Maps.epenis, M.DB.Maps.epenis.user_id==M.DB.Maps.User.id))
+        Q = Q.join(M.DB.Maps.User.epenis)
         Q = Q.order_by(M.DB.Maps.epenis.rank)
         result = Q[:5]
         session.close()

@@ -43,10 +43,11 @@ class bumchums(loadable):
             return
         bums = int(params.group(2) or 1)
         session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, M.DB.SQL.f.count())
-        Q = Q.join((M.DB.Maps.Intel, M.DB.Maps.Intel.planet_id==M.DB.Maps.Planet.id))
+        Q = session.query(M.DB.Maps.Galaxy, M.DB.SQL.f.count())
+        Q = Q.join(M.DB.Maps.Intel.planet)
+        Q = Q.join(M.DB.Maps.Planet.galaxy)
         Q = Q.filter(M.DB.Maps.Intel.alliance_id==alliance.id)
-        Q = Q.group_by(M.DB.Maps.Planet.x, M.DB.Maps.Planet.y)
+        Q = Q.group_by(M.DB.Maps.Galaxy.x, M.DB.Maps.Galaxy.y)
         Q = Q.having(M.DB.SQL.f.count() >= bums)
         result = Q.all()
         session.close()
@@ -54,7 +55,7 @@ class bumchums(loadable):
             message.reply("No galaxies with at least %s bumchums from %s"%(bums,alliance.name,))
             return
         prev=[]
-        for planet, intel, chums in result:
-            prev.append("%s:%s (%s)"%(planet.x, planet.y, chums))
+        for galaxy, chums in result:
+            prev.append("%s:%s (%s)"%(galaxy.x, galaxy.y, chums))
         reply="Galaxies with at least %s bums from %s: "%(bums,alliance.name)+ ' | '.join(prev)
         message.reply(reply)
