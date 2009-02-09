@@ -64,6 +64,8 @@ class bitches(loadable):
             prev.append("%s (%s)"%(alliance.name if alliance else "Unknown", bitches))
         replies.append("Active bitches: " + ", ".join(prev))
         
+        session.close()
+        
         if len(replies) < 1:
             replies.append("No active bookings. This makes %s sad. Please don't make %s sad." %(nick,nick))
         message.reply("\n".join(replies))
