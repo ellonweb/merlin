@@ -37,7 +37,7 @@ class bitches(loadable):
     @loadable.run_with_access(access.get('hc',0) | access.get('bc',access['member']))
     def execute(self, message, user, params):
         
-        tick = params.group(1) or M.DB.Maps.Updates.current_tick()+1
+        tick = M.DB.Maps.Updates.current_tick() + (params.group(1) or 1)
         session = M.DB.Session()
         replies = []
         
