@@ -53,5 +53,5 @@ class spam(loadable):
             return
         printable=map(lambda (p, i): "%s:%s:%s" % (p.x,p.y,p.z),result)
         reply="Spam on alliance %s - " %(alliance.name)
-        reply += str.join(' | ', printable)
+        reply += ' | '.join(printable)
         message.reply(reply)
