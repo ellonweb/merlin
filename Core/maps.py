@@ -147,6 +147,7 @@ class Updates(Base):
     galaxies = Column(Integer)
     alliances = Column(Integer)
     timestamp = Column(DateTime, default=SQL.f.current_timestamp())
+    
     @staticmethod
     def current_tick():
         session = Session()
@@ -173,8 +174,10 @@ class Planet(Base):
     xp_rank = Column(Integer)
     idle = Column(Integer)
     vdiff = Column(Integer)
+    
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
+    
     @staticmethod
     def load(x,y,z):
         session = Session()
@@ -183,6 +186,7 @@ class Planet(Base):
         planet = Q.first()
         session.close()
         return planet
+    
     def __str__(self):
         retstr="%s:%s:%s (%s) '%s' of '%s' " % (self.x,self.y,self.z,self.race,self.rulername,self.planetname)
         retstr+="Score: %s (%s) " % (self.score,self.score_rank)
@@ -191,6 +195,7 @@ class Planet(Base):
         retstr+="XP: %s (%s) " % (self.xp,self.xp_rank)
         retstr+="Idle: %s " % (self.idle,)
         return retstr
+    
     def bravery(self, target):
         victim_val = target.value
         attacker_val = self.value
@@ -199,6 +204,7 @@ class Planet(Base):
         bravery = max(0,( min(2,float(victim_val)/attacker_val)-0.4 ) * (min(2,float(victim_score)/attacker_score)-0.6))
         bravery *= 10.0
         return bravery
+    
     def maxcap(self):
         return self.size/4
 User.planet = relation(Planet, primaryjoin=User.planet_id==Planet.id)
@@ -253,10 +259,13 @@ class Galaxy(Base):
     score_rank = Column(Integer)
     value_rank = Column(Integer)
     xp_rank = Column(Integer)
+    
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
+    
     def planet(self, z):
         return self.planet_loader.filter_by(z=z).first()
+    
     @staticmethod
     def load(x,y):
         session = Session()
@@ -265,6 +274,7 @@ class Galaxy(Base):
         galaxy = Q.first()
         session.close()
         return galaxy
+    
     def __str__(self):
         retstr="%s:%s '%s' " % (self.x,self.y,self.name)
         retstr+="Score: %s (%s) " % (self.score,self.score_rank)
@@ -310,19 +320,20 @@ class Alliance(Base):
     score_avg = Column(Integer)
     size_avg_rank = Column(Integer)
     score_avg_rank = Column(Integer)
+    
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
+    
     @staticmethod
     def load(name):
         session = Session()
         Q = session.query(Alliance)
-        if Q.filter(Alliance.name.ilike(name)).count() > 0:
-            Q = Q.filter(Alliance.name.ilike(name))
-        else:
-            Q = Q.filter(Alliance.name.ilike("%"+name+"%"))
-        alliance = Q.first()
+        alliance = Q.filter(Alliance.name.ilike(name)).first()
+        if alliance is None:
+            alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
         session.close()
         return alliance
+    
     def __str__(self):
         retstr="'%s' Members: %s (%s) " % (self.name,self.members,self.members_rank)
         retstr+="Score: %s (%s) Avg: %s (%s) " % (self.score,self.score_rank,self.score_avg,self.score_avg_rank)
@@ -472,23 +483,25 @@ class Ship(Base):
     eonium = Column(Integer)
     total_cost = Column(Integer)
     race = Column(String(10))
+    
     @staticmethod
-    def load(id=None, name=None):
+    def load(name=None, id=None):
         assert id or name
         session = Session()
         Q = session.query(Ship)
         if id is not None:
-            Q = Q.filter(Ship.id == id)
+            ship = Q.filter_by(Ship.id == id).first()
         if name is not None:
-            if Q.filter(Ship.name.ilike(name)).count() > 0:
-                Q = Q.filter(Ship.name.ilike(name))
-            elif Q.filter(Ship.name.ilike("%"+name+"%")) > 0 or (name[-1].lower()!="s"):
-                Q = Q.filter(Ship.name.ilike("%"+name+"%"))
-            else:
-                Q = Q.filter(Ship.name.ilike("%"+name[:-1]+"%"))
-        ship = Q.first()
+            ship = Q.filter(Ship.name.ilike(name)).first()
+            if ship is None:
+                ship = Q.filter(Ship.name.ilike("%"+name+"%")).first()
+            if ship is None and name[-1].lower()=="s":
+                ship = Q.filter(Ship.name.ilike("%"+name[:-1]+"%")).first()
+            if ship is None and name[-3:].lower()=="ies":
+                ship = Q.filter(Ship.name.ilike("%"+name[:-3]+"%")).first()
         session.close()
         return ship
+    
     def __str__(self):
         reply="%s (%s) is class %s | Target 1: %s |"%(self.name,self.race[:3],self.class_,self.t1)
         if self.t2:
