@@ -236,7 +236,7 @@ while True:
                 session.execute(planet_old_id_search.delete())
                 if session.execute(text("INSERT INTO planet_new_id_search (id, x, y, z, race, size, score, value, xp) SELECT id, x, y, z, race, size, score, value, xp FROM planet WHERE planet.id IS NULL;")).rowcount < 1:
                     return None
-                if session.execute(text("INSERT INTO planet_old_id_search (id, x, y, z, race, size, score, value, xp, vdiff) SELECT id, x, y, z, race, size, score, value, xp, vdiff FROM planet_history WHERE tick = :tick AND planet_history.id NOT IN (SELECT id FROM planet WHERE id NOT NULL);", bindparams=[bindparam("tick",last_tick)])).rowcount < 1:
+                if session.execute(text("INSERT INTO planet_old_id_search (id, x, y, z, race, size, score, value, xp, vdiff) SELECT id, x, y, z, race, size, score, value, xp, vdiff FROM planet_history WHERE tick = :tick AND planet_history.id NOT IN (SELECT id FROM planet WHERE id IS NOT NULL);", bindparams=[bindparam("tick",last_tick)])).rowcount < 1:
                     return None
                 session.execute(text("UPDATE planet SET id = (SELECT id FROM planet_new_id_search WHERE planet.x = planet_new_id_search.x AND planet.y = planet_new_id_search.y AND planet.z = planet_new_id_search.z) WHERE id IS NULL;"))
                 return 1
