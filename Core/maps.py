@@ -411,6 +411,15 @@ Planet.alliance = relation(Alliance, secondary=Intel.__table__, primaryjoin=Inte
 Alliance.planets = relation(Planet, secondary=Intel.__table__, primaryjoin=Intel.alliance_id==Alliance.id, secondaryjoin=Planet.id==Intel.planet_id, foreign_keys=(Intel.planet_id, Intel.alliance_id))
 
 # ########################################################################### #
+# ###############################    SCANS    ############################### #
+# ########################################################################### #
+
+class Scan(Base):
+    __tablename__ = 'scans'
+    id = Column(Integer, primary_key=True) 
+    scan_id = Column(String(32), index=True)
+
+# ########################################################################### #
 # #############################    BOOKINGS    ############################## #
 # ########################################################################### #
 
