@@ -22,6 +22,9 @@
 # owners.
 
 import sys
+import sqlalchemy
+if float(sqlalchemy.__version__[:3]) < 0.5:
+    sys.exit("SQLAlchemy 0.5+ Required")
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker, clear_mappers
 import sqlalchemy.sql as SQL
