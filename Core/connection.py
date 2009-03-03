@@ -21,28 +21,25 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-import socket, re, time
+import re, time
 
 CRLF = "\r\n"
 
 class Connection(object):
-    # No description necessary
+    # Socket/Connection handler
     
-    def __init__(self, serv, port):
-        # Get a server and a port -> establish a connection to it
-        
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(300)
-        self.server = serv
-        self.port = port
+    def __init__(self, socket, file):
+        # Socket to handle is provided
+        self.sock = socket
+        self.file = file
         self.ping = re.compile(r"PING\s*:\s*(\S+)", re.I)
         self.pong = re.compile(r"PONG\s*:", re.I)
         self.last = time.time()
     
-    def connect(self):
+    def connect(self, nick):
         # Connect
-        self.sock.connect((self.server, self.port))
-        self.file = self.sock.makefile('rb')
+        self.write("NICK %s" % nick)
+        self.write("USER %s 0 * : %s" % (nick, nick))
     
     def write(self, line):
         # Write to socket/server

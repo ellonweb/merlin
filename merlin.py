@@ -22,6 +22,7 @@
 # owners.
 
 import os
+import socket
 import sys
 from time import asctime
 from traceback import format_exc
@@ -50,23 +51,32 @@ class Merlin(object):
                     # Reload variables
                     reload(v)
                     
-                    # Configure self and connection
-                    self.details = {"nick":v.nick, "pass":v.passw}
-                    self.conn = conn(v.server, v.port)
-                    self.conn.connect()
+                    # Configure self
+                    self.nick = v.nick
+                    self.passw = v.passw
+                    self.server = v.server
+                    self.port = v.port
                     
+                    # Connect and pass socket to connection handler
+                    self.connect()
+                    self.conn = conn(self.sock, self.file)
+                    self.conn.connect(self.nick)
+                    
+                    #####
                     self.run()
-
-
-######
-
-
+                    #####
+        #####
+    
+    def connect(self):
+        # Return a socket
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.settimeout(300)
+        self.sock.connect((self.server, self.port))
+        self.file = self.sock.makefile('rb')
+    
     def run(self):
         # Run the bot
-        
-        self.conn.write("NICK %s" % self.details["nick"])
-        self.conn.write("USER %s 0 * : %s" % (self.details["nick"], self.details["nick"]))
-        
+        #####
         # Initialise the bot with the modules that are supposed to be loaded at startup
         for mod in Hooks.__all__:
             cb.reload_mod(mod)
@@ -79,10 +89,10 @@ class Merlin(object):
                 return
             
             # Parse and process the line
-            parsed_line = parse(line, self.conn, self.details["nick"], alliance, cb)
+            parsed_line = parse(line, self.conn, self.nick, alliance, cb)
             try:
                 cb.callback(parsed_line)
-                self.details["nick"] = parsed_line.botnick
+                self.nick = parsed_line.botnick
             except SystemExit:
                 raise
             except KeyboardInterrupt:
@@ -97,4 +107,4 @@ class Merlin(object):
                 parsed_line.alert("An exception occured and has been logged.")
 
 if __name__ == "__main__":
-    Bot() # Start the bot here, if we're the main module.
+    Merlin() # Start the bot here, if we're the main module.
