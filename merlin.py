@@ -22,9 +22,10 @@
 # owners.
 
 import os
+import sys
 from time import asctime
 from traceback import format_exc
-from variables import *
+import variables as v
 from Core.connection import Connection as conn
 from Core.actions import Action as parse
 from Core.exceptions_ import RebootConnection
@@ -32,27 +33,34 @@ import Core.callbacks as cb
 import Core.modules
 import Hooks
 
-# Check the errorlog file exists, if not create it
-try:
-    open("errorlog.txt", "r")
-except IOError:
-    open("errorlog.txt", "w").close()
+# Redirect stderr to stdout
+sys.stderr = sys.stdout
 
-class Bot(object):
+class Merlin(object):
     # Main bot container
     
     def __init__(self):
-        # Initialize the bot
-    
-        self.server = server
-        self.port = port
-        self.details = {"nick":nick, "pass":passw}
-        
-        self.conn = conn(self.server, self.port)
-        self.conn.connect()
-        
-        self.run()
-    
+        try: # break out with Quit exceptions
+            
+            # Main loop
+            while True:
+                
+                try: # break out with Reconnect exceptions
+                    
+                    # Reload variables
+                    reload(v)
+                    
+                    # Configure self and connection
+                    self.details = {"nick":v.nick, "pass":v.passw}
+                    self.conn = conn(v.server, v.port)
+                    self.conn.connect()
+                    
+                    self.run()
+
+
+######
+
+
     def run(self):
         # Run the bot
         
