@@ -27,7 +27,8 @@ import sys
 from time import asctime
 from traceback import format_exc
 import variables as v
-from Core.connection import Connection as conn
+import Core
+from Core.connection import Connection
 from Core.actions import Action as parse
 from Core.exceptions_ import RebootConnection
 import Core.callbacks as cb
@@ -43,7 +44,7 @@ class Merlin(object):
     def __init__(self):
         try: # break out with Quit exceptions
             
-            # Main loop
+            # Connection loop
             while True:
                 
                 try: # break out with Reconnect exceptions
@@ -57,15 +58,61 @@ class Merlin(object):
                     self.server = v.server
                     self.port = v.port
                     
-                    # Connect and pass socket to connection handler
+                    # Connect and pass socket to (temporary) connection handler
                     self.connect()
-                    self.conn = conn(self.sock, self.file)
+                    self.conn = Connection(self.sock, self.file)
                     self.conn.connect(self.nick)
                     
-                    #####
-                    self.run()
-                    #####
-        #####
+                    # Operation loop
+                    while True:
+                        
+                        try: # break out with Reboot exceptions
+                            
+                            # Load in Core modules
+                            
+                            # Connection handler
+                            self.conn = Connection(self.sock, self.file)
+                            
+                            # Load in Hook modules
+                            
+                            # Parse line and shit
+                            while True:
+                                line = self.conn.read()
+                                if not line:
+                                    raise Reconnect
+                                
+                                #parse
+                                try:
+                                    #callbacks
+                                except Reboot:
+                                    raise
+                                except Reconnect:
+                                    raise
+                                except Quit:
+                                    raise
+                                except KeyboardInterrupt:
+                                    raise
+                                except:
+                                    print "ERROR RIGHT HERE!!"
+                                    print format_exc()
+                                    parsed_line.alert("An exception occured and has been logged.")
+                                    continue
+                                
+                            
+                        except Reboot:
+                            print "some message about a reboot"
+                            continue
+                    
+                except Reconnect:
+                    print "some message about a reconnect"
+                    continue
+            
+        except Quit:
+            pass
+        except KeyboardInterrupt:
+            pass
+        print "some quit message"
+        sys.exit()
     
     def connect(self):
         # Return a socket
@@ -76,7 +123,7 @@ class Merlin(object):
     
     def run(self):
         # Run the bot
-        #####
+        
         # Initialise the bot with the modules that are supposed to be loaded at startup
         for mod in Hooks.__all__:
             cb.reload_mod(mod)
