@@ -29,9 +29,9 @@ from traceback import format_exc
 import variables as v
 import Core
 from Core.connection import Connection
-from Core.actions import Action as parse
+from Core.actions import Action
 from Core.exceptions_ import RebootConnection
-import Core.callbacks as cb
+import Core.callbacks as Callbacks
 import Core.modules
 import Hooks
 
@@ -45,6 +45,7 @@ class Merlin(object):
         try: # break out with Quit exceptions
             
             # Connection loop
+            #   Loop back to reset connection
             while True:
                 
                 try: # break out with Reconnect exceptions
@@ -55,6 +56,7 @@ class Merlin(object):
                     # Configure self
                     self.nick = v.nick
                     self.passw = v.passw
+                    self.alliance = v.alliance
                     self.server = v.server
                     self.port = v.port
                     
@@ -63,7 +65,8 @@ class Merlin(object):
                     self.conn = Connection(self.sock, self.file)
                     self.conn.connect(self.nick)
                     
-                    # Operation loop
+                    # System loop
+                    #   Loop back to reboot and reload modules
                     while True:
                         
                         try: # break out with Reboot exceptions
@@ -75,15 +78,19 @@ class Merlin(object):
                             
                             # Load in Hook modules
                             
-                            # Parse line and shit
+                            # Operation loop
+                            #   Loop to parse every line received over connection
                             while True:
                                 line = self.conn.read()
                                 if not line:
                                     raise Reconnect
                                 
-                                #parse
+                                # Parse the line
+                                Message = Action(line, self.conn, self.nick, self.alliance, Callbacks)
                                 try:
-                                    #callbacks
+                                    # Callbacks
+                                    Callbacks.callback(Message)
+                                    self.nick = Message.botnick
                                 except Reboot:
                                     raise
                                 except Reconnect:
@@ -128,30 +135,6 @@ class Merlin(object):
         for mod in Hooks.__all__:
             cb.reload_mod(mod)
             
-        # The beast begins
-        while True:
-            # Read the next line
-            line = self.conn.read()
-            if not line:
-                return
-            
-            # Parse and process the line
-            parsed_line = parse(line, self.conn, self.nick, alliance, cb)
-            try:
-                cb.callback(parsed_line)
-                self.nick = parsed_line.botnick
-            except SystemExit:
-                raise
-            except KeyboardInterrupt:
-                raise
-            except RebootConnection:
-                raise
-            except:
-                open("errorlog.txt", "a").write(asctime()+" Error:\n%s" % format_exc())
-                open("errorlog.txt", "a").write("\nArguments that caused error: %s" % parsed_line)
-                print "ERROR RIGHT HERE!!"
-                print format_exc()
-                parsed_line.alert("An exception occured and has been logged.")
 
 if __name__ == "__main__":
     Merlin() # Start the bot here, if we're the main module.
