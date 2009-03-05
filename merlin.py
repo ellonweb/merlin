@@ -77,6 +77,8 @@ class Merlin(object):
                             self.conn = Connection(self.sock, self.file)
                             
                             # Load in Hook modules
+                            for mod in Hooks.__all__:
+                                Callbacks.reload_mod(mod)
                             
                             # Operation loop
                             #   Loop to parse every line received over connection
@@ -118,8 +120,7 @@ class Merlin(object):
             pass
         except KeyboardInterrupt:
             pass
-        print "some quit message"
-        sys.exit()
+        sys.exit("some quit message")
     
     def connect(self):
         # Return a socket
@@ -127,14 +128,6 @@ class Merlin(object):
         self.sock.settimeout(300)
         self.sock.connect((self.server, self.port))
         self.file = self.sock.makefile('rb')
-    
-    def run(self):
-        # Run the bot
-        
-        # Initialise the bot with the modules that are supposed to be loaded at startup
-        for mod in Hooks.__all__:
-            cb.reload_mod(mod)
-            
 
 if __name__ == "__main__":
     Merlin() # Start the bot here, if we're the main module.
