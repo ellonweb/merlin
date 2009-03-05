@@ -42,22 +42,6 @@ def loadmod(message):
         except PNickParseError:
             message.alert("You don't have access for that.")
 
-@callback('PRIVMSG')
-def addmod(message):
-    """Add a module."""
-
-    msg = message.get_msg()
-    if msg[:7] == "!addmod":
-        try:
-            if message.get_pnick() in admins:
-                for mod in msg.split()[1:]:
-                    open(os.path.join("Hooks/mods.txt"), "a").write(mod)
-                    message.alert(load(mod, message))
-            else:
-                message.alert("You don't have access for that.")
-        except PNickParseError:
-            message.alert("You don't have access for that.")
-
 def load(mod, message):
     # Stuff is parsed, and we'll try loading the module
     try:
