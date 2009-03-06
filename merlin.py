@@ -50,8 +50,11 @@ class Merlin(object):
                 
                 try: # break out with Reconnect exceptions
                     
-                    # Reload variables
-                    reload(v)
+                    try:
+                        # Reload variables
+                        reload(v)
+                    except (ImportError, SyntaxError):
+                        print "some message about failing to reload variables"
                     
                     # Configure self
                     self.nick = v.nick
@@ -88,23 +91,17 @@ class Merlin(object):
                                     raise Reconnect
                                 
                                 # Parse the line
-                                Message = Action(line, self.conn, self.nick, self.alliance, Callbacks)
+                                self.Message = Action(line, self.conn, self.nick, self.alliance, Callbacks)
                                 try:
                                     # Callbacks
-                                    Callbacks.callback(Message)
+                                    Callbacks.callback(self.Message)
                                     self.nick = Message.botnick
-                                except Reboot:
-                                    raise
-                                except Reconnect:
-                                    raise
-                                except Quit:
-                                    raise
-                                except KeyboardInterrupt:
+                                except (Reboot, Reconnect, Quit, KeyboardInterrupt):
                                     raise
                                 except:
                                     print "ERROR RIGHT HERE!!"
                                     print format_exc()
-                                    parsed_line.alert("An exception occured and has been logged.")
+                                    self.Message.alert("An exception occured and has been logged.")
                                     continue
                                 
                             
@@ -116,11 +113,8 @@ class Merlin(object):
                     print "some message about a reconnect"
                     continue
             
-        except Quit:
-            pass
-        except KeyboardInterrupt:
-            pass
-        sys.exit("some quit message")
+        except (Quit, KeyboardInterrupt):
+            sys.exit("some quit message")
     
     def connect(self):
         # Return a socket
@@ -128,6 +122,11 @@ class Merlin(object):
         self.sock.settimeout(300)
         self.sock.connect((self.server, self.port))
         self.file = self.sock.makefile('rb')
+    
+    def loader(self, name, hook=False):
+        # Load a module
+        try:
+            return reload(__import__(name, globals(), locals(), [''], 0))
 
 if __name__ == "__main__":
     Merlin() # Start the bot here, if we're the main module.
