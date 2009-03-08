@@ -26,10 +26,6 @@ import socket
 import sys
 from time import asctime
 from traceback import format_exc
-import variables as v
-import Core
-from Core.connection import Connection
-from Core.actions import Action
 from Core.exceptions_ import RebootConnection
 import Core.callbacks as Callbacks
 import Core.modules
@@ -41,6 +37,8 @@ sys.stderr = sys.stdout
 class Merlin(object):
     # Main bot container
     
+    mods = {"V": "variables", "Connection": "Core.connection", "Action": "Core.actions"}
+    
     def __init__(self):
         try: # break out with Quit exceptions
             
@@ -50,22 +48,16 @@ class Merlin(object):
                 
                 try: # break out with Reconnect exceptions
                     
-                    try:
-                        # Reload variables
-                        reload(v)
-                    except (ImportError, SyntaxError):
-                        print "some message about failing to reload variables"
+                    # Load up the Core
+                    # This will be repeated in the System loop
+                    self.lastload = self.coreload()
                     
                     # Configure self
-                    self.nick = v.nick
-                    self.passw = v.passw
-                    self.alliance = v.alliance
-                    self.server = v.server
-                    self.port = v.port
+                    self.nick = self.V.nick
                     
                     # Connect and pass socket to (temporary) connection handler
                     self.connect()
-                    self.conn = Connection(self.sock, self.file)
+                    self.conn = self.Connection(self.sock, self.file)
                     self.conn.connect(self.nick)
                     
                     # System loop
@@ -74,10 +66,13 @@ class Merlin(object):
                         
                         try: # break out with Reboot exceptions
                             
-                            # Load in Core modules
+                            # Load up the Core
+                            if self.lastload is True:
+                                self.coreload()
+                            self.lastload = True
                             
                             # Connection handler
-                            self.conn = Connection(self.sock, self.file)
+                            self.conn = self.Connection(self.sock, self.file)
                             
                             # Load in Hook modules
                             for mod in Hooks.__all__:
@@ -91,14 +86,24 @@ class Merlin(object):
                                     raise Reconnect
                                 
                                 # Parse the line
-                                self.Message = Action(line, self.conn, self.nick, self.alliance, Callbacks)
+                                self.Message = self.Action(line, self.conn, self.nick, self.V.alliance, Callbacks)
                                 try:
                                     # Callbacks
                                     Callbacks.callback(self.Message)
-                                    self.nick = Message.botnick
+                                    self.nick = self.Message.botnick
                                 except (Reboot, Reconnect, Quit, KeyboardInterrupt):
                                     raise
+                                except LoadHook, name:
+                                    # Load a Hook
+                                    try:
+                                        mod = self.load("Hooks."+name)
+                                        #Callbacks.unloadmod(name)
+                                        #Callbacks.addmod(mod)
+                                        self.Message.reply("Module %s loaded successfully." % (name,))
+                                    except (ImportError, SyntaxError), error:
+                                        self.Message.alert("Syntax error in module %s. Printing traceback to stderr." % (name,))
                                 except:
+                                    # Error while executing a callback/mod/hook
                                     print "ERROR RIGHT HERE!!"
                                     print format_exc()
                                     self.Message.alert("An exception occured and has been logged.")
@@ -120,13 +125,39 @@ class Merlin(object):
         # Return a socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(300)
-        self.sock.connect((self.server, self.port))
+        self.sock.connect((self.V.server, self.V.port))
         self.file = self.sock.makefile('rb')
     
-    def loader(self, name, hook=False):
+    def load(self, name):
         # Load a module
+        return reload(__import__(name, globals(), locals(), [''], 0))
+    
+    def coreload(self):
+        # Reload all Core modules
         try:
-            return reload(__import__(name, globals(), locals(), [''], 0))
+            # Temporarily store the new imports
+            temp = object()
+            for name, path in self.mods:
+                setattr(temp, name, self.load(path))
+            # If no errors occurred during imports,
+            #  assign modules to self, everything worked.
+            setattr(self, name, getattr(temp, name))
+            return True
+        except (ImportError, SyntaxError), error:
+            # There was an error importing the modules,
+            #  so reset them all back to their previous state.
+            for name, path in self.mods:
+                if hasattr(self, name):
+                    sys.modules[path] = getattr(self, name) # attribute error!!!
+                else:
+                    # One of the modules (probably all!) doesn't have a
+                    #  previous state. This should only occur during the
+                    #  initial imports. Exit and wait to be provided with
+                    #  working code! Hehehehehe :D
+                    print "Error in initial Core import."
+                    print format_exc()
+                    sys.exit()
+            return False
 
 if __name__ == "__main__":
     Merlin() # Start the bot here, if we're the main module.
