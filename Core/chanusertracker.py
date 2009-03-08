@@ -24,7 +24,7 @@
 
 from .variables import usercache
 from exceptions_ import PNickParseError, UserError
-#from modules import M
+import DB
 
 Channels = {}
 Nicks = {}
@@ -117,10 +117,10 @@ def auth_user(name, pnickf, username, passwd):
     try:
         pnick = pnickf()
         # They have a pnick, so shouldn't need to auth, let's auth them anyway
-        user = M.DB.Maps.User.load(name=pnick)
+        user = DB.Maps.User.load(name=pnick)
     except PNickParseError:
         # They don't have a pnick, expected
-        user = M.DB.Maps.User.load(name=username, passwd=passwd)
+        user = DB.Maps.User.load(name=username, passwd=passwd)
     
     if user is None:
         raise UserError
@@ -157,7 +157,7 @@ def get_user(name, pnick=None, pnickf=None):
         # Call the pnick function, might raise PNickParseError
         pnick = pnickf()
     
-    user = M.DB.Maps.User.load(name=pnick)
+    user = DB.Maps.User.load(name=pnick)
     if user is None:
         raise UserError
     

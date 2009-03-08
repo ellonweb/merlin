@@ -24,7 +24,6 @@
 import os
 import socket
 import sys
-from time import asctime
 from traceback import format_exc
 from Core.exceptions_ import RebootConnection
 import Core.callbacks as Callbacks
@@ -37,7 +36,9 @@ sys.stderr = sys.stdout
 class Merlin(object):
     # Main bot container
     
-    mods = {"v": "variables", "Connection": "Core.connection", "Action": "Core.actions"}
+    mods = {"v": "variables", "Connection": "Core.connection", 
+            "Action": "Core.actions", "DB": "Core.db", 
+            "CUT": "Core.chanusertracker", "loadable": "Core.loadable"}
     
     def __init__(self):
         try: # break out with Quit exceptions
@@ -74,6 +75,9 @@ class Merlin(object):
                             
                             # Connection handler
                             self.conn = self.Connection(self.sock, self.file)
+                            
+                            # Configure Core
+                            self.conn.write("WHOIS %s" % nick)
                             
                             # Load in Hook modules
                             for mod in Hooks.__all__:
@@ -149,7 +153,7 @@ class Merlin(object):
             #  so reset them all back to their previous state.
             for name, path in self.mods:
                 if hasattr(self, name):
-                    sys.modules[path] = getattr(self, name) # attribute error!!!
+                    sys.modules[path] = getattr(self, name)
                 else:
                     # One of the modules (probably all!) doesn't have a
                     #  previous state. This should only occur during the

@@ -23,7 +23,7 @@
 
 import re
 from exceptions_ import ParseError, PNickParseError, UserError
-#from modules import M
+import chanusertracker as CUT
 
 # ########################################################################### #
 # ##############################    LOADABLE    ############################# #
@@ -101,7 +101,7 @@ class loadable(object):
     def has_access(self, message):
         if self.access == -1:
             return 1
-        user = M.CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
+        user = CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
         if user is None:
             raise UserError
         if self.access == 0 or user.access & self.access > 0:
