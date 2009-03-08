@@ -37,7 +37,7 @@ sys.stderr = sys.stdout
 class Merlin(object):
     # Main bot container
     
-    mods = {"V": "variables", "Connection": "Core.connection", "Action": "Core.actions"}
+    mods = {"v": "variables", "Connection": "Core.connection", "Action": "Core.actions"}
     
     def __init__(self):
         try: # break out with Quit exceptions
@@ -50,15 +50,17 @@ class Merlin(object):
                     
                     # Load up the Core
                     # This will be repeated in the System loop
-                    self.lastload = self.coreload()
+                    self.coreload()
                     
                     # Configure self
-                    self.nick = self.V.nick
+                    self.nick = self.v.nick
                     
                     # Connect and pass socket to (temporary) connection handler
                     self.connect()
                     self.conn = self.Connection(self.sock, self.file)
+                    print "Connecting..."
                     self.conn.connect(self.nick)
+                    self.Message = None
                     
                     # System loop
                     #   Loop back to reboot and reload modules
@@ -67,9 +69,8 @@ class Merlin(object):
                         try: # break out with Reboot exceptions
                             
                             # Load up the Core
-                            if self.lastload is True:
-                                self.coreload()
-                            self.lastload = True
+                            if self.coreload() and self.Message:
+                                self.Message.reply("Core reloaded successfully.")
                             
                             # Connection handler
                             self.conn = self.Connection(self.sock, self.file)
@@ -86,12 +87,12 @@ class Merlin(object):
                                     raise Reconnect
                                 
                                 # Parse the line
-                                self.Message = self.Action(line, self.conn, self.nick, self.V.alliance, Callbacks)
+                                self.Message = self.Action(line, self.conn, self.nick, self.v.alliance, Callbacks)
                                 try:
                                     # Callbacks
                                     Callbacks.callback(self.Message)
                                     self.nick = self.Message.botnick
-                                except (Reboot, Reconnect, Quit, KeyboardInterrupt):
+                                except (Reboot, Reconnect, socket.error, Quit, KeyboardInterrupt):
                                     raise
                                 except LoadHook, name:
                                     # Load a Hook
@@ -111,21 +112,21 @@ class Merlin(object):
                                 
                             
                         except Reboot:
-                            print "some message about a reboot"
+                            print "Attempting to reload the system..."
                             continue
                     
-                except Reconnect:
-                    print "some message about a reconnect"
+                except (Reconnect, socket.error), error:
+                    print "Reconnecting..."
                     continue
             
         except (Quit, KeyboardInterrupt):
-            sys.exit("some quit message")
+            sys.exit("Bye!")
     
     def connect(self):
         # Return a socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(300)
-        self.sock.connect((self.V.server, self.V.port))
+        self.sock.connect((self.v.server, self.v.port))
         self.file = self.sock.makefile('rb')
     
     def load(self, name):
