@@ -344,7 +344,7 @@ class AllianceHistory(Base):
     tick = Column(Integer, primary_key=True, autoincrement=False)
     id = Column(Integer, primary_key=True, autoincrement=False)
     alliance_history_tick = ForeignKeyConstraint(('alliance_history.tick'), ('updates.tick'), deferrable=True, ondelete='cascade')
-    #alliance_history_id = ForeignKeyConstraint(('alliance_history.id'), ('galaxy.id'), deferrable=True)
+    #alliance_history_id = ForeignKeyConstraint(('alliance_history.id'), ('alliance.id'), deferrable=True)
     name = Column(String(20))
     size = Column(Integer)
     members = Column(Integer)
@@ -414,10 +414,47 @@ Alliance.planets = relation(Planet, secondary=Intel.__table__, primaryjoin=Intel
 # ###############################    SCANS    ############################### #
 # ########################################################################### #
 
-class Scan(Base):
-    __tablename__ = 'scans'
-    id = Column(Integer, primary_key=True) 
-    scan_id = Column(String(32), index=True)
+class Scan(object):
+    id = Column(String(32), primary_key=True) 
+    planet_id = Column(Integer, index=True)
+    tick = Column(Integer, index=True)
+    user_id = Column(Integer, index=True)
+
+class PlanetScan(Base, Scan):
+    __tablename__ = 'planetscan'
+    roid_metal = Column(Integer)
+    roid_crystal = Column(Integer)
+    roid_eonium = Column(Integer)
+    res_metal = Column(Integer)
+    res_crystal = Column(Integer)
+    res_eonium = Column(Integer)
+    factory_usage_light = Column(String(7))
+    factory_usage_medium = Column(String(7))
+    factory_usage_heavy = Column(String(7))
+    prod_res = Column(Integer)
+    agents = Column(Integer)
+    guards = Column(Integer)
+
+class DevScan(Base, Scan):
+    __tablename__ = 'devscan'
+    light_factory = Column(Integer)
+    medium_factory = Column(Integer)
+    heavy_factory = Column(Integer)
+    wave_amplifier = Column(Integer)
+    wave_distorter = Column(Integer)
+    metal_refinery = Column(Integer)
+    crystal_refinery = Column(Integer)
+    eonium_refinery = Column(Integer)
+    research_lab = Column(Integer)
+    finance_centre = Column(Integer)
+    security_centre = Column(Integer)
+    travel = Column(Integer)
+    infrastructure = Column(Integer)
+    hulls = Column(Integer)
+    waves = Column(Integer)
+    core = Column(Integer)
+    covert_op = Column(Integer)
+    mining = Column(Integer)
 
 # ########################################################################### #
 # #############################    BOOKINGS    ############################## #
