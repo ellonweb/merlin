@@ -38,10 +38,8 @@ class relay(loadable):
     def execute(self, message, user, params):
         self.relay(message, message.get_nick(), params.group(1))
     
-    def robocop(self, message):
-        params = loadable.robocop(self, message)
-        if not params:
-            return
+    @loadable.runcop
+    def robocop(self, message, params):
         self.relay(message, params.group(1), params.group(2))
     
     def relay(self, message, nick, msg):
