@@ -26,18 +26,10 @@ from .Core.exceptions_ import RebootConnection, PNickParseError
 from .Core.modules import M
 callback = M.loadable.callback
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', admin=True)
 def hop(message):
     """Get the bot to quit and reconnect"""
-    
-    if message.get_msg() == "!hop":
-        try:
-            if message.get_pnick() in admins:
-                dohop()
-            else:
-                message.alert("You don't have access for that.")
-        except PNickParseError:
-            message.alert("You don't have access for that.")
+    dohop()
 
 def dohop():
     # This is a separate function for legacy reasons

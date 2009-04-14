@@ -55,17 +55,10 @@ class handler(SocketServer.StreamRequestHandler):
             message._msg = l
             message.callbackmod.robocop(message)
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', admin=True)
 def robocop(message):
     "Start the RoBoCoP server"
-    if message.get_msg() == "!robocop":
-        try:
-            if message.get_pnick() in admins:
-                startcop(message)
-            else:
-                message.alert("You don't have access for that.")
-        except PNickParseError:
-            message.alert("You don't have access for that.")
+    startcop(message)
 
 @callback('396')
 def startcop(message):
@@ -80,25 +73,18 @@ def startcop(message):
         thread.killcop = False
         thread.start()
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', admin=True)
 def killcop(message):
     "Stop the RoBoCoP server"
-    if message.get_msg() == "!killcop":
-        try:
-            if message.get_pnick() in admins:
-                for thread in threading.enumerate():
-                    if thread.getName() == "RoBoCoP":
-                        thread.message = message
-                        thread.killcop = True
-                        copkiller = socket.socket(socket.AF_UNIX)
-                        try:
-                            copkiller.connect((addr))
-                            copkiller.close()
-                        except socket.error:
-                            pass
-                        return
-                message.alert("RoBoCoP is already dead.")
-            else:
-                message.alert("You don't have access for that.")
-        except PNickParseError:
-            message.alert("You don't have access for that.")
+    for thread in threading.enumerate():
+        if thread.getName() == "RoBoCoP":
+            thread.message = message
+            thread.killcop = True
+            copkiller = socket.socket(socket.AF_UNIX)
+            try:
+                copkiller.connect((addr))
+                copkiller.close()
+            except socket.error:
+                pass
+            return
+    message.alert("RoBoCoP is already dead.")

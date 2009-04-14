@@ -48,17 +48,10 @@ def hop(message = None):
         message.join(channel)
         sleep(5)
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', admin=True)
 def relayhopper(message):
     "Start the RelayHopper"
-    if message.get_msg() == "!relayhopper":
-        try:
-            if message.get_pnick() in admins:
-                starthopper(message)
-            else:
-                message.alert("You don't have access for that.")
-        except PNickParseError:
-            message.alert("You don't have access for that.")
+    starthopper(message)
 
 @callback('396')
 def starthopper(message):
@@ -75,22 +68,15 @@ def starthopper(message):
         thread.message = message
         thread.start()
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', admin=True)
 def stophopper(message):
     "Stop the RelayHopper"
-    if message.get_msg() == "!stophopper":
-        try:
-            if message.get_pnick() in admins:
-                for thread in threading.enumerate():
-                    if thread.getName() == "RelayHopper":
-                        thread.cancel()
-                        message.alert("RelayHopper has been cancelled.")
-                        return
-                message.alert("RelayHopper isn't running.")
-            else:
-                message.alert("You don't have access for that.")
-        except PNickParseError:
-            message.alert("You don't have access for that.")
+    for thread in threading.enumerate():
+        if thread.getName() == "RelayHopper":
+            thread.cancel()
+            message.alert("RelayHopper has been cancelled.")
+            return
+    message.alert("RelayHopper isn't running.")
 
 def secchan(message, channel):
     if channel in channels:
