@@ -33,7 +33,7 @@ class request(loadable):
     def __init__(self):
         loadable.__init__(self)
         self.paramre = re.compile(r"\s("+"|".join(scans.keys())+r")\w*\s"+self.planet_coordre.pattern+r"(?:\s(\d+))?", re.I)
-        self.robore = re.compile(r"\s(\d+)\s(\S+)\s("+"|".join(scans.keys())+r")\s"+self.planet_coordre.pattern+r"(?:\s(\d+))?", re.I)
+        self.robore = re.compile(r"\s(\d+)\s(\S+)\s("+"|".join(scans.keys())+r")\s"+self.planet_coordre.pattern+r"(\d+)(\d+)", re.I)
         self.usage += " scantype x.y.z [dists]"
     
     @loadable.run_with_access(access['member'])
@@ -48,14 +48,18 @@ class request(loadable):
         
         session = M.DB.Session()
         request = M.DB.Maps.Request(requester_id=user.id, planet_id=planet.id, scantype=scan)
-        if params.group(5) is not None:
-            request.dists = int(params.group(5))
+        request.dists = int(params.group(5) or 0)
         
         session.add(request)
         session.commit()
         
+        session.add(planet)
+        dists_intel = planet.intel.dists if planet.intel else 0
+        dists_request = request.dists
+        session.close()
+        
         message.reply("Requested a %s Scan of %s:%s:%s. !cancelscan %s to cancel the request." % (scans[scan]['name'], planet.x, planet.y, planet.z, request.id,))
-        self.request(message, request.id, user.name, scan, planet.x, planet.y, planet.z, params.group(5))
+        self.request(message, request.id, user.name, scan, planet.x, planet.y, planet.z, dists_intel, dists_request)
         return
     
     @loadable.runcop
@@ -64,12 +68,8 @@ class request(loadable):
         name = params.group(2)
         scan = params.group(3).upper()
         x,y,z = params.group(4,5,6)
-        self.request(message, id, name, scan, x, y, z, params.group(7))
+        dists_intel, dists_request = params.group(7,8)
+        self.request(message, id, name, scan, x, y, z, dists_intel, dists_request)
     
-    def request(self, message, id, name, scan, x,y,z, dists):
-        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s. %s amps required. " % (id, name, scans[scan]['name'], x,y,z, dists,) + url % (scans[scan]['type'],x,y,z,), channels.get('scan', channels['private']))
-    
-    def dists(self, planet):
-        session = M.DB.Session()
-        session.add(planet)
-        intel = planet.intel.dists
+    def request(self, message, id, name, scan, x,y,z, dists_intel, dists_request):
+        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (id, name, scans[scan]['name'], x,y,z, dists_intel, dists_request,) + url % (scans[scan]['type'],x,y,z,), channels.get('scan', channels['private']))
