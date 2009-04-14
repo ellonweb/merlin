@@ -414,10 +414,28 @@ Alliance.planets = relation(Planet, secondary=Intel.__table__, primaryjoin=Intel
 # ###############################    SCANS    ############################### #
 # ########################################################################### #
 
+class Request(Base):
+    __tablename__ = 'request'
+    id = Column(Integer, primary_key=True)
+    requester_id = Column(Integer)
+    planet_id = Column(Integer, index=True)
+    scantype = Column(String(1))
+    dists = Column(Integer)
+    scan_id = Column(String(32))
+
+class Scan(Base):
+    __tablename__ = 'scan'
+    id = Column(String(32), primary_key=True)
+    planet_id = Column(Integer, index=True)
+    scantype = Column(String(11))
+    tick = Column(Integer)
+    group_id = Column(String(32))
+    scanner_id = Column(Integer)
+
 class PlanetScan(Base):
     __tablename__ = 'planetscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True) 
+    scan_id = Column(String(32), index=True)
     planet_id = Column(Integer, index=True)
     tick = Column(Integer, index=True)
     user_id = Column(Integer, index=True)
@@ -437,7 +455,7 @@ class PlanetScan(Base):
 class DevScan(Base):
     __tablename__ = 'devscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True) 
+    scan_id = Column(String(32), index=True)
     planet_id = Column(Integer, index=True)
     tick = Column(Integer, index=True)
     user_id = Column(Integer, index=True)
@@ -463,7 +481,7 @@ class DevScan(Base):
 class UnitScan(Base):
     __tablename__ = 'unitscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True) 
+    scan_id = Column(String(32), index=True)
     planet_id = Column(Integer, index=True)
     tick = Column(Integer, index=True)
     user_id = Column(Integer, index=True)
