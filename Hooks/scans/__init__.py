@@ -20,7 +20,7 @@
 # owners.
 
 # List of package modules
-__all__ = ["request",]
+__all__ = ["request","parser"]
 
 scans = {
     "P": {"name":"Planet",         "type":"1"},

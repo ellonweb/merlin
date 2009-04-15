@@ -35,18 +35,18 @@ def catcher(message):
     try:
         user = message.get_pnick()
     except PNickParseError:
-        user = None
+        user = ""
     for m in scanre.finditer(message.get_msg()):
-        scan(m.group(1), user, None)
+        scan(user, "scan", m.group(1))
         pass
     for m in scangrpre.finditer(message.get_msg()):
-        scan(None, user, m.group(1))
+        scan(user, "group", m.group(1))
         pass
 
-def scan(scanid, user, groupid):
-    Popen(map(str,["python", __file__, scanid, user, groupid,]))
+def scan(user, type, id):
+    Popen(map(str,["python", "morganleparser.py", user, type, id,]))
 
-if __name__ == "__main__":
-    import sys
-    print "HELLO WORLD!"
-    print sys.argv
+class parse(object):
+    def __init__(self, *args):
+        print args
+    pass
