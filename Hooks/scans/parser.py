@@ -19,20 +19,34 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-# List of package modules
-__all__ = ["request",]
+# Parse a scan
 
-scans = {
-    "P": {"name":"Planet",         "type":"1"},
-    "L": {"name":"Landing",        "type":"2"},
-    "D": {"name":"Development",    "type":"3"},
-    "U": {"name":"Unit",           "type":"4"},
-    "N": {"name":"News",           "type":"5"},
-    "I": {"name":"Incoming",       "type":"6"},
-    "J": {"name":"Jumpgate Probe", "type":"7"},
-    "A": {"name":"Advanced Unit",  "type":"8"}
-}
+import re
+from subprocess import Popen
+from .Core.modules import M
+callback = M.loadable.callback
+from Hooks.scans import scans, scanurl, groupurl
 
-requesturl = "http://game.planetarion.com/waves.pl?action=single_scan&scan_type=%s&scan_x=%s&scan_y=%s&scan_z=%s"
-scanurl = "http://game.planetarion.com/showscan.pl?scan_id=%s"
-groupurl = "http://game.planetarion.com/showscan.pl?scan_grp=%s"
+scanre=re.compile("http://[^/]+/showscan.pl\?scan_id=([0-9a-zA-Z]+)")
+scangrpre=re.compile("http://[^/]+/showscan.pl\?scan_grp=([0-9a-zA-Z]+)")
+
+@callback('PRIVMSG')
+def catcher(message):
+    try:
+        user = message.get_pnick()
+    except PNickParseError:
+        user = None
+    for m in scanre.finditer(message.get_msg()):
+        scan(m.group(1), user, None)
+        pass
+    for m in scangrpre.finditer(message.get_msg()):
+        scan(None, user, m.group(1))
+        pass
+
+def scan(scanid, user, groupid):
+    Popen(map(str,["python", __file__, scanid, user, groupid,]))
+
+if __name__ == "__main__":
+    import sys
+    print "HELLO WORLD!"
+    print sys.argv

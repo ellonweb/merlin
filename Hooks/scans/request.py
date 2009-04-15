@@ -25,7 +25,7 @@ import re
 from .variables import access, channels
 from .Core.modules import M
 loadable = M.loadable.loadable
-from Hooks.scans import scans, url
+from Hooks.scans import scans, requesturl
 
 class request(loadable):
     """Request a scan"""
@@ -72,4 +72,4 @@ class request(loadable):
         self.request(message, id, name, scan, x, y, z, dists_intel, dists_request)
     
     def request(self, message, id, name, scan, x,y,z, dists_intel, dists_request):
-        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (id, name, scans[scan]['name'], x,y,z, dists_intel, dists_request,) + url % (scans[scan]['type'],x,y,z,), channels.get('scan', channels['private']))
+        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (id, name, scans[scan]['name'], x,y,z, dists_intel, dists_request,) + requesturl % (scans[scan]['type'],x,y,z,), channels.get('scan', channels['private']))
