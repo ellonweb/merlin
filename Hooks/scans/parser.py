@@ -23,9 +23,10 @@
 
 import re
 from subprocess import Popen
+from urllib2 import urlopen
 from .Core.modules import M
 callback = M.loadable.callback
-from Hooks.scans import scans, scanurl, groupurl
+from Hooks.scans import scans
 
 scanre=re.compile("http://[^/]+/showscan.pl\?scan_id=([0-9a-zA-Z]+)")
 scangrpre=re.compile("http://[^/]+/showscan.pl\?scan_grp=([0-9a-zA-Z]+)")
@@ -47,6 +48,36 @@ def scan(user, type, id):
     Popen(map(str,["python", "morganleparser.py", user, type, id,]))
 
 class parse(object):
-    def __init__(self, *args):
-        print args
-    pass
+    def __init__(user, type, id):
+        try:
+            if type == "scan":
+                self.scan(user, id)
+            elif type == "group":
+                self.group(user, id)
+        except Exception, e:
+            print "Exception in scan: "+e.__str__()
+            traceback.print_exc()
+    
+    def group(user, id):
+        page = urlopen('http://game.planetarion.com/showscan.pl?scan_grp='+ id).read()
+        for m in re.finditer('scan_id=([0-9a-zA-Z]+)',page):
+            try:
+                self.scan(user, m.group(1))
+            except Exception, e:
+                print "Exception in scan: "+e.__str__()
+                traceback.print_exc()
+    
+    def scan(user, id):
+        page = urlopen('http://game.planetarion.com/showscan.pl?scan_id='+ id).read()
+        
+        m = re.search('>([^>]+) on (\d+)\:(\d+)\:(\d+) in tick (\d+)', page)
+        if not m:
+            print "Expired/non-matchinng scan (id: %s)" %(id,)
+            return
+        
+        scan = m.group(1)[0].upper()
+        x = m.group(2)
+        y = m.group(3)
+        z = m.group(4)
+        tick = m.group(5)
+

@@ -34,5 +34,3 @@ scans = {
 }
 
 requesturl = "http://game.planetarion.com/waves.pl?action=single_scan&scan_type=%s&scan_x=%s&scan_y=%s&scan_z=%s"
-scanurl = "http://game.planetarion.com/showscan.pl?scan_id=%s"
-groupurl = "http://game.planetarion.com/showscan.pl?scan_grp=%s"
