@@ -404,7 +404,7 @@ class Intel(Base):
         if self.comment:
             ret += "comment=%s"%(self.comment,)
         return ret
-Planet.intel = relation(Intel, primaryjoin=Intel.planet_id==Planet.id, foreign_keys=(Planet.id,))
+Planet.intel = relation(Intel, primaryjoin=Intel.planet_id==Planet.id, foreign_keys=(Intel.planet_id,), uselist=False)
 Intel.planet = relation(Planet, primaryjoin=Planet.id==Intel.planet_id, foreign_keys=(Intel.planet_id,))
 Intel.alliance = relation(Alliance, primaryjoin=Alliance.id==Intel.alliance_id, foreign_keys=(Intel.alliance_id,))
 Planet.alliance = relation(Alliance, secondary=Intel.__table__, primaryjoin=Intel.planet_id==Planet.id, secondaryjoin=Alliance.id==Intel.alliance_id, foreign_keys=(Intel.planet_id, Intel.alliance_id), uselist=False)
