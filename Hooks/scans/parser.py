@@ -107,6 +107,9 @@ class parse(object):
     def parse_P(page):
         planetscan = M.DB.Maps.PlanetScan()
 
+        #m = re.search('<tr><td class="left">Asteroids</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><td class="left">Resources</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><th>Score</th><td>(\d+)</td><th>Value</th><td>(\d+)</td></tr>', page)
+        #m = re.search(r"""<tr><td class="left">Asteroids</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><td class="left">Resources</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><th>Score</th><td>(\d+)</td><th>Value</th><td>(\d+)</td></tr>""", page)
+
         page=re.sub(',','',page)
         m=re.search(r"""
             <tr><td[^>]*>Metal</td><td[^>]*>(\d+)</td><td[^>]*>(\d+)</td></tr>\s*
@@ -153,3 +156,53 @@ class parse(object):
 
         return planetscan
 
+    def parse_D(page):
+        devscan = M.DB.Maps.DevScan()
+
+        m=re.search("""
+            <tr><td[^>]*>Light\s+Factory</td><td[^>]*>(\d*)</td></tr>\s*
+            <tr><td[^>]*>Medium\s+Factory</td><td[^>]*>(\d*)</td></tr>\s*
+            <tr><td[^>]*>Heavy\s+Factory</td><td[^>]*>(\d*)</td></tr>\s*
+            <tr><td[^>]*>Wave\s+Amplifier</td><td[^>]*>(\d*)</td></tr>\s*
+            <tr><td[^>]*>Wave\s+Distorter</td><td[^>]*>(\d*)</td></tr>\s*
+            <tr><td[^>]*>Metal\s+Refinery</td><td[^>]*>(\d*)</td></tr>\s*
+            <tr><td[^>]*>Crystal\s+Refinery</td><td[^>]*>(\d*)</td></tr>\s*
+            <tr><td[^>]*>Eonium\s+Refinery</td><td[^>]*>(\d*)</td></tr>\s*
+            <tr><td[^>]*>Research\s+Laboratory</td><td[^>]*>(\d*)</td></tr>\s*
+            <tr><td[^>]*>Finance\s+Centre</td><td[^>]*>(\d*)</td></tr>\s*
+            <tr><td[^>]*>Security\s+Centre</td><td[^>]*>(\d*)</td></tr>
+        """, page,re.VERBOSE)
+
+        devscan.light_factory = m.group(1)
+        devscan.medium_factory = m.group(2)
+        devscan.heavy_factory = m.group(3)
+        devscan.wave_amplifier = m.group(4)
+        devscan.wave_distorter = m.group(5)
+        devscan.metal_refinery = m.group(6)
+        devscan.crystal_refinery = m.group(7)
+        devscan.eonium_refinery = m.group(8)
+        devscan.research_lab = m.group(9)
+        devscan.finance_centre = m.group(10)
+        devscan.security_centre = m.group(11)
+
+        m = re.search("""
+            <tr><td[^>]*>Space\s+Travel</td><td[^>]*>(\d+)</td></tr>\s*
+            <tr><td[^>]*>Infrastructure</td><td[^>]*>(\d+)</td></tr>\s*
+            <tr><td[^>]*>Hulls</td><td[^>]*>(\d+)</td></tr>\s*
+            <tr><td[^>]*>Waves</td><td[^>]*>(\d+)</td></tr>\s*
+            <tr><td[^>]*>Core\s+Extraction</td><td[^>]*>(\d+)</td></tr>\s*
+            <tr><td[^>]*>Covert\s+Ops</td><td[^>]*>(\d+)</td></tr>\s*
+            <tr><td[^>]*>Asteroid\s+Mining</td><td[^>]*>(\d+)</td></tr>
+        """, page,re.VERBOSE)
+
+        devscan.travel = m.group(1)
+        devscan.infrastructure = m.group(2)
+        devscan.hulls = m.group(3)
+        devscan.waves = m.group(4)
+        devscan.core = m.group(5)
+        devscan.covert_op = m.group(6)
+        devscan.mining = m.group(7)
+
+        return devscan
+
+    
