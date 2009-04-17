@@ -437,7 +437,6 @@ class PlanetScan(Base):
     __tablename__ = 'planetscan'
     id = Column(Integer, primary_key=True)
     scan_id = Column(String(32), index=True, unique=True)
-    planet_id = Column(Integer, index=True)
     roid_metal = Column(Integer)
     roid_crystal = Column(Integer)
     roid_eonium = Column(Integer)
@@ -455,9 +454,6 @@ class DevScan(Base):
     __tablename__ = 'devscan'
     id = Column(Integer, primary_key=True)
     scan_id = Column(String(32), index=True)
-    planet_id = Column(Integer, index=True)
-    tick = Column(Integer, index=True)
-    user_id = Column(Integer, index=True)
     light_factory = Column(Integer)
     medium_factory = Column(Integer)
     heavy_factory = Column(Integer)
@@ -481,9 +477,6 @@ class UnitScan(Base):
     __tablename__ = 'unitscan'
     id = Column(Integer, primary_key=True)
     scan_id = Column(String(32), index=True)
-    planet_id = Column(Integer, index=True)
-    tick = Column(Integer, index=True)
-    user_id = Column(Integer, index=True)
     ship_id = Column(Integer)
     amount = Column(Integer)
 

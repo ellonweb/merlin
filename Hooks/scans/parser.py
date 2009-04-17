@@ -99,7 +99,6 @@ class parse(object):
         
         pdunjascan = getattr(self, "parse_"+scantype)(page)
         pdunjascan.scan_id = id
-        pdunjascan.planet_id = planet.id
         session.add(pdunjascan)
         session.commit()
         session.close()
