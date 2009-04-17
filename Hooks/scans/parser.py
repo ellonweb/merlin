@@ -226,3 +226,22 @@ class parse(object):
             unitscan.amount = m.group(2)
 
         session.commit()
+
+    def parse_A(id, page):
+        session = M.DB.Session()
+
+        for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+)</td>', page):
+            print m.groups()
+
+            unitscan = M.DB.Maps.AUScan(scan_id=id)
+            session.add(unitscan)
+
+            try:
+                unitscan.ship_id = M.DB.Maps.Ship.load(name=m.group(1)).id
+            except AttributeError:
+                print "No such unit %s" % (m.group(1),)
+                session.rollback()
+                return
+            unitscan.amount = m.group(2)
+
+        session.commit()
