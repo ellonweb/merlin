@@ -425,7 +425,8 @@ class Request(Base):
 
 class Scan(Base):
     __tablename__ = 'scan'
-    id = Column(String(32), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    scan_id = Column(String(32), index=True, unique=True)
     planet_id = Column(Integer, index=True)
     scantype = Column(String(1))
     tick = Column(Integer)
@@ -435,10 +436,8 @@ class Scan(Base):
 class PlanetScan(Base):
     __tablename__ = 'planetscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True)
+    scan_id = Column(String(32), index=True, unique=True)
     planet_id = Column(Integer, index=True)
-    tick = Column(Integer, index=True)
-    user_id = Column(Integer, index=True)
     roid_metal = Column(Integer)
     roid_crystal = Column(Integer)
     roid_eonium = Column(Integer)

@@ -88,11 +88,68 @@ class parse(object):
             return
         session = M.DB.Session()
         try:
-            scan = M.DB.Maps.Scan(id=id, planet_id=planet.id, scantype=scantype, tick=tick, group_id=gid, scanner_id=uid)
+            scan = M.DB.Maps.Scan(scan_id=id, planet_id=planet.id, scantype=scantype, tick=tick, group_id=gid, scanner_id=uid)
             session.add(scan)
             session.commit()
         except M.DB.sqlalchemy.exceptions.IntegrityError:
             session.rollback()
-            print "Scan %s may already exist" %(self.rand_id,)
+            print "Scan %s may already exist" %(id,)
             print e.__str__()
             return
+        
+        pdunjascan = getattr(self, "parse_"+scantype)(page)
+        pdunjascan.scan_id = id
+        pdunjascan.planet_id = planet.id
+        session.add(pdunjascan)
+        session.commit()
+        session.close()
+    
+    def parse_P(page):
+        planetscan = M.DB.Maps.PlanetScan()
+
+        page=re.sub(',','',page)
+        m=re.search(r"""
+            <tr><td[^>]*>Metal</td><td[^>]*>(\d+)</td><td[^>]*>(\d+)</td></tr>\s*
+            <tr><td[^>]*>Crystal</td><td[^>]*>(\d+)</td><td[^>]*>(\d+)</td></tr>\s*
+            <tr><td[^>]*>Eonium</td><td[^>]*>(\d+)</td><td[^>]*>(\d+)</td></tr>\s*
+        """,page,re.VERBOSE)
+
+        planetscan.roid_metal = m.group(1)
+        planetscan.res_metal = m.group(2)
+        planetscan.roid_crystal = m.group(3)
+        planetscan.res_crystal = m.group(4)
+        planetscan.roid_eonium = m.group(5)
+        planetscan.res_eonium = m.group(6)
+
+        m=re.search(r"""
+            <tr><th[^>]*>Value</th><th[^>]*>Score</th></tr>\s*
+            <tr><td[^>]*>(\d+)</td><td[^>]*>(\d+)</td></tr>\s*
+        """,page,re.VERBOSE)
+
+        value = m.group(1)
+        score = m.group(2)
+
+        m=re.search(r"""
+            <tr><th[^>]*>Agents</th><th[^>]*>Security\s+Guards</th></tr>\s*
+            <tr><td[^>]*>([^<]+)</td><td[^>]*>([^<]+)</td></tr>\s*
+        """,page,re.VERBOSE)
+
+        planetscan.agents=m.group(1)
+        planetscan.guards=m.group(2)
+
+        m=re.search(r"""
+            <tr><th[^>]*>Light</th><th[^>]*>Medium</th><th[^>]*>Heavy</th></tr>\s*
+            <tr><td[^>]*>([^<]+)</td><td[^>]*>([^<]+)</td><td[^>]*>([^<]+)</td></tr>
+        """,page,re.VERBOSE)
+
+        planetscan.factory_usage_light=m.group(1)
+        planetscan.factory_usage_medium=m.group(2)
+        planetscan.factory_usage_heavy=m.group(3)
+
+        #atm the only span tag is the one around the hidden res.
+        m=re.search(r"""<span[^>]*>(\d+)</span>""",page,re.VERBOSE)
+
+        planetscan.prod_res=m.group(1)
+
+        return planetscan
+
