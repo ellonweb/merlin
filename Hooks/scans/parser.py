@@ -97,14 +97,15 @@ class parse(object):
             print e.__str__()
             return
         
-        pdunjascan = getattr(self, "parse_"+scantype)(page)
-        pdunjascan.scan_id = id
-        session.add(pdunjascan)
-        session.commit()
         session.close()
+        getattr(self, "parse_"+scantype)(id, page)
+        print scans[scantype]['name'], "%s:%s:%s" % (x,y,z,)
     
-    def parse_P(page):
-        planetscan = M.DB.Maps.PlanetScan()
+    def parse_P(id, page):
+        session = M.DB.Session()
+
+        planetscan = M.DB.Maps.PlanetScan(scan_id=id)
+        session.add(planetscan)
 
         #m = re.search('<tr><td class="left">Asteroids</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><td class="left">Resources</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><th>Score</th><td>(\d+)</td><th>Value</th><td>(\d+)</td></tr>', page)
         #m = re.search(r"""<tr><td class="left">Asteroids</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><td class="left">Resources</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><th>Score</th><td>(\d+)</td><th>Value</th><td>(\d+)</td></tr>""", page)
@@ -153,10 +154,13 @@ class parse(object):
 
         planetscan.prod_res=m.group(1)
 
-        return planetscan
+        session.commit()
 
-    def parse_D(page):
-        devscan = M.DB.Maps.DevScan()
+    def parse_D(id, page):
+        session = M.DB.Session()
+
+        devscan = M.DB.Maps.DevScan(scan_id=id)
+        session.add(devscan)
 
         m=re.search("""
             <tr><td[^>]*>Light\s+Factory</td><td[^>]*>(\d*)</td></tr>\s*
@@ -202,6 +206,23 @@ class parse(object):
         devscan.covert_op = m.group(6)
         devscan.mining = m.group(7)
 
-        return devscan
+        session.commit()
 
-    
+    def parse_U(id, page):
+        session = M.DB.Session()
+
+        for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+)</td>', page):
+            print m.groups()
+
+            unitscan = M.DB.Maps.UnitScan(scan_id=id)
+            session.add(unitscan)
+
+            try:
+                unitscan.ship_id = M.DB.Maps.Ship.load(name=m.group(1)).id
+            except AttributeError:
+                print "No such unit %s" % (m.group(1),)
+                session.rollback()
+                return
+            unitscan.amount = m.group(2)
+
+        session.commit()

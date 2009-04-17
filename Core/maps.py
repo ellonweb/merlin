@@ -436,7 +436,7 @@ class Scan(Base):
 class PlanetScan(Base):
     __tablename__ = 'planetscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True, unique=True)
+    scan_id = Column(String(32), index=True)
     roid_metal = Column(Integer)
     roid_crystal = Column(Integer)
     roid_eonium = Column(Integer)
