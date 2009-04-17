@@ -427,7 +427,7 @@ class Scan(Base):
     __tablename__ = 'scan'
     id = Column(String(32), primary_key=True)
     planet_id = Column(Integer, index=True)
-    scantype = Column(String(11))
+    scantype = Column(String(1))
     tick = Column(Integer)
     group_id = Column(String(32))
     scanner_id = Column(Integer)
