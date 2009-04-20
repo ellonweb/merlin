@@ -233,7 +233,7 @@ class parse(object):
         for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+)</td>', page):
             print m.groups()
 
-            unitscan = M.DB.Maps.AUScan(scan_id=id)
+            unitscan = M.DB.Maps.UnitScan(scan_id=id)
             session.add(unitscan)
 
             try:

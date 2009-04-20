@@ -480,13 +480,6 @@ class UnitScan(Base):
     ship_id = Column(Integer)
     amount = Column(Integer)
 
-class AUScan(Base):
-    __tablename__ = 'auscan'
-    id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True)
-    ship_id = Column(Integer)
-    amount = Column(Integer)
-
 # ########################################################################### #
 # #############################    BOOKINGS    ############################## #
 # ########################################################################### #
