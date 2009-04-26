@@ -27,6 +27,7 @@ import traceback
 from urllib2 import urlopen
 from .Core.modules import M
 callback = M.loadable.callback
+from .Core.robocop import push
 from Hooks.scans import scans
 
 scanre=re.compile("http://[^/]+/showscan.pl\?scan_id=([0-9a-zA-Z]+)")
@@ -101,6 +102,10 @@ class parse(object):
         if hasattr(self,"parse_"+scantype):
             getattr(self, "parse_"+scantype)(id, scan, page)
         print scans[scantype]['name'], "%s:%s:%s" % (x,y,z,)
+        
+        #check requests table, was this scan was requested?
+        #list of requestees, update records
+        #robocop-push scan-link, users
     
     def parse_P(id, scan, page):
         session = M.DB.Session()
