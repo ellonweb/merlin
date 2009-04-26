@@ -313,8 +313,8 @@ class parse(object):
         session = M.DB.Session()
         session.add(scan)
 
-    #incoming fleets
-    #<td class=left valign=top>Incoming</td><td valign=top>851</td><td class=left valign=top>We have detected an open jumpgate from Tertiary, located at 18:5:11. The fleet will approach our system in tick 855 and appears to have roughly 95 ships.</td>
+        #incoming fleets
+        #<td class=left valign=top>Incoming</td><td valign=top>851</td><td class=left valign=top>We have detected an open jumpgate from Tertiary, located at 18:5:11. The fleet will approach our system in tick 855 and appears to have roughly 95 ships.</td>
         for m in re.finditer('<td class="left" valign="top">Incoming</td><td valign="top">(\d+)</td><td class="left" valign="top">We have detected an open jumpgate from ([^<]+), located at (\d+):(\d+):(\d+). The fleet will approach our system in tick (\d+) and appears to have roughly (\d+) ships.</td>', page):
             fleetscan = M.DB.Maps.FleetScan(scan_id=id)
             session.add(fleetscan)
@@ -349,8 +349,8 @@ class parse(object):
 
             print 'Incoming: ' + newstick + ':' + fleetname + '-' + originx + ':' + originy + ':' + originz + '-' + arrivaltick + '|' + numships
 
-    #launched attacking fleets
-    #<td class=left valign=top>Launch</td><td valign=top>848</td><td class=left valign=top>The Disposable Heroes fleet has been launched, heading for 15:9:8, on a mission to Attack. Arrival tick: 857</td>
+        #launched attacking fleets
+        #<td class=left valign=top>Launch</td><td valign=top>848</td><td class=left valign=top>The Disposable Heroes fleet has been launched, heading for 15:9:8, on a mission to Attack. Arrival tick: 857</td>
         for m in re.finditer('<td class="left" valign="top">Launch</td><td valign="top">(\d+)</td><td class="left" valign="top">The ([^,]+) fleet has been launched, heading for (\d+):(\d+):(\d+), on a mission to Attack. Arrival tick: (\d+)</td>', page):
             fleetscan = M.DB.Maps.FleetScan(scan_id=id)
             session.add(fleetscan)
@@ -384,8 +384,8 @@ class parse(object):
 
             print 'Attack:' + newstick + ':' + fleetname + ':' + originx + ':' + originy + ':' + originz + ':' + arrivaltick
 
-    #launched defending fleets
-    #<td class=left valign=top>Launch</td><td valign=top>847</td><td class=left valign=top>The Ship Collection fleet has been launched, heading for 2:9:14, on a mission to Defend. Arrival tick: 853</td>
+        #launched defending fleets
+        #<td class=left valign=top>Launch</td><td valign=top>847</td><td class=left valign=top>The Ship Collection fleet has been launched, heading for 2:9:14, on a mission to Defend. Arrival tick: 853</td>
         for m in re.finditer('<td class="left" valign="top">Launch</td><td valign="top">(\d+)</td><td class="left" valign="top">The ([^<]+) fleet has been launched, heading for (\d+):(\d+):(\d+), on a mission to Defend. Arrival tick: (\d+)</td>', page):
             fleetscan = M.DB.Maps.FleetScan(scan_id=id)
             session.add(fleetscan)
@@ -419,16 +419,16 @@ class parse(object):
 
             print 'Defend:' + newstick + ':' + fleetname + ':' + originx + ':' + originy + ':' + originz + ':' + arrivaltick
 
-    #tech report
-    #<td class=left valign=top>Tech</td><td valign=top>838</td><td class=left valign=top>Our scientists report that Portable EMP emitters has been finished. Please drop by the Research area and choose the next area of interest.</td>
+        #tech report
+        #<td class=left valign=top>Tech</td><td valign=top>838</td><td class=left valign=top>Our scientists report that Portable EMP emitters has been finished. Please drop by the Research area and choose the next area of interest.</td>
         for m in re.finditer('<td class="left" valign="top">Tech</td><td valign="top">(\d+)</td><td class="left" valign="top">Our scientists report that ([^<]+) has been finished. Please drop by the Research area and choose the next area of interest.</td>', page):
             newstick = m.group(1)
             research = m.group(2)
 
             print 'Tech:' + newstick + ':' + research
 
-    #failed security report
-    #<td class=left valign=top>Security</td><td valign=top>873</td><td class=left valign=top>A covert operation was attempted by Ikaris (2:5:5), but our agents were able to stop them from doing any harm.</td>
+        #failed security report
+        #<td class=left valign=top>Security</td><td valign=top>873</td><td class=left valign=top>A covert operation was attempted by Ikaris (2:5:5), but our agents were able to stop them from doing any harm.</td>
         for m in re.finditer('<td class="left" valign="top">Security</td><td valign="top">(\d+)</td><td class="left" valign="top">A covert operation was attempted by ([^<]+) \\((\d+):(\d+):(\d+)\\), but our agents were able to stop them from doing any harm.</td>', page):
             covop = M.DB.Maps.CovOp(scan_id=id)
             session.add(covop)
@@ -456,28 +456,28 @@ class parse(object):
 
             print 'Security:' + newstick + ':' + ruler + ':' + originx + ':' + originy + ':' + originz
 
-    #fleet report
-    #<tr bgcolor=#2d2d2d><td class=left valign=top>Fleet</td><td valign=top>881</td><td class=left valign=top><table width=500><tr><th class=left colspan=3>Report of Losses from the Disposable Heroes fighting at 13:10:3</th></tr>
-    #<tr><th class=left width=33%>Ship</th><th class=left width=33%>Arrived</th><th class=left width=33%>Lost</th></tr>
-    #
-    #<tr><td class=left>Syren</td><td class=left>15</td><td class=left>13</td></tr>
-    #<tr><td class=left>Behemoth</td><td class=left>13</td><td class=left>13</td></tr>
-    #<tr><td class=left>Roach</td><td class=left>6</td><td class=left>6</td></tr>
-    #<tr><td class=left>Thief</td><td class=left>1400</td><td class=left>1400</td></tr>
-    #<tr><td class=left>Clipper</td><td class=left>300</td><td class=left>181</td></tr>
-    #
-    #<tr><td class=left>Buccaneer</td><td class=left>220</td><td class=left>102</td></tr>
-    #<tr><td class=left>Rogue</td><td class=left>105</td><td class=left>105</td></tr>
-    #<tr><td class=left>Marauder</td><td class=left>110</td><td class=left>110</td></tr>
-    #<tr><td class=left>Ironclad</td><td class=left>225</td><td class=left>90</td></tr>
-    #</table>
-    #
-    #<table width=500><tr><th class=left colspan=3>Report of Ships Stolen by the Disposable Heroes fighting at 13:10:3</th></tr>
-    #<tr><th class=left width=50%>Ship</th><th class=left width=50%>Stolen</th></tr>
-    #<tr><td class=left>Roach</td><td class=left>5</td></tr>
-    #<tr><td class=left>Hornet</td><td class=left>1</td></tr>
-    #<tr><td class=left>Wraith</td><td class=left>36</td></tr>
-    #</table>
-    #<table width=500><tr><th class=left>Asteroids Captured</th><th class=left>Metal : 37</th><th class=left>Crystal : 36</th><th class=left>Eonium : 34</th></tr></table>
-    #
-    #</td></tr>
+        #fleet report
+        #<tr bgcolor=#2d2d2d><td class=left valign=top>Fleet</td><td valign=top>881</td><td class=left valign=top><table width=500><tr><th class=left colspan=3>Report of Losses from the Disposable Heroes fighting at 13:10:3</th></tr>
+        #<tr><th class=left width=33%>Ship</th><th class=left width=33%>Arrived</th><th class=left width=33%>Lost</th></tr>
+        #
+        #<tr><td class=left>Syren</td><td class=left>15</td><td class=left>13</td></tr>
+        #<tr><td class=left>Behemoth</td><td class=left>13</td><td class=left>13</td></tr>
+        #<tr><td class=left>Roach</td><td class=left>6</td><td class=left>6</td></tr>
+        #<tr><td class=left>Thief</td><td class=left>1400</td><td class=left>1400</td></tr>
+        #<tr><td class=left>Clipper</td><td class=left>300</td><td class=left>181</td></tr>
+        #
+        #<tr><td class=left>Buccaneer</td><td class=left>220</td><td class=left>102</td></tr>
+        #<tr><td class=left>Rogue</td><td class=left>105</td><td class=left>105</td></tr>
+        #<tr><td class=left>Marauder</td><td class=left>110</td><td class=left>110</td></tr>
+        #<tr><td class=left>Ironclad</td><td class=left>225</td><td class=left>90</td></tr>
+        #</table>
+        #
+        #<table width=500><tr><th class=left colspan=3>Report of Ships Stolen by the Disposable Heroes fighting at 13:10:3</th></tr>
+        #<tr><th class=left width=50%>Ship</th><th class=left width=50%>Stolen</th></tr>
+        #<tr><td class=left>Roach</td><td class=left>5</td></tr>
+        #<tr><td class=left>Hornet</td><td class=left>1</td></tr>
+        #<tr><td class=left>Wraith</td><td class=left>36</td></tr>
+        #</table>
+        #<table width=500><tr><th class=left>Asteroids Captured</th><th class=left>Metal : 37</th><th class=left>Crystal : 36</th><th class=left>Eonium : 34</th></tr></table>
+        #
+        #</td></tr>
