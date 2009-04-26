@@ -432,6 +432,7 @@ class Scan(Base):
     tick = Column(Integer)
     group_id = Column(String(32))
     scanner_id = Column(Integer)
+Scan.planet = relation(Planet, primaryjoin=Planet.id==Scan.planet_id, foreign_keys=(Scan.planet_id,))
 
 class PlanetScan(Base):
     __tablename__ = 'planetscan'

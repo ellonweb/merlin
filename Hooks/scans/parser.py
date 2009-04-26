@@ -159,6 +159,7 @@ class parse(object):
 
     def parse_D(id, scan, page):
         session = M.DB.Session()
+        session.add(scan)
 
         devscan = M.DB.Maps.DevScan(scan_id=id)
         session.add(devscan)
@@ -208,6 +209,11 @@ class parse(object):
         devscan.mining = m.group(7)
 
         session.commit()
+
+        if (scan.planet.intel.dists < devscan.dists) or (scan.tick == M.DB.Maps.Updates.current_tick()):
+            scan.planet.intel.dists = devscan.dists
+            session.commit()
+            print "Updating planet-intel-dists"
 
     def parse_U(id, scan, page):
         session = M.DB.Session()
