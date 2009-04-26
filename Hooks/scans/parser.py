@@ -23,7 +23,7 @@
 
 import re
 from subprocess import Popen
-from traceback import print_exc
+import traceback
 from urllib2 import urlopen
 from .Core.modules import M
 callback = M.loadable.callback
@@ -58,7 +58,7 @@ class parse(object):
                 self.group(uid, id)
         except Exception, e:
             print "Exception in scan: "+e.__str__()
-            print_exc()
+            traceback.print_exc()
     
     def group(uid, gid):
         page = urlopen('http://game.planetarion.com/showscan.pl?scan_grp='+ id).read()
@@ -67,7 +67,7 @@ class parse(object):
                 self.scan(uid, m.group(1), gid)
             except Exception, e:
                 print "Exception in scan: "+e.__str__()
-                print_exc()
+                traceback.print_exc()
     
     def scan(uid, id, gid=None):
         page = urlopen('http://game.planetarion.com/showscan.pl?scan_id='+ id).read()
@@ -268,13 +268,14 @@ class parse(object):
             originy = m.group(2)
             originz = m.group(3)
             mission = m.group(4)
-            fleet_name = m.group(5)
-            landing_tick = int(m.group(6)) + scan.tick
-            fleet_size = m.group(7)
+            fleet = m.group(5)
+            eta = int(m.group(6))
+            fleetsize = m.group(7)
+
             fleetscan.mission = mission
-            fleetscan.fleet_name = fleet_name
-            fleetscan.landing_tick = landing_tick
-            fleetscan.fleet_size = fleet_size
+            fleetscan.fleet_name = fleet
+            fleetscan.landing_tick = eta + scan.tick
+            fleetscan.fleetsize = fleet_size
 
             print "JGP fleet "
 
@@ -291,19 +292,192 @@ class parse(object):
             except M.DB.sqlalchemy.exceptions.IntegrityError:
                 session.rollback()
                 print "Caught exception in jgp: "+e.__str__()
-                print_exc()
+                traceback.print_exc()
                 print "Trying to update instead"
-                query = session.query(M.DB.Maps.FleetScan).filter_by(owner_id=attacker.id, target_id=scan.planet_id, fleet_size=fleet_size, fleet_name=fleet_name, landing_tick=landing_tick, mission=mission)
+                query = session.query(M.DB.Maps.FleetScan).filter_by(owner_id=attacker.id, target_id=scan.planet_id, fleet_size=fleetsize, fleet_name=fleet, landing_tick=eta+scan.tick, mission=mission)
                 try:
                     query.update({"scan_id": id})
                     session.commit()
                 except:
                     session.rollback()
                     print "Exception trying to update jgp: "+e.__str__()
-                    print_exc()
+                    traceback.print_exc()
                     continue
             except Exception, e:
                 session.rollback()
                 print "Exception in jgp: "+e.__str__()
-                print_exc()
+                traceback.print_exc()
                 continue
+
+    def parse_N(id, scan, page):
+        session = M.DB.Session()
+        session.add(scan)
+
+    #incoming fleets
+    #<td class=left valign=top>Incoming</td><td valign=top>851</td><td class=left valign=top>We have detected an open jumpgate from Tertiary, located at 18:5:11. The fleet will approach our system in tick 855 and appears to have roughly 95 ships.</td>
+        for m in re.finditer('<td class="left" valign="top">Incoming</td><td valign="top">(\d+)</td><td class="left" valign="top">We have detected an open jumpgate from ([^<]+), located at (\d+):(\d+):(\d+). The fleet will approach our system in tick (\d+) and appears to have roughly (\d+) ships.</td>', page):
+            fleetscan = M.DB.Maps.FleetScan(scan_id=id)
+            session.add(fleetscan)
+
+            newstick = m.group(1)
+            fleetname = m.group(2)
+            originx = m.group(3)
+            originy = m.group(4)
+            originz = m.group(5)
+            arrivaltick = int(m.group(6))
+            numships = m.group(7)
+
+            fleetscan.mission = "Unknown"
+            fleetscan.fleet_name = fleetname
+            fleetscan.launch_tick = newstick
+            fleetscan.landing_tick = arrivaltick
+            fleetscan.fleetsize = numships
+
+            owner=M.DB.Maps.Planet.load(originx,originy,originz)
+            if owner is None:
+                session.rollback()
+                continue
+            fleetscan.owner_id = owner.id
+            fleetscan.target_id = scan.planet_id
+            try:
+                session.commit()
+            except Exception, e:
+                session.rollback()
+                print "Exception in news: "+e.__str__()
+                traceback.print_exc()
+                continue
+
+            print 'Incoming: ' + newstick + ':' + fleetname + '-' + originx + ':' + originy + ':' + originz + '-' + arrivaltick + '|' + numships
+
+    #launched attacking fleets
+    #<td class=left valign=top>Launch</td><td valign=top>848</td><td class=left valign=top>The Disposable Heroes fleet has been launched, heading for 15:9:8, on a mission to Attack. Arrival tick: 857</td>
+        for m in re.finditer('<td class="left" valign="top">Launch</td><td valign="top">(\d+)</td><td class="left" valign="top">The ([^,]+) fleet has been launched, heading for (\d+):(\d+):(\d+), on a mission to Attack. Arrival tick: (\d+)</td>', page):
+            fleetscan = M.DB.Maps.FleetScan(scan_id=id)
+            session.add(fleetscan)
+
+            newstick = m.group(1)
+            fleetname = m.group(2)
+            originx = m.group(3)
+            originy = m.group(4)
+            originz = m.group(5)
+            arrivaltick = m.group(6)
+
+            fleetscan.mission = "Attack"
+            fleetscan.fleet_name = fleetname
+            fleetscan.launch_tick = newstick
+            fleetscan.landing_tick = arrivaltick
+
+            target=M.DB.Maps.Planet.load(originx,originy,originz)
+            if target is None:
+                session.rollback()
+                continue
+            fleetscan.owner_id = scan.planet_id
+            fleetscan.target_id = target.id
+
+            try:
+                session.commit()
+            except Exception, e:
+                session.rollback()
+                print "Exception in news: "+e.__str__()
+                traceback.print_exc()
+                continue
+
+            print 'Attack:' + newstick + ':' + fleetname + ':' + originx + ':' + originy + ':' + originz + ':' + arrivaltick
+
+    #launched defending fleets
+    #<td class=left valign=top>Launch</td><td valign=top>847</td><td class=left valign=top>The Ship Collection fleet has been launched, heading for 2:9:14, on a mission to Defend. Arrival tick: 853</td>
+        for m in re.finditer('<td class="left" valign="top">Launch</td><td valign="top">(\d+)</td><td class="left" valign="top">The ([^<]+) fleet has been launched, heading for (\d+):(\d+):(\d+), on a mission to Defend. Arrival tick: (\d+)</td>', page):
+            fleetscan = M.DB.Maps.FleetScan(scan_id=id)
+            session.add(fleetscan)
+
+            newstick = m.group(1)
+            fleetname = m.group(2)
+            originx = m.group(3)
+            originy = m.group(4)
+            originz = m.group(5)
+            arrivaltick = m.group(6)
+
+            fleetscan.mission = "Defend"
+            fleetscan.fleet_name = fleetname
+            fleetscan.launch_tick = newstick
+            fleetscan.landing_tick = arrivaltick
+
+            target=M.DB.Maps.Planet.load(originx,originy,originz)
+            if target is None:
+                session.rollback()
+                continue
+            fleetscan.owner_id = scan.planet_id
+            fleetscan.target_id = target.id
+
+            try:
+                session.commit()
+            except Exception, e:
+                session.rollback()
+                print "Exception in news: "+e.__str__()
+                traceback.print_exc()
+                continue
+
+            print 'Defend:' + newstick + ':' + fleetname + ':' + originx + ':' + originy + ':' + originz + ':' + arrivaltick
+
+    #tech report
+    #<td class=left valign=top>Tech</td><td valign=top>838</td><td class=left valign=top>Our scientists report that Portable EMP emitters has been finished. Please drop by the Research area and choose the next area of interest.</td>
+        for m in re.finditer('<td class="left" valign="top">Tech</td><td valign="top">(\d+)</td><td class="left" valign="top">Our scientists report that ([^<]+) has been finished. Please drop by the Research area and choose the next area of interest.</td>', page):
+            newstick = m.group(1)
+            research = m.group(2)
+
+            print 'Tech:' + newstick + ':' + research
+
+    #failed security report
+    #<td class=left valign=top>Security</td><td valign=top>873</td><td class=left valign=top>A covert operation was attempted by Ikaris (2:5:5), but our agents were able to stop them from doing any harm.</td>
+        for m in re.finditer('<td class="left" valign="top">Security</td><td valign="top">(\d+)</td><td class="left" valign="top">A covert operation was attempted by ([^<]+) \\((\d+):(\d+):(\d+)\\), but our agents were able to stop them from doing any harm.</td>', page):
+            covop = M.DB.Maps.CovOp(scan_id=id)
+            session.add(covop)
+
+            newstick = m.group(1)
+            ruler = m.group(2)
+            originx = m.group(3)
+            originy = m.group(4)
+            originz = m.group(5)
+
+            covopper=M.DB.Maps.Planet.load(originx,originy,originz)
+            if covopper is None:
+                session.rollback()
+                continue
+            fleetscan.covopper_id = covopper.id
+            fleetscan.target_id = scan.planet_id
+
+            try:
+                session.commit()
+            except Exception, e:
+                session.rollback()
+                print "Exception in unit: "+e.__str__()
+                traceback.print_exc()
+                continue
+
+            print 'Security:' + newstick + ':' + ruler + ':' + originx + ':' + originy + ':' + originz
+
+    #fleet report
+    #<tr bgcolor=#2d2d2d><td class=left valign=top>Fleet</td><td valign=top>881</td><td class=left valign=top><table width=500><tr><th class=left colspan=3>Report of Losses from the Disposable Heroes fighting at 13:10:3</th></tr>
+    #<tr><th class=left width=33%>Ship</th><th class=left width=33%>Arrived</th><th class=left width=33%>Lost</th></tr>
+    #
+    #<tr><td class=left>Syren</td><td class=left>15</td><td class=left>13</td></tr>
+    #<tr><td class=left>Behemoth</td><td class=left>13</td><td class=left>13</td></tr>
+    #<tr><td class=left>Roach</td><td class=left>6</td><td class=left>6</td></tr>
+    #<tr><td class=left>Thief</td><td class=left>1400</td><td class=left>1400</td></tr>
+    #<tr><td class=left>Clipper</td><td class=left>300</td><td class=left>181</td></tr>
+    #
+    #<tr><td class=left>Buccaneer</td><td class=left>220</td><td class=left>102</td></tr>
+    #<tr><td class=left>Rogue</td><td class=left>105</td><td class=left>105</td></tr>
+    #<tr><td class=left>Marauder</td><td class=left>110</td><td class=left>110</td></tr>
+    #<tr><td class=left>Ironclad</td><td class=left>225</td><td class=left>90</td></tr>
+    #</table>
+    #
+    #<table width=500><tr><th class=left colspan=3>Report of Ships Stolen by the Disposable Heroes fighting at 13:10:3</th></tr>
+    #<tr><th class=left width=50%>Ship</th><th class=left width=50%>Stolen</th></tr>
+    #<tr><td class=left>Roach</td><td class=left>5</td></tr>
+    #<tr><td class=left>Hornet</td><td class=left>1</td></tr>
+    #<tr><td class=left>Wraith</td><td class=left>36</td></tr>
+    #</table>
+    #<table width=500><tr><th class=left>Asteroids Captured</th><th class=left>Metal : 37</th><th class=left>Crystal : 36</th><th class=left>Eonium : 34</th></tr></table>
+    #
+    #</td></tr>

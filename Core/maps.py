@@ -493,6 +493,13 @@ class FleetScan(Base):
     mission = Column(String(7))
     unique = UniqueConstraint('owner_id','target_id','fleet_size','fleet_name','landing_tick','mission')
 
+class CovOp(Base):
+    __tablename__ = 'covop'
+    id = Column(Integer, primary_key=True)
+    scan_id = Column(String(32), index=True)
+    covopper_id = Column(Integer)
+    target_id = Column(Integer)
+
 # ########################################################################### #
 # #############################    BOOKINGS    ############################## #
 # ########################################################################### #
