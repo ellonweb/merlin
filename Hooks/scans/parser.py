@@ -98,10 +98,11 @@ class parse(object):
             return
         
         session.close()
-        getattr(self, "parse_"+scantype)(id, page)
+        if hasattr(self,"parse_"+scantype):
+            getattr(self, "parse_"+scantype)(id, scan, page)
         print scans[scantype]['name'], "%s:%s:%s" % (x,y,z,)
     
-    def parse_P(id, page):
+    def parse_P(id, scan, page):
         session = M.DB.Session()
 
         planetscan = M.DB.Maps.PlanetScan(scan_id=id)
@@ -156,7 +157,7 @@ class parse(object):
 
         session.commit()
 
-    def parse_D(id, page):
+    def parse_D(id, scan, page):
         session = M.DB.Session()
 
         devscan = M.DB.Maps.DevScan(scan_id=id)
@@ -208,7 +209,7 @@ class parse(object):
 
         session.commit()
 
-    def parse_U(id, page):
+    def parse_U(id, scan, page):
         session = M.DB.Session()
 
         for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+)</td>', page):
@@ -222,12 +223,12 @@ class parse(object):
             except AttributeError:
                 print "No such unit %s" % (m.group(1),)
                 session.rollback()
-                return
+                continue
             unitscan.amount = m.group(2)
 
-        session.commit()
+            session.commit()
 
-    def parse_A(id, page):
+    def parse_A(id, scan, page):
         session = M.DB.Session()
 
         for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+)</td>', page):
@@ -241,7 +242,68 @@ class parse(object):
             except AttributeError:
                 print "No such unit %s" % (m.group(1),)
                 session.rollback()
-                return
+                continue
             unitscan.amount = m.group(2)
 
-        session.commit()
+            session.commit()
+
+    def parse_J(id, scan, page):
+        session = M.DB.Session()
+        session.add(scan)
+
+        # <td class=left>Origin</td><td class=left>Mission</td><td>Fleet</td><td>ETA</td><td>Fleetsize</td>
+        # <td class=left>13:10:5</td><td class=left>Attack</td><td>Gamma</td><td>5</td><td>265</td>
+
+        #                     <td class="left">15:7:11            </td><td class="left">Defend </td><td>Ad infinitum</td><td>9</td><td>0</td>
+        #<tr><td class="left">10:4:9</td><td class="left">Return</td><td>They look thirsty</td><td>5</td><td>3000</td></tr>
+        #        <tr><td class="left">4:1:10</td><td class="left">Return</td><td>Or Is It?</td><td>9</td><td>3000</td></tr>
+
+        #<tr><td class="left">10:1:10</td><td class="left">Defend</td><td class="left">Pesticide IV</td><td class="right">1</td><td class="right">0</td></tr>
+
+        for m in re.finditer('<td[^>]*>(\d+)\:(\d+)\:(\d+)</td><td[^>]*>([^<]+)</td><td[^>]*>([^<]+)</td><td[^>]*>(\d+)</td><td[^>]*>(\d+)</td>', page):
+            fleetscan = M.DB.Maps.FleetScan(scan_id=id)
+            session.add(fleetscan)
+
+            originx = m.group(1)
+            originy = m.group(2)
+            originz = m.group(3)
+            mission = m.group(4)
+            fleet_name = m.group(5)
+            landing_tick = int(m.group(6)) + scan.tick
+            fleet_size = m.group(7)
+            fleetscan.mission = mission
+            fleetscan.fleet_name = fleet_name
+            fleetscan.landing_tick = landing_tick
+            fleetscan.fleet_size = fleet_size
+
+            print "JGP fleet "
+
+            attacker=M.DB.Maps.Planet.load(originx,originy,originz)
+            if attacker is None:
+                print "Can't find attacker in db: %s:%s:%s"%(originx,originy,originz)
+                session.rollback()
+                continue
+            fleetscan.owner_id = attacker.id
+            fleetscan.target_id = scan.planet_id
+
+            try:
+                session.commit()
+            except M.DB.sqlalchemy.exceptions.IntegrityError:
+                session.rollback()
+                print "Caught exception in jgp: "+e.__str__()
+                print_exc()
+                print "Trying to update instead"
+                query = session.query(M.DB.Maps.FleetScan).filter_by(owner_id=attacker.id, target_id=scan.planet_id, fleet_size=fleet_size, fleet_name=fleet_name, landing_tick=landing_tick, mission=mission)
+                try:
+                    query.update({"scan_id": id})
+                    session.commit()
+                except:
+                    session.rollback()
+                    print "Exception trying to update jgp: "+e.__str__()
+                    print_exc()
+                    continue
+            except Exception, e:
+                session.rollback()
+                print "Exception in jgp: "+e.__str__()
+                print_exc()
+                continue

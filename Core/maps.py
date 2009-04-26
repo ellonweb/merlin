@@ -480,6 +480,19 @@ class UnitScan(Base):
     ship_id = Column(Integer)
     amount = Column(Integer)
 
+class FleetScan(Base):
+    __tablename__ = 'fleetscan'
+    id = Column(Integer, primary_key=True)
+    scan_id = Column(String(32), index=True)
+    owner_id = Column(Integer)
+    target_id = Column(Integer)
+    fleet_size = Column(Integer)
+    fleet_name = Column(String(24))
+    launch_tick = Column(Integer)
+    landing_tick = Column(Integer)
+    mission = Column(String(7))
+    unique = UniqueConstraint('owner_id','target_id','fleet_size','fleet_name','landing_tick','mission')
+
 # ########################################################################### #
 # #############################    BOOKINGS    ############################## #
 # ########################################################################### #
