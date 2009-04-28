@@ -22,7 +22,7 @@
 # owners.
 
 import re
-from .variables import nick, passw, admins, channels
+from .variables import nick, passw, channels
 from .Core.exceptions_ import PNickParseError
 from .Core.modules import M
 callback = M.loadable.callback
@@ -70,16 +70,8 @@ def pinvite(message):
     if message.get_hostmask() == "P!cservice@netgamers.org":
         message.join(message.get_msg())
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', admin=True)
 def secure(message):
     """Secures the PNick of the bot."""
-    if not message.get_msg() == "!secure":
-        return
-    try:
-        if message.get_pnick() in admins:
-            message.privmsg("SET MAXLOGINS 2\nSET INVISIBLE ON\nSET AUTOKILL ON", "P")
-            message.reply("Secured the PNick")
-        else:
-            message.alert("You don't have access for that.")
-    except PNickParseError:
-        message.alert("You don't have access for that.")
+    message.privmsg("SET MAXLOGINS 2\nSET INVISIBLE ON\nSET AUTOKILL ON", "P")
+    message.reply("Secured the PNick")
