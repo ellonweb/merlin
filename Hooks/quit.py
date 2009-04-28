@@ -27,16 +27,8 @@ from .Core.exceptions_ import PNickParseError
 from .Core.modules import M
 callback = M.loadable.callback
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', admin=True)
 def quit(message):
     """Does exactly what one would think it does."""
-    
-    if message.get_msg()[:5] == "!quit":
-        try:
-            if message.get_pnick() in admins:
-                message.quit(message.get_msg()[6:])
-                sys.exit(0)
-            else:
-                message.alert("You don't have access for that.")
-        except PNickParseError:
-            message.alert("You don't have access for that.")
+    message.quit(message.get_msg()[6:])
+    sys.exit(0)

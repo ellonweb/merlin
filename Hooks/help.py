@@ -64,7 +64,7 @@ class help(loadable):
                     if hasattr(callback, "help"):
                         continue
                     else:
-                        if (message.get_pnick() in admins) and (message.get_msg()[6:] == callback.__name__):
+                        if (message.get_pnick() in admins) and (message.get_msg().split()[1] == callback.__name__):
                             message.reply(callback.__doc__)
                 except PNickParseError:
                     continue
