@@ -422,6 +422,7 @@ class Request(Base):
     scantype = Column(String(1))
     dists = Column(Integer)
     scan_id = Column(String(32))
+Request.user = relation(User, primaryjoin=User.id==Request.requester_id, foreign_keys=(Request.requester_id,))
 
 class Scan(Base):
     __tablename__ = 'scan'

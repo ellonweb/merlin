@@ -103,9 +103,16 @@ class parse(object):
             getattr(self, "parse_"+scantype)(id, scan, page)
         print scans[scantype]['name'], "%s:%s:%s" % (x,y,z,)
         
-        #check requests table, was this scan was requested?
-        #list of requestees, update records
-        #robocop-push scan-link, users
+        Q = session.query(M.DB.Maps.User.name)
+        Q = Q.join(M.DB.Maps.Request.user)
+        Q = Q.filter(M.DB.Maps.Request.planet_id==planet.id)
+        Q = Q.filter(M.DB.Maps.Request.scan_id==None)
+        
+        users = Q.all()
+        push("!scan %s %s %s" % (scantype, id, " ".join(users),))
+        
+        Q.update({"scan_id": id})
+        session.commit()
     
     def parse_P(id, scan, page):
         session = M.DB.Session()
