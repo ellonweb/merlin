@@ -76,6 +76,14 @@ class loadable(object):
                 f(self, message, *userparams)
         return execute
     
+    @staticmethod
+    def runcop(f):
+        def robocop(self, message):
+            params = loadable.robocop(self, message)
+            if params:
+                f(self, message, params)
+        return robocop
+    
     def execute(self, message):
         m = self.commandre.search(message.get_msg())
         if not m:
