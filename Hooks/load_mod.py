@@ -27,20 +27,11 @@ from .Core.exceptions_ import LoadFailure, PNickParseError
 from .Core.modules import M
 callback = M.loadable.callback
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', admin=True)
 def loadmod(message):
     """Load a module, dynamically."""
-    
-    msg = message.get_msg()
-    if msg[:8] == "!loadmod":
-        try:
-            if message.get_pnick() in admins:
-                for mod in msg.split()[1:]:
-                    message.alert(load(mod, message))
-            else:
-                message.alert("You don't have access for that.")
-        except PNickParseError:
-            message.alert("You don't have access for that.")
+    for mod in message.get_msg().split()[1:]:
+        message.alert(load(mod, message))
 
 def load(mod, message):
     # Stuff is parsed, and we'll try loading the module
@@ -57,38 +48,20 @@ def load(mod, message):
 
     return "Module %s loaded successfully." % mod
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', admin=True)
 def unloadmod(message):
     """Unload a module. Privileged users only. Syntax: !unload name."""
+    for mod in message.get_msg().split()[1:]:
+        message.callbackmod.unload_mod(mod)
+        message.alert("Unloaded everything matching %s." % mod)
 
-    msg = message.get_msg()
-    if msg[:10] == "!unloadmod":
-        try:
-            if message.get_pnick() in admins:
-                for mod in msg.split()[1:]:
-                    message.callbackmod.unload_mod(mod)
-                    message.alert("Unloaded everything matching %s." % mod)
-            else:
-                message.alert("You don't have access for that.")
-        except PNickParseError:
-            message.alert("You don't have access for that.")
-
-@callback('PRIVMSG')
+@callback('PRIVMSG', admin=True)
 def reload(message):
     """Reload DB. Reload Loadable."""
-    
-    msg = message.get_msg()
-    if msg[:7] == "!reload":
-        try:
-            if message.get_pnick() in admins:
-                # Shortcut for both: !reloadable db
-                if "db" in msg:
-                    M.reload_db()
-                    message.alert("Reloaded the DB mappings.")
-                if "loadable" in msg:
-                    M.reload_loadable()
-                    message.alert("Reloaded the Loadable.")
-            else:
-                message.alert("You don't have access for that.")
-        except PNickParseError:
-            message.alert("You don't have access for that.")
+    # Shortcut for both: !reloadable db
+    if "db" in message.get_msg():
+        M.reload_db()
+        message.alert("Reloaded the DB mappings.")
+    if "loadable" in message.get_msg():
+        M.reload_loadable()
+        message.alert("Reloaded the Loadable.")

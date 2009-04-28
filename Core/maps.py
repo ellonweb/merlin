@@ -344,7 +344,7 @@ class AllianceHistory(Base):
     tick = Column(Integer, primary_key=True, autoincrement=False)
     id = Column(Integer, primary_key=True, autoincrement=False)
     alliance_history_tick = ForeignKeyConstraint(('alliance_history.tick'), ('updates.tick'), deferrable=True, ondelete='cascade')
-    #alliance_history_id = ForeignKeyConstraint(('alliance_history.id'), ('galaxy.id'), deferrable=True)
+    #alliance_history_id = ForeignKeyConstraint(('alliance_history.id'), ('alliance.id'), deferrable=True)
     name = Column(String(20))
     size = Column(Integer)
     members = Column(Integer)
@@ -409,6 +409,98 @@ Intel.planet = relation(Planet, primaryjoin=Planet.id==Intel.planet_id, foreign_
 Intel.alliance = relation(Alliance, primaryjoin=Alliance.id==Intel.alliance_id, foreign_keys=(Intel.alliance_id,))
 Planet.alliance = relation(Alliance, secondary=Intel.__table__, primaryjoin=Intel.planet_id==Planet.id, secondaryjoin=Alliance.id==Intel.alliance_id, foreign_keys=(Intel.planet_id, Intel.alliance_id), uselist=False)
 Alliance.planets = relation(Planet, secondary=Intel.__table__, primaryjoin=Intel.alliance_id==Alliance.id, secondaryjoin=Planet.id==Intel.planet_id, foreign_keys=(Intel.planet_id, Intel.alliance_id))
+
+# ########################################################################### #
+# ###############################    SCANS    ############################### #
+# ########################################################################### #
+
+class Request(Base):
+    __tablename__ = 'request'
+    id = Column(Integer, primary_key=True)
+    requester_id = Column(Integer)
+    planet_id = Column(Integer, index=True)
+    scantype = Column(String(1))
+    dists = Column(Integer)
+    scan_id = Column(String(32))
+Request.user = relation(User, primaryjoin=User.id==Request.requester_id, foreign_keys=(Request.requester_id,))
+
+class Scan(Base):
+    __tablename__ = 'scan'
+    id = Column(Integer, primary_key=True)
+    scan_id = Column(String(32), index=True, unique=True)
+    planet_id = Column(Integer, index=True)
+    scantype = Column(String(1))
+    tick = Column(Integer)
+    group_id = Column(String(32))
+    scanner_id = Column(Integer)
+Scan.planet = relation(Planet, primaryjoin=Planet.id==Scan.planet_id, foreign_keys=(Scan.planet_id,))
+
+class PlanetScan(Base):
+    __tablename__ = 'planetscan'
+    id = Column(Integer, primary_key=True)
+    scan_id = Column(String(32), index=True)
+    roid_metal = Column(Integer)
+    roid_crystal = Column(Integer)
+    roid_eonium = Column(Integer)
+    res_metal = Column(Integer)
+    res_crystal = Column(Integer)
+    res_eonium = Column(Integer)
+    factory_usage_light = Column(String(7))
+    factory_usage_medium = Column(String(7))
+    factory_usage_heavy = Column(String(7))
+    prod_res = Column(Integer)
+    agents = Column(Integer)
+    guards = Column(Integer)
+
+class DevScan(Base):
+    __tablename__ = 'devscan'
+    id = Column(Integer, primary_key=True)
+    scan_id = Column(String(32), index=True)
+    light_factory = Column(Integer)
+    medium_factory = Column(Integer)
+    heavy_factory = Column(Integer)
+    wave_amplifier = Column(Integer)
+    wave_distorter = Column(Integer)
+    metal_refinery = Column(Integer)
+    crystal_refinery = Column(Integer)
+    eonium_refinery = Column(Integer)
+    research_lab = Column(Integer)
+    finance_centre = Column(Integer)
+    security_centre = Column(Integer)
+    travel = Column(Integer)
+    infrastructure = Column(Integer)
+    hulls = Column(Integer)
+    waves = Column(Integer)
+    core = Column(Integer)
+    covert_op = Column(Integer)
+    mining = Column(Integer)
+
+class UnitScan(Base):
+    __tablename__ = 'unitscan'
+    id = Column(Integer, primary_key=True)
+    scan_id = Column(String(32), index=True)
+    ship_id = Column(Integer)
+    amount = Column(Integer)
+
+class FleetScan(Base):
+    __tablename__ = 'fleetscan'
+    id = Column(Integer, primary_key=True)
+    scan_id = Column(String(32), index=True)
+    owner_id = Column(Integer)
+    target_id = Column(Integer)
+    fleet_size = Column(Integer)
+    fleet_name = Column(String(24))
+    launch_tick = Column(Integer)
+    landing_tick = Column(Integer)
+    mission = Column(String(7))
+    unique = UniqueConstraint('owner_id','target_id','fleet_size','fleet_name','landing_tick','mission')
+
+class CovOp(Base):
+    __tablename__ = 'covop'
+    id = Column(Integer, primary_key=True)
+    scan_id = Column(String(32), index=True)
+    covopper_id = Column(Integer)
+    target_id = Column(Integer)
 
 # ########################################################################### #
 # #############################    BOOKINGS    ############################## #
