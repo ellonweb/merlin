@@ -275,11 +275,8 @@ while True:
         print "Lost planet ids match up in %.3f seconds" % (t2,)
         t1=time.time()
 
-        p_id = session.query(DB.SQL.f.max(DB.Maps.PlanetHistory.id)).scalar() or 0
-        for planet in session.query(DB.Maps.Planet).filter_by(id=None):
-            p_id += 1
-            planet.id = p_id
-        session.flush()
+        session.execute(text("INSERT INTO planet_ref (rulername, planetname) SELECT rulername, planetname FROM planet WHERE id IS NULL;"))
+        session.execute(text("UPDATE planet SET id = (SELECT id FROM planet_ref WHERE planet.rulername = planet_ref.rulername AND planet.planetname = planet_ref.planetname ORDER BY planet_ref.id DESC) WHERE id IS NULL;"))
 
         t2=time.time()-t1
         print "Generate new planet ids in %.3f seconds" % (t2,)
@@ -312,11 +309,8 @@ while True:
         print "Copy galaxy ids from history in %.3f seconds" % (t2,)
         t1=time.time()
 
-        g_id = session.query(DB.SQL.f.max(DB.Maps.GalaxyHistory.id)).scalar() or 0
-        for galaxy in session.query(DB.Maps.Galaxy).filter_by(id=None):
-            g_id += 1
-            galaxy.id = g_id
-        session.flush()
+        session.execute(text("INSERT INTO galaxy_ref (x, y) SELECT x, y FROM galaxy WHERE id IS NULL;"))
+        session.execute(text("UPDATE galaxy SET id = (SELECT id FROM galaxy_ref WHERE galaxy.x = galaxy_ref.x AND galaxy.y = galaxy_ref.y ORDER BY galaxy_ref.id DESC) WHERE id IS NULL;"))
 
         t2=time.time()-t1
         print "Generate new galaxy ids in %.3f seconds" % (t2,)
@@ -347,11 +341,8 @@ while True:
         print "Copy alliance ids from history in %.3f seconds" % (t2,)
         t1=time.time()
 
-        a_id = session.query(DB.SQL.f.max(DB.Maps.AllianceHistory.id)).scalar() or 0
-        for alliance in session.query(DB.Maps.Alliance).filter_by(id=None):
-            a_id += 1
-            alliance.id = a_id
-        session.flush()
+        session.execute(text("INSERT INTO alliance_ref (name) SELECT name FROM alliance WHERE id IS NULL;"))
+        session.execute(text("UPDATE alliance SET id = (SELECT id FROM alliance_ref WHERE alliance.name = alliance_ref.name ORDER BY alliance_ref.id DESC) WHERE id IS NULL;"))
 
         t2=time.time()-t1
         print "Generate new alliance ids in %.3f seconds" % (t2,)
