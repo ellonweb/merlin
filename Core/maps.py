@@ -154,9 +154,17 @@ class Updates(Base):
         tick = session.query(SQL.f.max(Updates.tick)).scalar() or 0
         session.close()
         return tick
+
+class PlanetRef(Base):
+    __tablename__ = 'planet_ref'
+    id = Column(Integer, primary_key=True)
+    active = Column(Boolean, default=True)
+    planetname = Column(String(20))
+    rulername = Column(String(20))
+
 class Planet(Base):
     __tablename__ = 'planet'
-    id = Column(Integer, index=True, unique=True)
+    id = Column(Integer, ForeignKey(PlanetRef.id, deferrable=True, ondelete='cascade'), index=True, unique=True)
     x = Column(Integer, primary_key=True, autoincrement=False)
     y = Column(Integer, primary_key=True, autoincrement=False)
     z = Column(Integer, primary_key=True, autoincrement=False)
@@ -210,8 +218,8 @@ class Planet(Base):
 User.planet = relation(Planet, primaryjoin=User.planet_id==Planet.id)
 class PlanetHistory(Base):
     __tablename__ = 'planet_history'
-    tick = Column(Integer, primary_key=True, autoincrement=False)
-    id = Column(Integer, primary_key=True, autoincrement=False)
+    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(PlanetRef.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
     planet_history_tick = ForeignKeyConstraint(('planet_history.tick'), ('updates.tick'), deferrable=True, ondelete='cascade')
     #planet_history_id = ForeignKeyConstraint(('planet_history.id'), ('planet.id'), deferrable=True)
     x = Column(Integer)
