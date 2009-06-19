@@ -155,7 +155,7 @@ class Updates(Base):
         session.close()
         return tick
 
-class PlanetRef(Base):
+class PlanetRef(Base): #ref tables only used for id generation in excalibur
     __tablename__ = 'planet_ref'
     id = Column(Integer, primary_key=True)
     planetname = Column(String(20))
@@ -253,7 +253,7 @@ class PlanetExiles(Base):
     newy = Column(Integer)
     newz = Column(Integer)
 
-class GalaxyRef(Base):
+class GalaxyRef(Base): #ref tables only used for id generation in excalibur
     __tablename__ = 'galaxy_ref'
     id = Column(Integer, primary_key=True)
     x = Column(Integer)
@@ -321,7 +321,7 @@ PlanetHistory.galaxy = relation(GalaxyHistory, primaryjoin=and_(GalaxyHistory.ti
 Galaxy.history_loader = dynamic_loader(GalaxyHistory, primaryjoin=GalaxyHistory.id==Galaxy.id, foreign_keys=(Galaxy.id))
 GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory, primaryjoin=and_(PlanetHistory.tick==GalaxyHistory.tick, PlanetHistory.x==GalaxyHistory.x, PlanetHistory.y==GalaxyHistory.y), foreign_keys=(GalaxyHistory.tick, GalaxyHistory.x, GalaxyHistory.y))
 
-class AllianceRef(Base):
+class AllianceRef(Base): #ref tables only used for id generation in excalibur
     __tablename__ = 'alliance_ref'
     id = Column(Integer, primary_key=True)
     name = Column(String(64))
