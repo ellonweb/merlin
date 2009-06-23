@@ -236,7 +236,7 @@ class PlanetHistory(Base):
     xp_rank = Column(Integer)
     idle = Column(Integer)
     vdiff = Column(Integer)
-Planet.history_loader = dynamic_loader(PlanetHistory, primaryjoin=PlanetHistory.id==Planet.id)
+Planet.history_loader = dynamic_loader(PlanetHistory, backref="current")
 class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
     tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
