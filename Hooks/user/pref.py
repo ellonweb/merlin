@@ -49,7 +49,7 @@ class pref(loadable):
                     if planet is None:
                         continue
                     pl = val
-                    user.planet_id = planet.id
+                    user.planet = planet
                     if user.is_member():
                         session.add(planet)
                         if planet.intel is None:

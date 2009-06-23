@@ -35,107 +35,6 @@ from .variables import access
 Base = declarative_base()
 
 # ########################################################################### #
-# #############################    USER TABLES    ########################### #
-# ########################################################################### #
-
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(15)) # pnick
-    passwd = Column(String(32))
-    active = Column(Boolean, default=True)
-    access = Column(Integer)
-    planet_id = Column(Integer, ForeignKey('planet.id', deferrable=True, ondelete='set null'))
-    email = Column(String(32))
-    phone = Column(String(32))
-    pubphone = Column(Boolean, default=False) # Asc
-    sponsor = Column(String(15)) # Asc
-    invites = Column(Integer) # Asc
-    quits = Column(Integer) # Asc
-    stay = Column(Boolean) # Asc
-    emailre = re.compile("^([\w.-]+@[\w.-]+)")
-    
-    @validates('passwd')
-    def valid_passwd(self, key, passwd):
-        return User.hasher(passwd)
-    @validates('email')
-    def valid_email(self, key, email):
-        assert self.emailre.match(email)
-        return email
-    @validates('invites')
-    def valid_invites(self, key, invites):
-        assert invites > 0
-        return invites
-    
-    @staticmethod
-    def hasher(passwd):
-        # *Every* user password operation should go through this function
-        # This can be easily adapted to use SHA1 instead, or add salts
-        return hashlib.md5(passwd).hexdigest()
-    
-    @staticmethod
-    def load(name=None, id=None, passwd=None, exact=True, active=True):
-        assert id or name
-        session = Session()
-        Q = session.query(User)
-        if id is not None:
-            Q = Q.filter(User.id == id)
-        if name is not None:
-            if Q.filter(User.name.ilike(name)).count() > 0 or (exact is True):
-                Q = Q.filter(User.name.ilike(name))
-            else:
-                Q = Q.filter(User.name.ilike("%"+name+"%"))
-        if passwd is not None:
-            Q = Q.filter(User.passwd == User.hasher(passwd))
-        if active is True:
-            Q = Q.filter(User.active == True)
-        user = Q.first()
-        session.close()
-        return user
-def user_access_function(num):
-    # Function generator for access check
-    def func(self):
-        if self.access & num == num:
-            return True
-    return func
-for lvl, num in access.items():
-    # Bind user access functions
-    setattr(User, "is_"+lvl, user_access_function(num))
-
-class PhoneFriend(Base):
-    __tablename__ = 'phonefriends'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
-    friend_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
-
-User.phonefriends = relation(User,  secondary=PhoneFriend.__table__,
-                                  primaryjoin=PhoneFriend.user_id   == User.id,
-                                secondaryjoin=PhoneFriend.friend_id == User.id) # Asc
-
-class Gimp(Base):
-    __tablename__ = 'sponsor'
-    id = Column(Integer, primary_key=True)
-    sponsor_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
-    name = Column(String(15))
-    comment = Column(String(512))
-    timestamp = Column(Float, default=time)
-    wait = 36 #hours. use 0 for invite mode, -1 for recruitment closed
-    
-    def hoursleft(self):
-        return -ceil((time()-(self.timestamp+(self.wait*60*60)))/60/60)
-    
-    @staticmethod
-    def load(name):
-        session = Session()
-        Q = session.query(Gimp)
-        Q = Q.filter(Gimp.name.ilike(name))
-        gimp = Q.first()
-        session.close()
-        return gimp
-
-Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gimps')
-
-# ########################################################################### #
 # #############################    DUMP TABLES    ########################### #
 # ########################################################################### #
 
@@ -214,7 +113,6 @@ class Planet(Base):
     
     def maxcap(self):
         return self.size/4
-User.planet = relation(Planet, primaryjoin=User.planet_id==Planet.id)
 class PlanetHistory(Base):
     __tablename__ = 'planet_history'
     tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
@@ -372,6 +270,110 @@ class AllianceHistory(Base):
     size_avg_rank = Column(Integer)
     score_avg_rank = Column(Integer)
 Alliance.history_loader = dynamic_loader(AllianceHistory, primaryjoin=AllianceHistory.id==Alliance.id, foreign_keys=(Alliance.id))
+
+# ########################################################################### #
+# #############################    USER TABLES    ########################### #
+# ########################################################################### #
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(15)) # pnick
+    passwd = Column(String(32))
+    active = Column(Boolean, default=True)
+    access = Column(Integer)
+    planet_id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='set null'), index=True, unique=True)
+    email = Column(String(32))
+    phone = Column(String(32))
+    pubphone = Column(Boolean, default=False) # Asc
+    sponsor = Column(String(15)) # Asc
+    invites = Column(Integer) # Asc
+    quits = Column(Integer) # Asc
+    stay = Column(Boolean) # Asc
+    emailre = re.compile("^([\w.-]+@[\w.-]+)")
+    
+    @validates('passwd')
+    def valid_passwd(self, key, passwd):
+        return User.hasher(passwd)
+    @validates('email')
+    def valid_email(self, key, email):
+        assert self.emailre.match(email)
+        return email
+    @validates('invites')
+    def valid_invites(self, key, invites):
+        assert invites > 0
+        return invites
+    
+    @staticmethod
+    def hasher(passwd):
+        # *Every* user password operation should go through this function
+        # This can be easily adapted to use SHA1 instead, or add salts
+        return hashlib.md5(passwd).hexdigest()
+    
+    @staticmethod
+    def load(name=None, id=None, passwd=None, exact=True, active=True):
+        assert id or name
+        session = Session()
+        Q = session.query(User)
+        if id is not None:
+            Q = Q.filter(User.id == id)
+        if name is not None:
+            if Q.filter(User.name.ilike(name)).count() > 0 or (exact is True):
+                Q = Q.filter(User.name.ilike(name))
+            else:
+                Q = Q.filter(User.name.ilike("%"+name+"%"))
+        if passwd is not None:
+            Q = Q.filter(User.passwd == User.hasher(passwd))
+        if active is True:
+            Q = Q.filter(User.active == True)
+        user = Q.first()
+        session.close()
+        return user
+User.planet = relation(Planet)
+def user_access_function(num):
+    # Function generator for access check
+    def func(self):
+        if self.access & num == num:
+            return True
+    return func
+for lvl, num in access.items():
+    # Bind user access functions
+    setattr(User, "is_"+lvl, user_access_function(num))
+
+class PhoneFriend(Base):
+    __tablename__ = 'phonefriends'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
+    friend_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
+
+User.phonefriends = relation(User,  secondary=PhoneFriend.__table__,
+                                  primaryjoin=PhoneFriend.user_id   == User.id,
+                                secondaryjoin=PhoneFriend.friend_id == User.id) # Asc
+
+"""
+class Gimp(Base):
+    __tablename__ = 'sponsor'
+    id = Column(Integer, primary_key=True)
+    sponsor_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
+    name = Column(String(15))
+    comment = Column(String(512))
+    timestamp = Column(Float, default=time)
+    wait = 36 #hours. use 0 for invite mode, -1 for recruitment closed
+    
+    def hoursleft(self):
+        return -ceil((time()-(self.timestamp+(self.wait*60*60)))/60/60)
+    
+    @staticmethod
+    def load(name):
+        session = Session()
+        Q = session.query(Gimp)
+        Q = Q.filter(Gimp.name.ilike(name))
+        gimp = Q.first()
+        session.close()
+        return gimp
+
+Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gimps')
+"""
 
 # ########################################################################### #
 # ############################    INTEL TABLE    ############################ #
