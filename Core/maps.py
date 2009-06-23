@@ -217,10 +217,8 @@ class Planet(Base):
 User.planet = relation(Planet, primaryjoin=User.planet_id==Planet.id)
 class PlanetHistory(Base):
     __tablename__ = 'planet_history'
-    tick = Column(Integer, primary_key=True, autoincrement=False)
-    id = Column(Integer, primary_key=True, autoincrement=False)
-    planet_history_tick = ForeignKeyConstraint(('planet_history.tick'), ('updates.tick'), deferrable=True, ondelete='cascade')
-    #planet_history_id = ForeignKeyConstraint(('planet_history.id'), ('planet.id'), deferrable=True)
+    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
     x = Column(Integer)
     y = Column(Integer)
     z = Column(Integer)
@@ -238,14 +236,11 @@ class PlanetHistory(Base):
     xp_rank = Column(Integer)
     idle = Column(Integer)
     vdiff = Column(Integer)
-Planet.history_loader = dynamic_loader(PlanetHistory, primaryjoin=PlanetHistory.id==Planet.id, foreign_keys=(Planet.id))
+Planet.history_loader = dynamic_loader(PlanetHistory, primaryjoin=PlanetHistory.id==Planet.id)
 class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
-    key = Column(Integer, primary_key=True)
-    tick = Column(Integer)
-    id = Column(Integer)
-    planet_exiles_tick = ForeignKeyConstraint(('planet_exiles.tick'), ('updates.tick'), deferrable=True, ondelete='cascade')
-    #planet_exiles_id = ForeignKeyConstraint(('planet_exiles.id'), ('planet.id'), deferrable=True)
+    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
     oldx = Column(Integer)
     oldy = Column(Integer)
     oldz = Column(Integer)
