@@ -118,22 +118,10 @@ while True:
 
         try:
             planets = urllib2.urlopen(urlPlanet)
-        except Exception, e:
-            print "Failed gathering planet listing."
-            print e.__str__()
-            time.sleep(300)
-            continue
-        try:
             galaxies = urllib2.urlopen(urlGalaxy)
-        except Exception, e:
-            print "Failed gathering galaxy listing."
-            print e.__str__()
-            time.sleep(300)
-            continue    
-        try:
             alliances = urllib2.urlopen(urlAlliance)
         except Exception, e:
-            print "Failed gathering alliance listing."
+            print "Failed gathering dump files."
             print e.__str__()
             time.sleep(300)
             continue
