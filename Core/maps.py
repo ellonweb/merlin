@@ -34,6 +34,23 @@ from .variables import access
 
 Base = declarative_base()
 
+'''
+### WARNING ###
+Some of the FKs are used only internally by SQLA and need to be deleted after
+the intial table creations. (SQLA will only check the tables exist, it does
+not check that they're correct.) FKs to delete:
+
+galaxy_history.id -> galaxy.id
+planet.x -> galaxy.x
+planet.y -> galaxy.y
+planet_history.id -> planet.id
+planet_history.x -> galaxy_history.x
+planet_history.y -> galaxy_history.y
+alliance_history.id -> alliance.id
+
+
+'''
+
 # ########################################################################### #
 # #############################    DUMP TABLES    ########################### #
 # ########################################################################### #
@@ -54,6 +71,68 @@ class Updates(Base):
         session.close()
         return tick
 
+class GalaxyRef(Base): #ref tables only used for id generation in excalibur
+    __tablename__ = 'galaxy_ref'
+    id = Column(Integer, primary_key=True)
+    x = Column(Integer)
+    y = Column(Integer)
+
+class Galaxy(Base):
+    __tablename__ = 'galaxy'
+    id = Column(Integer, index=True, unique=True)
+    x = Column(Integer, primary_key=True, autoincrement=False)
+    y = Column(Integer, primary_key=True, autoincrement=False)
+    name = Column(String(64))
+    size = Column(Integer)
+    score = Column(Integer)
+    value = Column(Integer)
+    xp = Column(Integer)
+    size_rank = Column(Integer)
+    score_rank = Column(Integer)
+    value_rank = Column(Integer)
+    xp_rank = Column(Integer)
+    
+    def history(self, tick):
+        return self.history_loader.filter_by(tick=tick).first()
+    
+    def planet(self, z):
+        return self.planet_loader.filter_by(z=z).first()
+    
+    @staticmethod
+    def load(x,y):
+        session = Session()
+        Q = session.query(Galaxy)
+        Q = Q.filter_by(x=x, y=y)
+        galaxy = Q.first()
+        session.close()
+        return galaxy
+    
+    def __str__(self):
+        retstr="%s:%s '%s' " % (self.x,self.y,self.name)
+        retstr+="Score: %s (%s) " % (self.score,self.score_rank)
+        retstr+="Value: %s (%s) " % (self.value,self.value_rank)
+        retstr+="Size: %s (%s) " % (self.size,self.size_rank)
+        retstr+="XP: %s (%s) " % (self.xp,self.xp_rank)
+        return retstr
+class GalaxyHistory(Base):
+    __tablename__ = 'galaxy_history'
+    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Galaxy.id), primary_key=True, autoincrement=False)
+    x = Column(Integer)
+    y = Column(Integer)
+    name = Column(String(64))
+    size = Column(Integer)
+    score = Column(Integer)
+    value = Column(Integer)
+    xp = Column(Integer)
+    size_rank = Column(Integer)
+    score_rank = Column(Integer)
+    value_rank = Column(Integer)
+    xp_rank = Column(Integer)
+    def planet(self, z):
+        return self.planet_loader.filter_by(z=z).first()
+Galaxy.history_loader = dynamic_loader(GalaxyHistory, backref="current")
+
 class PlanetRef(Base): #ref tables only used for id generation in excalibur
     __tablename__ = 'planet_ref'
     id = Column(Integer, primary_key=True)
@@ -63,10 +142,9 @@ class PlanetRef(Base): #ref tables only used for id generation in excalibur
 class Planet(Base):
     __tablename__ = 'planet'
     id = Column(Integer, index=True, unique=True)
-    x = Column(Integer, primary_key=True, autoincrement=False)
-    y = Column(Integer, primary_key=True, autoincrement=False)
+    x = Column(Integer, ForeignKey(Galaxy.x), primary_key=True, autoincrement=False)
+    y = Column(Integer, ForeignKey(Galaxy.y), primary_key=True, autoincrement=False)
     z = Column(Integer, primary_key=True, autoincrement=False)
-    #galaxy_coords = ForeignKeyConstraint(('planet.x', 'planet.y'), ('galaxy.x', 'galaxy.y'), deferrable=True)
     planetname = Column(String(20))
     rulername = Column(String(20))
     race = Column(String(3))
@@ -113,14 +191,17 @@ class Planet(Base):
     
     def maxcap(self):
         return self.size/4
+Planet2Galaxy = and_(Galaxy.x==Planet.x,
+                     Galaxy.y==Planet.y)
+Planet.galaxy = relation(Galaxy, backref="planets", primaryjoin=Planet2Galaxy)
+Galaxy.planet_loader = dynamic_loader(Planet, primaryjoin=Planet2Galaxy)
 class PlanetHistory(Base):
     __tablename__ = 'planet_history'
-    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
-    id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
-    x = Column(Integer)
-    y = Column(Integer)
+    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), ForeignKey(GalaxyHistory.tick, deferrable=True), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
+    x = Column(Integer, ForeignKey(GalaxyHistory.x))
+    y = Column(Integer, ForeignKey(GalaxyHistory.y))
     z = Column(Integer)
-    #galaxy_coords = ForeignKeyConstraint(('planet_history.tick', 'planet_history.x', 'planet_history.y'), ('galaxy_history.tick', 'galaxy_history.x', 'galaxy_history.y'), deferrable=True)
     planetname = Column(String(20))
     rulername = Column(String(20))
     race = Column(String(3))
@@ -135,82 +216,21 @@ class PlanetHistory(Base):
     idle = Column(Integer)
     vdiff = Column(Integer)
 Planet.history_loader = dynamic_loader(PlanetHistory, backref="current")
+Planet2GalaxyH = and_(GalaxyHistory.x==PlanetHistory.x,
+                      GalaxyHistory.y==PlanetHistory.y,
+                      GalaxyHistory.tick==PlanetHistory.tick)
+PlanetHistory.galaxy = relation(GalaxyHistory, backref="planets", primaryjoin=Planet2GalaxyH)
+GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory, primaryjoin=Planet2GalaxyH)
 class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
     tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
-    id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id, deferrable=True), primary_key=True, autoincrement=False)
     oldx = Column(Integer)
     oldy = Column(Integer)
     oldz = Column(Integer)
     newx = Column(Integer)
     newy = Column(Integer)
     newz = Column(Integer)
-
-class GalaxyRef(Base): #ref tables only used for id generation in excalibur
-    __tablename__ = 'galaxy_ref'
-    id = Column(Integer, primary_key=True)
-    x = Column(Integer)
-    y = Column(Integer)
-
-class Galaxy(Base):
-    __tablename__ = 'galaxy'
-    id = Column(Integer, index=True, unique=True)
-    x = Column(Integer, primary_key=True, autoincrement=False)
-    y = Column(Integer, primary_key=True, autoincrement=False)
-    name = Column(String(64))
-    size = Column(Integer)
-    score = Column(Integer)
-    value = Column(Integer)
-    xp = Column(Integer)
-    size_rank = Column(Integer)
-    score_rank = Column(Integer)
-    value_rank = Column(Integer)
-    xp_rank = Column(Integer)
-    
-    def history(self, tick):
-        return self.history_loader.filter_by(tick=tick).first()
-    
-    def planet(self, z):
-        return self.planet_loader.filter_by(z=z).first()
-    
-    @staticmethod
-    def load(x,y):
-        session = Session()
-        Q = session.query(Galaxy)
-        Q = Q.filter_by(x=x, y=y)
-        galaxy = Q.first()
-        session.close()
-        return galaxy
-    
-    def __str__(self):
-        retstr="%s:%s '%s' " % (self.x,self.y,self.name)
-        retstr+="Score: %s (%s) " % (self.score,self.score_rank)
-        retstr+="Value: %s (%s) " % (self.value,self.value_rank)
-        retstr+="Size: %s (%s) " % (self.size,self.size_rank)
-        retstr+="XP: %s (%s) " % (self.xp,self.xp_rank)
-        return retstr
-#Planet.galaxy = relation(Galaxy, primaryjoin=and_(Galaxy.x==Planet.x, Galaxy.y==Planet.y), foreign_keys=(Planet.x, Planet.y), backref=backref('planets', primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), foreign_keys=(Planet.x, Planet.y)))
-#Galaxy.planet_loader = dynamic_loader(Planet, primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), foreign_keys=(Galaxy.x, Galaxy.y))
-class GalaxyHistory(Base):
-    __tablename__ = 'galaxy_history'
-    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
-    id = Column(Integer, ForeignKey(Galaxy.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
-    x = Column(Integer)
-    y = Column(Integer)
-    name = Column(String(64))
-    size = Column(Integer)
-    score = Column(Integer)
-    value = Column(Integer)
-    xp = Column(Integer)
-    size_rank = Column(Integer)
-    score_rank = Column(Integer)
-    value_rank = Column(Integer)
-    xp_rank = Column(Integer)
-    def planet(self, z):
-        return self.planet_loader.filter_by(z=z).first()
-#PlanetHistory.galaxy = relation(GalaxyHistory, primaryjoin=and_(GalaxyHistory.tick==PlanetHistory.tick, GalaxyHistory.x==PlanetHistory.x, GalaxyHistory.y==PlanetHistory.y), foreign_keys=(PlanetHistory.tick, PlanetHistory.x, PlanetHistory.y), backref=backref('planets', primaryjoin=and_(PlanetHistory.tick==GalaxyHistory.tick, PlanetHistory.x==GalaxyHistory.x, PlanetHistory.y==GalaxyHistory.y), foreign_keys=(PlanetHistory.tick, PlanetHistory.x, PlanetHistory.y)))
-Galaxy.history_loader = dynamic_loader(GalaxyHistory, backref="current")
-#GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory, primaryjoin=and_(PlanetHistory.tick==GalaxyHistory.tick, PlanetHistory.x==GalaxyHistory.x, PlanetHistory.y==GalaxyHistory.y), foreign_keys=(GalaxyHistory.tick, GalaxyHistory.x, GalaxyHistory.y))
 
 class AllianceRef(Base): #ref tables only used for id generation in excalibur
     __tablename__ = 'alliance_ref'
@@ -252,10 +272,8 @@ class Alliance(Base):
         return retstr
 class AllianceHistory(Base):
     __tablename__ = 'alliance_history'
-    tick = Column(Integer, primary_key=True, autoincrement=False)
-    id = Column(Integer, primary_key=True, autoincrement=False)
-    alliance_history_tick = ForeignKeyConstraint(('alliance_history.tick'), ('updates.tick'), deferrable=True, ondelete='cascade')
-    #alliance_history_id = ForeignKeyConstraint(('alliance_history.id'), ('alliance.id'), deferrable=True)
+    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Alliance.id), primary_key=True, autoincrement=False)
     name = Column(String(20))
     size = Column(Integer)
     members = Column(Integer)
@@ -267,7 +285,7 @@ class AllianceHistory(Base):
     score_avg = Column(Integer)
     size_avg_rank = Column(Integer)
     score_avg_rank = Column(Integer)
-Alliance.history_loader = dynamic_loader(AllianceHistory, primaryjoin=AllianceHistory.id==Alliance.id, foreign_keys=(Alliance.id))
+Alliance.history_loader = dynamic_loader(AllianceHistory, backref="current")
 
 # ########################################################################### #
 # #############################    USER TABLES    ########################### #
@@ -348,7 +366,7 @@ User.phonefriends = relation(User,  secondary=PhoneFriend.__table__,
                                   primaryjoin=PhoneFriend.user_id   == User.id,
                                 secondaryjoin=PhoneFriend.friend_id == User.id) # Asc
 
-"""
+'''
 class Gimp(Base):
     __tablename__ = 'sponsor'
     id = Column(Integer, primary_key=True)
@@ -371,7 +389,7 @@ class Gimp(Base):
         return gimp
 
 Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gimps')
-"""
+'''
 
 # ########################################################################### #
 # ############################    INTEL TABLE    ############################ #
