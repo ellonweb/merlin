@@ -46,6 +46,7 @@ planet.y -> galaxy.y
 planet_history.id -> planet.id
 planet_history.x -> galaxy_history.x
 planet_history.y -> galaxy_history.y
+planet_exiles.id -> planet.id
 alliance_history.id -> alliance.id
 
 
@@ -224,7 +225,7 @@ GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory, primaryjoin=Planet2G
 class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
     tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
-    id = Column(Integer, ForeignKey(Planet.id, deferrable=True), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
     oldx = Column(Integer)
     oldy = Column(Integer)
     oldz = Column(Integer)
