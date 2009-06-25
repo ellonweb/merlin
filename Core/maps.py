@@ -34,28 +34,6 @@ from .variables import access
 
 Base = declarative_base()
 
-'''
-### WARNING ###
-Some of the FKs are used only internally by SQLA and need to be deleted after
-the intial table creations. (SQLA will only check the tables exist, it does
-not check that they're correct.) FKs to delete:
-
-galaxy_history.id -> galaxy.id
-planet.x -> galaxy.x
-planet.y -> galaxy.y
-planet_history.id -> planet.id
-planet_history.x -> galaxy_history.x
-planet_history.y -> galaxy_history.y
-planet_exiles.id -> planet.id
-alliance_history.id -> alliance.id
-
-x/y references are not so important unless PA fucks up the dumps
-
-the id references may cause the tick to fail or the loss of data if the FKs
-are enforced and a planet is deleted or a galaxy disbanded
-
-'''
-
 # ########################################################################### #
 # #############################    DUMP TABLES    ########################### #
 # ########################################################################### #
