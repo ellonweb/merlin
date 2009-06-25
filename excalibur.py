@@ -82,6 +82,15 @@ galaxy_xp_rank = Table('galaxy_xp_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
     Column('xp', Integer),
     Column('xp_rank', Integer, primary_key=True))
+alliance_temp = Table('alliance_temp', DB.Maps.Base.metadata,
+    Column('id', Integer),
+    Column('name', String(20), primary_key=True)
+    Column('size', Integer),
+    Column('members', Integer),
+    Column('score', Integer),
+    Column('score_rank', Integer))
+    Column('size_avg', Integer))
+    Column('score_avg', Integer))
 alliance_size_rank = Table('alliance_size_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
     Column('size', Integer),
@@ -112,6 +121,7 @@ galaxy_size_rank.drop(checkfirst=True)
 galaxy_score_rank.drop(checkfirst=True)
 galaxy_value_rank.drop(checkfirst=True)
 galaxy_xp_rank.drop(checkfirst=True)
+alliance_temp.drop(checkfirst=True)
 alliance_size_rank.drop(checkfirst=True)
 alliance_members_rank.drop(checkfirst=True)
 alliance_size_avg_rank.drop(checkfirst=True)
@@ -128,6 +138,7 @@ galaxy_size_rank.create()
 galaxy_score_rank.create()
 galaxy_value_rank.create()
 galaxy_xp_rank.create()
+alliance_temp.create()
 alliance_size_rank.create()
 alliance_members_rank.create()
 alliance_size_avg_rank.create()
@@ -206,7 +217,7 @@ while True:
 
         planet_insert = "INSERT INTO planet_temp (x, y, z, planetname, rulername, race, size, score, value, xp) "
         galaxy_insert = "INSERT INTO galaxy_temp (x, y, name, size, score, value, xp) "
-        alliance_insert = "INSERT INTO alliance (score_rank, name, size, members, score, size_avg, score_avg) "
+        alliance_insert = "INSERT INTO alliance_temp (score_rank, name, size, members, score, size_avg, score_avg) "
 
         p_list = []
         g_list = []
@@ -372,23 +383,24 @@ while True:
 # #############################    ALLIANCES    ############################# #
 # ########################################################################### #
 
-        session.execute(text("UPDATE alliance SET id = (SELECT id FROM alliance_history WHERE alliance.name = alliance_history.name AND alliance_history.tick = :tick);", bindparams=[bindparam("tick",last_tick)]))
+        session.execute(text("UPDATE alliance_temp SET id = (SELECT id FROM alliance WHERE alliance.name = alliance_temp.name);"))
 
         t2=time.time()-t1
-        print "Copy alliance ids from history in %.3f seconds" % (t2,)
+        print "Copy alliance ids to temp in %.3f seconds" % (t2,)
         t1=time.time()
 
-        session.execute(text("INSERT INTO alliance_ref (name) SELECT name FROM alliance WHERE id IS NULL;"))
-        session.execute(text("UPDATE alliance SET id = (SELECT id FROM alliance_ref WHERE alliance.name = alliance_ref.name ORDER BY alliance_ref.id DESC) WHERE id IS NULL;"))
+        session.execute(text("UPDATE alliance SET active = 0 WHERE id NOT IN (SELECT id FROM alliance_temp);"))
+        session.execute(text("INSERT INTO alliance (name) SELECT name FROM alliance_temp WHERE id IS NULL;"))
+        session.execute(text("UPDATE alliance_temp SET id = (SELECT id FROM alliance WHERE alliance.name = alliance_temp.name ORDER BY alliance.id DESC) WHERE id IS NULL;"))
 
         t2=time.time()-t1
-        print "Generate new alliance ids in %.3f seconds" % (t2,)
+        print "Deactivate old alliances and generate new alliance ids in %.3f seconds" % (t2,)
         t1=time.time()
 
-        session.execute(text("INSERT INTO alliance_size_rank (id, size) SELECT id, size FROM alliance ORDER BY size DESC;"))
-        session.execute(text("INSERT INTO alliance_members_rank (id, members) SELECT id, members FROM alliance ORDER BY members DESC;"))
-        session.execute(text("INSERT INTO alliance_size_avg_rank (id, size_avg) SELECT id, size_avg FROM alliance ORDER BY size_avg DESC;"))
-        session.execute(text("INSERT INTO alliance_score_avg_rank (id, score_avg) SELECT id, score_avg FROM alliance ORDER BY score_avg DESC;"))
+        session.execute(text("INSERT INTO alliance_size_rank (id, size) SELECT id, size FROM alliance_temp ORDER BY size DESC;"))
+        session.execute(text("INSERT INTO alliance_members_rank (id, members) SELECT id, members FROM alliance_temp ORDER BY members DESC;"))
+        session.execute(text("INSERT INTO alliance_size_avg_rank (id, size_avg) SELECT id, size_avg FROM alliance_temp ORDER BY size_avg DESC;"))
+        session.execute(text("INSERT INTO alliance_score_avg_rank (id, score_avg) SELECT id, score_avg FROM alliance_temp ORDER BY score_avg DESC;"))
         session.execute(text("""UPDATE alliance SET
                                     size_rank = (SELECT size_rank FROM alliance_size_rank WHERE alliance.id = alliance_size_rank.id),
                                     members_rank = (SELECT members_rank FROM alliance_members_rank WHERE alliance.id = alliance_members_rank.id),
@@ -398,6 +410,16 @@ while True:
 
         t2=time.time()-t1
         print "Alliance ranks in %.3f seconds" % (t2,)
+        t1=time.time()
+
+        session.execute(text("""UPDATE alliance SET score_rank, name, size, members, score, size_avg, score_avg = (
+                                             SELECT score_rank, name, size, members, score, size_avg, score_avg
+                                             FROM alliance_temp WHERE alliance.id = alliance_temp.id
+                                            )
+                            ;"""))
+
+        t2=time.time()-t1
+        print "Update alliances from temp in %.3f seconds" % (t2,)
         t1=time.time()
 
 # ########################################################################### #

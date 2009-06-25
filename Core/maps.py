@@ -227,15 +227,11 @@ class PlanetExiles(Base):
     newy = Column(Integer)
     newz = Column(Integer)
 
-class AllianceRef(Base): #ref tables only used for id generation in excalibur
-    __tablename__ = 'alliance_ref'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(64))
-
 class Alliance(Base):
     __tablename__ = 'alliance'
-    id = Column(Integer, index=True, unique=True)
-    name = Column(String(20), primary_key=True)
+    id = Column(Integer, primary_key=True)
+    active = Column(Boolean)
+    name = Column(String(20), index=True)
     size = Column(Integer)
     members = Column(Integer)
     score = Column(Integer)
