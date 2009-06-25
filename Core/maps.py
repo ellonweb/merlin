@@ -76,17 +76,12 @@ class Updates(Base):
         session.close()
         return tick
 
-class GalaxyRef(Base): #ref tables only used for id generation in excalibur
-    __tablename__ = 'galaxy_ref'
-    id = Column(Integer, primary_key=True)
-    x = Column(Integer)
-    y = Column(Integer)
-
 class Galaxy(Base):
     __tablename__ = 'galaxy'
-    id = Column(Integer, index=True, unique=True)
-    x = Column(Integer, primary_key=True, autoincrement=False)
-    y = Column(Integer, primary_key=True, autoincrement=False)
+    id = Column(Integer, primary_key=True)
+    active = Column(Boolean)
+    x = Column(Integer)
+    y = Column(Integer)
     name = Column(String(64))
     size = Column(Integer)
     score = Column(Integer)

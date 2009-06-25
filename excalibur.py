@@ -8,11 +8,11 @@ from sqlalchemy.sql import text, bindparam
 
 planet_temp = Table('planet_temp', DB.Maps.Base.metadata,
     Column('id', Integer),
-    Column('x', Integer),
-    Column('y', Integer),
-    Column('z', Integer),
-    Column('planetname', String(20), primary_key=True)
-    Column('rulername', String(20), primary_key=True)
+    Column('x', Integer, primary_key=True),
+    Column('y', Integer, primary_key=True),
+    Column('z', Integer, primary_key=True),
+    Column('planetname', String(20))
+    Column('rulername', String(20))
     Column('race', String(3)),
     Column('size', Integer),
     Column('score', Integer),
@@ -57,6 +57,15 @@ planet_xp_rank = Table('planet_xp_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
     Column('xp', Integer),
     Column('xp_rank', Integer, primary_key=True))
+galaxy_temp = Table('galaxy_temp', DB.Maps.Base.metadata,
+    Column('id', Integer),
+    Column('x', Integer, primary_key=True),
+    Column('y', Integer, primary_key=True),
+    Column('name', String(64))
+    Column('size', Integer),
+    Column('score', Integer),
+    Column('value', Integer),
+    Column('xp', Integer))
 galaxy_size_rank = Table('galaxy_size_rank', DB.Maps.Base.metadata,
     Column('id', Integer),
     Column('size', Integer),
@@ -98,6 +107,7 @@ planet_size_rank.drop(checkfirst=True)
 planet_score_rank.drop(checkfirst=True)
 planet_value_rank.drop(checkfirst=True)
 planet_xp_rank.drop(checkfirst=True)
+galaxy_temp.drop(checkfirst=True)
 galaxy_size_rank.drop(checkfirst=True)
 galaxy_score_rank.drop(checkfirst=True)
 galaxy_value_rank.drop(checkfirst=True)
@@ -113,6 +123,7 @@ planet_size_rank.create()
 planet_score_rank.create()
 planet_value_rank.create()
 planet_xp_rank.create()
+galaxy_temp.create()
 galaxy_size_rank.create()
 galaxy_score_rank.create()
 galaxy_value_rank.create()
@@ -194,7 +205,7 @@ while True:
         session.execute(DB.Maps.Alliance.__table__.delete())
 
         planet_insert = "INSERT INTO planet_temp (x, y, z, planetname, rulername, race, size, score, value, xp) "
-        galaxy_insert = "INSERT INTO galaxy (x, y, name, size, score, value, xp) "
+        galaxy_insert = "INSERT INTO galaxy_temp (x, y, name, size, score, value, xp) "
         alliance_insert = "INSERT INTO alliance (score_rank, name, size, members, score, size_avg, score_avg) "
 
         p_list = []
@@ -280,8 +291,8 @@ while True:
         t1=time.time()
 
         session.execute(text("UPDATE planet SET active = 0 WHERE id NOT IN (SELECT id FROM planet_temp);"))
-        session.execute(text("INSERT INTO planet (planetname, rulername, active) SELECT planetname, rulername, 1 FROM planet_temp WHERE id IS NULL;"))
-        session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.rulername = planet_temp.rulername AND planet.planetname = planet_temp.planetname ORDER BY planet.id DESC) WHERE id IS NULL;"))
+        session.execute(text("INSERT INTO planet (x, y, z, active) SELECT x, y, z, 1 FROM planet_temp WHERE id IS NULL;"))
+        session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.x = planet_temp.x AND planet.y = planet_temp.y AND planet.z = planet_temp.z ORDER BY planet.id DESC) WHERE id IS NULL;"))
 
         t2=time.time()-t1
         print "Deactivate old planets and generate new planet ids in %.3f seconds" % (t2,)
@@ -318,23 +329,24 @@ while True:
 # ##############################    GALAXIES    ############################# #
 # ########################################################################### #
 
-        session.execute(text("UPDATE galaxy SET id = (SELECT id FROM galaxy_history WHERE galaxy.x = galaxy_history.x AND galaxy.y = galaxy_history.y AND galaxy_history.tick = :tick);", bindparams=[bindparam("tick",last_tick)]))
+        session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y);"))
 
         t2=time.time()-t1
-        print "Copy galaxy ids from history in %.3f seconds" % (t2,)
+        print "Copy galaxy ids to temp in %.3f seconds" % (t2,)
         t1=time.time()
 
-        session.execute(text("INSERT INTO galaxy_ref (x, y) SELECT x, y FROM galaxy WHERE id IS NULL;"))
-        session.execute(text("UPDATE galaxy SET id = (SELECT id FROM galaxy_ref WHERE galaxy.x = galaxy_ref.x AND galaxy.y = galaxy_ref.y ORDER BY galaxy_ref.id DESC) WHERE id IS NULL;"))
+        session.execute(text("UPDATE galaxy SET active = 0 WHERE id NOT IN (SELECT id FROM galaxy_temp);"))
+        session.execute(text("INSERT INTO galaxy (x, y, active) SELECT x, y, 1 FROM galaxy_temp WHERE id IS NULL;"))
+        session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y ORDER BY galaxy.id DESC) WHERE id IS NULL;"))
 
         t2=time.time()-t1
-        print "Generate new galaxy ids in %.3f seconds" % (t2,)
+        print "Deactivate old galaxies and generate new galaxy ids in %.3f seconds" % (t2,)
         t1=time.time()
 
-        session.execute(text("INSERT INTO galaxy_size_rank (id, size) SELECT id, size FROM galaxy ORDER BY size DESC;"))
-        session.execute(text("INSERT INTO galaxy_score_rank (id, score) SELECT id, score FROM galaxy ORDER BY score DESC;"))
-        session.execute(text("INSERT INTO galaxy_value_rank (id, value) SELECT id, value FROM galaxy ORDER BY value DESC;"))
-        session.execute(text("INSERT INTO galaxy_xp_rank (id, xp) SELECT id, xp FROM galaxy ORDER BY xp DESC;"))
+        session.execute(text("INSERT INTO galaxy_size_rank (id, size) SELECT id, size FROM galaxy_temp ORDER BY size DESC;"))
+        session.execute(text("INSERT INTO galaxy_score_rank (id, score) SELECT id, score FROM galaxy_temp ORDER BY score DESC;"))
+        session.execute(text("INSERT INTO galaxy_value_rank (id, value) SELECT id, value FROM galaxy_temp ORDER BY value DESC;"))
+        session.execute(text("INSERT INTO galaxy_xp_rank (id, xp) SELECT id, xp FROM galaxy_temp ORDER BY xp DESC;"))
         session.execute(text("""UPDATE galaxy SET
                                     size_rank = (SELECT size_rank FROM galaxy_size_rank WHERE galaxy.id = galaxy_size_rank.id),
                                     score_rank = (SELECT score_rank FROM galaxy_score_rank WHERE galaxy.id = galaxy_score_rank.id),
@@ -344,6 +356,16 @@ while True:
 
         t2=time.time()-t1
         print "Galaxy ranks in %.3f seconds" % (t2,)
+        t1=time.time()
+
+        session.execute(text("""UPDATE galaxy SET x, y, name, size, score, value, xp = (
+                                           SELECT x, y, name, size, score, value, xp
+                                           FROM galaxy_temp WHERE galaxy.id = galaxy_temp.id
+                                          )
+                            ;"""))
+
+        t2=time.time()-t1
+        print "Update galaxies from temp in %.3f seconds" % (t2,)
         t1=time.time()
 
 # ########################################################################### #
