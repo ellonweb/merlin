@@ -6,6 +6,20 @@ import Core.db as DB
 from sqlalchemy import Table, Column, Integer, String
 from sqlalchemy.sql import text, bindparam
 
+planet_temp = Table('planet_temp', DB.Maps.Base.metadata,
+    Column('id', Integer),
+    Column('x', Integer),
+    Column('y', Integer),
+    Column('z', Integer),
+    Column('planetname', String(20), primary_key=True)
+    Column('rulername', String(20), primary_key=True)
+    Column('race', String(3)),
+    Column('size', Integer),
+    Column('score', Integer),
+    Column('value', Integer),
+    Column('xp', Integer))
+    Column('vdiff', Integer),
+    Column('idle', Integer),
 planet_new_id_search = Table('planet_new_id_search', DB.Maps.Base.metadata,
     Column('id', Integer),
     Column('x', Integer, primary_key=True),
@@ -77,6 +91,7 @@ alliance_score_avg_rank = Table('alliance_score_avg_rank', DB.Maps.Base.metadata
     Column('score_avg_rank', Integer, primary_key=True))
 
 
+planet_temp.drop(checkfirst=True)
 planet_new_id_search.drop(checkfirst=True)
 planet_old_id_search.drop(checkfirst=True)
 planet_size_rank.drop(checkfirst=True)
@@ -91,6 +106,7 @@ alliance_size_rank.drop(checkfirst=True)
 alliance_members_rank.drop(checkfirst=True)
 alliance_size_avg_rank.drop(checkfirst=True)
 alliance_score_avg_rank.drop(checkfirst=True)
+planet_temp.create()
 planet_new_id_search.create()
 planet_old_id_search.create()
 planet_size_rank.create()
@@ -177,7 +193,7 @@ while True:
         session.execute(DB.Maps.Galaxy.__table__.delete())
         session.execute(DB.Maps.Alliance.__table__.delete())
 
-        planet_insert = "INSERT INTO planet (x, y, z, planetname, rulername, race, size, score, value, xp) "
+        planet_insert = "INSERT INTO planet_temp (x, y, z, planetname, rulername, race, size, score, value, xp) "
         galaxy_insert = "INSERT INTO galaxy (x, y, name, size, score, value, xp) "
         alliance_insert = "INSERT INTO alliance (score_rank, name, size, members, score, size_avg, score_avg) "
 
@@ -212,21 +228,21 @@ while True:
 # ##############################    PLANETS    ############################## #
 # ########################################################################### #
 
-        session.execute(text("UPDATE planet SET id = (SELECT id FROM planet_history WHERE planet.rulername = planet_history.rulername AND planet.planetname = planet_history.planetname AND planet_history.tick = :tick);", bindparams=[bindparam("tick",last_tick)]))
+        session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.rulername = planet_temp.rulername AND planet.planetname = planet_temp.planetname);"))
 
         t2=time.time()-t1
-        print "Copy planet ids from history in %.3f seconds" % (t2,)
+        print "Copy planet ids to temp in %.3f seconds" % (t2,)
         t1=time.time()
 
         while last_tick > 0:
             def load_planet_id_search():
+                session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet_new_id_search WHERE planet_temp.x = planet_new_id_search.x AND planet_temp.y = planet_new_id_search.y AND planet_temp.z = planet_new_id_search.z) WHERE id IS NULL;"))
                 session.execute(planet_new_id_search.delete())
                 session.execute(planet_old_id_search.delete())
-                if session.execute(text("INSERT INTO planet_new_id_search (id, x, y, z, race, size, score, value, xp) SELECT id, x, y, z, race, size, score, value, xp FROM planet WHERE planet.id IS NULL;")).rowcount < 1:
+                if session.execute(text("INSERT INTO planet_new_id_search (id, x, y, z, race, size, score, value, xp) SELECT id, x, y, z, race, size, score, value, xp FROM planet_temp WHERE planet_temp.id IS NULL;")).rowcount < 1:
                     return None
-                if session.execute(text("INSERT INTO planet_old_id_search (id, x, y, z, race, size, score, value, xp, vdiff) SELECT id, x, y, z, race, size, score, value, xp, vdiff FROM planet_history WHERE tick = :tick AND planet_history.id NOT IN (SELECT id FROM planet WHERE id IS NOT NULL);", bindparams=[bindparam("tick",last_tick)])).rowcount < 1:
+                if session.execute(text("INSERT INTO planet_old_id_search (id, x, y, z, race, size, score, value, xp, vdiff) SELECT id, x, y, z, race, size, score, value, xp, vdiff FROM planet WHERE planet.id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL);")).rowcount < 1:
                     return None
-                session.execute(text("UPDATE planet SET id = (SELECT id FROM planet_new_id_search WHERE planet.x = planet_new_id_search.x AND planet.y = planet_new_id_search.y AND planet.z = planet_new_id_search.z) WHERE id IS NULL;"))
                 return 1
             if load_planet_id_search() is None: break
             session.execute(text("""UPDATE planet_new_id_search SET id = (
@@ -263,28 +279,39 @@ while True:
         print "Lost planet ids match up in %.3f seconds" % (t2,)
         t1=time.time()
 
-        session.execute(text("INSERT INTO planet_ref (rulername, planetname) SELECT rulername, planetname FROM planet WHERE id IS NULL;"))
-        session.execute(text("UPDATE planet SET id = (SELECT id FROM planet_ref WHERE planet.rulername = planet_ref.rulername AND planet.planetname = planet_ref.planetname ORDER BY planet_ref.id DESC) WHERE id IS NULL;"))
+        session.execute(text("UPDATE planet SET active = 0 WHERE id NOT IN (SELECT id FROM planet_temp);"))
+        session.execute(text("INSERT INTO planet (planetname, rulername, active) SELECT planetname, rulername, 1 FROM planet_temp WHERE id IS NULL;"))
+        session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.rulername = planet_temp.rulername AND planet.planetname = planet_temp.planetname ORDER BY planet.id DESC) WHERE id IS NULL;"))
 
         t2=time.time()-t1
-        print "Generate new planet ids in %.3f seconds" % (t2,)
+        print "Deactivate old planets and generate new planet ids in %.3f seconds" % (t2,)
         t1=time.time()
 
-        session.execute(text("INSERT INTO planet_size_rank (id, size) SELECT id, size FROM planet ORDER BY size DESC;"))
-        session.execute(text("INSERT INTO planet_score_rank (id, score) SELECT id, score FROM planet ORDER BY score DESC;"))
-        session.execute(text("INSERT INTO planet_value_rank (id, value) SELECT id, value FROM planet ORDER BY value DESC;"))
-        session.execute(text("INSERT INTO planet_xp_rank (id, xp) SELECT id, xp FROM planet ORDER BY xp DESC;"))
+        session.execute(text("INSERT INTO planet_size_rank (id, size) SELECT id, size FROM planet_temp ORDER BY size DESC;"))
+        session.execute(text("INSERT INTO planet_score_rank (id, score) SELECT id, score FROM planet_temp ORDER BY score DESC;"))
+        session.execute(text("INSERT INTO planet_value_rank (id, value) SELECT id, value FROM planet_temp ORDER BY value DESC;"))
+        session.execute(text("INSERT INTO planet_xp_rank (id, xp) SELECT id, xp FROM planet_temp ORDER BY xp DESC;"))
         session.execute(text("""UPDATE planet SET
                                     size_rank = (SELECT size_rank FROM planet_size_rank WHERE planet.id = planet_size_rank.id),
                                     score_rank = (SELECT score_rank FROM planet_score_rank WHERE planet.id = planet_score_rank.id),
                                     value_rank = (SELECT value_rank FROM planet_value_rank WHERE planet.id = planet_value_rank.id),
                                     xp_rank = (SELECT xp_rank FROM planet_xp_rank WHERE planet.id = planet_xp_rank.id)
-                            """))
-        session.execute(text("UPDATE planet SET vdiff = planet.value - (SELECT value FROM planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :tick);", bindparams=[bindparam("tick",last_tick)]))
-        session.execute(text("UPDATE planet SET idle = COALESCE(1 + (SELECT idle FROM planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :tick AND planet.vdiff BETWEEN planet_history.vdiff -1 AND planet_history.vdiff +1 AND planet.xp - planet_history.xp = 0), 1);", bindparams=[bindparam("tick",last_tick)]))
+                            ;"""))
+        session.execute(text("UPDATE planet_temp SET vdiff = planet_temp.value - (SELECT value FROM planet WHERE planet.id = planet_temp.id);"))
+        session.execute(text("UPDATE planet_temp SET idle = COALESCE(1 + (SELECT idle FROM planet WHERE planet.id = planet_temp.id AND planet_temp.vdiff BETWEEN planet.vdiff -1 AND planet.vdiff +1 AND planet.xp - planet_temp.xp = 0), 0);"))
 
         t2=time.time()-t1
         print "Planet ranks in %.3f seconds" % (t2,)
+        t1=time.time()
+
+        session.execute(text("""UPDATE planet SET x, y, z, planetname, rulername, race, size, score, value, xp, vdiff, idle = (
+                                           SELECT x, y, z, planetname, rulername, race, size, score, value, xp, vdiff, idle
+                                           FROM planet_temp WHERE planet.id = planet_temp.id
+                                          )
+                            ;"""))
+
+        t2=time.time()-t1
+        print "Update planets from temp in %.3f seconds" % (t2,)
         t1=time.time()
 
 # ########################################################################### #
@@ -313,7 +340,7 @@ while True:
                                     score_rank = (SELECT score_rank FROM galaxy_score_rank WHERE galaxy.id = galaxy_score_rank.id),
                                     value_rank = (SELECT value_rank FROM galaxy_value_rank WHERE galaxy.id = galaxy_value_rank.id),
                                     xp_rank = (SELECT xp_rank FROM galaxy_xp_rank WHERE galaxy.id = galaxy_xp_rank.id)
-                            """))
+                            ;"""))
 
         t2=time.time()-t1
         print "Galaxy ranks in %.3f seconds" % (t2,)
@@ -345,7 +372,7 @@ while True:
                                     members_rank = (SELECT members_rank FROM alliance_members_rank WHERE alliance.id = alliance_members_rank.id),
                                     size_avg_rank = (SELECT size_avg_rank FROM alliance_size_avg_rank WHERE alliance.id = alliance_size_avg_rank.id),
                                     score_avg_rank = (SELECT score_avg_rank FROM alliance_score_avg_rank WHERE alliance.id = alliance_score_avg_rank.id)
-                            """))
+                            ;"""))
 
         t2=time.time()-t1
         print "Alliance ranks in %.3f seconds" % (t2,)

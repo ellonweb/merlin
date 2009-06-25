@@ -49,6 +49,10 @@ planet_history.y -> galaxy_history.y
 planet_exiles.id -> planet.id
 alliance_history.id -> alliance.id
 
+x/y references are not so important unless PA fucks up the dumps
+
+the id references may cause the tick to fail or the loss of data if the FKs
+are enforced and a planet is deleted or a galaxy disbanded
 
 '''
 
@@ -134,18 +138,13 @@ class GalaxyHistory(Base):
         return self.planet_loader.filter_by(z=z).first()
 Galaxy.history_loader = dynamic_loader(GalaxyHistory, backref="current")
 
-class PlanetRef(Base): #ref tables only used for id generation in excalibur
-    __tablename__ = 'planet_ref'
-    id = Column(Integer, primary_key=True)
-    planetname = Column(String(20))
-    rulername = Column(String(20))
-
 class Planet(Base):
     __tablename__ = 'planet'
-    id = Column(Integer, index=True, unique=True)
-    x = Column(Integer, ForeignKey(Galaxy.x), primary_key=True, autoincrement=False)
-    y = Column(Integer, ForeignKey(Galaxy.y), primary_key=True, autoincrement=False)
-    z = Column(Integer, primary_key=True, autoincrement=False)
+    id = Column(Integer, primary_key=True)
+    active = Column(Boolean)
+    x = Column(Integer, ForeignKey(Galaxy.x))
+    y = Column(Integer, ForeignKey(Galaxy.y))
+    z = Column(Integer)
     planetname = Column(String(20))
     rulername = Column(String(20))
     race = Column(String(3))
