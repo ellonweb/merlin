@@ -314,7 +314,7 @@ class User(Base):
         user = Q.first()
         session.close()
         return user
-User.planet = relation(Planet)
+Planet.user = relation(User, uselist=False, backref="planet")
 def user_access_function(num):
     # Function generator for access check
     def func(self):
@@ -366,8 +366,8 @@ Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gim
 
 class Intel(Base):
     __tablename__ = 'intel'
-    planet_id = Column(Integer, primary_key=True, autoincrement=False)
-    alliance_id = Column(Integer, index=True)
+    planet_id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
+    alliance_id = Column(Integer, ForeignKey(Alliance.id), index=True)
     nick = Column(String(20))
     fakenick = Column(String(20))
     defwhore = Column(Boolean, default=False)
@@ -406,11 +406,10 @@ class Intel(Base):
         if self.comment:
             ret += "comment=%s"%(self.comment,)
         return ret
-Planet.intel = relation(Intel, primaryjoin=Intel.planet_id==Planet.id, foreign_keys=(Intel.planet_id,), uselist=False)
-Intel.planet = relation(Planet, primaryjoin=Planet.id==Intel.planet_id, foreign_keys=(Intel.planet_id,))
-Intel.alliance = relation(Alliance, primaryjoin=Alliance.id==Intel.alliance_id, foreign_keys=(Intel.alliance_id,))
-Planet.alliance = relation(Alliance, secondary=Intel.__table__, primaryjoin=Intel.planet_id==Planet.id, secondaryjoin=Alliance.id==Intel.alliance_id, foreign_keys=(Intel.planet_id, Intel.alliance_id), uselist=False)
-Alliance.planets = relation(Planet, secondary=Intel.__table__, primaryjoin=Intel.alliance_id==Alliance.id, secondaryjoin=Planet.id==Intel.planet_id, foreign_keys=(Intel.planet_id, Intel.alliance_id))
+Planet.intel = relation(Intel, uselist=False, backref="planet")
+Intel.alliance = relation(Alliance)
+#Planet.alliance = relation(Alliance, Intel.__table__, uselist=False, viewonly=True, backref="planets")
+Alliance.planets = relation(Planet, Intel.__table__, viewonly=True)
 
 # ########################################################################### #
 # ###############################    SCANS    ############################### #

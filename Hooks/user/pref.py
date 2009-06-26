@@ -52,13 +52,12 @@ class pref(loadable):
                     user.planet = planet
                     if user.is_member():
                         session.add(planet)
-                        if planet.intel is None:
-                            planet.intel = M.DB.Maps.Intel(planet_id=planet.id)
-                            session.add(planet.intel)
-                        planet.intel.nick = user.name
                         alliance = M.DB.Maps.Alliance.load(message.botally)
-                        if alliance is not None:
-                            planet.intel.alliance_id = alliance.id
+                        if planet.intel is None:
+                            planet.intel = M.DB.Maps.Intel(nick=user.name, alliance=alliance)
+                        else:
+                            planet.intel.nick = user.name
+                            planet.intel.alliance = alliance
             if opt == "pass":
                 user.passwd = pw = val
             if opt == "email":
