@@ -237,9 +237,8 @@ class parse(object):
             unitscan = M.DB.Maps.UnitScan(scan_id=scan_id)
             session.add(unitscan)
 
-            try:
-                unitscan.ship_id = M.DB.Maps.Ship.load(name=m.group(1)).id
-            except AttributeError:
+            unitscan.ship = M.DB.Maps.Ship.load(name=m.group(1))
+            if unitscan.ship is None:
                 print "No such unit %s" % (m.group(1),)
                 session.rollback()
                 continue
@@ -256,9 +255,8 @@ class parse(object):
             unitscan = M.DB.Maps.UnitScan(scan_id=scan_id)
             session.add(unitscan)
 
-            try:
-                unitscan.ship_id = M.DB.Maps.Ship.load(name=m.group(1)).id
-            except AttributeError:
+            unitscan.ship = M.DB.Maps.Ship.load(name=m.group(1))
+            if unitscan.ship is None:
                 print "No such unit %s" % (m.group(1),)
                 session.rollback()
                 continue

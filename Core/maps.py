@@ -415,6 +415,63 @@ Intel.alliance = relation(Alliance)
 Alliance.planets = relation(Planet, Intel.__table__, viewonly=True)
 
 # ########################################################################### #
+# #############################    SHIP TABLE    ############################ #
+# ########################################################################### #
+
+class Ship(Base):
+    __tablename__ = 'ships'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(30))
+    class_ = Column(String(10))
+    t1 = Column(String(10))
+    t2 = Column(String(10))
+    t3 = Column(String(10))
+    type = Column(String(5))
+    init = Column(Integer)
+    guns = Column(Integer)
+    armor = Column(Integer)
+    damage = Column(Integer)
+    empres = Column(Integer)
+    metal = Column(Integer)
+    crystal = Column(Integer)
+    eonium = Column(Integer)
+    total_cost = Column(Integer)
+    race = Column(String(10))
+    
+    @staticmethod
+    def load(name=None, id=None):
+        assert id or name
+        session = Session()
+        Q = session.query(Ship)
+        if id is not None:
+            ship = Q.filter_by(Ship.id == id).first()
+        if name is not None:
+            ship = Q.filter(Ship.name.ilike(name)).first()
+            if ship is None:
+                ship = Q.filter(Ship.name.ilike("%"+name+"%")).first()
+            if ship is None and name[-1].lower()=="s":
+                ship = Q.filter(Ship.name.ilike("%"+name[:-1]+"%")).first()
+            if ship is None and name[-3:].lower()=="ies":
+                ship = Q.filter(Ship.name.ilike("%"+name[:-3]+"%")).first()
+        session.close()
+        return ship
+    
+    def __str__(self):
+        reply="%s (%s) is class %s | Target 1: %s |"%(self.name,self.race[:3],self.class_,self.t1)
+        if self.t2:
+            reply+=" Target 2: %s |"%(self.t2,)
+        if self.t3:
+            reply+=" Target 3: %s |"%(self.t3,)
+        reply+=" Type: %s | Init: %s |"%(self.type,self.init)
+        reply+=" EMPres: %s |"%(self.empres,)
+        if self.type=='Emp':
+            reply+=" Guns: %s |"%(self.guns,)
+        else:
+            reply+=" D/C: %s |"%((self.damage*10000)/self.total_cost,)
+        reply+=" A/C: %s"%((self.armor*10000)/self.total_cost,)
+        return reply
+
+# ########################################################################### #
 # ###############################    SCANS    ############################### #
 # ########################################################################### #
 
@@ -427,7 +484,6 @@ class Scan(Base):
     pa_id = Column(String(32), index=True, unique=True)
     group_id = Column(String(32))
     scanner_id = Column(Integer, ForeignKey(User.id))
-#Scan.planet = relation(Planet, backref="scans")#, primaryjoin=Planet.id==Scan.planet_id, foreign_keys=(Scan.planet_id,))
 Planet.scans = dynamic_loader(Scan, backref="planet")
 Scan.scanner = relation(User, backref="scans")
 
@@ -489,16 +545,17 @@ class UnitScan(Base):
     __tablename__ = 'unitscan'
     id = Column(Integer, primary_key=True)
     scan_id = Column(Integer, ForeignKey(Scan.id))
-    ship_id = Column(Integer)
+    ship_id = Column(Integer, ForeignKey(Ship.id))
     amount = Column(Integer)
 Scan.units = relation(UnitScan)
+UnitScan.ship = relation(Ship)
 
 class FleetScan(Base):
     __tablename__ = 'fleetscan'
     id = Column(Integer, primary_key=True)
     scan_id = Column(Integer, ForeignKey(Scan.id))
-    owner_id = Column(Integer)
-    target_id = Column(Integer)
+    owner_id = Column(Integer, ForeignKey(Planet.id))
+    target_id = Column(Integer, ForeignKey(Planet.id))
     fleet_size = Column(Integer)
     fleet_name = Column(String(24))
     launch_tick = Column(Integer)
@@ -506,6 +563,8 @@ class FleetScan(Base):
     mission = Column(String(7))
     unique = UniqueConstraint('owner_id','target_id','fleet_size','fleet_name','landing_tick','mission')
 Scan.fleets = relation(FleetScan)
+FleetScan.owner = relation(Planet, primaryjoin=FleetScan.owner_id==Planet.id)
+FleetScan.target = relation(Planet, primaryjoin=FleetScan.target_id==Planet.id)
 
 class CovOp(Base):
     __tablename__ = 'covop'
@@ -563,60 +622,3 @@ class apenis(Base):
     alliance_id = Column(Integer, index=True)
     penis = Column(Integer)
 Alliance.apenis = relation(apenis, primaryjoin=apenis.alliance_id==Alliance.id, foreign_keys=(Alliance.id,))
-
-# ########################################################################### #
-# #############################    SHIP TABLE    ############################ #
-# ########################################################################### #
-
-class Ship(Base):
-    __tablename__ = 'ships'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(30))
-    class_ = Column(String(10))
-    t1 = Column(String(10))
-    t2 = Column(String(10))
-    t3 = Column(String(10))
-    type = Column(String(5))
-    init = Column(Integer)
-    guns = Column(Integer)
-    armor = Column(Integer)
-    damage = Column(Integer)
-    empres = Column(Integer)
-    metal = Column(Integer)
-    crystal = Column(Integer)
-    eonium = Column(Integer)
-    total_cost = Column(Integer)
-    race = Column(String(10))
-    
-    @staticmethod
-    def load(name=None, id=None):
-        assert id or name
-        session = Session()
-        Q = session.query(Ship)
-        if id is not None:
-            ship = Q.filter_by(Ship.id == id).first()
-        if name is not None:
-            ship = Q.filter(Ship.name.ilike(name)).first()
-            if ship is None:
-                ship = Q.filter(Ship.name.ilike("%"+name+"%")).first()
-            if ship is None and name[-1].lower()=="s":
-                ship = Q.filter(Ship.name.ilike("%"+name[:-1]+"%")).first()
-            if ship is None and name[-3:].lower()=="ies":
-                ship = Q.filter(Ship.name.ilike("%"+name[:-3]+"%")).first()
-        session.close()
-        return ship
-    
-    def __str__(self):
-        reply="%s (%s) is class %s | Target 1: %s |"%(self.name,self.race[:3],self.class_,self.t1)
-        if self.t2:
-            reply+=" Target 2: %s |"%(self.t2,)
-        if self.t3:
-            reply+=" Target 3: %s |"%(self.t3,)
-        reply+=" Type: %s | Init: %s |"%(self.type,self.init)
-        reply+=" EMPres: %s |"%(self.empres,)
-        if self.type=='Emp':
-            reply+=" Guns: %s |"%(self.guns,)
-        else:
-            reply+=" D/C: %s |"%((self.damage*10000)/self.total_cost,)
-        reply+=" A/C: %s"%((self.armor*10000)/self.total_cost,)
-        return reply
