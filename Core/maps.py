@@ -416,6 +416,31 @@ Intel.alliance = relation(Alliance)
 Alliance.planets = relation(Planet, Intel.__table__, viewonly=True)
 
 # ########################################################################### #
+# #############################    BOOKINGS    ############################## #
+# ########################################################################### #
+
+class Target(Base):
+    __tablename__ = 'target'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.id), index=True)
+    planet_id = Column(Integer, ForeignKey(Planet.id), ForeignKey(Intel.planet_id), index=True)
+    tick = Column(Integer)
+User.bookings_loader = dynamic_loader(Target, backref="user")
+Planet.bookings_loader = dynamic_loader(Target, backref="planet")
+Galaxy.bookings_loader = dynamic_loader(Target, Planet.__table__, primaryjoin=Planet2Galaxy)
+Alliance.bookings_loader = dynamic_loader(Target, Intel.__table__)
+def bookings(self, tick=None):
+    if tick is not None:
+        return self.bookings_loader.filter_by(tick=tick).all()
+    else:
+        return self.bookings_loader.filter(Target.tick > Updates.current_tick()).all()
+User.bookings = bookings
+Planet.bookings = bookings
+Galaxy.bookings = bookings
+Alliance.bookings = bookings
+del bookings
+
+# ########################################################################### #
 # #############################    SHIP TABLE    ############################ #
 # ########################################################################### #
 
@@ -573,33 +598,6 @@ class CovOp(Base):
     scan_id = Column(Integer, ForeignKey(Scan.id))
     covopper_id = Column(Integer)
     target_id = Column(Integer)
-
-# ########################################################################### #
-# #############################    BOOKINGS    ############################## #
-# ########################################################################### #
-
-class Target(Base):
-    __tablename__ = 'target'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, index=True)
-    planet_id = Column(Integer, index=True)
-    tick = Column(Integer)
-Target.user = relation(User, primaryjoin=User.id==Target.user_id, foreign_keys=(Target.user_id))
-Target.planet = relation(Planet, primaryjoin=Planet.id==Target.planet_id, foreign_keys=(Target.planet_id))
-User.bookings_loader = dynamic_loader(Target, primaryjoin=Target.user_id==User.id, foreign_keys=(Target.user_id))
-Planet.bookings_loader = dynamic_loader(Target, primaryjoin=Target.planet_id==Planet.id, foreign_keys=(Target.planet_id))
-Galaxy.bookings_loader = dynamic_loader(Target, secondary=Planet.__table__, primaryjoin=and_(Planet.x==Galaxy.x, Planet.y==Galaxy.y), secondaryjoin=Target.planet_id==Planet.id, foreign_keys=(Planet.id, Planet.x, Planet.y))
-Alliance.bookings_loader = dynamic_loader(Target, secondary=Intel.__table__, primaryjoin=Intel.alliance_id==Alliance.id, secondaryjoin=Target.planet_id==Intel.planet_id, foreign_keys=(Intel.planet_id, Intel.alliance_id))
-def bookings(self, tick=None):
-    if tick is not None:
-        return self.bookings_loader.filter_by(tick=tick).all()
-    else:
-        return self.bookings_loader.filter(Target.tick > Updates.current_tick()).all()
-User.bookings = bookings
-Planet.bookings = bookings
-Galaxy.bookings = bookings
-Alliance.bookings = bookings
-del bookings
 
 # ########################################################################### #
 # ############################    PENIS CACHE    ############################ #
