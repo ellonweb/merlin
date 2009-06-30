@@ -135,6 +135,9 @@ class Planet(Base):
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
     
+    def scan(self, type):
+        return self.scans.filter_by(scantype=type[0].upper()).order_by(SQL.desc(Scan.id)).first()
+    
     @staticmethod
     def load(x,y,z):
         session = Session()
@@ -415,31 +418,35 @@ Alliance.planets = relation(Planet, Intel.__table__, viewonly=True)
 # ###############################    SCANS    ############################### #
 # ########################################################################### #
 
-class Request(Base):
-    __tablename__ = 'request'
-    id = Column(Integer, primary_key=True)
-    requester_id = Column(Integer)
-    planet_id = Column(Integer, index=True)
-    scantype = Column(String(1))
-    dists = Column(Integer)
-    scan_id = Column(String(32))
-Request.user = relation(User, primaryjoin=User.id==Request.requester_id, foreign_keys=(Request.requester_id,))
-
 class Scan(Base):
     __tablename__ = 'scan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True, unique=True)
-    planet_id = Column(Integer, index=True)
+    planet_id = Column(Integer, ForeignKey(Planet.id), index=True)
     scantype = Column(String(1))
     tick = Column(Integer)
+    pa_id = Column(String(32), index=True, unique=True)
     group_id = Column(String(32))
-    scanner_id = Column(Integer)
-Scan.planet = relation(Planet, primaryjoin=Planet.id==Scan.planet_id, foreign_keys=(Scan.planet_id,))
+    scanner_id = Column(Integer, ForeignKey(User.id))
+#Scan.planet = relation(Planet, backref="scans")#, primaryjoin=Planet.id==Scan.planet_id, foreign_keys=(Scan.planet_id,))
+Planet.scans = dynamic_loader(Scan, backref="planet")
+Scan.scanner = relation(User, backref="scans")
+
+class Request(Base):
+    __tablename__ = 'request'
+    id = Column(Integer, primary_key=True)
+    requester_id = Column(Integer, ForeignKey(User.id))
+    planet_id = Column(Integer, ForeignKey(Planet.id), index=True)
+    scantype = Column(String(1))
+    dists = Column(Integer)
+    scan_id = Column(Integer, ForeignKey(Scan.id))
+Request.user = relation(User, backref="requests")
+Request.target = relation(Planet)
+Request.scan = relation(Scan)
 
 class PlanetScan(Base):
     __tablename__ = 'planetscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True)
+    scan_id = Column(Integer, ForeignKey(Scan.id))
     roid_metal = Column(Integer)
     roid_crystal = Column(Integer)
     roid_eonium = Column(Integer)
@@ -452,11 +459,12 @@ class PlanetScan(Base):
     prod_res = Column(Integer)
     agents = Column(Integer)
     guards = Column(Integer)
+Scan.planetscan = relation(PlanetScan, uselist=False)
 
 class DevScan(Base):
     __tablename__ = 'devscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True)
+    scan_id = Column(Integer, ForeignKey(Scan.id))
     light_factory = Column(Integer)
     medium_factory = Column(Integer)
     heavy_factory = Column(Integer)
@@ -475,18 +483,20 @@ class DevScan(Base):
     core = Column(Integer)
     covert_op = Column(Integer)
     mining = Column(Integer)
+Scan.devscan = relation(DevScan, uselist=False)
 
 class UnitScan(Base):
     __tablename__ = 'unitscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True)
+    scan_id = Column(Integer, ForeignKey(Scan.id))
     ship_id = Column(Integer)
     amount = Column(Integer)
+Scan.units = relation(UnitScan)
 
 class FleetScan(Base):
     __tablename__ = 'fleetscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True)
+    scan_id = Column(Integer, ForeignKey(Scan.id))
     owner_id = Column(Integer)
     target_id = Column(Integer)
     fleet_size = Column(Integer)
@@ -495,11 +505,12 @@ class FleetScan(Base):
     landing_tick = Column(Integer)
     mission = Column(String(7))
     unique = UniqueConstraint('owner_id','target_id','fleet_size','fleet_name','landing_tick','mission')
+Scan.fleets = relation(FleetScan)
 
 class CovOp(Base):
     __tablename__ = 'covop'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(String(32), index=True)
+    scan_id = Column(Integer, ForeignKey(Scan.id))
     covopper_id = Column(Integer)
     target_id = Column(Integer)
 
