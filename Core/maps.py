@@ -26,6 +26,7 @@ import sys
 from time import time
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates, relation, backref, dynamic_loader
 import sqlalchemy.sql as SQL
 import sqlalchemy.sql.functions
@@ -607,18 +608,21 @@ del bookings
 class epenis(Base):
     __tablename__ = 'epenis'
     rank = Column(Integer, primary_key=True)
-    user_id = Column(Integer, index=True)
+    user_id = Column(Integer, ForeignKey(User.id), index=True)
     penis = Column(Integer)
-User.epenis = relation(epenis, primaryjoin=epenis.user_id==User.id, foreign_keys=(User.id,))
+User.epenis = relation(epenis, uselist=False)
+User.penis = association_proxy("epenis", "penis")
 class galpenis(Base):
     __tablename__ = 'galpenis'
     rank = Column(Integer, primary_key=True)
-    galaxy_id = Column(Integer, index=True)
+    galaxy_id = Column(Integer, ForeignKey(Galaxy.id), index=True)
     penis = Column(Integer)
-Galaxy.galpenis = relation(galpenis, primaryjoin=galpenis.galaxy_id==Galaxy.id, foreign_keys=(Galaxy.id,))
+Galaxy.galpenis = relation(galpenis, uselist=False)
+Galaxy.penis = association_proxy("galpenis", "penis")
 class apenis(Base):
     __tablename__ = 'apenis'
     rank = Column(Integer, primary_key=True)
-    alliance_id = Column(Integer, index=True)
+    alliance_id = Column(Integer, ForeignKey(Alliance.id), index=True)
     penis = Column(Integer)
-Alliance.apenis = relation(apenis, primaryjoin=apenis.alliance_id==Alliance.id, foreign_keys=(Alliance.id,))
+Alliance.apenis = relation(apenis, uselist=False)
+Alliance.penis = association_proxy("apenis", "penis")
