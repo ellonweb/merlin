@@ -69,7 +69,7 @@ class intel(loadable):
         session = M.DB.Session()
         session.add(planet)
         if planet.intel is None:
-            planet.intel = M.DB.Maps.Intel(planet_id=planet.id)
+            planet.intel = M.DB.Maps.Intel(planet_id=planet.id) #####
         
         params = self.split_opts(message.get_msg())
         for opt, val in params.items():
