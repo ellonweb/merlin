@@ -37,19 +37,105 @@ class status(loadable):
     @loadable.run_with_access(access.get('hc',0) | access.get('bc',0) | access['member'])
     def execute(self, message, user, params):
         
+        tick = M.DB.Maps.Updates.current_tick()
+        
+        # Planet or Galaxy
+        if params.group(1) is not None and params.group(1).isdigit():
+            when = int(params.group(4) or 0)
+            if when and when < 80:
+                when += tick
+            elif when and when <= tick:
+                message.alert("Can not check status on the past. You wanted tick %s, but current tick is %s." % (when, tick,))
+                return
+            
+            # Planet
+            if params.group(3) is not None:
+                planet = M.DB.Maps.Planet.load(*params.group(1,2,3))
+                if planet is None:
+                    message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
+                    return
+                
+                session = M.DB.Session()
+                Q = session.query(M.DB.Maps.User.name, M.DB.Maps.Target.tick)
+                Q = Q.join(M.DB.Maps.Target.user)
+                Q = Q.filter(M.DB.Maps.Target.planet_id == planet.id)
+                Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
+                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Target.tick))
+                result = Q.all()
+                session.close()
+                
+                if len(result) < 1:
+                    reply="No bookings matching planet %s:%s:%s" % (planet.x, planet.y, planet.z,)
+                    if when:
+                        reply+=" for tick %s"%(when,)
+                    message.reply(reply)
+                    return
+                
+                reply="Status for %s:%s:%s - " % (planet.x, planet.y, planet.z,)
+                if when:
+                    user, land = result[0]
+                    reply+="booked for landing pt %s (eta %s) by %s"%(land,land-tick,user)
+                else:
+                    prev=[]
+                    for user, land in result:
+                        prev.append("(%s user:%s)" % (land,owner))
+                    reply+=", ".join(prev)
+                message.reply(reply)
+                return
+            
+            # Galaxy
+            else:
+                galaxy = M.DB.Maps.Galaxy.load(*params.group(1,2))
+                if planet is None:
+                    message.alert("No galaxy with coords %s:%s" % params.group(1,2))
+                    return
+                
+                session = M.DB.Session()
+                Q = session.query(M.DB.Maps.Planet.z, M.DB.Maps.User.name, M.DB.Maps.Target.tick)
+                Q = Q.join(M.DB.Maps.Target.planet)
+                Q = Q.join(M.DB.Maps.Target.user)
+                Q = Q.filter(M.DB.Maps.Planet.x == galaxy.x)
+                Q = Q.filter(M.DB.Maps.Planet.y == galaxy.y)
+                Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
+                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.z))
+                result = Q.all()
+                session.close()
+                
+                if len(result) < 1:
+                    reply="No bookings matching galaxy %s:%s" % (galaxy.x, galaxy.y,)
+                    if when:
+                        reply+=" for tick %s"%(when,)
+                    message.reply(reply)
+                    return
+                
+                reply="Target information for %s:%s" % (galaxy.x, galaxy.y,)
+                reply+=" landing on tick %s (eta %s): "%(when,when-tick) if when else ": "
+                
+                ticks={}
+                for z, user, land in result:
+                    if not ticks.has_key(land):
+                        ticks[land]=[]
+                    ticks[land].append((z, user,))
+                sorted_keys=ticks.keys()
+                sorted_keys.sort()
+                
+                replies = []
+                for land in sorted_keys:
+                    prev=[]
+                    for z, user in ticks[land]:
+                        prev.append("(%s user:%s)" % (z,user))
+                    replies.append("Tick %s (eta %s) "%(land,land-tick) +", ".join(prev))
+                replies[0] = reply + replies[0]
+                
+                message.reply("\n".join(replies))
+                return
+        
         alliance = M.DB.Maps.Alliance(name="Unknown") if params.group(1).lower() == "unknown" else M.DB.Maps.Alliance.load(params.group(1))
         if alliance is None:
             message.reply("No alliance matching '%s' found"%(params.group(1),))
             return
         
-        tick = M.DB.Maps.Updates.current_tick()
         
-        when = int(params.group(2) or 0)
-        if when and when < 80:
-            when += tick
-        elif when and when <= tick:
-            message.alert("Can not check status on the past. You wanted tick %s, but current tick is %s." % (when, tick,))
-            return
         
         session = M.DB.Session()
         Q = session.query(M.DB.Maps.Planet, M.DB.Maps.User, M.DB.Maps.Target.tick)
