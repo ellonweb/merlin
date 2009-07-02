@@ -130,48 +130,93 @@ class status(loadable):
                 message.reply("\n".join(replies))
                 return
         
-        alliance = M.DB.Maps.Alliance(name="Unknown") if params.group(1).lower() == "unknown" else M.DB.Maps.Alliance.load(params.group(1))
-        if alliance is None:
-            message.reply("No alliance matching '%s' found"%(params.group(1),))
-            return
-        
-        
-        
-        session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.User, M.DB.Maps.Target.tick)
-        Q = Q.join(M.DB.Maps.Planet.bookings_loader)
-        Q = Q.join(M.DB.Maps.Planet.intel) if alliance.id else Q.outerjoin(M.DB.Maps.Planet.intel)
-        Q = Q.join(M.DB.Maps.Target.user)
-        Q = Q.filter(M.DB.Maps.Intel.alliance_id == alliance.id)
-        Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
-        Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Target.tick))
-        result = Q.all()
-        session.close()
-        
-        if len(result) < 1:
-            reply="No active bookings matching alliance %s" %(alliance.name)
-            if when:
-                reply+=" for tick %s."%(when,)
-            message.reply(reply)
-            return
-        
-        reply="Target information for %s"%(alliance.name)
-        reply+=" landing on tick %s (eta %s): "%(when,when-tick) if when else ": "
-        
-        ticks={}
-        for planet, user, land in result:
-            if not ticks.has_key(land):
-                ticks[land]=[]
-            ticks[land].append((planet, user,))
-        sorted_keys=ticks.keys()
-        sorted_keys.sort()
-        
-        replies = []
-        for land in sorted_keys:
-            prev=[]
-            for planet, user in ticks[land]:
-                prev.append("(%s:%s:%s %s)" % (planet.x,planet.y,planet.z,user.name))
-            replies.append("Tick %s (eta %s) "%(land,land-tick) +", ".join(prev))
-        replies[0] = reply + replies[0]
-        
-        message.reply("\n".join(replies))
+        # User or Alliance
+        else:
+            when = int(params.group(2) or 0)
+            if when and when < 80:
+                when += tick
+            elif when and when <= tick:
+                message.alert("Can not check status on the past. You wanted tick %s, but current tick is %s." % (when, tick,))
+                return
+            
+            booker = M.DB.Maps.User.load(params.group(1)) if params.group(1) is not None else user
+            alliance = (M.DB.Maps.Alliance(name="Unknown") if params.group(1).lower() == "unknown" else M.DB.Maps.Alliance.load(params.group(1))) if booker is None else None
+            if (booker or alliance) is None:
+                message.reply("No alliance or user matching '%s' found" % (param,.group(1),))
+                return
+            
+            # User
+            if booker is not None:
+                session = M.DB.Session()
+                Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Target.tick)
+                Q = Q.join(M.DB.Maps.Target.planet)
+                Q = Q.join(M.DB.Maps.Target.user)
+                Q = Q.filter(M.DB.Maps.Target.user_id == booker.id)
+                Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
+                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Target.tick))
+                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.x))
+                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.y))
+                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.z))
+                result = Q.all()
+                session.close()
+                
+                if len(result) < 1:
+                    reply="No bookings matching user %s" % (booker.name,)
+                    if when:
+                        reply+=" for tick %s"%(when,)
+                    message.reply(reply)
+                    return
+                
+                reply="Bookings matching user %s" % (booker.name,)
+                reply+=" landing on tick %s (eta %s): "%(when,when-tick) if when else ": "
+                
+                prev=[]
+                for planet, land in result:
+                    prev.append("(%s:%s:%s%s)" % (planet.x, planet.y, planet.z, "" if when else " landing pt%s/eta %s" % (when,when-tick,),))
+                reply+=", ".join(prev)
+                message.reply(reply)
+                return
+            
+            # Alliance
+            else:
+                session = M.DB.Session()
+                Q = session.query(M.DB.Maps.Planet, M.DB.Maps.User.name, M.DB.Maps.Target.tick)
+                Q = Q.join(M.DB.Maps.Target.planet)
+                Q = Q.join(M.DB.Maps.Planet.intel) if alliance.id else Q.outerjoin(M.DB.Maps.Planet.intel)
+                Q = Q.join(M.DB.Maps.Target.user)
+                Q = Q.filter(M.DB.Maps.Intel.alliance_id == alliance.id)
+                Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
+                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.x))
+                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.y))
+                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.z))
+                result = Q.all()
+                session.close()
+                
+                if len(result) < 1:
+                    reply="No active bookings matching alliance %s" %(alliance.name)
+                    if when:
+                        reply+=" for tick %s."%(when,)
+                    message.reply(reply)
+                    return
+                
+                reply="Target information for %s"%(alliance.name)
+                reply+=" landing on tick %s (eta %s): "%(when,when-tick) if when else ": "
+                
+                ticks={}
+                for planet, user, land in result:
+                    if not ticks.has_key(land):
+                        ticks[land]=[]
+                    ticks[land].append((planet, user,))
+                sorted_keys=ticks.keys()
+                sorted_keys.sort()
+                
+                replies = []
+                for land in sorted_keys:
+                    prev=[]
+                    for planet, user in ticks[land]:
+                        prev.append("(%s:%s:%s %s)" % (planet.x,planet.y,planet.z,user))
+                    replies.append("Tick %s (eta %s) "%(land,land-tick) +", ".join(prev))
+                replies[0] = reply + replies[0]
+                
+                message.reply("\n".join(replies))
+                return

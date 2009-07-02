@@ -53,7 +53,7 @@ class gangbang(loadable):
         
         session = M.DB.Session()
         Q = session.query(M.DB.Maps.Planet, M.DB.Maps.User, M.DB.Maps.Target.tick)
-        Q = Q.join(M.DB.Maps.Planet.bookings_loader)
+        Q = Q.join(M.DB.Maps.Target.planet)
         Q = Q.join(M.DB.Maps.Planet.intel) if alliance.id else Q.outerjoin(M.DB.Maps.Planet.intel)
         Q = Q.join(M.DB.Maps.Target.user)
         Q = Q.filter(M.DB.Maps.Intel.alliance_id == alliance.id)
