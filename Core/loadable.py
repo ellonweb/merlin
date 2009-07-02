@@ -118,6 +118,11 @@ class loadable(object):
         return
     
     def params_match(self, message):
+        if type(self.paramre) == tuple:
+            for p in self.paramre:
+                m = p.search(message.get_msg())
+                if m: break
+            return m
         return self.paramre.search(message.get_msg())
     
     def help(self, message):

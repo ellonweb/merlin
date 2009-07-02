@@ -22,7 +22,7 @@
 # owners.
 
 import re
-from .variables import nick, access
+from .variables import access
 from .Core.modules import M
 loadable = M.loadable.loadable
 
@@ -31,10 +31,10 @@ class status(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = re.compile(r"status(?:\s([\w-]+|)(?:\s(\d+))?")
-        self.usage += " alliance [tick]"
+        self.paramre = (re.compile(r"status(?:\s([\w-]+)(?:\s(\d+))?)?"), re.compile(self.coordre.pattern+r"(?:\s(\d+))?"),)
+        self.usage += " [user|x:y[:z]|alliance] [tick]"
     
-    @loadable.run_with_access(access.get('hc',0) | access.get('bc',access['member']))
+    @loadable.run_with_access(access.get('hc',0) | access.get('bc',0) | access['member'])
     def execute(self, message, user, params):
         
         alliance = M.DB.Maps.Alliance(name="Unknown") if params.group(1).lower() == "unknown" else M.DB.Maps.Alliance.load(params.group(1))

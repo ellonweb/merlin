@@ -22,7 +22,7 @@
 # owners.
 
 import re
-from .variables import nick, access
+from .variables import access
 from .Core.modules import M
 loadable = M.loadable.loadable
 
