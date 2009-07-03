@@ -425,6 +425,7 @@ class Target(Base):
     user_id = Column(Integer, ForeignKey(User.id), index=True)
     planet_id = Column(Integer, ForeignKey(Planet.id), ForeignKey(Intel.planet_id), index=True)
     tick = Column(Integer)
+    unique = UniqueConstraint('planet_id','tick')
 User.bookings_loader = dynamic_loader(Target, backref="user")
 Planet.bookings_loader = dynamic_loader(Target, backref="planet")
 Galaxy.bookings_loader = dynamic_loader(Target, Planet.__table__, primaryjoin=Planet2Galaxy)
