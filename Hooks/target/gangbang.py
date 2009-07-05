@@ -56,7 +56,7 @@ class gangbang(loadable):
         Q = Q.join(M.DB.Maps.Target.planet)
         Q = Q.join(M.DB.Maps.Planet.intel) if alliance.id else Q.outerjoin(M.DB.Maps.Planet.intel)
         Q = Q.join(M.DB.Maps.Target.user)
-        Q = Q.filter(M.DB.Maps.Intel.alliance_id == alliance.id)
+        Q = Q.filter(M.DB.Maps.Intel.alliance == alliance)
         Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
         Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.x))
         Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.y))

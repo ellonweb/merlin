@@ -106,8 +106,8 @@ class parse(object):
         
         Q = session.query(M.DB.Maps.User.name)
         Q = Q.join(M.DB.Maps.Request.user)
-        Q = Q.filter(M.DB.Maps.Request.planet_id==planet.id)
-        Q = Q.filter(M.DB.Maps.Request.scan_id==None)
+        Q = Q.filter(M.DB.Maps.Request.target==planet)
+        Q = Q.filter(M.DB.Maps.Request.scan==None)
         
         users = Q.all()
         push("!scan %s %s %s" % (scantype, pa_id, " ".join(users),))
