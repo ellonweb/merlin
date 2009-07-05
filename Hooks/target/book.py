@@ -46,7 +46,7 @@ class book(loadable):
         if when < 80:
             eta = when
             when += tick
-        elif when < tick:
+        elif when <= tick:
             message.alert("Can not book targets in the past. You wanted tick %s, but current tick is %s." % (when, tick,))
             return
         else:
@@ -64,7 +64,7 @@ class book(loadable):
         
         Q = session.query(M.DB.Maps.User.name, M.DB.Maps.Target.tick)
         Q = Q.join(M.DB.Maps.Target.user)
-        Q = Q.filter(M.DB.Maps.Target.planet_id == planet.id)
+        Q = Q.filter(M.DB.Maps.Target.planet == planet)
         Q = Q.filter(M.DB.Maps.Target.tick >= when)
         Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Target.tick))
         result = Q.all()
@@ -87,7 +87,7 @@ class book(loadable):
                 return
         
         try:
-            planet.bookings_loader.append(M.DB.Maps.Target(user=user, tick=when)
+            planet.bookings.append(M.DB.Maps.Target(user=user, tick=when)
             session.commit()
             message.reply("Booked landing on %s:%s:%s tick %s for user %s" % (planet.x,planet.y,planet.z, when, user.name,))
             return

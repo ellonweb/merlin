@@ -426,20 +426,10 @@ class Target(Base):
     planet_id = Column(Integer, ForeignKey(Planet.id), ForeignKey(Intel.planet_id), index=True)
     tick = Column(Integer)
     unique = UniqueConstraint('planet_id','tick')
-User.bookings_loader = dynamic_loader(Target, backref="user")
-Planet.bookings_loader = dynamic_loader(Target, backref="planet")
-Galaxy.bookings_loader = dynamic_loader(Target, Planet.__table__, primaryjoin=Planet2Galaxy)
-Alliance.bookings_loader = dynamic_loader(Target, Intel.__table__)
-def bookings(self, tick=None):
-    if tick is not None:
-        return self.bookings_loader.filter_by(tick=tick).all()
-    else:
-        return self.bookings_loader.filter(Target.tick > Updates.current_tick()).all()
-User.bookings = bookings
-Planet.bookings = bookings
-Galaxy.bookings = bookings
-Alliance.bookings = bookings
-del bookings
+User.bookings = dynamic_loader(Target, backref="user")
+Planet.bookings = dynamic_loader(Target, backref="planet")
+Galaxy.bookings = dynamic_loader(Target, Planet.__table__, primaryjoin=Planet2Galaxy)
+Alliance.bookings = dynamic_loader(Target, Intel.__table__)
 
 # ########################################################################### #
 # #############################    SHIP TABLE    ############################ #

@@ -45,9 +45,6 @@ Scans:
     unit, 
 
 Bookings:
-    book, 
-    status, 
-    unbook, 
 
 Access and Channels:
     addchan, 
