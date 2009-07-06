@@ -6,22 +6,15 @@ Channel access min/max system
 reloading loadable is unsafe, needs fixing
 
 Hooks.request
-    scan requests
-    !request p/au/etc x.y.z [dists]
     !request cancel id
-    robocop interface
-        msg #chan "ellonweb has requested a p scan of x:y:z. <url>"
     intel.dists
         fill in data from scan requests ("ellonweb informs that atleast n dists are needed")
-        provide data when requesting a scan: "x:y:z had n dists at tick ..."
 
 Hooks.scan
     scans ala munin
     robocop interface
     chanusertracker interface
         pm all known users that their scan is done
-    intel.dists
-        fill in data from completed scans
 
 Hooks.blocked
     more manual info for intel.dists

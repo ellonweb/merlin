@@ -332,12 +332,14 @@ for lvl, num in access.items():
 class PhoneFriend(Base):
     __tablename__ = 'phonefriends'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
-    friend_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    friend_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
 
 User.phonefriends = relation(User,  secondary=PhoneFriend.__table__,
                                   primaryjoin=PhoneFriend.user_id   == User.id,
                                 secondaryjoin=PhoneFriend.friend_id == User.id) # Asc
+PhoneFriend.user = relation(User, primaryjoin=PhoneFriend.user_id==User.id)
+PhoneFriend.friend = relation(User, primaryjoin=PhoneFriend.friend_id==User.id)
 
 '''
 class Gimp(Base):
@@ -587,8 +589,11 @@ class CovOp(Base):
     __tablename__ = 'covop'
     id = Column(Integer, primary_key=True)
     scan_id = Column(Integer, ForeignKey(Scan.id))
-    covopper_id = Column(Integer)
-    target_id = Column(Integer)
+    covopper_id = Column(Integer, ForeignKey(Planet.id))
+    target_id = Column(Integer, ForeignKey(Planet.id))
+Scan.covops = relation(CovOp)
+CovOp.covopper = relation(Planet, primaryjoin=CovOp.covopper_id==Planet.id)
+CovOp.target = relation(Planet, primaryjoin=CovOp.target_id==Planet.id)
 
 # ########################################################################### #
 # ############################    PENIS CACHE    ############################ #

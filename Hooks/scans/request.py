@@ -47,10 +47,11 @@ class request(loadable):
         scan = params.group(1).upper()
         
         session = M.DB.Session()
-        request = M.DB.Maps.Request(requester_id=user.id, planet_id=planet.id, scantype=scan)
-        request.dists = int(params.group(5) or 0)
+        session.add(user)
         
-        session.add(request)
+        request = M.DB.Maps.Request(target=planet, scantype=scan)
+        request.dists = int(params.group(5) or 0)
+        user.requests.append(request)
         session.commit()
         
         session.add(planet)
