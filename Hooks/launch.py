@@ -42,6 +42,7 @@ class launch(loadable):
     def execute(self, message, user, params):
         
         eta, land_tick = params.groups()
+        land_tick = int(land_tick)
 
         if eta.lower() in self.class_eta.keys():
              eta = self.class_eta[eta.lower()]
