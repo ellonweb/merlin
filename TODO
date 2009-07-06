@@ -2,6 +2,7 @@ update LICENSE in all files (some files don't have any license atm)
     add jester to the list of (C) names: a _lot_ of code is copy/pasted straight from munin
 
 Channel access min/max system
+    inc a way to check for a user but proceed even if user doesn't exist
 
 reloading loadable is unsafe, needs fixing
 
