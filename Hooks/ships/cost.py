@@ -24,7 +24,7 @@
 import re
 from .Core.modules import M
 loadable = M.loadable.loadable
-from Hooks.ships import feud, effs
+from Hooks.ships import feud
 
 class cost(loadable):
     """Calculates the cost of producing the specified number of ships"""
@@ -50,8 +50,8 @@ class cost(loadable):
                 self.num2short(ship.crystal*num),
                 self.num2short(ship.eonium*num))
         reply+=" Feudalism: %s metal, %s crystal and %s eonium."%(
-                self.num2short(ship.metal*.86*num),
-                self.num2short(ship.crystal*.86*num),
-                self.num2short(ship.eonium*.86*num))
+                self.num2short(ship.metal*(1-feud)*num),
+                self.num2short(ship.crystal*(1-feud)*num),
+                self.num2short(ship.eonium*(1-feud)*num))
         reply+=" It will add %s value"%(self.num2short(ship.total_cost*num/100),)
         message.reply(reply)

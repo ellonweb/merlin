@@ -24,7 +24,6 @@
 import re
 from .Core.modules import M
 loadable = M.loadable.loadable
-from Hooks.ships import feud, effs
 
 class ship(loadable):
     """Returns the stats of the specified ship"""

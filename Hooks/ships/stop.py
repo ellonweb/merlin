@@ -24,7 +24,7 @@
 import math, re
 from .Core.modules import M
 loadable = M.loadable.loadable
-from Hooks.ships import feud, effs
+from Hooks.ships import effs
 
 class stop(loadable):
     """Calculates the required defence to the specified number of ships"""

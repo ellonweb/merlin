@@ -24,32 +24,29 @@ from .Core.modules import M
 loadable = M.loadable.loadable
 from Hooks.ships import feud
 
-class roidcost(loadable):
-    """Calculate how long it will take to repay a value loss capping roids."""
+class roidsave(loadable):
+    """Tells you how much value will be mined by a number of roids in that many ticks. M=Max, F=Feudalism, D=Democracy."""
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = re.compile(r"\s+(\d+)\s+(\d+(?:\.\d+)?[km]?)(?:\s+(\d+))?")
-        self.usage += " <roids> <value_cost> [mining_bonus]"
+        self.paramre = re.compile(r"\s+(\d+)\s+(\d+)(?:\s+(\d+))?")
+        self.usage += " <roids> <ticks> [mining_bonus]"
     
     @loadable.run
     def execute(self, message, user, params):
         
-        roids, cost, bonus = params.groups()
-        roids, cost, bonus = int(roids), self.short2num(cost), int(bonus or 0)
+        roids=int(params.group(1))
+        ticks=int(params.group(2))
+        bonus=int(params.group(3) or 0)
         mining = 250
 
-        if roids == 0:
-            message.reply("Another NewDawn landing, eh?")
-            return
+        mining = int(mining *(float(bonus+100)/100))
+        cost=self.num2short(ticks*roids*mining/100)
 
-        mining=mining * ((float(bonus)+100)/100)
+        cost_m=self.num2short(int(ticks*roids*mining/100*1.9529))
+        cost_f=self.num2short(int(ticks*roids*mining/100*(1/(1-float(feud)))))
+        cost_d=self.num2short(int(ticks*roids*mining/100*.9524))
 
-        repay=int((cost*100)/(roids*mining))
-
-        reply="Capping %s roids at %s value with %s%% bonus will repay in %s ticks (%s days)" % (roids,self.num2short(cost),bonus,repay,repay/24)
-
-        repay = int((cost*100)/(roids*mining*(1/(1-float(feud)))))
-        reply+=" Feudalism: %s ticks (%s days)" % (repay,repay/24)
+        reply="%s roids with %s%% bonus will mine %s value (M: %s/F: %s/D: %s) in %s ticks (%s days)" % (roids,bonus,cost,cost_m,cost_f,cost_d,ticks,ticks/24)
 
         message.reply(reply)
