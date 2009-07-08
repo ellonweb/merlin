@@ -69,19 +69,19 @@ class intel(loadable):
         session = M.DB.Session()
         session.add(planet)
         if planet.intel is None:
-            planet.intel = M.DB.Maps.Intel(planet_id=planet.id)
+            planet.intel = M.DB.Maps.Intel()
         
         params = self.split_opts(message.get_msg())
         for opt, val in params.items():
             if opt == "alliance":
                 if val in self.nulls:
-                    planet.intel.alliance_id = None
+                    planet.intel.alliance = None
                     continue
                 alliance = M.DB.Maps.Alliance.load(val)
                 if alliance is None:
                     message.alert("No alliances match %s" % (val,))
                     continue
-                planet.intel.alliance_id = alliance.id
+                planet.intel.alliance = alliance
             if (opt in self.options) and (val in self.nulls):
                 setattr(planet.intel, opt, None)
                 continue
