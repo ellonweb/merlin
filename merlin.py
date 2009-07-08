@@ -142,11 +142,12 @@ class Merlin(object):
         try:
             # Temporarily store the new imports
             temp = object()
-            for name, path in self.mods:
+            for name, path in self.mods.items():
                 setattr(temp, name, self.load(path))
             # If no errors occurred during imports,
             #  assign modules to self, everything worked.
-            setattr(self, name, getattr(temp, name))
+            for name in self.mods.keys():
+                setattr(self, name, getattr(temp, name))
             return True
         except (ImportError, SyntaxError), error:
             # There was an error importing the modules,
