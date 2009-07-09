@@ -102,15 +102,6 @@ class Merlin(object):
                                     self.nick = self.Message.botnick
                                 except (Reboot, Reconnect, socket.error, Quit, KeyboardInterrupt):
                                     raise
-                                except LoadHook, name:
-                                    # Load a Hook
-                                    try:
-                                        mod = self.load("Hooks."+name)
-                                        #Callbacks.unloadmod(name)
-                                        #Callbacks.addmod(mod)
-                                        self.Message.reply("Module %s loaded successfully." % (name,))
-                                    except (ImportError, SyntaxError), error:
-                                        self.Message.alert("Syntax error in module %s. Printing traceback to stderr." % (name,))
                                 except:
                                     # Error while executing a callback/mod/hook
                                     print "ERROR RIGHT HERE!!"
@@ -123,7 +114,7 @@ class Merlin(object):
                             print "Attempting to reload the system..."
                             continue
                     
-                except (Reconnect, socket.error), error:
+                except (Reconnect, socket.error) as exc:
                     print "Reconnecting..."
                     continue
             
@@ -153,7 +144,7 @@ class Merlin(object):
             for name in self.mods.keys():
                 setattr(self, name, getattr(temp, name))
             return True
-        except (ImportError, SyntaxError), error:
+        except (ImportError, SyntaxError) as exc:
             # There was an error importing the modules,
             #  so reset them all back to their previous state.
             for name, path in self.mods:
