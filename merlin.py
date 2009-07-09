@@ -25,6 +25,10 @@ import os
 import socket
 import sys
 from traceback import format_exc
+
+if not 2.6 <= float(sys.version[:3]) < 3.0:
+    sys.exit("Python 2.6.x Required")
+
 from Core.exceptions_ import RebootConnection
 import Core.callbacks as Callbacks
 import Core.modules
