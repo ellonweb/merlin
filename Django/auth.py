@@ -10,6 +10,7 @@ class Session(object):
 
 class Auth(object):
     pass
+'''
     def authenticate(self, username=None, password=None):
         print "authing user:", username
         try:
@@ -22,3 +23,4 @@ class Auth(object):
         print "get_user id:", user_id
         return DB.Maps.User.load(id=user_id)
     
+'''
