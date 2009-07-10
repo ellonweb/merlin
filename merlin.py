@@ -21,6 +21,7 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
+from ConfigParser import ConfigParser as configparser
 import os
 import socket
 import sys
@@ -29,18 +30,33 @@ from traceback import format_exc
 if not 2.6 <= float(sys.version[:3]) < 3.0:
     sys.exit("Python 2.6.x Required")
 
-from Core.exceptions_ import RebootConnection
-import Core.callbacks as Callbacks
-import Core.modules
-import Hooks
+from Core.exceptions_ import Quit, Reconnect, Reboot
+#import Core.callbacks as Callbacks
+#import Core.modules
+#import Hooks
 
 # Redirect stderr to stdout
 sys.stderr = sys.stdout
 
+configs = {"botfig": "merlin.ini",
+           "pafig":  "pa.ini"
+          }
+
+class stub(object):
+    # Dumb object for storing internals and core modules
+    storage = ("loader", "system", "sock", "file",)
+    def __init__(self, **kwagrs):
+        for store in self.storage:
+            setattr(self, store, kwagrs.get(store))
+    
+    def dump(self):
+        return [getattr(self, store) for store in self.storage]
+    
+
 class Merlin(object):
     # Main bot container
     
-    mods = {"v": "variables", "Connection": "Core.connection", 
+    mods = {"Connection": "Core.connection", 
             "Action": "Core.actions", "DB": "Core.db", 
             "CUT": "Core.chanusertracker", "loadable": "Core.loadable"}
     
@@ -53,18 +69,13 @@ class Merlin(object):
                 
                 try: # break out with Reconnect exceptions
                     
-                    # Load up the Core
-                    # This will be repeated in the System loop
-                    self.coreload()
+                    # Load up configuration
+                    self.botfig = self.loadconfig("botfig") or self.botfig
+                    self.nick = self.config.get("Connection", "nick")
                     
-                    # Configure self
-                    self.nick = self.v.nick
-                    
-                    # Connect and pass socket to (temporary) connection handler
-                    self.connect()
-                    self.conn = self.Connection(self.sock, self.file)
+                    # Connect using raw socket
                     print "Connecting..."
-                    self.conn.connect(self.nick)
+                    self.connect()
                     self.Message = None
                     
                     # System loop
@@ -121,11 +132,29 @@ class Merlin(object):
         except (Quit, KeyboardInterrupt):
             sys.exit("Bye!")
     
+    def loadconfig(self, config):
+        # Load and parse required config file
+        try:
+            temp = configparser()
+            if temp.read(configs[config]):
+                return temp
+        except:
+            pass
+        # Either couldn't read/find the file, or couldn't parse it.
+        print "Warning! Could not load %s (%s)." % (config, configs[config],)
+        print "Attempting to continue with previous state."
+        # If there's a previous state, return, otherwise exit.
+        if hasattr(self, config):
+            return None
+        sys.exit()
+    
     def connect(self):
-        # Return a socket
+        # Configure socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(300)
-        self.sock.connect((self.v.server, self.v.port))
+        self.sock.connect((config.get("Connection", "server"), config.get("Connection", "port"),))
+        self.sock.send("NICK %s\r\n" % (self.nick,))
+        self.sock.send("USER %s 0 * : %s\r\n" % (self.nick, self.nick,))
         self.file = self.sock.makefile('rb')
     
     def load(self, name):

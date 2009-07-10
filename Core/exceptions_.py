@@ -21,7 +21,13 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-class RebootConnection(Exception):
+class Quit(Exception):
+    pass
+
+class Reconnect(Exception):
+    pass
+
+class Reboot(Exception):
     pass
 
 class ParseError(Exception):

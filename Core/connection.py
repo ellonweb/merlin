@@ -36,11 +36,6 @@ class Connection(object):
         self.pong = re.compile(r"PONG\s*:", re.I)
         self.last = time.time()
     
-    def connect(self, nick):
-        # Connect
-        self.write("NICK %s" % nick)
-        self.write("USER %s 0 * : %s" % (nick, nick))
-    
     def write(self, line):
         # Write to socket/server
         ponging = self.pong.search(line)
