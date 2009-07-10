@@ -1,10 +1,15 @@
 import Core.db as DB
 
-# This class is based on django.contrib.auth.backends.ModelBackend
-# and information in the django docs at this url:
-# http://docs.djangoproject.com/en/dev/topics/auth/#writing-an-authentication-backend
+# Code based on information from the django docs on middleware:
+# http://docs.djangoproject.com/en/dev/topics/http/middleware/
+# class Session based on django.contrib.sessions.middleware.SessionMiddleware
+# class Auth based on django.contrib.auth.middleware.AuthMiddleware
+
+class Session(object):
+    pass
 
 class Auth(object):
+    pass
     def authenticate(self, username=None, password=None):
         print "authing user:", username
         try:
