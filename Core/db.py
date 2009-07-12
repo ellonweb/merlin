@@ -36,3 +36,7 @@ from .variables import DBeng
 engine = create_engine(DBeng)#, echo='debug')
 Session = sessionmaker(bind=engine)
 Base = declarative_base(bind=engine)
+
+if __name__ == "__main__":
+    import maps
+    Base.metadata.create_all()
