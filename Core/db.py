@@ -27,22 +27,12 @@ if float(sqlalchemy.__version__[2:5]) < 5.4:
     sys.exit("SQLAlchemy 0.5.4+ Required")
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker, clear_mappers
+from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.sql as SQL
 import sqlalchemy.sql.functions
 SQL.f = sys.modules['sqlalchemy.sql.functions']
 from .variables import DBeng
 
 engine = create_engine(DBeng)#, echo='debug')
-
 Session = sessionmaker(bind=engine)
-
-def reload_mappings():
-    Maps.Base.metadata.clear()
-    clear_mappers()
-    reload(Maps)
-    Maps.Base.metadata.bind = engine
-    Maps.Base.metadata.create_all()
-    Maps.Session = Session
-
-import maps as Maps
-reload_mappings()
+Base = declarative_base(bind=engine)

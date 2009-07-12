@@ -25,7 +25,6 @@ import re
 import sys
 from time import time
 from sqlalchemy import *
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates, relation, backref, dynamic_loader
 import sqlalchemy.sql as SQL
@@ -33,7 +32,7 @@ import sqlalchemy.sql.functions
 SQL.f = sys.modules['sqlalchemy.sql.functions']
 from .variables import access
 
-Base = declarative_base()
+from db import Base, Session
 
 # ########################################################################### #
 # #############################    DUMP TABLES    ########################### #
