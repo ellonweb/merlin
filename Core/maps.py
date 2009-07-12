@@ -93,10 +93,11 @@ class Galaxy(Base):
         retstr+="Size: %s (%s) " % (self.size,self.size_rank)
         retstr+="XP: %s (%s) " % (self.xp,self.xp_rank)
         return retstr
+Galaxy.galaxy_x_y = Index('galaxy_x_y', Galaxy.x, Galaxy.y, unique=True)
 class GalaxyHistory(Base):
     __tablename__ = 'galaxy_history'
     tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
-    id = Column(Integer, ForeignKey(Galaxy.id), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Galaxy.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
     x = Column(Integer)
     y = Column(Integer)
     name = Column(String(64))
@@ -116,8 +117,8 @@ class Planet(Base):
     __tablename__ = 'planet'
     id = Column(Integer, primary_key=True)
     active = Column(Boolean)
-    x = Column(Integer, ForeignKey(Galaxy.x))
-    y = Column(Integer, ForeignKey(Galaxy.y))
+    x = Column(Integer, ForeignKey(Galaxy.x, deferrable=True, ondelete='cascade'))
+    y = Column(Integer, ForeignKey(Galaxy.y, deferrable=True, ondelete='cascade'))
     z = Column(Integer)
     planetname = Column(String(20))
     rulername = Column(String(20))
@@ -168,6 +169,7 @@ class Planet(Base):
     
     def maxcap(self):
         return self.size/4
+Planet.planet_x_y_z = Index('planet_x_y_z', Planet.x, Planet.y, Planet.z, unique=True)
 Planet2Galaxy = and_(Galaxy.x==Planet.x,
                      Galaxy.y==Planet.y)
 Planet.galaxy = relation(Galaxy, backref="planets", primaryjoin=Planet2Galaxy)
@@ -175,9 +177,9 @@ Galaxy.planet_loader = dynamic_loader(Planet, primaryjoin=Planet2Galaxy)
 class PlanetHistory(Base):
     __tablename__ = 'planet_history'
     tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), ForeignKey(GalaxyHistory.tick, deferrable=True), primary_key=True, autoincrement=False)
-    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
-    x = Column(Integer, ForeignKey(GalaxyHistory.x))
-    y = Column(Integer, ForeignKey(GalaxyHistory.y))
+    id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
+    x = Column(Integer, ForeignKey(GalaxyHistory.x, deferrable=True, ondelete='cascade'))
+    y = Column(Integer, ForeignKey(GalaxyHistory.y, deferrable=True, ondelete='cascade'))
     z = Column(Integer)
     planetname = Column(String(20))
     rulername = Column(String(20))
@@ -201,7 +203,7 @@ GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory, primaryjoin=Planet2G
 class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
     tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
-    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
     oldx = Column(Integer)
     oldy = Column(Integer)
     oldz = Column(Integer)
@@ -213,7 +215,7 @@ class Alliance(Base):
     __tablename__ = 'alliance'
     id = Column(Integer, primary_key=True)
     active = Column(Boolean)
-    name = Column(String(20), index=True)
+    name = Column(String(20), index=True, unique=True)
     size = Column(Integer)
     members = Column(Integer)
     score = Column(Integer)
@@ -246,7 +248,7 @@ class Alliance(Base):
 class AllianceHistory(Base):
     __tablename__ = 'alliance_history'
     tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
-    id = Column(Integer, ForeignKey(Alliance.id), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Alliance.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
     name = Column(String(20))
     size = Column(Integer)
     members = Column(Integer)
@@ -370,8 +372,8 @@ Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gim
 
 class Intel(Base):
     __tablename__ = 'intel'
-    planet_id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
-    alliance_id = Column(Integer, ForeignKey(Alliance.id), index=True)
+    planet_id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
+    alliance_id = Column(Integer, ForeignKey(Alliance.id, deferrable=True, ondelete='set null'), index=True)
     nick = Column(String(20))
     fakenick = Column(String(20))
     defwhore = Column(Boolean, default=False)
@@ -422,8 +424,8 @@ Alliance.planets = relation(Planet, Intel.__table__, viewonly=True)
 class Target(Base):
     __tablename__ = 'target'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey(User.id), index=True)
-    planet_id = Column(Integer, ForeignKey(Planet.id), ForeignKey(Intel.planet_id), index=True)
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'), index=True)
+    planet_id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'), ForeignKey(Intel.planet_id), index=True)
     tick = Column(Integer)
 User.bookings_loader = dynamic_loader(Target, backref="user")
 Planet.bookings_loader = dynamic_loader(Target, backref="planet")
@@ -504,23 +506,23 @@ class Ship(Base):
 class Scan(Base):
     __tablename__ = 'scan'
     id = Column(Integer, primary_key=True)
-    planet_id = Column(Integer, ForeignKey(Planet.id), index=True)
+    planet_id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'), index=True)
     scantype = Column(String(1))
     tick = Column(Integer)
     pa_id = Column(String(32), index=True, unique=True)
     group_id = Column(String(32))
-    scanner_id = Column(Integer, ForeignKey(User.id))
+    scanner_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
 Planet.scans = dynamic_loader(Scan, backref="planet")
 Scan.scanner = relation(User, backref="scans")
 
 class Request(Base):
     __tablename__ = 'request'
     id = Column(Integer, primary_key=True)
-    requester_id = Column(Integer, ForeignKey(User.id))
-    planet_id = Column(Integer, ForeignKey(Planet.id), index=True)
+    requester_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    planet_id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'), index=True)
     scantype = Column(String(1))
     dists = Column(Integer)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='set null'))
 Request.user = relation(User, backref="requests")
 Request.target = relation(Planet)
 Request.scan = relation(Scan)
@@ -528,7 +530,7 @@ Request.scan = relation(Scan)
 class PlanetScan(Base):
     __tablename__ = 'planetscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
     roid_metal = Column(Integer)
     roid_crystal = Column(Integer)
     roid_eonium = Column(Integer)
@@ -546,7 +548,7 @@ Scan.planetscan = relation(PlanetScan, uselist=False)
 class DevScan(Base):
     __tablename__ = 'devscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
     light_factory = Column(Integer)
     medium_factory = Column(Integer)
     heavy_factory = Column(Integer)
@@ -570,8 +572,8 @@ Scan.devscan = relation(DevScan, uselist=False)
 class UnitScan(Base):
     __tablename__ = 'unitscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
-    ship_id = Column(Integer, ForeignKey(Ship.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
+    ship_id = Column(Integer, ForeignKey(Ship.id, ondelete='cascade'))
     amount = Column(Integer)
 Scan.units = relation(UnitScan)
 UnitScan.ship = relation(Ship)
@@ -579,9 +581,9 @@ UnitScan.ship = relation(Ship)
 class FleetScan(Base):
     __tablename__ = 'fleetscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
-    owner_id = Column(Integer, ForeignKey(Planet.id))
-    target_id = Column(Integer, ForeignKey(Planet.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
+    owner_id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'))
+    target_id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='cascade'))
     fleet_size = Column(Integer)
     fleet_name = Column(String(24))
     launch_tick = Column(Integer)
@@ -595,7 +597,7 @@ FleetScan.target = relation(Planet, primaryjoin=FleetScan.target_id==Planet.id)
 class CovOp(Base):
     __tablename__ = 'covop'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
     covopper_id = Column(Integer)
     target_id = Column(Integer)
 
@@ -606,21 +608,21 @@ class CovOp(Base):
 class epenis(Base):
     __tablename__ = 'epenis'
     rank = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey(User.id), index=True)
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'), index=True)
     penis = Column(Integer)
 User.epenis = relation(epenis, uselist=False)
 User.penis = association_proxy("epenis", "penis")
 class galpenis(Base):
     __tablename__ = 'galpenis'
     rank = Column(Integer, primary_key=True)
-    galaxy_id = Column(Integer, ForeignKey(Galaxy.id), index=True)
+    galaxy_id = Column(Integer, ForeignKey(Galaxy.id, deferrable=True, ondelete='cascade'), index=True)
     penis = Column(Integer)
 Galaxy.galpenis = relation(galpenis, uselist=False)
 Galaxy.penis = association_proxy("galpenis", "penis")
 class apenis(Base):
     __tablename__ = 'apenis'
     rank = Column(Integer, primary_key=True)
-    alliance_id = Column(Integer, ForeignKey(Alliance.id), index=True)
+    alliance_id = Column(Integer, ForeignKey(Alliance.id, deferrable=True, ondelete='cascade'), index=True)
     penis = Column(Integer)
 Alliance.apenis = relation(apenis, uselist=False)
 Alliance.penis = association_proxy("apenis", "penis")
