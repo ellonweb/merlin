@@ -67,7 +67,7 @@ class info(loadable):
                               M.DB.Maps.Planet.size, M.DB.Maps.Planet.xp, 
                               M.DB.Maps.Intel.alliance_id)
             Q = Q.join(M.DB.Maps.Planet.intel)
-            Q = Q.filter(M.DB.Maps.Intel.alliance_id==alliance.id)
+            Q = Q.filter(M.DB.Maps.Intel.alliance==alliance)
             Q = Q.order_by(M.DB.SQL.desc(M.DB.Maps.Planet.score))
             Q = Q.limit(60)
             Q = Q.from_self(M.DB.SQL.f.sum(M.DB.Maps.Planet.value), M.DB.SQL.f.sum(M.DB.Maps.Planet.score),

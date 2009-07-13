@@ -47,7 +47,7 @@ class racism(loadable):
                           M.DB.SQL.f.sum(M.DB.Maps.Planet.size), M.DB.SQL.f.sum(M.DB.Maps.Planet.xp),
                           M.DB.SQL.f.count(), M.DB.Maps.Planet.race)
         Q = Q.join(M.DB.Maps.Planet.intel)
-        Q = Q.filter(M.DB.Maps.Intel.alliance_id==alliance.id)
+        Q = Q.filter(M.DB.Maps.Intel.alliance==alliance)
         Q = Q.group_by(M.DB.Maps.Intel.alliance_id, M.DB.Maps.Planet.race)
         Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.race))
         result = Q.all()
