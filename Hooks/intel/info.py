@@ -34,7 +34,7 @@ class info(loadable):
         self.paramre = re.compile(r"\s([\w-]+)")
         self.usage += " alliance"
     
-    @loadable.run_with_access(access.get('hc',0) | access.get('intel',access['member))
+    @loadable.run_with_access(access.get('hc',0) | access.get('intel',access['member']))
     def execute(self, message, user, params):
         
         alliance = M.DB.Maps.Alliance.load(params.group(1))
