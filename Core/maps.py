@@ -414,8 +414,8 @@ class Intel(Base):
         return ret
 Planet.intel = relation(Intel, uselist=False, backref="planet")
 Intel.alliance = relation(Alliance)
-#Planet.alliance = relation(Alliance, Intel.__table__, uselist=False, viewonly=True, backref="planets")
-Alliance.planets = relation(Planet, Intel.__table__, viewonly=True)
+Planet.alliance = relation(Alliance, Intel.__table__, uselist=False, viewonly=True, backref="planets")
+#Alliance.planets = relation(Planet, Intel.__table__, viewonly=True)
 
 # ########################################################################### #
 # #############################    BOOKINGS    ############################## #
