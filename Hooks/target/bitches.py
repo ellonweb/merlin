@@ -53,7 +53,6 @@ class bitches(loadable):
         replies.append("Active bookings: " + ", ".join(prev))
         
         Q = session.query(M.DB.Maps.Alliance, M.DB.SQL.f.count())
-        Q = Q.select_from(M.DB.Maps.Target)
         Q = Q.outerjoin(M.DB.Maps.Target.planet)
         Q = Q.outerjoin(M.DB.Maps.Planet.alliance)
         Q = Q.filter(M.DB.Maps.Target.tick >= tick)
