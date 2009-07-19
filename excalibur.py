@@ -250,6 +250,56 @@ while True:
         t1=time.time()
 
 # ########################################################################### #
+# ##############################    GALAXIES    ############################# #
+# ########################################################################### #
+
+        session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y AND galaxy.active = :true);", bindparams=[bindparam("true",True)]))
+
+        t2=time.time()-t1
+        print "Copy galaxy ids to temp in %.3f seconds" % (t2,)
+        t1=time.time()
+
+        session.execute(text("""UPDATE galaxy SET
+                                  active = :false,
+                                  x = NULL, y = NULL, name = NULL, size = NULL, score = NULL, value = NULL, xp = NULL,
+                                  size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
+                                WHERE id NOT IN (SELECT id FROM galaxy_temp)
+                            ;""", bindparams=[bindparam("false",False)]))
+
+        session.execute(text("INSERT INTO galaxy (x, y, active) SELECT x, y, :true FROM galaxy_temp WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
+        session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y ORDER BY galaxy.id DESC) WHERE id IS NULL;"))
+
+        t2=time.time()-t1
+        print "Deactivate old galaxies and generate new galaxy ids in %.3f seconds" % (t2,)
+        t1=time.time()
+
+        session.execute(text("INSERT INTO galaxy_size_rank (id, size) SELECT id, size FROM galaxy_temp ORDER BY size DESC;"))
+        session.execute(text("INSERT INTO galaxy_score_rank (id, score) SELECT id, score FROM galaxy_temp ORDER BY score DESC;"))
+        session.execute(text("INSERT INTO galaxy_value_rank (id, value) SELECT id, value FROM galaxy_temp ORDER BY value DESC;"))
+        session.execute(text("INSERT INTO galaxy_xp_rank (id, xp) SELECT id, xp FROM galaxy_temp ORDER BY xp DESC;"))
+        session.execute(text("""UPDATE galaxy_temp SET
+                                    size_rank = (SELECT size_rank FROM galaxy_size_rank WHERE galaxy_temp.id = galaxy_size_rank.id),
+                                    score_rank = (SELECT score_rank FROM galaxy_score_rank WHERE galaxy_temp.id = galaxy_score_rank.id),
+                                    value_rank = (SELECT value_rank FROM galaxy_value_rank WHERE galaxy_temp.id = galaxy_value_rank.id),
+                                    xp_rank = (SELECT xp_rank FROM galaxy_xp_rank WHERE galaxy_temp.id = galaxy_xp_rank.id)
+                            ;"""))
+
+        t2=time.time()-t1
+        print "Galaxy ranks in %.3f seconds" % (t2,)
+        t1=time.time()
+
+        session.execute(text("DELETE FROM galaxy WHERE active = :true;", bindparams=[bindparam("true",True)]))
+        session.execute(text("""INSERT INTO galaxy
+                                  (id, active, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank)
+                                SELECT id, :true, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank
+                                  FROM galaxy_temp ORDER BY id ASC
+                            ;""", bindparams=[bindparam("true",True)]))
+
+        t2=time.time()-t1
+        print "Update galaxies from temp in %.3f seconds" % (t2,)
+        t1=time.time()
+
+# ########################################################################### #
 # ##############################    PLANETS    ############################## #
 # ########################################################################### #
 
@@ -348,56 +398,6 @@ while True:
         t1=time.time()
 
 # ########################################################################### #
-# ##############################    GALAXIES    ############################# #
-# ########################################################################### #
-
-        session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y AND galaxy.active = :true);", bindparams=[bindparam("true",True)]))
-
-        t2=time.time()-t1
-        print "Copy galaxy ids to temp in %.3f seconds" % (t2,)
-        t1=time.time()
-
-        session.execute(text("""UPDATE galaxy SET
-                                  active = :false,
-                                  x = NULL, y = NULL, name = NULL, size = NULL, score = NULL, value = NULL, xp = NULL,
-                                  size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
-                                WHERE id NOT IN (SELECT id FROM galaxy_temp)
-                            ;""", bindparams=[bindparam("false",False)]))
-
-        session.execute(text("INSERT INTO galaxy (x, y, active) SELECT x, y, :true FROM galaxy_temp WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
-        session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y ORDER BY galaxy.id DESC) WHERE id IS NULL;"))
-
-        t2=time.time()-t1
-        print "Deactivate old galaxies and generate new galaxy ids in %.3f seconds" % (t2,)
-        t1=time.time()
-
-        session.execute(text("INSERT INTO galaxy_size_rank (id, size) SELECT id, size FROM galaxy_temp ORDER BY size DESC;"))
-        session.execute(text("INSERT INTO galaxy_score_rank (id, score) SELECT id, score FROM galaxy_temp ORDER BY score DESC;"))
-        session.execute(text("INSERT INTO galaxy_value_rank (id, value) SELECT id, value FROM galaxy_temp ORDER BY value DESC;"))
-        session.execute(text("INSERT INTO galaxy_xp_rank (id, xp) SELECT id, xp FROM galaxy_temp ORDER BY xp DESC;"))
-        session.execute(text("""UPDATE galaxy_temp SET
-                                    size_rank = (SELECT size_rank FROM galaxy_size_rank WHERE galaxy_temp.id = galaxy_size_rank.id),
-                                    score_rank = (SELECT score_rank FROM galaxy_score_rank WHERE galaxy_temp.id = galaxy_score_rank.id),
-                                    value_rank = (SELECT value_rank FROM galaxy_value_rank WHERE galaxy_temp.id = galaxy_value_rank.id),
-                                    xp_rank = (SELECT xp_rank FROM galaxy_xp_rank WHERE galaxy_temp.id = galaxy_xp_rank.id)
-                            ;"""))
-
-        t2=time.time()-t1
-        print "Galaxy ranks in %.3f seconds" % (t2,)
-        t1=time.time()
-
-        session.execute(text("DELETE FROM galaxy WHERE active = :true;", bindparams=[bindparam("true",True)]))
-        session.execute(text("""INSERT INTO galaxy
-                                  (id, active, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank)
-                                SELECT id, :true, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank
-                                  FROM galaxy_temp ORDER BY id ASC
-                            ;""", bindparams=[bindparam("true",True)]))
-
-        t2=time.time()-t1
-        print "Update galaxies from temp in %.3f seconds" % (t2,)
-        t1=time.time()
-
-# ########################################################################### #
 # #############################    ALLIANCES    ############################# #
 # ########################################################################### #
 
@@ -451,11 +451,11 @@ while True:
 # ########################################################################### #
 
         # planet_tick = last_tick + 1
-        session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz, newx, newy, newz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z, planet.x, planet.y, planet.z FROM planet, planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :oldtick AND (planet.active = :true AND (planet.x != planet_history.x OR planet.y != planet_history.y OR planet.z != planet_history.z) OR planet.active = :false);", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), bindparam("true",True), bindparam("false",False)]))
-        session.execute(text("INSERT INTO planet_history (tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff) SELECT :tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff FROM planet WHERE planet.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), bindparam("true",True)]))
-        session.execute(text("INSERT INTO galaxy_history (tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank) SELECT :tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank FROM galaxy WHERE galaxy.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), bindparam("true",True)]))
-        session.execute(text("INSERT INTO alliance_history (tick, id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank) SELECT :tick, id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank FROM alliance WHERE alliance.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), bindparam("true",True)]))
         session.execute(DB.Maps.Updates.__table__.insert().values(tick=planet_tick, planets=DB.Maps.Planet.__table__.count(), galaxies=DB.Maps.Galaxy.__table__.count(), alliances=DB.Maps.Alliance.__table__.count()))
+        session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz, newx, newy, newz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z, planet.x, planet.y, planet.z FROM planet, planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :oldtick AND (planet.active = :true AND (planet.x != planet_history.x OR planet.y != planet_history.y OR planet.z != planet_history.z) OR planet.active = :false);", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), bindparam("true",True), bindparam("false",False)]))
+        session.execute(text("INSERT INTO galaxy_history (tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank) SELECT :tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank FROM galaxy WHERE galaxy.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), bindparam("true",True)]))
+        session.execute(text("INSERT INTO planet_history (tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff) SELECT :tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff FROM planet WHERE planet.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), bindparam("true",True)]))
+        session.execute(text("INSERT INTO alliance_history (tick, id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank) SELECT :tick, id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank FROM alliance WHERE alliance.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), bindparam("true",True)]))
         session.commit()
         session.close()
 
