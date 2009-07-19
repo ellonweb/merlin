@@ -78,9 +78,11 @@ class Galaxy(Base):
         return self.planet_loader.filter_by(z=z).first()
     
     @staticmethod
-    def load(x,y):
+    def load(x,y, active=True):
         session = Session()
         Q = session.query(Galaxy)
+        if active is True:
+            Q = Q.filter_by(active=True)
         Q = Q.filter_by(x=x, y=y)
         galaxy = Q.first()
         session.close()
@@ -143,9 +145,11 @@ class Planet(Base):
         return self.scans.filter_by(scantype=type[0].upper()).order_by(SQL.desc(Scan.id)).first()
     
     @staticmethod
-    def load(x,y,z):
+    def load(x,y,z, active=True):
         session = Session()
         Q = session.query(Planet)
+        if active is True:
+            Q = Q.filter_by(active=True)
         Q = Q.filter_by(x=x, y=y, z=z)
         planet = Q.first()
         session.close()
@@ -229,9 +233,11 @@ class Alliance(Base):
         return self.history_loader.filter_by(tick=tick).first()
     
     @staticmethod
-    def load(name):
+    def load(name, active=True):
         session = Session()
         Q = session.query(Alliance)
+        if active is True:
+            Q = Q.filter_by(active=True)
         alliance = Q.filter(Alliance.name.ilike(name)).first()
         if alliance is None:
             alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
