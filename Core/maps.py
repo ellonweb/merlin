@@ -78,14 +78,14 @@ class Galaxy(Base):
         return self.planet_loader.filter_by(z=z).first()
     
     @staticmethod
-    def load(x,y, active=True):
-        session = Session()
-        Q = session.query(Galaxy)
+    def load(x,y, active=True, session=None):
+        s = session or Session()
+        Q = s.query(Galaxy)
         if active is True:
             Q = Q.filter_by(active=True)
         Q = Q.filter_by(x=x, y=y)
         galaxy = Q.first()
-        session.close()
+        s.close() if session is None else None
         return galaxy
     
     def __str__(self):
@@ -145,14 +145,14 @@ class Planet(Base):
         return self.scans.filter_by(scantype=type[0].upper()).order_by(SQL.desc(Scan.id)).first()
     
     @staticmethod
-    def load(x,y,z, active=True):
-        session = Session()
-        Q = session.query(Planet)
+    def load(x,y,z, active=True, session=None):
+        s = session or Session()
+        Q = s.query(Planet)
         if active is True:
             Q = Q.filter_by(active=True)
         Q = Q.filter_by(x=x, y=y, z=z)
         planet = Q.first()
-        session.close()
+        s.close() if session is None else None
         return planet
     
     def __str__(self):
@@ -233,15 +233,15 @@ class Alliance(Base):
         return self.history_loader.filter_by(tick=tick).first()
     
     @staticmethod
-    def load(name, active=True):
-        session = Session()
-        Q = session.query(Alliance)
+    def load(name, active=True, session=None):
+        s = session or Session()
+        Q = s.query(Alliance)
         if active is True:
             Q = Q.filter_by(active=True)
         alliance = Q.filter(Alliance.name.ilike(name)).first()
         if alliance is None:
             alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
-        session.close()
+        s.close() if session is None else None
         return alliance
     
     def __str__(self):
@@ -306,10 +306,10 @@ class User(Base):
         return hashlib.md5(passwd).hexdigest()
     
     @staticmethod
-    def load(name=None, id=None, passwd=None, exact=True, active=True):
+    def load(name=None, id=None, passwd=None, exact=True, active=True, session=None):
         assert id or name
-        session = Session()
-        Q = session.query(User)
+        s = session or Session()
+        Q = s.query(User)
         if id is not None:
             Q = Q.filter(User.id == id)
         if name is not None:
@@ -322,7 +322,7 @@ class User(Base):
         if active is True:
             Q = Q.filter(User.active == True)
         user = Q.first()
-        session.close()
+        s.close() if session is None else None
         return user
 Planet.user = relation(User, uselist=False, backref="planet")
 def user_access_function(num):
@@ -359,12 +359,12 @@ class Gimp(Base):
         return -ceil((time()-(self.timestamp+(self.wait*60*60)))/60/60)
     
     @staticmethod
-    def load(name):
-        session = Session()
-        Q = session.query(Gimp)
+    def load(name, session=None):
+        s = session or Session()
+        Q = s.query(Gimp)
         Q = Q.filter(Gimp.name.ilike(name))
         gimp = Q.first()
-        session.close()
+        s.close() if session is None else None
         return gimp
 
 Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gimps')
@@ -472,10 +472,10 @@ class Ship(Base):
     race = Column(String(10))
     
     @staticmethod
-    def load(name=None, id=None):
+    def load(name=None, id=None, session=None):
         assert id or name
-        session = Session()
-        Q = session.query(Ship)
+        s = session or Session()
+        Q = s.query(Ship)
         if id is not None:
             ship = Q.filter_by(Ship.id == id).first()
         if name is not None:
@@ -486,7 +486,7 @@ class Ship(Base):
                 ship = Q.filter(Ship.name.ilike("%"+name[:-1]+"%")).first()
             if ship is None and name[-3:].lower()=="ies":
                 ship = Q.filter(Ship.name.ilike("%"+name[:-3]+"%")).first()
-        session.close()
+        s.close() if session is None else None
         return ship
     
     def __str__(self):
