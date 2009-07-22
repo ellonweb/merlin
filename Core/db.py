@@ -23,8 +23,8 @@
 
 import sys
 import sqlalchemy
-if float(sqlalchemy.__version__[:3]) < 0.5:
-    sys.exit("SQLAlchemy 0.5+ Required")
+if float(sqlalchemy.__version__[2:5]) < 5.4:
+    sys.exit("SQLAlchemy 0.5.4+ Required")
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker, clear_mappers
 import sqlalchemy.sql as SQL
