@@ -344,6 +344,8 @@ class PhoneFriend(Base):
 User.phonefriends = relation(User,  secondary=PhoneFriend.__table__,
                                   primaryjoin=PhoneFriend.user_id   == User.id,
                                 secondaryjoin=PhoneFriend.friend_id == User.id) # Asc
+PhoneFriend.user = relation(User, primaryjoin=PhoneFriend.user_id==User.id)
+PhoneFriend.friend = relation(User, primaryjoin=PhoneFriend.friend_id==User.id)
 
 '''
 class Gimp(Base):
@@ -433,20 +435,11 @@ class Target(Base):
     user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'), index=True)
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), ForeignKey(Intel.planet_id), index=True)
     tick = Column(Integer)
-User.bookings_loader = dynamic_loader(Target, backref="user")
-Planet.bookings_loader = dynamic_loader(Target, backref="planet")
-Galaxy.bookings_loader = dynamic_loader(Target, Planet.__table__)
-Alliance.bookings_loader = dynamic_loader(Target, Intel.__table__)
-def bookings(self, tick=None):
-    if tick is not None:
-        return self.bookings_loader.filter_by(tick=tick).all()
-    else:
-        return self.bookings_loader.filter(Target.tick > Updates.current_tick()).all()
-User.bookings = bookings
-Planet.bookings = bookings
-Galaxy.bookings = bookings
-Alliance.bookings = bookings
-del bookings
+    unique = UniqueConstraint('planet_id','tick')
+User.bookings = dynamic_loader(Target, backref="user")
+Planet.bookings = dynamic_loader(Target, backref="planet")
+Galaxy.bookings = dynamic_loader(Target, Planet.__table__)
+Alliance.bookings = dynamic_loader(Target, Intel.__table__)
 
 # ########################################################################### #
 # #############################    SHIP TABLE    ############################ #
@@ -604,8 +597,11 @@ class CovOp(Base):
     __tablename__ = 'covop'
     id = Column(Integer, primary_key=True)
     scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
-    covopper_id = Column(Integer)
-    target_id = Column(Integer)
+    covopper_id = Column(Integer, ForeignKey(Planet.id))
+    target_id = Column(Integer, ForeignKey(Planet.id))
+Scan.covops = relation(CovOp)
+CovOp.covopper = relation(Planet, primaryjoin=CovOp.covopper_id==Planet.id)
+CovOp.target = relation(Planet, primaryjoin=CovOp.target_id==Planet.id)
 
 # ########################################################################### #
 # ############################    PENIS CACHE    ############################ #

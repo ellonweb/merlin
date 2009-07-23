@@ -46,7 +46,7 @@ class bumchums(loadable):
         Q = session.query(M.DB.Maps.Galaxy, M.DB.SQL.f.count())
         Q = Q.join(M.DB.Maps.Galaxy.planets)
         Q = Q.join(M.DB.Maps.Planet.intel)
-        Q = Q.filter(M.DB.Maps.Intel.alliance_id==alliance.id)
+        Q = Q.filter(M.DB.Maps.Intel.alliance==alliance)
         Q = Q.group_by(M.DB.Maps.Galaxy.x, M.DB.Maps.Galaxy.y)
         Q = Q.having(M.DB.SQL.f.count() >= bums)
         result = Q.all()

@@ -22,7 +22,7 @@
 # owners.
 
 import re
-from .variables import nick, access
+from .variables import access
 from .Core.modules import M
 loadable = M.loadable.loadable
 
@@ -53,12 +53,14 @@ class gangbang(loadable):
         
         session = M.DB.Session()
         Q = session.query(M.DB.Maps.Planet, M.DB.Maps.User, M.DB.Maps.Target.tick)
-        Q = Q.join(M.DB.Maps.Planet.bookings_loader)
+        Q = Q.join(M.DB.Maps.Target.planet)
         Q = Q.join(M.DB.Maps.Planet.intel) if alliance.id else Q.outerjoin(M.DB.Maps.Planet.intel)
         Q = Q.join(M.DB.Maps.Target.user)
-        Q = Q.filter(M.DB.Maps.Intel.alliance_id == alliance.id)
+        Q = Q.filter(M.DB.Maps.Intel.alliance == alliance)
         Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
-        Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Target.tick))
+        Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.x))
+        Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.y))
+        Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.z))
         result = Q.all()
         session.close()
         
