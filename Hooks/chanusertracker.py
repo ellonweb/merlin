@@ -21,7 +21,7 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-from .variables import admins, channels, access, usercache
+from .variables import channels, access, usercache
 from .Core.exceptions_ import PNickParseError, UserError
 from .Core.modules import M
 callback = M.loadable.callback
@@ -101,56 +101,42 @@ def pnick(message):
         # Set the user's pnick
         M.CUT.get_user(nick, pnick=pnick)
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', admin=True)
 def flush(message):
     """Flush entire usercache"""
-    
-    if message.get_msg() == "!flush":
-        try:
-            if message.get_pnick() in admins:
-                for chan in M.CUT.Channels.values():
-                    for nick in chan.nicks[:]:
-                        chan.remnick(nick)
-                    message.write("NAMES %s" % (chan.chan,))
-                message.reply("Usercache is now being rebuilt.")
-            else:
-                message.alert("You don't have access for that.")
-        except PNickParseError:
-            message.alert("You don't have access for that.")
+    for chan in M.CUT.Channels.values():
+        for nick in chan.nicks[:]:
+            chan.remnick(nick)
+        message.write("NAMES %s" % (chan.chan,))
+    message.reply("Usercache is now being rebuilt.")
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', command=True)
 def auth(message):
     """Authenticates the user, if they provide their username and password"""
     # P redundancy
-    
-    msg = message.get_msg()
-    if msg[:5] == "!auth":
-        msg = msg.split()
-        if len(msg) != 3:
-            message.alert("!auth user pass")
-            return
-        try:
-            user = M.CUT.auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
-            if user is not None:
-                message.reply("You have been authenticated as %s" % (user.name,))
-        except UserError:
-            message.alert("You don't have access to this command")
+    msg = message.get_msg().split()
+    if len(msg) != 3:
+        message.alert("!auth user pass")
+        return
+    try:
+        user = M.CUT.auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
+        if user is not None:
+            message.reply("You have been authenticated as %s" % (user.name,))
+    except UserError:
+        message.alert("You don't have access to this command")
 
-@callback('PRIVMSG')
+@callback('PRIVMSG', command=True)
 def letmein(message):
     """Invites the user to the private channel, if they provide their username and password"""
     # P redundancy
-    
-    msg = message.get_msg()
-    if message.get_msg()[:8] == "!letmein":
-        msg = msg.split()
-        if len(msg) != 3:
-            message.alert("!letmein user pass")
-            return
-        try:
-            user = M.CUT.auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
-            if (user is not None) and (channels.get("private") is not None) \
-                            and (access.get("member") is not None) and user.is_member():
-                message.invite(message.get_nick(), channels['private'])
-        except UserError:
-            message.alert("You don't have access to this command")
+    msg = message.get_msg().split()
+    if len(msg) != 3:
+        message.alert("!letmein user pass")
+        return
+    try:
+        user = M.CUT.auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
+        if (user is not None) and (channels.get("private") is not None) \
+                        and (access.get("member") is not None) and user.is_member():
+            message.invite(message.get_nick(), channels['private'])
+    except UserError:
+        message.alert("You don't have access to this command")

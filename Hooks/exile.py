@@ -1,5 +1,3 @@
-# bumchums
-
 # This file is part of Merlin.
  
 # This program is free software; you can redistribute it and/or modify
@@ -21,41 +19,53 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-import re
-from .variables import access
 from .Core.modules import M
 loadable = M.loadable.loadable
 
-class bumchums(loadable):
-    """Pies"""
+class exile(loadable):
+    """Calculate how long it will take to repay a value loss capping roids."""
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = re.compile(r"\s([\w-]+)(?:\s(\d+))?")
-        self.usage += " alliance number"
     
-    @loadable.run_with_access(access.get('hc',0) | access.get('intel',access['member']))
+    @loadable.run
     def execute(self, message, user, params):
         
-        alliance = M.DB.Maps.Alliance.load(params.group(1))
-        if alliance is None:
-            message.reply("No alliance matching '%s' found"%(params.group(1),))
-            return
-        bums = int(params.group(2) or 1)
         session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Galaxy, M.DB.SQL.f.count())
-        Q = Q.join(M.DB.Maps.Galaxy.planets)
-        Q = Q.join(M.DB.Maps.Planet.intel)
-        Q = Q.filter(M.DB.Maps.Intel.alliance==alliance)
-        Q = Q.group_by(M.DB.Maps.Galaxy.x, M.DB.Maps.Galaxy.y)
-        Q = Q.having(M.DB.SQL.f.count() >= bums)
+        Q = session.query(M.DB.Maps.Planet.id, M.DB.SQL.f.count().label('planets'))
+        Q = Q.filter(M.DB.Maps.Planet.x < 200)
+        Q = Q.group_by(M.DB.Maps.Planet.x, M.DB.Maps.Planet.y)
+        Q = Q.order_by(M.DB.SQL.desc(M.DB.SQL.f.count()))
+        subQ = Q.subquery()
+
+        Q = session.query(subQ.c.planets, M.DB.SQL.f.count().label('count'))
+        Q = Q.group_by(subQ.c.planets)
+        Q = Q.order_by(M.DB.SQL.asc(subQ.c.planets))
+
         result = Q.all()
         session.close()
+
         if len(result) < 1:
-            message.reply("No galaxies with at least %s bumchums from %s"%(bums,alliance.name,))
+            message.reply("There is no spoon")
             return
-        prev=[]
-        for galaxy, chums in result:
-            prev.append("%s:%s (%s)"%(galaxy.x, galaxy.y, chums))
-        reply="Galaxies with at least %s bums from %s: "%(bums,alliance.name)+ ' | '.join(prev)
+
+        gals=0
+        bracket=0
+        max_planets=0
+
+        for planets, count in result:
+            gals+=count
+        bracket=int(gals*.2)
+        for planets, count in result:
+            bracket-=count
+            if bracket < 0:
+                rest_gals=bracket+count
+                total_rest_gals=count
+                rest_planets=planets
+                break
+            max_planets=planets
+
+        reply="Total galaxies: %s Maximum planets to guarantee a galaxy is in the exile bracket: %s" % (gals,max_planets)
+        reply+=" | Also in the bracket: %s of %s galaxies with %s planets."%(rest_gals,total_rest_gals,rest_planets)
+
         message.reply(reply)

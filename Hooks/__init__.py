@@ -36,4 +36,7 @@ __all__ = ["load_mod",
            "details",
            "growth",
            "target",
+           "launch",
+           "roidcost",
+           "roidsave",
            ]

@@ -61,7 +61,7 @@ class details(loadable):
         if target.intel is not None:
             replies.append(("Information stored for %s:%s:%s -"+str(target.intel) if str(target.intel) else "No information stored for %s:%s:%s") % (target.x, target.y, target.z,))
         
-        bookings = target.bookings()
+        bookings = target.bookings.filter(M.DB.Maps.Target.tick > M.DB.Maps.Updates.current_tick()).all()
         if len(bookings) < 1:
             replies.append("No bookings matching planet %s:%s:%s" % (target.x, target.y, target.z,))
         else:

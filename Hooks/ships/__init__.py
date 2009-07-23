@@ -23,7 +23,7 @@
 __all__ = ["ship","cost","eff","stop"]
 
 # Package variables
-feud = 0.86
+feud = 0.12
 effs = {"t1": 1.0,
         "t2": 0.6,
         "t3": 0.3}

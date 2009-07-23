@@ -1,5 +1,3 @@
-# Relay a message
-
 # This file is part of Merlin.
  
 # This program is free software; you can redistribute it and/or modify
@@ -22,25 +20,36 @@
 # owners.
 
 import re
-from .variables import channels, access
 from .Core.modules import M
 loadable = M.loadable.loadable
+from Hooks.ships import feud
 
-class relay(loadable):
-    """Relays a message"""
+class roidcost(loadable):
+    """Calculate how long it will take to repay a value loss capping roids."""
     
     def __init__(self):
         loadable.__init__(self)
-        self.robore = re.compile(r"\s(\S+?)\s(.+)")
-        self.usage += " message"
+        self.paramre = re.compile(r"\s+(\d+)\s+(\d+(?:\.\d+)?[km]?)(?:\s+(\d+))?")
+        self.usage += " <roids> <value_cost> [mining_bonus]"
     
-    @loadable.run_with_access(access['admin'])
+    @loadable.run
     def execute(self, message, user, params):
-        self.relay(message, message.get_nick(), params.group(1))
-    
-    @loadable.runcop
-    def robocop(self, message, params):
-        self.relay(message, params.group(1), params.group(2))
-    
-    def relay(self, message, nick, msg):
-        message.privmsg(r"04,01 %s Reports: 08,01%s " % (nick, msg.replace("\t"," "),), channels['off'])
+        
+        roids, cost, bonus = params.groups()
+        roids, cost, bonus = int(roids), self.short2num(cost), int(bonus or 0)
+        mining = 250
+
+        if roids == 0:
+            message.reply("Another NewDawn landing, eh?")
+            return
+
+        mining=mining * ((float(bonus)+100)/100)
+
+        repay=int((cost*100)/(roids*mining))
+
+        reply="Capping %s roids at %s value with %s%% bonus will repay in %s ticks (%s days)" % (roids,self.num2short(cost),bonus,repay,repay/24)
+
+        repay = int((cost*100)/(roids*mining*(1/(1-float(feud)))))
+        reply+=" Feudalism: %s ticks (%s days)" % (repay,repay/24)
+
+        message.reply(reply)

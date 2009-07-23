@@ -1,5 +1,3 @@
-# SQLAlchemy DB interface
-
 # This file is part of Merlin.
  
 # This program is free software; you can redistribute it and/or modify
@@ -21,28 +19,18 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-import sys
-import sqlalchemy
-if float(sqlalchemy.__version__[2:5]) < 5.4:
-    sys.exit("SQLAlchemy 0.5.4+ Required")
-from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker, clear_mappers
-import sqlalchemy.sql as SQL
-import sqlalchemy.sql.functions
-SQL.f = sys.modules['sqlalchemy.sql.functions']
-from .variables import DBeng
+# List of package modules
+__all__ = ["request","parser"]
 
-engine = create_engine(DBeng)#, echo='debug')
+scans = {
+    "P": {"name":"Planet",         "type":"1"},
+    "L": {"name":"Landing",        "type":"2"},
+    "D": {"name":"Development",    "type":"3"},
+    "U": {"name":"Unit",           "type":"4"},
+    "N": {"name":"News",           "type":"5"},
+    "I": {"name":"Incoming",       "type":"6"},
+    "J": {"name":"Jumpgate Probe", "type":"7"},
+    "A": {"name":"Advanced Unit",  "type":"8"}
+}
 
-Session = sessionmaker(bind=engine)
-
-def reload_mappings():
-    Maps.Base.metadata.clear()
-    clear_mappers()
-    reload(Maps)
-    Maps.Base.metadata.bind = engine
-    Maps.Base.metadata.create_all()
-    Maps.Session = Session
-
-import maps as Maps
-reload_mappings()
+requesturl = "http://game.planetarion.com/waves.pl?action=single_scan&scan_type=%s&scan_x=%s&scan_y=%s&scan_z=%s"

@@ -21,10 +21,9 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-import socket
-from .variables import robocop as addr
 from Hooks.relaybot import channels
 from .Core.modules import M
+from .Core.robocop import push
 callback = M.loadable.callback
 
 addr = "../RoBoCoP"
@@ -35,12 +34,4 @@ def relay(message):
         send(message.get_nick(), message.get_msg())
 
 def send(nick, msg):
-    try:
-        s=socket.socket(socket.AF_UNIX)
-        s.connect((addr))
-        s.send("!relay %s %s" % (nick, msg,) + "\n")
-        s.close()
-    except socket.error:
-        pass
-
-callbacks = [("PRIVMSG", relay)]
+    push("!relay %s %s" % (nick, msg,))

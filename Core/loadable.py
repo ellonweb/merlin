@@ -22,6 +22,7 @@
 # owners.
 
 import re
+from .variables import admins
 from exceptions_ import ParseError, PNickParseError, UserError
 #from modules import M
 
@@ -75,6 +76,14 @@ class loadable(object):
                 f(self, message, *userparams)
         return execute
     
+    @staticmethod
+    def runcop(f):
+        def robocop(self, message):
+            params = loadable.robocop(self, message)
+            if params:
+                f(self, message, params)
+        return robocop
+    
     def execute(self, message):
         m = self.commandre.search(message.get_msg())
         if not m:
@@ -109,6 +118,11 @@ class loadable(object):
         return
     
     def params_match(self, message):
+        if type(self.paramre) == tuple:
+            for p in self.paramre:
+                m = p.search(message.get_msg())
+                if m: break
+            return m
         return self.paramre.search(message.get_msg())
     
     def help(self, message):
@@ -165,13 +179,27 @@ class loadable(object):
 # ##############################    CALLBACK    ############################# #
 # ########################################################################### #
 class function(object):
-    def __init__(self, hook, trigger):
+    def __init__(self, hook, trigger, command, admin):
+        print hook, hook.__name__, hook.__doc__
         self.__name__ = hook.__name__
+        self.__doc__ = hook.__doc__
         self.hook = hook
         self.trigger = trigger
+        self.command = command
+        self.commandre = re.compile(r"^[!|.|\-|~|@]"+self.__name__,re.IGNORECASE)
+        self.admin = admin
     def __call__(self, message):
+        if (self.command is True) and (self.commandre.search(message.get_msg()) is None):
+            return
+        try:
+            if (self.admin is True) and (message.get_pnick() not in admins):
+                raise PNickParseError
+        except PNickParseError:
+            message.alert("You don't have access for that.")
+            return
         self.hook(message)
-def callback(trigger):
+def callback(trigger, command=False, admin=False):
+    command = command or admin
     def wrapper(hook):
-        return function(hook, trigger)
+        return function(hook, trigger, command, admin)
     return wrapper

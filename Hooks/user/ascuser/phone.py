@@ -43,11 +43,10 @@ class phone(loadable):
             # Add a PhoneFriend
             session = M.DB.Session()
             session.add(user)
-            friends = user.phonefriends
-            if member in friends:
+            if member in user.phonefriends:
                 reply="%s can already access your phone number."%(member.name,)
             else:
-                session.add(M.DB.Maps.PhoneFriend(user_id=user.id,friend_id=member.id))
+                user.phonefriends.append(member)
                 session.commit()
                 reply="Added %s to the list of people able to view your phone number."%(member.name,)
             session.close()
@@ -62,7 +61,7 @@ class phone(loadable):
             if member not in friends:
                 reply="Could not find %s among the people allowed to see your phone number." % (member.name,)
             else:
-                session.execute(M.DB.Maps.PhoneFriend.__table__.delete().where(M.DB.Maps.PhoneFriend.user_id==user.id).where(M.DB.Maps.PhoneFriend.friend_id==member.id))
+                session.query(M.DB.Maps.PhoneFriend).filter_by(user=user, friend=member).delete(synchronize_session=False)
                 session.commit()
                 reply="Removed %s from the list of people allowed to see your phone number." % (member.name,)
             session.close()

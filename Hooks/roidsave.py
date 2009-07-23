@@ -1,5 +1,3 @@
-# Relay a message
-
 # This file is part of Merlin.
  
 # This program is free software; you can redistribute it and/or modify
@@ -22,25 +20,33 @@
 # owners.
 
 import re
-from .variables import channels, access
 from .Core.modules import M
 loadable = M.loadable.loadable
+from Hooks.ships import feud
 
-class relay(loadable):
-    """Relays a message"""
+class roidsave(loadable):
+    """Tells you how much value will be mined by a number of roids in that many ticks. M=Max, F=Feudalism, D=Democracy."""
     
     def __init__(self):
         loadable.__init__(self)
-        self.robore = re.compile(r"\s(\S+?)\s(.+)")
-        self.usage += " message"
+        self.paramre = re.compile(r"\s+(\d+)\s+(\d+)(?:\s+(\d+))?")
+        self.usage += " <roids> <ticks> [mining_bonus]"
     
-    @loadable.run_with_access(access['admin'])
+    @loadable.run
     def execute(self, message, user, params):
-        self.relay(message, message.get_nick(), params.group(1))
-    
-    @loadable.runcop
-    def robocop(self, message, params):
-        self.relay(message, params.group(1), params.group(2))
-    
-    def relay(self, message, nick, msg):
-        message.privmsg(r"04,01 %s Reports: 08,01%s " % (nick, msg.replace("\t"," "),), channels['off'])
+        
+        roids=int(params.group(1))
+        ticks=int(params.group(2))
+        bonus=int(params.group(3) or 0)
+        mining = 250
+
+        mining = int(mining *(float(bonus+100)/100))
+        cost=self.num2short(ticks*roids*mining/100)
+
+        cost_m=self.num2short(int(ticks*roids*mining/100*1.9529))
+        cost_f=self.num2short(int(ticks*roids*mining/100*(1/(1-float(feud)))))
+        cost_d=self.num2short(int(ticks*roids*mining/100*.9524))
+
+        reply="%s roids with %s%% bonus will mine %s value (M: %s/F: %s/D: %s) in %s ticks (%s days)" % (roids,bonus,cost,cost_m,cost_f,cost_d,ticks,ticks/24)
+
+        message.reply(reply)

@@ -43,18 +43,44 @@ class info(loadable):
             return
         
         session = M.DB.Session()
-        Q = session.query(M.DB.SQL.f.count(), M.DB.SQL.f.sum(M.DB.Maps.Planet.value),
-                          M.DB.SQL.f.sum(M.DB.Maps.Planet.score), M.DB.SQL.f.sum(M.DB.Maps.Planet.size), M.DB.SQL.f.sum(M.DB.Maps.Planet.xp))
+        Q = session.query(M.DB.SQL.f.sum(M.DB.Maps.Planet.value), M.DB.SQL.f.sum(M.DB.Maps.Planet.score),
+                          M.DB.SQL.f.sum(M.DB.Maps.Planet.size), M.DB.SQL.f.sum(M.DB.Maps.Planet.xp),
+                          M.DB.SQL.f.count())
         Q = Q.join(M.DB.Maps.Planet.intel)
-        Q = Q.filter(M.DB.Maps.Intel.alliance_id==alliance.id)
+        Q = Q.filter(M.DB.Maps.Intel.alliance==alliance)
         Q = Q.group_by(M.DB.Maps.Intel.alliance_id)
         result = Q.first()
         session.close()
         if result is None:
             message.reply("No planets in intel match alliance %s"%(alliance.name,))
             return
-        members, value, score, size, xp = result
-        reply="%s Members: %s, Value: %s, Avg: %s," % (alliance.name,members,value,value/members)
-        reply+=" Score: %s, Avg: %s," % (score,score/members) 
-        reply+=" Size: %s, Avg: %s, XP: %s, Avg: %s" % (size,size/members,xp,xp/members)
-        message.reply(reply)
+        
+        value, score, size, xp, members = result
+        if members <= 60:
+            reply="%s Members: %s, Value: %s, Avg: %s," % (alliance.name,members,value,value/members)
+            reply+=" Score: %s, Avg: %s," % (score,score/members) 
+            reply+=" Size: %s, Avg: %s, XP: %s, Avg: %s" % (size,size/members,xp,xp/members)
+            message.reply(reply)
+        else:
+            session = M.DB.Session()
+            Q = session.query(M.DB.Maps.Planet.value, M.DB.Maps.Planet.score, 
+                              M.DB.Maps.Planet.size, M.DB.Maps.Planet.xp, 
+                              M.DB.Maps.Intel.alliance_id)
+            Q = Q.join(M.DB.Maps.Planet.intel)
+            Q = Q.filter(M.DB.Maps.Intel.alliance==alliance)
+            Q = Q.order_by(M.DB.SQL.desc(M.DB.Maps.Planet.score))
+            Q = Q.limit(60)
+            Q = Q.from_self(M.DB.SQL.f.sum(M.DB.Maps.Planet.value), M.DB.SQL.f.sum(M.DB.Maps.Planet.score),
+                            M.DB.SQL.f.sum(M.DB.Maps.Planet.size), M.DB.SQL.f.sum(M.DB.Maps.Planet.xp),
+                            M.DB.SQL.f.count())
+            Q = Q.group_by(M.DB.Maps.Intel.alliance_id)
+            ts_result = Q.first()
+            session.close()
+            
+            ts_value, ts_score, ts_size, ts_xp, ts_members = ts_result
+            reply="%s Members: %s (%s)" % (alliance.name,members,ts_members)
+            reply+=", Value: %s (%s), Avg: %s (%s)" % (value,ts_value,value/members,ts_value/ts_members)
+            reply+=", Score: %s (%s), Avg: %s (%s)" % (score,ts_score,score/members,ts_score/ts_members)
+            reply+=", Size: %s (%s), Avg: %s (%s)" % (size,ts_size,size/members,ts_size/ts_members)
+            reply+=", XP: %s (%s), Avg: %s (%s)" % (xp,ts_xp,xp/members,ts_xp/ts_members)
+            message.reply(reply)

@@ -45,7 +45,7 @@ class spam(loadable):
         session = M.DB.Session()
         Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel)
         Q = Q.join(M.DB.Maps.Planet.intel)
-        Q = Q.filter(M.DB.Maps.Intel.alliance_id==alliance.id)
+        Q = Q.filter(M.DB.Maps.Intel.alliance==alliance)
         result = Q.all()
         session.close()
         if len(result) < 1:

@@ -32,7 +32,7 @@ class prod(loadable):
     def __init__(self):
 
         loadable.__init__(self)
-        self.paramre = re.compile(r"\s(\d+(?:.\d+)?[km]?)\s(\S+)\s(\d+)")
+        self.paramre = re.compile(r"\s(\d+(?:\.\d+)?[km]?)\s(\S+)\s(\d+)")
         self.usage += " <number> <ship> <factories>."
 
     @loadable.run
@@ -43,6 +43,7 @@ class prod(loadable):
         ship = M.DB.Maps.Ship.load(name=name)
         if ship is None:
             message.alert("%s is not a ship." % name)
+            return
         num = self.short2num(num)
         factories = int(factories)
 
@@ -54,12 +55,13 @@ class prod(loadable):
     def calc_ticks(self, ship, num, factories):
         """Calculate the cost in ticks. Return (ticks, ticks_with_feudalism)."""
 
-        cost = number * ship.total_cost
         ln = lambda x: math.log(x) / math.log(math.e)
-        required = 2 * math.sqrt(cost) * ln(cost)
-        feud = 2 * math.sqrt(cost * 0.85) * ln(cost)
+        norm_cost = num * ship.total_cost
+        feud_cost = num * ship.total_cost * (1-feud)
+        norm_req = 2 * math.sqrt(norm_cost) * ln(norm_cost)
+        feud_req = 2 * math.sqrt(feud_cost) * ln(feud_cost)
         output = int((4000 * factories) ** 0.98)
-        ticks = int(math.ceil((required + 10000 * factories) / output))
-        feud_ticks = int(1.2 * math.ceil((feud + 10000 * factories) / output))
+        norm_ticks = int(math.ceil((norm_req + 10000 * factories) / output))
+        feud_ticks = int(math.ceil((feud_req + 10000 * factories) / output))
 
-        return ticks, feud_ticks
+        return norm_ticks, feud_ticks
