@@ -41,17 +41,16 @@ Base = declarative_base()
 
 class Updates(Base):
     __tablename__ = 'updates'
-    id = Column(Integer, primary_key=True)
-    tick = Column(Integer, unique=True)
-    planets = Column(Integer)
+    id = Column(Integer, primary_key=True, autoincrement=False)
     galaxies = Column(Integer)
+    planets = Column(Integer)
     alliances = Column(Integer)
     timestamp = Column(DateTime, default=SQL.f.current_timestamp())
     
     @staticmethod
     def current_tick():
         session = Session()
-        tick = session.query(SQL.f.max(Updates.tick)).scalar() or 0
+        tick = session.query(Updates.id).order_by(SQL.desc(Updates.id)).scalar() or 0
         session.close()
         return tick
 
