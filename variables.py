@@ -35,8 +35,9 @@ alliance = "Ascendancy"
 #  mysql://user:password@host:port/database
 #  sqlite:///relative/path/to/database.sqlite
 # http://www.sqlalchemy.org/docs/05/dbengine.html#create-engine-url-arguments
-DBeng = "sqlite:///testdb.sqlite"
-#DBeng = "postgres://Elliot@localhost:5432/merlin"
+#DBeng = "sqlite:///testdb.sqlite"
+#!# Only Postgre supported now #!#
+DBeng = "postgres://Elliot:moo@localhost:5432/merlin"
 
 # Channels
 channels = {

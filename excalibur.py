@@ -317,23 +317,25 @@ while True:
         session.execute(text("INSERT INTO galaxy_value_rank (id, value) SELECT id, value FROM galaxy_temp ORDER BY value DESC;"))
         session.execute(text("INSERT INTO galaxy_xp_rank (id, xp) SELECT id, xp FROM galaxy_temp ORDER BY xp DESC;"))
         session.execute(text("""UPDATE galaxy_temp SET
-                                    size_rank = (SELECT size_rank FROM galaxy_size_rank WHERE galaxy_temp.id = galaxy_size_rank.id),
-                                    score_rank = (SELECT score_rank FROM galaxy_score_rank WHERE galaxy_temp.id = galaxy_score_rank.id),
-                                    value_rank = (SELECT value_rank FROM galaxy_value_rank WHERE galaxy_temp.id = galaxy_value_rank.id),
-                                    xp_rank = (SELECT xp_rank FROM galaxy_xp_rank WHERE galaxy_temp.id = galaxy_xp_rank.id)
+                                  size_rank = (SELECT size_rank FROM galaxy_size_rank WHERE galaxy_temp.id = galaxy_size_rank.id),
+                                  score_rank = (SELECT score_rank FROM galaxy_score_rank WHERE galaxy_temp.id = galaxy_score_rank.id),
+                                  value_rank = (SELECT value_rank FROM galaxy_value_rank WHERE galaxy_temp.id = galaxy_value_rank.id),
+                                  xp_rank = (SELECT xp_rank FROM galaxy_xp_rank WHERE galaxy_temp.id = galaxy_xp_rank.id)
                             ;"""))
 
         t2=time.time()-t1
         print "Galaxy ranks in %.3f seconds" % (t2,)
         t1=time.time()
 
-        # Delete everything in the current table, but only those marked
-        #  as active, because they're the ones which we'll replace afterwards
-        session.execute(text("DELETE FROM galaxy WHERE active = :true;", bindparams=[bindparam("true",True)]))
-        session.execute(text("""INSERT INTO galaxy
-                                  (id, active, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank)
-                                SELECT id, :true, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank
-                                  FROM galaxy_temp ORDER BY id ASC
+        # Update everything from the temp table,
+        #  deactivated items are untouched but NULLed earlier
+        session.execute(text("""UPDATE galaxy SET
+                                  x = t.x, y = t.y,
+                                  name = t.name, size = t.size, score = t.score, value = t.value, xp = t.xp,
+                                  size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank
+                                FROM galaxy_temp AS t
+                                  WHERE galaxy.id = t.id
+                                AND galaxy.active = :true
                             ;""", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
@@ -416,9 +418,10 @@ while True:
         #  NULL all the data, leaving only the coords and id for FKs
         session.execute(text("""UPDATE planet SET
                                   active = :false,
-                                  planetname = NULL, rulername = NULL, race = NULL, size = NULL, score = NULL, value = NULL, xp = NULL,
-                                  vdiff = NULL, idle = NULL,
-                                  size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
+                                  planetname = NULL, rulername = NULL, race = NULL,
+                                  size = NULL, score = NULL, value = NULL, xp = NULL,
+                                  size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL,
+                                  vdiff = NULL, idle = NULL
                                 WHERE id NOT IN (SELECT id FROM planet_temp)
                             ;""", bindparams=[bindparam("false",False)]))
 
@@ -454,13 +457,17 @@ while True:
         print "Planet ranks in %.3f seconds" % (t2,)
         t1=time.time()
 
-        # Delete everything in the current table, but only those marked
-        #  as active, because they're the ones which we'll replace afterwards
-        session.execute(text("DELETE FROM planet WHERE active = :true;", bindparams=[bindparam("true",True)]))
-        session.execute(text("""INSERT INTO planet
-                                  (id, active, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff)
-                                SELECT id, :true, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff
-                                  FROM planet_temp ORDER BY id ASC
+        # Update everything from the temp table,
+        #  deactivated items are untouched but NULLed earlier
+        session.execute(text("""UPDATE planet SET
+                                  x = t.x, y = t.y, z = t.z,
+                                  planetname = t.planetname, rulername = t.rulername, race = t.race,
+                                  size = t.size, score = t.score, value = t.value, xp = t.xp,
+                                  size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank,
+                                  vdiff = t.vdiff, idle = t.idle
+                                FROM planet_temp AS t
+                                  WHERE planet.id = t.id
+                                AND planet.active = :true
                             ;""", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
@@ -517,13 +524,16 @@ while True:
         print "Alliance ranks in %.3f seconds" % (t2,)
         t1=time.time()
 
-        # Delete everything in the current table, but only those marked
-        #  as active, because they're the ones which we'll replace afterwards
-        session.execute(text("DELETE FROM alliance WHERE active = :true;", bindparams=[bindparam("true",True)]))
-        session.execute(text("""INSERT INTO alliance
-                                  (id, active, name, size, members, score, size_rank, members_rank, score_rank, size_avg, score_avg, size_avg_rank, score_avg_rank)
-                                SELECT id, :true, name, size, members, score, size_rank, members_rank, score_rank, size_avg, score_avg, size_avg_rank, score_avg_rank
-                                  FROM alliance_temp ORDER BY id ASC
+        # Update everything from the temp table,
+        #  deactivated items are untouched but NULLed earlier
+        session.execute(text("""UPDATE alliance SET
+                                  size = t.size, members = t.members, score = t.score,
+                                  size_avg = t.size_avg, score_avg = t.score_avg,
+                                  size_rank = t.size_rank, members_rank = t.members_rank, score_rank = t.score_rank,
+                                  size_avg_rank = t.size_avg_rank, score_avg_rank = t.score_avg_rank
+                                FROM alliance_temp AS t
+                                  WHERE alliance.id = t.id
+                                AND alliance.active = :true
                             ;""", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
@@ -535,7 +545,7 @@ while True:
 # ########################################################################### #
 
         # Uncomment this line to allow ticking on the same data for debug
-        # planet_tick = last_tick + 1
+        planet_tick = last_tick + 1
 
         # Insert a record of the tick, with counts of the dumps
         #  and a timestamp generated by SQLA

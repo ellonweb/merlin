@@ -23,16 +23,20 @@
 
 import sys
 import sqlalchemy
-if float(sqlalchemy.__version__[2:5]) < 5.4:
+if not 5.4 <= float(sqlalchemy.__version__[2:5]) < 6.0:
     sys.exit("SQLAlchemy 0.5.4+ Required")
 from sqlalchemy import *
 from sqlalchemy.orm import sessionmaker, clear_mappers
+from sqlalchemy.sql import text
 import sqlalchemy.sql as SQL
 import sqlalchemy.sql.functions
 SQL.f = sys.modules['sqlalchemy.sql.functions']
 from .variables import DBeng
 
 engine = create_engine(DBeng)#, echo='debug')
+
+if engine.name != "postgres" or "PostgreSQL 8.4" not in engine.connect().execute(text("SELECT version();")).scalar():
+    sys.exit("PostgreSQL 8.4+ Required.")
 
 Session = sessionmaker(bind=engine)
 
