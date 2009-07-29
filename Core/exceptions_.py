@@ -24,10 +24,10 @@
 class Quit(Exception):
     pass
 
-class Reconnect(Exception):
+class Reboot(Exception):
     pass
 
-class Reboot(Exception):
+class Reload(Exception):
     pass
 
 class ParseError(Exception):

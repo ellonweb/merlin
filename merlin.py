@@ -30,7 +30,8 @@ from traceback import format_exc
 if not 2.6 <= float(sys.version[:3]) < 3.0:
     sys.exit("Python 2.6.x Required")
 
-from Core.exceptions_ import Quit, Reconnect, Reboot
+from Core.exceptions_ import Quit, Reboot, Reload
+from Core.loader import Loader
 #import Core.callbacks as Callbacks
 #import Core.modules
 #import Hooks
@@ -67,7 +68,13 @@ class Merlin(object):
             #   Loop back to reset connection
             while True:
                 
-                try: # break out with Reconnect exceptions
+                try: # break out with Reboot exceptions
+                    
+                    # Reload everything
+                    Loader.reboot()
+                    from Core.loader import Loader
+                    from Core.config import Config
+                    Loader.reload()
                     
                     # Load up configuration
                     self.botfig = self.loadconfig("botfig") or self.botfig
@@ -79,14 +86,18 @@ class Merlin(object):
                     self.Message = None
                     
                     # System loop
-                    #   Loop back to reboot and reload modules
+                    #   Loop back to reload modules
                     while True:
                         
-                        try: # break out with Reboot exceptions
+                        try: # break out with Reload exceptions
                             
                             # Load up the Core
-                            if self.coreload() and self.Message:
-                                self.Message.reply("Core reloaded successfully.")
+                            Loader.reload()
+                            
+                            # If we've been asked to reload, report if it worked
+                            if self.Message is not None:
+                                if Loader.success: self.Message.reply("Core reloaded successfully.")
+                                else: self.Message.reply("Error reloading the core.")
                             
                             # Connection handler
                             self.conn = self.Connection(self.sock, self.file)
@@ -103,7 +114,7 @@ class Merlin(object):
                             while True:
                                 line = self.conn.read()
                                 if not line:
-                                    raise Reconnect
+                                    raise Reboot
                                 
                                 # Parse the line
                                 self.Message = self.Action(line, self.conn, self.nick, self.v.alliance, Callbacks)
@@ -111,7 +122,7 @@ class Merlin(object):
                                     # Callbacks
                                     Callbacks.callback(self.Message)
                                     self.nick = self.Message.botnick
-                                except (Reboot, Reconnect, socket.error, Quit, KeyboardInterrupt):
+                                except (Reload, Reboot, socket.error, Quit, KeyboardInterrupt):
                                     raise
                                 except:
                                     # Error while executing a callback/mod/hook
@@ -121,12 +132,12 @@ class Merlin(object):
                                     continue
                                 
                             
-                        except Reboot:
+                        except Reload:
                             print "Attempting to reload the system..."
                             continue
                     
-                except (Reconnect, socket.error) as exc:
-                    print "Reconnecting..."
+                except (Reboot, socket.error) as exc:
+                    print "Rebooting..."
                     continue
             
         except (Quit, KeyboardInterrupt):
@@ -157,37 +168,5 @@ class Merlin(object):
         self.sock.send("USER %s 0 * : %s\r\n" % (self.nick, self.nick,))
         self.file = self.sock.makefile('rb')
     
-    def load(self, name):
-        # Load a module
-        return reload(__import__(name, globals(), locals(), [''], 0))
-    
-    def coreload(self):
-        # Reload all Core modules
-        try:
-            # Temporarily store the new imports
-            temp = object()
-            for name, path in self.mods.items():
-                setattr(temp, name, self.load(path))
-            # If no errors occurred during imports,
-            #  assign modules to self, everything worked.
-            for name in self.mods.keys():
-                setattr(self, name, getattr(temp, name))
-            return True
-        except (ImportError, SyntaxError) as exc:
-            # There was an error importing the modules,
-            #  so reset them all back to their previous state.
-            for name, path in self.mods:
-                if hasattr(self, name):
-                    sys.modules[path] = getattr(self, name)
-                else:
-                    # One of the modules (probably all!) doesn't have a
-                    #  previous state. This should only occur during the
-                    #  initial imports. Exit and wait to be provided with
-                    #  working code! Hehehehehe :D
-                    print "Error in initial Core import."
-                    print format_exc()
-                    sys.exit()
-            return False
-
 if __name__ == "__main__":
     Merlin() # Start the bot here, if we're the main module.
