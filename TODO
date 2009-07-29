@@ -1,7 +1,10 @@
 update LICENSE in all files (some files don't have any license atm)
     add jester to the list of (C) names: a _lot_ of code is copy/pasted straight from munin
 
+update all hooks to use new loader(session) system, test thoroughly etc
+
 Channel access min/max system
+    inc a way to check for a user but proceed even if user doesn't exist
 
 reloading loadable is unsafe, needs fixing
 
@@ -40,6 +43,7 @@ Scans:
 Bookings:
 
 Access and Channels:
+    alias, 
     addchan, 
     galchan, 
     remchan, 
@@ -49,15 +53,15 @@ Intel:
 
 Penis:
 
+Ships:
+    prod needs rewrite, race bonus, feud/demo etc
+    move package vars to main var system
+
 Simple calcs and lookups:
     bashee, 
     basher, 
-    exile, 
-    launch, 
     lookup, 
     maxcap, 
-    roidcost, 
-    roidsave, 
     xp, 
 
 Growth:
@@ -70,17 +74,25 @@ Target search:
     victim, 
     whore, 
 
+Cookies and Props:
+    cookie, 
+    gac, 
+    prop, 
+    yourmum, 
+
+Defence:
+    logdef, 
+    mydef, 
+    searchdef, 
+    showdef, 
+    usedef, 
+
+SMS:
+    showmethemoney, 
+    sms, 
+    smslog, 
 
 afford, 
-b, 
 bcalc, 
-c, 
-cookie, 
-defcalls, 
-f, 
-i, 
-prop, 
-rprod, 
-s, 
 surprisesex, 
 topcunts, 

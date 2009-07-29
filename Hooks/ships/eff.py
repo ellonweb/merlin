@@ -24,14 +24,14 @@
 import re
 from .Core.modules import M
 loadable = M.loadable.loadable
-from Hooks.ships import feud, effs
+from Hooks.ships import effs
 
 class eff(loadable):
     """Calculates the efficiency of the specified number of ships"""
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = re.compile(r"\s(\d+(?:.\d+)?[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
+        self.paramre = re.compile(r"\s(\d+(?:\.\d+)?[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
         self.usage += " number ship [t1|t2|t3]"
     
     @loadable.run

@@ -142,7 +142,7 @@ class status(loadable):
             booker = M.DB.Maps.User.load(params.group(1)) if params.group(1) is not None else user
             alliance = (M.DB.Maps.Alliance(name="Unknown") if params.group(1).lower() == "unknown" else M.DB.Maps.Alliance.load(params.group(1))) if booker is None else None
             if (booker or alliance) is None:
-                message.reply("No alliance or user matching '%s' found" % (param,.group(1),))
+                message.reply("No alliance or user matching '%s' found" % (param.group(1),))
                 return
             
             # User

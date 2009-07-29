@@ -40,17 +40,16 @@ from db import Base, Session
 
 class Updates(Base):
     __tablename__ = 'updates'
-    id = Column(Integer, primary_key=True)
-    tick = Column(Integer, unique=True)
-    planets = Column(Integer)
+    id = Column(Integer, primary_key=True, autoincrement=False)
     galaxies = Column(Integer)
+    planets = Column(Integer)
     alliances = Column(Integer)
     timestamp = Column(DateTime, default=SQL.f.current_timestamp())
     
     @staticmethod
     def current_tick():
         session = Session()
-        tick = session.query(SQL.f.max(Updates.tick)).scalar() or 0
+        tick = session.query(Updates.id).order_by(SQL.desc(Updates.id)).scalar() or 0
         session.close()
         return tick
 
@@ -77,12 +76,14 @@ class Galaxy(Base):
         return self.planet_loader.filter_by(z=z).first()
     
     @staticmethod
-    def load(x,y):
-        session = Session()
-        Q = session.query(Galaxy)
+    def load(x,y, active=True, session=None):
+        s = session or Session()
+        Q = s.query(Galaxy)
+        if active is True:
+            Q = Q.filter_by(active=True)
         Q = Q.filter_by(x=x, y=y)
         galaxy = Q.first()
-        session.close()
+        s.close() if session is None else None
         return galaxy
     
     def __str__(self):
@@ -92,9 +93,11 @@ class Galaxy(Base):
         retstr+="Size: %s (%s) " % (self.size,self.size_rank)
         retstr+="XP: %s (%s) " % (self.xp,self.xp_rank)
         return retstr
+Galaxy._idx_x_y = Index('galaxy_x_y', Galaxy.x, Galaxy.y, unique=True)
 class GalaxyHistory(Base):
     __tablename__ = 'galaxy_history'
-    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
+    __table_args__ = (UniqueConstraint('x', 'y', 'tick'), {})
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
     id = Column(Integer, ForeignKey(Galaxy.id), primary_key=True, autoincrement=False)
     x = Column(Integer)
     y = Column(Integer)
@@ -113,10 +116,11 @@ Galaxy.history_loader = dynamic_loader(GalaxyHistory, backref="current")
 
 class Planet(Base):
     __tablename__ = 'planet'
+    __table_args__ = (ForeignKeyConstraint(('x', 'y',), (Galaxy.x, Galaxy.y,)), {})
     id = Column(Integer, primary_key=True)
     active = Column(Boolean)
-    x = Column(Integer, ForeignKey(Galaxy.x))
-    y = Column(Integer, ForeignKey(Galaxy.y))
+    x = Column(Integer)
+    y = Column(Integer)
     z = Column(Integer)
     planetname = Column(String(20))
     rulername = Column(String(20))
@@ -129,8 +133,8 @@ class Planet(Base):
     score_rank = Column(Integer)
     value_rank = Column(Integer)
     xp_rank = Column(Integer)
-    idle = Column(Integer)
     vdiff = Column(Integer)
+    idle = Column(Integer)
     
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
@@ -139,12 +143,14 @@ class Planet(Base):
         return self.scans.filter_by(scantype=type[0].upper()).order_by(SQL.desc(Scan.id)).first()
     
     @staticmethod
-    def load(x,y,z):
-        session = Session()
-        Q = session.query(Planet)
+    def load(x,y,z, active=True, session=None):
+        s = session or Session()
+        Q = s.query(Planet)
+        if active is True:
+            Q = Q.filter_by(active=True)
         Q = Q.filter_by(x=x, y=y, z=z)
         planet = Q.first()
-        session.close()
+        s.close() if session is None else None
         return planet
     
     def __str__(self):
@@ -167,16 +173,16 @@ class Planet(Base):
     
     def maxcap(self):
         return self.size/4
-Planet2Galaxy = and_(Galaxy.x==Planet.x,
-                     Galaxy.y==Planet.y)
-Planet.galaxy = relation(Galaxy, backref="planets", primaryjoin=Planet2Galaxy)
-Galaxy.planet_loader = dynamic_loader(Planet, primaryjoin=Planet2Galaxy)
+Planet._idx_x_y_z = Index('planet_x_y_z', Planet.x, Planet.y, Planet.z)
+Planet.galaxy = relation(Galaxy, backref="planets")
+Galaxy.planet_loader = dynamic_loader(Planet)
 class PlanetHistory(Base):
     __tablename__ = 'planet_history'
-    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), ForeignKey(GalaxyHistory.tick, deferrable=True), primary_key=True, autoincrement=False)
+    __table_args__ = (ForeignKeyConstraint(('x', 'y', 'tick',), (GalaxyHistory.x, GalaxyHistory.y, GalaxyHistory.tick,)), {})
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
     id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
-    x = Column(Integer, ForeignKey(GalaxyHistory.x))
-    y = Column(Integer, ForeignKey(GalaxyHistory.y))
+    x = Column(Integer)
+    y = Column(Integer)
     z = Column(Integer)
     planetname = Column(String(20))
     rulername = Column(String(20))
@@ -192,14 +198,11 @@ class PlanetHistory(Base):
     idle = Column(Integer)
     vdiff = Column(Integer)
 Planet.history_loader = dynamic_loader(PlanetHistory, backref="current")
-Planet2GalaxyH = and_(GalaxyHistory.x==PlanetHistory.x,
-                      GalaxyHistory.y==PlanetHistory.y,
-                      GalaxyHistory.tick==PlanetHistory.tick)
-PlanetHistory.galaxy = relation(GalaxyHistory, backref="planets", primaryjoin=Planet2GalaxyH)
-GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory, primaryjoin=Planet2GalaxyH)
+PlanetHistory.galaxy = relation(GalaxyHistory, backref="planets")
+GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory)
 class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
-    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
     id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
     oldx = Column(Integer)
     oldy = Column(Integer)
@@ -228,13 +231,15 @@ class Alliance(Base):
         return self.history_loader.filter_by(tick=tick).first()
     
     @staticmethod
-    def load(name):
-        session = Session()
-        Q = session.query(Alliance)
+    def load(name, active=True, session=None):
+        s = session or Session()
+        Q = s.query(Alliance)
+        if active is True:
+            Q = Q.filter_by(active=True)
         alliance = Q.filter(Alliance.name.ilike(name)).first()
         if alliance is None:
             alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
-        session.close()
+        s.close() if session is None else None
         return alliance
     
     def __str__(self):
@@ -244,7 +249,7 @@ class Alliance(Base):
         return retstr
 class AllianceHistory(Base):
     __tablename__ = 'alliance_history'
-    tick = Column(Integer, ForeignKey(Updates.id, deferrable=True, ondelete='cascade'), primary_key=True, autoincrement=False)
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
     id = Column(Integer, ForeignKey(Alliance.id), primary_key=True, autoincrement=False)
     name = Column(String(20))
     size = Column(Integer)
@@ -270,7 +275,7 @@ class User(Base):
     passwd = Column(String(32))
     active = Column(Boolean, default=True)
     access = Column(Integer)
-    planet_id = Column(Integer, ForeignKey(Planet.id, deferrable=True, ondelete='set null'), index=True, unique=True)
+    planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='set null'), index=True)
     email = Column(String(32))
     phone = Column(String(32))
     pubphone = Column(Boolean, default=False) # Asc
@@ -299,10 +304,10 @@ class User(Base):
         return hashlib.md5(passwd).hexdigest()
     
     @staticmethod
-    def load(name=None, id=None, passwd=None, exact=True, active=True):
+    def load(name=None, id=None, passwd=None, exact=True, active=True, session=None):
         assert id or name
-        session = Session()
-        Q = session.query(User)
+        s = session or Session()
+        Q = s.query(User)
         if id is not None:
             Q = Q.filter(User.id == id)
         if name is not None:
@@ -315,7 +320,7 @@ class User(Base):
         if active is True:
             Q = Q.filter(User.active == True)
         user = Q.first()
-        session.close()
+        s.close() if session is None else None
         return user
 Planet.user = relation(User, uselist=False, backref="planet")
 def user_access_function(num):
@@ -354,12 +359,12 @@ class Gimp(Base):
         return -ceil((time()-(self.timestamp+(self.wait*60*60)))/60/60)
     
     @staticmethod
-    def load(name):
-        session = Session()
-        Q = session.query(Gimp)
+    def load(name, session=None):
+        s = session or Session()
+        Q = s.query(Gimp)
         Q = Q.filter(Gimp.name.ilike(name))
         gimp = Q.first()
-        session.close()
+        s.close() if session is None else None
         return gimp
 
 Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gimps')
@@ -371,8 +376,8 @@ Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gim
 
 class Intel(Base):
     __tablename__ = 'intel'
-    planet_id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
-    alliance_id = Column(Integer, ForeignKey(Alliance.id), index=True)
+    planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), primary_key=True, autoincrement=False)
+    alliance_id = Column(Integer, ForeignKey(Alliance.id, ondelete='set null'), index=True)
     nick = Column(String(20))
     fakenick = Column(String(20))
     defwhore = Column(Boolean, default=False)
@@ -412,8 +417,10 @@ class Intel(Base):
             ret += "comment=%s"%(self.comment,)
         return ret
 Planet.intel = relation(Intel, uselist=False, backref="planet")
+Galaxy.intel = relation(Intel, Planet.__table__)
 Intel.alliance = relation(Alliance)
 #Planet.alliance = relation(Alliance, Intel.__table__, uselist=False, viewonly=True, backref="planets")
+Planet.alliance = association_proxy("intel", "alliance")
 Alliance.planets = relation(Planet, Intel.__table__, viewonly=True)
 
 # ########################################################################### #
@@ -423,13 +430,13 @@ Alliance.planets = relation(Planet, Intel.__table__, viewonly=True)
 class Target(Base):
     __tablename__ = 'target'
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey(User.id), index=True)
-    planet_id = Column(Integer, ForeignKey(Planet.id), ForeignKey(Intel.planet_id), index=True)
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'), index=True)
+    planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), ForeignKey(Intel.planet_id), index=True)
     tick = Column(Integer)
     unique = UniqueConstraint('planet_id','tick')
 User.bookings = dynamic_loader(Target, backref="user")
 Planet.bookings = dynamic_loader(Target, backref="planet")
-Galaxy.bookings = dynamic_loader(Target, Planet.__table__, primaryjoin=Planet2Galaxy)
+Galaxy.bookings = dynamic_loader(Target, Planet.__table__)
 Alliance.bookings = dynamic_loader(Target, Intel.__table__)
 
 # ########################################################################### #
@@ -457,10 +464,10 @@ class Ship(Base):
     race = Column(String(10))
     
     @staticmethod
-    def load(name=None, id=None):
+    def load(name=None, id=None, session=None):
         assert id or name
-        session = Session()
-        Q = session.query(Ship)
+        s = session or Session()
+        Q = s.query(Ship)
         if id is not None:
             ship = Q.filter_by(Ship.id == id).first()
         if name is not None:
@@ -471,7 +478,7 @@ class Ship(Base):
                 ship = Q.filter(Ship.name.ilike("%"+name[:-1]+"%")).first()
             if ship is None and name[-3:].lower()=="ies":
                 ship = Q.filter(Ship.name.ilike("%"+name[:-3]+"%")).first()
-        session.close()
+        s.close() if session is None else None
         return ship
     
     def __str__(self):
@@ -496,23 +503,23 @@ class Ship(Base):
 class Scan(Base):
     __tablename__ = 'scan'
     id = Column(Integer, primary_key=True)
-    planet_id = Column(Integer, ForeignKey(Planet.id), index=True)
+    planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), index=True)
     scantype = Column(String(1))
     tick = Column(Integer)
     pa_id = Column(String(32), index=True, unique=True)
     group_id = Column(String(32))
-    scanner_id = Column(Integer, ForeignKey(User.id))
+    scanner_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
 Planet.scans = dynamic_loader(Scan, backref="planet")
 Scan.scanner = relation(User, backref="scans")
 
 class Request(Base):
     __tablename__ = 'request'
     id = Column(Integer, primary_key=True)
-    requester_id = Column(Integer, ForeignKey(User.id))
-    planet_id = Column(Integer, ForeignKey(Planet.id), index=True)
+    requester_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), index=True)
     scantype = Column(String(1))
     dists = Column(Integer)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='set null'))
 Request.user = relation(User, backref="requests")
 Request.target = relation(Planet)
 Request.scan = relation(Scan)
@@ -520,7 +527,7 @@ Request.scan = relation(Scan)
 class PlanetScan(Base):
     __tablename__ = 'planetscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
     roid_metal = Column(Integer)
     roid_crystal = Column(Integer)
     roid_eonium = Column(Integer)
@@ -538,7 +545,7 @@ Scan.planetscan = relation(PlanetScan, uselist=False)
 class DevScan(Base):
     __tablename__ = 'devscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
     light_factory = Column(Integer)
     medium_factory = Column(Integer)
     heavy_factory = Column(Integer)
@@ -562,24 +569,24 @@ Scan.devscan = relation(DevScan, uselist=False)
 class UnitScan(Base):
     __tablename__ = 'unitscan'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
-    ship_id = Column(Integer, ForeignKey(Ship.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
+    ship_id = Column(Integer, ForeignKey(Ship.id, ondelete='cascade'))
     amount = Column(Integer)
 Scan.units = relation(UnitScan)
 UnitScan.ship = relation(Ship)
 
 class FleetScan(Base):
     __tablename__ = 'fleetscan'
+    __table_args__ = (UniqueConstraint('owner_id','target_id','fleet_size','fleet_name','landing_tick','mission'), {})
     id = Column(Integer, primary_key=True)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
-    owner_id = Column(Integer, ForeignKey(Planet.id))
-    target_id = Column(Integer, ForeignKey(Planet.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
+    owner_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'))
+    target_id = Column(Integer, ForeignKey(Planet.id, ondelete='set null'))
     fleet_size = Column(Integer)
     fleet_name = Column(String(24))
     launch_tick = Column(Integer)
     landing_tick = Column(Integer)
     mission = Column(String(7))
-    unique = UniqueConstraint('owner_id','target_id','fleet_size','fleet_name','landing_tick','mission')
 Scan.fleets = relation(FleetScan)
 FleetScan.owner = relation(Planet, primaryjoin=FleetScan.owner_id==Planet.id)
 FleetScan.target = relation(Planet, primaryjoin=FleetScan.target_id==Planet.id)
@@ -587,9 +594,9 @@ FleetScan.target = relation(Planet, primaryjoin=FleetScan.target_id==Planet.id)
 class CovOp(Base):
     __tablename__ = 'covop'
     id = Column(Integer, primary_key=True)
-    scan_id = Column(Integer, ForeignKey(Scan.id))
-    covopper_id = Column(Integer, ForeignKey(Planet.id))
-    target_id = Column(Integer, ForeignKey(Planet.id))
+    scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
+    covopper_id = Column(Integer, ForeignKey(Planet.id, ondelete='set null'))
+    target_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'))
 Scan.covops = relation(CovOp)
 CovOp.covopper = relation(Planet, primaryjoin=CovOp.covopper_id==Planet.id)
 CovOp.target = relation(Planet, primaryjoin=CovOp.target_id==Planet.id)
@@ -601,21 +608,21 @@ CovOp.target = relation(Planet, primaryjoin=CovOp.target_id==Planet.id)
 class epenis(Base):
     __tablename__ = 'epenis'
     rank = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey(User.id), index=True)
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'), index=True)
     penis = Column(Integer)
 User.epenis = relation(epenis, uselist=False)
 User.penis = association_proxy("epenis", "penis")
 class galpenis(Base):
     __tablename__ = 'galpenis'
     rank = Column(Integer, primary_key=True)
-    galaxy_id = Column(Integer, ForeignKey(Galaxy.id), index=True)
+    galaxy_id = Column(Integer, ForeignKey(Galaxy.id, ondelete='cascade'), index=True)
     penis = Column(Integer)
 Galaxy.galpenis = relation(galpenis, uselist=False)
 Galaxy.penis = association_proxy("galpenis", "penis")
 class apenis(Base):
     __tablename__ = 'apenis'
     rank = Column(Integer, primary_key=True)
-    alliance_id = Column(Integer, ForeignKey(Alliance.id), index=True)
+    alliance_id = Column(Integer, ForeignKey(Alliance.id, ondelete='cascade'), index=True)
     penis = Column(Integer)
 Alliance.apenis = relation(apenis, uselist=False)
 Alliance.penis = association_proxy("apenis", "penis")

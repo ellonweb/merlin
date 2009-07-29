@@ -87,7 +87,7 @@ class book(loadable):
                 return
         
         try:
-            planet.bookings.append(M.DB.Maps.Target(user=user, tick=when)
+            planet.bookings.append(M.DB.Maps.Target(user=user, tick=when))
             session.commit()
             message.reply("Booked landing on %s:%s:%s tick %s for user %s" % (planet.x,planet.y,planet.z, when, user.name,))
             return

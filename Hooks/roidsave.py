@@ -1,5 +1,3 @@
-# Ship info
-
 # This file is part of Merlin.
  
 # This program is free software; you can redistribute it and/or modify
@@ -24,22 +22,31 @@
 import re
 from .Core.modules import M
 loadable = M.loadable.loadable
+from Hooks.ships import feud
 
-class ship(loadable):
-    """Returns the stats of the specified ship"""
+class roidsave(loadable):
+    """Tells you how much value will be mined by a number of roids in that many ticks. M=Max, F=Feudalism, D=Democracy."""
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = re.compile(r"\s(\w+)")
-        self.usage += " name"
+        self.paramre = re.compile(r"\s+(\d+)\s+(\d+)(?:\s+(\d+))?")
+        self.usage += " <roids> <ticks> [mining_bonus]"
     
     @loadable.run
     def execute(self, message, user, params):
         
-        name = params.group(1)
-        
-        ship = M.DB.Maps.Ship.load(name=name)
-        if ship is None:
-            message.alert("No Ship called: %s" % (name,))
-            return
-        message.reply(ship)
+        roids=int(params.group(1))
+        ticks=int(params.group(2))
+        bonus=int(params.group(3) or 0)
+        mining = 250
+
+        mining = int(mining *(float(bonus+100)/100))
+        cost=self.num2short(ticks*roids*mining/100)
+
+        cost_m=self.num2short(int(ticks*roids*mining/100*1.9529))
+        cost_f=self.num2short(int(ticks*roids*mining/100*(1/(1-float(feud)))))
+        cost_d=self.num2short(int(ticks*roids*mining/100*.9524))
+
+        reply="%s roids with %s%% bonus will mine %s value (M: %s/F: %s/D: %s) in %s ticks (%s days)" % (roids,bonus,cost,cost_m,cost_f,cost_d,ticks,ticks/24)
+
+        message.reply(reply)
