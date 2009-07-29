@@ -24,13 +24,7 @@ planet_temp = Table('planet_temp', DB.Maps.Base.metadata,
     Column('size', Integer),
     Column('score', Integer),
     Column('value', Integer),
-    Column('xp', Integer),
-    Column('size_rank', Integer),
-    Column('score_rank', Integer),
-    Column('value_rank', Integer),
-    Column('xp_rank', Integer),
-    Column('vdiff', Integer),
-    Column('idle', Integer))
+    Column('xp', Integer))
 planet_new_id_search = Table('planet_new_id_search', DB.Maps.Base.metadata,
     Column('id', Integer),
     Column('x', Integer, primary_key=True),
@@ -52,22 +46,6 @@ planet_old_id_search = Table('planet_old_id_search', DB.Maps.Base.metadata,
     Column('value', Integer),
     Column('xp', Integer),
     Column('vdiff', Integer))
-planet_size_rank = Table('planet_size_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('size', Integer),
-    Column('size_rank', Integer, primary_key=True))
-planet_score_rank = Table('planet_score_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('score', Integer),
-    Column('score_rank', Integer, primary_key=True))
-planet_value_rank = Table('planet_value_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('value', Integer),
-    Column('value_rank', Integer, primary_key=True))
-planet_xp_rank = Table('planet_xp_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('xp', Integer),
-    Column('xp_rank', Integer, primary_key=True))
 galaxy_temp = Table('galaxy_temp', DB.Maps.Base.metadata,
     Column('id', Integer),
     Column('x', Integer, primary_key=True),
@@ -76,92 +54,27 @@ galaxy_temp = Table('galaxy_temp', DB.Maps.Base.metadata,
     Column('size', Integer),
     Column('score', Integer),
     Column('value', Integer),
-    Column('xp', Integer),
-    Column('size_rank', Integer),
-    Column('score_rank', Integer),
-    Column('value_rank', Integer),
-    Column('xp_rank', Integer))
-galaxy_size_rank = Table('galaxy_size_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('size', Integer),
-    Column('size_rank', Integer, primary_key=True))
-galaxy_score_rank = Table('galaxy_score_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('score', Integer),
-    Column('score_rank', Integer, primary_key=True))
-galaxy_value_rank = Table('galaxy_value_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('value', Integer),
-    Column('value_rank', Integer, primary_key=True))
-galaxy_xp_rank = Table('galaxy_xp_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('xp', Integer),
-    Column('xp_rank', Integer, primary_key=True))
+    Column('xp', Integer))
 alliance_temp = Table('alliance_temp', DB.Maps.Base.metadata,
     Column('id', Integer),
     Column('name', String(20), primary_key=True),
     Column('size', Integer),
     Column('members', Integer),
     Column('score', Integer),
-    Column('size_rank', Integer),
-    Column('members_rank', Integer),
     Column('score_rank', Integer),
     Column('size_avg', Integer),
-    Column('score_avg', Integer),
-    Column('size_avg_rank', Integer),
-    Column('score_avg_rank', Integer))
-alliance_size_rank = Table('alliance_size_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('size', Integer),
-    Column('size_rank', Integer, primary_key=True))
-alliance_members_rank = Table('alliance_members_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('members', Integer),
-    Column('members_rank', Integer, primary_key=True))
-alliance_size_avg_rank = Table('alliance_size_avg_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('size_avg', Integer),
-    Column('size_avg_rank', Integer, primary_key=True))
-alliance_score_avg_rank = Table('alliance_score_avg_rank', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('score_avg', Integer),
-    Column('score_avg_rank', Integer, primary_key=True))
-
+    Column('score_avg', Integer))
 
 planet_temp.drop(checkfirst=True)
 planet_new_id_search.drop(checkfirst=True)
 planet_old_id_search.drop(checkfirst=True)
-planet_size_rank.drop(checkfirst=True)
-planet_score_rank.drop(checkfirst=True)
-planet_value_rank.drop(checkfirst=True)
-planet_xp_rank.drop(checkfirst=True)
 galaxy_temp.drop(checkfirst=True)
-galaxy_size_rank.drop(checkfirst=True)
-galaxy_score_rank.drop(checkfirst=True)
-galaxy_value_rank.drop(checkfirst=True)
-galaxy_xp_rank.drop(checkfirst=True)
 alliance_temp.drop(checkfirst=True)
-alliance_size_rank.drop(checkfirst=True)
-alliance_members_rank.drop(checkfirst=True)
-alliance_size_avg_rank.drop(checkfirst=True)
-alliance_score_avg_rank.drop(checkfirst=True)
 planet_temp.create()
 planet_new_id_search.create()
 planet_old_id_search.create()
-planet_size_rank.create()
-planet_score_rank.create()
-planet_value_rank.create()
-planet_xp_rank.create()
 galaxy_temp.create()
-galaxy_size_rank.create()
-galaxy_score_rank.create()
-galaxy_value_rank.create()
-galaxy_xp_rank.create()
 alliance_temp.create()
-alliance_size_rank.create()
-alliance_members_rank.create()
-alliance_size_avg_rank.create()
-alliance_score_avg_rank.create()
 
 # Get the previous tick number!
 last_tick = DB.Maps.Updates.current_tick()
@@ -283,7 +196,11 @@ while True:
 
         # Update the newly dumped data with IDs from the current data
         #  based on an x,y match in the two tables (and active=True)
-        session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y AND galaxy.active = :true);", bindparams=[bindparam("true",True)]))
+        session.execute(text("""UPDATE galaxy_temp AS t SET
+                                  id = g.id
+                                FROM (SELECT id, x, y FROM galaxy WHERE active = :true) AS g
+                                  WHERE t.x = g.x AND t.y = g.y
+                            ;""", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
         print "Copy galaxy ids to temp in %.3f seconds" % (t2,)
@@ -302,44 +219,30 @@ while True:
         # Insert them to the current table and the id(serial/auto_increment)
         #  will be generated, and we can then copy it back to the temp table
         session.execute(text("INSERT INTO galaxy (x, y, active) SELECT x, y, :true FROM galaxy_temp WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
-        session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y ORDER BY galaxy.id DESC) WHERE id IS NULL;"))
+        session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y AND galaxy.active = :true ORDER BY galaxy.id DESC) WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
         print "Deactivate old galaxies and generate new galaxy ids in %.3f seconds" % (t2,)
         t1=time.time()
 
-        # Copy the temp's id and a certain attribure to a new temp table
-        # Order the insert by the attribute and a rank(serial/auto_increment)
-        #  will be generated in the extra tables which can be copied back to
-        #  the main temp table
-        session.execute(text("INSERT INTO galaxy_size_rank (id, size) SELECT id, size FROM galaxy_temp ORDER BY size DESC;"))
-        session.execute(text("INSERT INTO galaxy_score_rank (id, score) SELECT id, score FROM galaxy_temp ORDER BY score DESC;"))
-        session.execute(text("INSERT INTO galaxy_value_rank (id, value) SELECT id, value FROM galaxy_temp ORDER BY value DESC;"))
-        session.execute(text("INSERT INTO galaxy_xp_rank (id, xp) SELECT id, xp FROM galaxy_temp ORDER BY xp DESC;"))
-        session.execute(text("""UPDATE galaxy_temp SET
-                                  size_rank = (SELECT size_rank FROM galaxy_size_rank WHERE galaxy_temp.id = galaxy_size_rank.id),
-                                  score_rank = (SELECT score_rank FROM galaxy_score_rank WHERE galaxy_temp.id = galaxy_score_rank.id),
-                                  value_rank = (SELECT value_rank FROM galaxy_value_rank WHERE galaxy_temp.id = galaxy_value_rank.id),
-                                  xp_rank = (SELECT xp_rank FROM galaxy_xp_rank WHERE galaxy_temp.id = galaxy_xp_rank.id)
-                            ;"""))
-
-        t2=time.time()-t1
-        print "Galaxy ranks in %.3f seconds" % (t2,)
-        t1=time.time()
-
-        # Update everything from the temp table,
-        #  deactivated items are untouched but NULLed earlier
-        session.execute(text("""UPDATE galaxy SET
+        # Update everything from the temp table and generate ranks
+        # Deactivated items are untouched but NULLed earlier
+        session.execute(text("""UPDATE galaxy AS g SET
                                   x = t.x, y = t.y,
                                   name = t.name, size = t.size, score = t.score, value = t.value, xp = t.xp,
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank
-                                FROM galaxy_temp AS t
-                                  WHERE galaxy.id = t.id
-                                AND galaxy.active = :true
+                                FROM (SELECT *,
+                                  rank() OVER (ORDER BY size DESC) AS size_rank,
+                                  rank() OVER (ORDER BY score DESC) AS score_rank,
+                                  rank() OVER (ORDER BY value DESC) AS value_rank,
+                                  rank() OVER (ORDER BY xp DESC) AS xp_rank
+                                FROM galaxy_temp) AS t
+                                  WHERE g.id = t.id
+                                AND g.active = :true
                             ;""", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
-        print "Update galaxies from temp in %.3f seconds" % (t2,)
+        print "Update galaxies from temp and generate ranks in %.3f seconds" % (t2,)
         t1=time.time()
 
 # ########################################################################### #
@@ -348,7 +251,11 @@ while True:
 
         # Update the newly dumped data with IDs from the current data
         #  based on an ruler-,planet-name match in the two tables (and active=True)
-        session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.rulername = planet_temp.rulername AND planet.planetname = planet_temp.planetname AND planet.active = :true);", bindparams=[bindparam("true",True)]))
+        session.execute(text("""UPDATE planet_temp AS t SET
+                                  id = p.id
+                                FROM (SELECT id, rulername, planetname FROM planet WHERE active = :true) AS p
+                                  WHERE t.rulername = p.rulername AND t.planetname = p.planetname
+                            ;""", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
         print "Copy planet ids to temp in %.3f seconds" % (t2,)
@@ -418,7 +325,6 @@ while True:
         #  NULL all the data, leaving only the coords and id for FKs
         session.execute(text("""UPDATE planet SET
                                   active = :false,
-                                  planetname = NULL, rulername = NULL, race = NULL,
                                   size = NULL, score = NULL, value = NULL, xp = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL,
                                   vdiff = NULL, idle = NULL
@@ -428,50 +334,34 @@ while True:
         # Any planets in the temp table without an id are new
         # Insert them to the current table and the id(serial/auto_increment)
         #  will be generated, and we can then copy it back to the temp table
-        session.execute(text("INSERT INTO planet (x, y, z, active) SELECT x, y, z, :true FROM planet_temp WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
-        session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.x = planet_temp.x AND planet.y = planet_temp.y AND planet.z = planet_temp.z ORDER BY planet.id DESC) WHERE id IS NULL;"))
+        session.execute(text("INSERT INTO planet (rulername, planetname, active) SELECT rulername, planetname, :true FROM planet_temp WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
+        session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.rulername = planet_temp.rulername AND planet.planetname = planet_temp.planetname AND planet.active = :true ORDER BY planet.id DESC) WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
         print "Deactivate old planets and generate new planet ids in %.3f seconds" % (t2,)
         t1=time.time()
 
-        # Copy the temp's id and a certain attribure to a new temp table
-        # Order the insert by the attribute and a rank(serial/auto_increment)
-        #  will be generated in the extra tables which can be copied back to
-        #  the main temp table
-        session.execute(text("INSERT INTO planet_size_rank (id, size) SELECT id, size FROM planet_temp ORDER BY size DESC;"))
-        session.execute(text("INSERT INTO planet_score_rank (id, score) SELECT id, score FROM planet_temp ORDER BY score DESC;"))
-        session.execute(text("INSERT INTO planet_value_rank (id, value) SELECT id, value FROM planet_temp ORDER BY value DESC;"))
-        session.execute(text("INSERT INTO planet_xp_rank (id, xp) SELECT id, xp FROM planet_temp ORDER BY xp DESC;"))
-        session.execute(text("""UPDATE planet_temp SET
-                                  size_rank = (SELECT size_rank FROM planet_size_rank WHERE planet_temp.id = planet_size_rank.id),
-                                  score_rank = (SELECT score_rank FROM planet_score_rank WHERE planet_temp.id = planet_score_rank.id),
-                                  value_rank = (SELECT value_rank FROM planet_value_rank WHERE planet_temp.id = planet_value_rank.id),
-                                  xp_rank = (SELECT xp_rank FROM planet_xp_rank WHERE planet_temp.id = planet_xp_rank.id)
-                            ;"""))
-        # Calculate the planets' value difference and idle ticks
-        session.execute(text("UPDATE planet_temp SET vdiff = planet_temp.value - (SELECT value FROM planet WHERE planet.id = planet_temp.id);"))
-        session.execute(text("UPDATE planet_temp SET idle = COALESCE(1 + (SELECT idle FROM planet WHERE planet.id = planet_temp.id AND planet_temp.vdiff BETWEEN planet.vdiff -1 AND planet.vdiff +1 AND planet.xp - planet_temp.xp = 0), 0);"))
-
-        t2=time.time()-t1
-        print "Planet ranks in %.3f seconds" % (t2,)
-        t1=time.time()
-
-        # Update everything from the temp table,
-        #  deactivated items are untouched but NULLed earlier
-        session.execute(text("""UPDATE planet SET
+        # Update everything from the temp table and generate ranks
+        # Deactivated items are untouched but NULLed earlier
+        session.execute(text("""UPDATE planet AS p SET
                                   x = t.x, y = t.y, z = t.z,
                                   planetname = t.planetname, rulername = t.rulername, race = t.race,
                                   size = t.size, score = t.score, value = t.value, xp = t.xp,
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank,
-                                  vdiff = t.vdiff, idle = t.idle
-                                FROM planet_temp AS t
-                                  WHERE planet.id = t.id
-                                AND planet.active = :true
+                                  vdiff = t.value - p.value,
+                                  idle = COALESCE(1 + (SELECT p.idle WHERE (t.value-p.value) BETWEEN (p.vdiff-1) AND (p.vdiff+1) AND (p.xp-t.xp=0) ), 0)
+                                FROM (SELECT *,
+                                  rank() OVER (ORDER BY size DESC) AS size_rank,
+                                  rank() OVER (ORDER BY score DESC) AS score_rank,
+                                  rank() OVER (ORDER BY value DESC) AS value_rank,
+                                  rank() OVER (ORDER BY xp DESC) AS xp_rank
+                                FROM planet_temp) AS t
+                                  WHERE p.id = t.id
+                                AND p.active = :true
                             ;""", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
-        print "Update planets from temp in %.3f seconds" % (t2,)
+        print "Update planets from temp and generate ranks in %.3f seconds" % (t2,)
         t1=time.time()
 
 # ########################################################################### #
@@ -480,7 +370,11 @@ while True:
 
         # Update the newly dumped data with IDs from the current data
         #  based on a name match in the two tables (and active=True)
-        session.execute(text("UPDATE alliance_temp SET id = (SELECT id FROM alliance WHERE alliance.name = alliance_temp.name AND alliance.active = :true);", bindparams=[bindparam("true",True)]))
+        session.execute(text("""UPDATE alliance_temp AS t SET
+                                  id = a.id
+                                FROM (SELECT id, name FROM alliance WHERE active = :true) AS a
+                                  WHERE t.name = a.name
+                            ;""", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
         print "Copy alliance ids to temp in %.3f seconds" % (t2,)
@@ -499,45 +393,31 @@ while True:
         # Insert them to the current table and the id(serial/auto_increment)
         #  will be generated, and we can then copy it back to the temp table
         session.execute(text("INSERT INTO alliance (name, active) SELECT name, :true FROM alliance_temp WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
-        session.execute(text("UPDATE alliance_temp SET id = (SELECT id FROM alliance WHERE alliance.name = alliance_temp.name ORDER BY alliance.id DESC) WHERE id IS NULL;"))
+        session.execute(text("UPDATE alliance_temp SET id = (SELECT id FROM alliance WHERE alliance.name = alliance_temp.name AND alliance.active = :true ORDER BY alliance.id DESC) WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
         print "Deactivate old alliances and generate new alliance ids in %.3f seconds" % (t2,)
         t1=time.time()
 
-        # Copy the temp's id and a certain attribure to a new temp table
-        # Order the insert by the attribute and a rank(serial/auto_increment)
-        #  will be generated in the extra tables which can be copied back to
-        #  the main temp table
-        session.execute(text("INSERT INTO alliance_size_rank (id, size) SELECT id, size FROM alliance_temp ORDER BY size DESC;"))
-        session.execute(text("INSERT INTO alliance_members_rank (id, members) SELECT id, members FROM alliance_temp ORDER BY members DESC;"))
-        session.execute(text("INSERT INTO alliance_size_avg_rank (id, size_avg) SELECT id, size_avg FROM alliance_temp ORDER BY size_avg DESC;"))
-        session.execute(text("INSERT INTO alliance_score_avg_rank (id, score_avg) SELECT id, score_avg FROM alliance_temp ORDER BY score_avg DESC;"))
-        session.execute(text("""UPDATE alliance_temp SET
-                                    size_rank = (SELECT size_rank FROM alliance_size_rank WHERE alliance_temp.id = alliance_size_rank.id),
-                                    members_rank = (SELECT members_rank FROM alliance_members_rank WHERE alliance_temp.id = alliance_members_rank.id),
-                                    size_avg_rank = (SELECT size_avg_rank FROM alliance_size_avg_rank WHERE alliance_temp.id = alliance_size_avg_rank.id),
-                                    score_avg_rank = (SELECT score_avg_rank FROM alliance_score_avg_rank WHERE alliance_temp.id = alliance_score_avg_rank.id)
-                            ;"""))
-
-        t2=time.time()-t1
-        print "Alliance ranks in %.3f seconds" % (t2,)
-        t1=time.time()
-
-        # Update everything from the temp table,
-        #  deactivated items are untouched but NULLed earlier
-        session.execute(text("""UPDATE alliance SET
+        # Update everything from the temp table and generate ranks
+        # Deactivated items are untouched but NULLed earlier
+        session.execute(text("""UPDATE alliance AS a SET
                                   size = t.size, members = t.members, score = t.score,
                                   size_avg = t.size_avg, score_avg = t.score_avg,
                                   size_rank = t.size_rank, members_rank = t.members_rank, score_rank = t.score_rank,
                                   size_avg_rank = t.size_avg_rank, score_avg_rank = t.score_avg_rank
-                                FROM alliance_temp AS t
-                                  WHERE alliance.id = t.id
-                                AND alliance.active = :true
+                                FROM (SELECT *,
+                                  rank() OVER (ORDER BY size DESC) AS size_rank,
+                                  rank() OVER (ORDER BY members DESC) AS members_rank,
+                                  rank() OVER (ORDER BY size_avg DESC) AS size_avg_rank,
+                                  rank() OVER (ORDER BY score_avg DESC) AS score_avg_rank
+                                FROM alliance_temp) AS t
+                                  WHERE a.id = t.id
+                                AND a.active = :true
                             ;""", bindparams=[bindparam("true",True)]))
 
         t2=time.time()-t1
-        print "Update alliances from temp in %.3f seconds" % (t2,)
+        print "Update alliances from temp and generate ranks in %.3f seconds" % (t2,)
         t1=time.time()
 
 # ########################################################################### #
@@ -587,18 +467,6 @@ print "Total time taken: %.3f seconds" % (t1,)
 # TODO: remove all these drop tables
 planet_new_id_search.drop()
 planet_old_id_search.drop()
-planet_size_rank.drop()
-planet_score_rank.drop()
-planet_value_rank.drop()
-planet_xp_rank.drop()
-galaxy_size_rank.drop()
-galaxy_score_rank.drop()
-galaxy_value_rank.drop()
-galaxy_xp_rank.drop()
-alliance_size_rank.drop()
-alliance_members_rank.drop()
-alliance_size_avg_rank.drop()
-alliance_score_avg_rank.drop()
 
 # Measure some dicks
 last_tick = DB.Maps.Updates.current_tick()
