@@ -101,7 +101,6 @@ class Merlin(object):
                                 try:
                                     # Callbacks
                                     Callbacks.callback(self.Message)
-                                    self.nick = self.Message.botnick
                                 except (Reload, Reboot, socket.error, Quit, KeyboardInterrupt):
                                     raise
                                 except:

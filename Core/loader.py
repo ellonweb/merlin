@@ -25,7 +25,6 @@ from traceback import format_exc
 mods = ["Core.connection", "Core.db", "Core.maps", "Core.chanusertracker",
         "Core.messages", "Core.actions", "Core.loadable", "Core.paconf", "Core.callbacks"]
 
-
 class loader(object):
     # Module controller
     

@@ -21,17 +21,16 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-import messages
+from Core.messages import Message
 from exceptions_ import ParseError
 
-class Action(messages.Message):
+class Action(Message):
     # This object holds the parse, and will enable users to send messages to the server on a higher level
     
-    def __init__(self, line, conn, nick, alliance, callbackmod):
+    def __init__(self, line, bot):
         # The object takes a line as a parameter
-        messages.Message.__init__(self, line, nick, alliance)
-        self.connection = conn
-        self.callbackmod = callbackmod
+        Message.__init__(self, line, bot)
+        self.connection = bot.conn
     
     def write(self, text):
         # Write something to the server, the message will be split up by newlines and at 450chars max
@@ -82,7 +81,7 @@ class Action(messages.Message):
     def nick(self, new_nick):
         # Change the bots nick to new_nick
         self.write("NICK %s" % new_nick)
-        self.botnick = new_nick
+        self.bot.nick = new_nick
     
     def join(self, target, key=None):
         # Join a channel

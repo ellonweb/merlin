@@ -23,18 +23,17 @@
 
 import re, time
 
-from exceptions_ import ChanParseError, MsgParseError, PNickParseError
+from Core.exceptions_ import ChanParseError, MsgParseError, PNickParseError
 
 pnickre = re.compile(r"^:.+!.+@(.+)\.users.netgamers.org")
 
 class Message(object):
     # The message object will be passed around to callbacks for inspection and ability to write to the server
     
-    def __init__(self, line, botnick, botally):
+    def __init__(self, line, bot):
         # A raw irc line and a connection
         self.line = line
-        self.botnick = botnick
-        self.botally = botally
+        self.bot = bot
         self._chanerror = False # Will be set to True on failure to parse.
         self._msgerror = False # Will be set to True on failure to parse.
         self.parse(line)
@@ -85,7 +84,7 @@ class Message(object):
         # Return the proper target to reply to
         if self._chanerror:
             raise ChanParseError("Could not parse target.")
-        return self._channel if (self._channel != self.botnick) else self.get_nick()
+        return self._channel if (self._channel != self.bot.nick) else self.get_nick()
     
     def get_pnick(self):
         #Return the pnick. Raises ParseError on failure
