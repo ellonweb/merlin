@@ -55,6 +55,8 @@ class loader(object):
                     print "Error in initial Core import."
                     print format_exc()
                     sys.exit()
+            print "Error in Core import, successfully reverted to previous state."
+            print format_exc()
             return False
         else:
             # If no errors occurred during imports,

@@ -85,10 +85,6 @@ class Merlin(object):
                             # Configure Core
                             self.conn.write("WHOIS %s" % self.nick)
                             
-                            # Load in Hook modules
-                            for mod in Hooks.__all__:
-                                Callbacks.reload_mod(mod)
-                            
                             # Operation loop
                             #   Loop to parse every line received over connection
                             while True:

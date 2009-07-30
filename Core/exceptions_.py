@@ -42,9 +42,6 @@ class MsgParseError(ParseError):
 class PNickParseError(ParseError):
     pass
 
-class LoadFailure(Exception):
-    pass
-
 class UserError(Exception):
     pass
     
