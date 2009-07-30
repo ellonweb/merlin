@@ -21,10 +21,10 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-from .variables import admins, access
-from .Core.exceptions_ import PNickParseError, UserError
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.exceptions_ import PNickParseError, UserError
+from Core.config import Config
+from Core.loadable import loadable
+from Core.callbacks import Callbacks
 
 class help(loadable):
     """Help"""
@@ -38,33 +38,28 @@ class help(loadable):
     def execute(self, message, user, params):
         
         if len(message.get_msg().split()) == 1:
-            modules = {}
             commands = []
-            message.alert(self.helptext+". For more information use: "+self.usage)
-            for event, callback, module_name in message.callbackmod.callbacks:
-                if event != "PRIVMSG":
-                    continue
+            message.reply(self.helptext+". For more information use: "+self.usage)
+            for callback in Callbacks.callbacks:
                 try:
                     if hasattr(callback, "has_access"):
                         if callback.has_access(message):
                             commands.append(callback.__class__.__name__)
                     else:
-                        if message.get_pnick() in admins:
+                        if message.get_pnick() == Config.get("Auth", "admin"):
                             commands.append(callback.__name__)
                 except PNickParseError:
                     continue
                 except UserError:
                     continue
-            message.alert("Loaded commands: " + ", ".join(commands))
+            message.reply("Loaded commands: " + ", ".join(commands))
         else:
-            for event, callback, module_name in message.callbackmod.callbacks:
-                if event != "PRIVMSG":
-                    continue
+            for callback in Callbacks.callbacks:
                 try:
                     if hasattr(callback, "help"):
                         continue
                     else:
-                        if (message.get_pnick() in admins) and (message.get_msg().split()[1] == callback.__name__):
+                        if (message.get_pnick() == Config.get("Auth", "admin")) and (message.get_msg().split()[1] == callback.__name__):
                             message.reply(callback.__doc__)
                 except PNickParseError:
                     continue
