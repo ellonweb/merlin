@@ -29,8 +29,6 @@ if not 2.6 <= float(sys.version[:3]) < 3.0:
     sys.exit("Python 2.6.x Required")
 
 from Core.exceptions_ import Quit, Reboot, Reload
-from Core.loader import Loader
-#import Core.callbacks as Callbacks
 #import Core.modules
 #import Hooks
 
@@ -40,11 +38,9 @@ sys.stderr = sys.stdout
 class Merlin(object):
     # Main bot container
     
-    mods = {"Connection": "Core.connection", 
-            "Action": "Core.actions", "DB": "Core.db", 
-            "CUT": "Core.chanusertracker", "loadable": "Core.loadable"}
-    
     def __init__(self):
+        from Core.loader import Loader
+        
         try: # break out with Quit exceptions
             
             # Connection loop
@@ -63,7 +59,7 @@ class Merlin(object):
                     
                     # Connect using raw socket
                     print "Connecting..."
-                    self.connect()
+                    self.connect(Config)
                     self.Message = None
                     
                     # System loop
@@ -74,6 +70,9 @@ class Merlin(object):
                             
                             # Load up the Core
                             Loader.reload()
+                            from Core.connection import Connection
+                            from Core.actions import Action
+                            from Core.callbacks import Callbacks
                             
                             # If we've been asked to reload, report if it worked
                             if self.Message is not None:
@@ -81,10 +80,10 @@ class Merlin(object):
                                 else: self.Message.reply("Error reloading the core.")
                             
                             # Connection handler
-                            self.conn = self.Connection(self.sock, self.file)
+                            self.conn = Connection(self.sock, self.file)
                             
                             # Configure Core
-                            self.conn.write("WHOIS %s" % nick)
+                            self.conn.write("WHOIS %s" % self.nick)
                             
                             # Load in Hook modules
                             for mod in Hooks.__all__:
@@ -98,7 +97,7 @@ class Merlin(object):
                                     raise Reboot
                                 
                                 # Parse the line
-                                self.Message = self.Action(line, self.conn, self.nick, self.v.alliance, Callbacks)
+                                self.Message = Action(line, self)
                                 try:
                                     # Callbacks
                                     Callbacks.callback(self.Message)
@@ -124,7 +123,7 @@ class Merlin(object):
         except (Quit, KeyboardInterrupt):
             sys.exit("Bye!")
     
-    def connect(self):
+    def connect(self, Config):
         # Configure socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(300)
