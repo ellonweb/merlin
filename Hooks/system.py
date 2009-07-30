@@ -21,6 +21,7 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
+from traceback import format_exc
 from Core.exceptions_ import Quit, Reboot, Reload
 from Core.loadable import callback
 
@@ -38,3 +39,16 @@ def reboot(message):
 def reload(message):
     """Dynamically reload the Core and Hooks"""
     raise Reload
+
+@callback('PRIVMSG', admin=True)
+def raw(message):
+    """Send a raw message to the server."""
+    message.write(message.get_msg()[5:])
+
+@callback('PRIVMSG', admin=True)
+def debug(message):
+    """Execute a statement. Warning: Playing with this is risky!"""
+    try:
+        exec(message.get_msg()[7:])
+    except:
+        message.alert(format_exc())
