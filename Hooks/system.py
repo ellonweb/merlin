@@ -1,4 +1,4 @@
-# This module provides a means of quitting the bot sanely
+# This module provides an entry point for system reboots or reloads
 
 # This file is part of Merlin.
  
@@ -21,14 +21,20 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-import sys
-from .variables import admins
-from .Core.exceptions_ import PNickParseError
-from .Core.modules import M
-callback = M.loadable.callback
+from Core.exceptions_ import Quit, Reboot, Reload
+from Core.loadable import callback
 
 @callback('PRIVMSG', admin=True)
 def quit(message):
-    """Does exactly what one would think it does."""
-    message.quit(message.get_msg()[6:])
-    sys.exit(0)
+    """Quit IRC and close down"""
+    raise Quit
+
+@callback('PRIVMSG', admin=True)
+def reboot(message):
+    """Quit IRC reboot, reload and reconnect"""
+    raise Reboot
+
+@callback('PRIVMSG', admin=True)
+def reload(message):
+    """Dynamically reload the Core and Hooks"""
+    raise Reload

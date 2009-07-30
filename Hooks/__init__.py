@@ -20,8 +20,7 @@
 # owners.
 
 # List of package modules
-__all__ = ["load_mod",
-           "quit",
+__all__ = ["system",
 #           "debug",
            "help",
            "auth",
