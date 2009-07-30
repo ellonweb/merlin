@@ -113,19 +113,25 @@ class Merlin(object):
                     
                 except (Reboot, socket.error) as exc:
                     print "Rebooting..."
+                    self.disconnect()
                     continue
             
         except (Quit, KeyboardInterrupt):
+            self.disconnect()
             sys.exit("Bye!")
     
     def connect(self, Config):
         # Configure socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(300)
-        self.sock.connect((Config.get("Connection", "server"), Config.get("Connection", "port"),))
+        self.sock.connect((Config.get("Connection", "server"), Config.getint("Connection", "port"),))
         self.sock.send("NICK %s\r\n" % (self.nick,))
         self.sock.send("USER %s 0 * : %s\r\n" % (self.nick, self.nick,))
         self.file = self.sock.makefile('rb')
+    def disconnect(self):
+        # Cleanly close sockets
+        self.sock.close()
+        self.file.close()
     
 if __name__ == "__main__":
     Merlin() # Start the bot here, if we're the main module.
