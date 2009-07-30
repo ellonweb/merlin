@@ -21,8 +21,6 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-from ConfigParser import ConfigParser as configparser
-import os
 import socket
 import sys
 from traceback import format_exc
@@ -38,21 +36,6 @@ from Core.loader import Loader
 
 # Redirect stderr to stdout
 sys.stderr = sys.stdout
-
-configs = {"botfig": "merlin.ini",
-           "pafig":  "pa.ini"
-          }
-
-class stub(object):
-    # Dumb object for storing internals and core modules
-    storage = ("loader", "system", "sock", "file",)
-    def __init__(self, **kwagrs):
-        for store in self.storage:
-            setattr(self, store, kwagrs.get(store))
-    
-    def dump(self):
-        return [getattr(self, store) for store in self.storage]
-    
 
 class Merlin(object):
     # Main bot container
@@ -73,12 +56,10 @@ class Merlin(object):
                     # Reload everything
                     Loader.reboot()
                     from Core.loader import Loader
-                    from Core.config import Config
-                    Loader.reload()
                     
                     # Load up configuration
-                    self.botfig = self.loadconfig("botfig") or self.botfig
-                    self.nick = self.config.get("Connection", "nick")
+                    from Core.config import Config
+                    self.nick = Config.get("Connection", "nick")
                     
                     # Connect using raw socket
                     print "Connecting..."
@@ -143,27 +124,11 @@ class Merlin(object):
         except (Quit, KeyboardInterrupt):
             sys.exit("Bye!")
     
-    def loadconfig(self, config):
-        # Load and parse required config file
-        try:
-            temp = configparser()
-            if temp.read(configs[config]):
-                return temp
-        except:
-            pass
-        # Either couldn't read/find the file, or couldn't parse it.
-        print "Warning! Could not load %s (%s)." % (config, configs[config],)
-        print "Attempting to continue with previous state."
-        # If there's a previous state, return, otherwise exit.
-        if hasattr(self, config):
-            return None
-        sys.exit()
-    
     def connect(self):
         # Configure socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(300)
-        self.sock.connect((config.get("Connection", "server"), config.get("Connection", "port"),))
+        self.sock.connect((Config.get("Connection", "server"), Config.get("Connection", "port"),))
         self.sock.send("NICK %s\r\n" % (self.nick,))
         self.sock.send("USER %s 0 * : %s\r\n" % (self.nick, self.nick,))
         self.file = self.sock.makefile('rb')
