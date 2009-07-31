@@ -46,7 +46,7 @@ class help(loadable):
                         if callback.has_access(message):
                             commands.append(callback.__class__.__name__)
                     else:
-                        if message.get_pnick() == Config.get("Auth", "admin"):
+                        if message.get_pnick() in Config.options("Admins"):
                             commands.append(callback.__name__)
                 except PNickParseError:
                     continue
@@ -59,7 +59,7 @@ class help(loadable):
                     if hasattr(callback, "help"):
                         continue
                     else:
-                        if (message.get_pnick() == Config.get("Auth", "admin")) and (message.get_msg().split()[1] == callback.__name__):
+                        if (message.get_pnick() in Config.options("Admins")) and (message.get_msg().split()[1] == callback.__name__):
                             message.reply(callback.__doc__)
                 except PNickParseError:
                     continue
