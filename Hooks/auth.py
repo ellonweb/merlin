@@ -22,23 +22,32 @@
 # owners.
 
 import re
-from .variables import nick, passw, channels
-from .Core.exceptions_ import PNickParseError
-from .Core.modules import M
-callback = M.loadable.callback
+from Core.exceptions_ import PNickParseError
+from Core.config import Config
+from Core.loadable import callback
 
 @callback('433')
 def altnick(message):
     # Need to register with an alternate nick
-    message.nick(message.botnick+"2")
+    if message.bot.nick == Config.get("Connection", "nick"):
+        message.nick(Config.get("Connection", "nick")+"2")
+    else:
+        message.nick(Config.get("Connection", "nick"))
+
+@callback('NICK')
+def nick(message):
+    # Changing nick
+    if message.get_nick() == message.bot.nick:
+        message.bot.nick = message.get_msg()
 
 @callback('376')
 def connected(message):
     # Successfully connected to the IRC server
-    message.write("MODE %s +ix" % message.botnick)
+    message.write("MODE %s +ix" % message.bot.nick)
     # Kill the ghost
-    if message.botnick[-1] == "2":
-        message.privmsg("RECOVER %s %s %s" % (nick, nick, passw), "P@cservice.netgamers.org")
+    nick = Config.get("Connection", "nick")
+    if message.bot.nick != nick:
+        message.privmsg("RECOVER %s %s %s" % (nick, nick, Config.get("Connection", "passwd")), "P@cservice.netgamers.org")
     else: login(message)
 
 @callback('NOTICE')
@@ -47,7 +56,7 @@ def PNS(message):
     if message.get_hostmask() in ("P!cservice@netgamers.org","NS!NickServ@netgamers.org"):
         if re.match(r"^(Recover Successful For|Unable to find)", message.get_msg()):
             # Ghosted
-            message.nick(nick)
+            message.nick(Config.get("Connection", "nick"))
             login(message)
         if re.match(r"^Your nickname is registered", message.get_msg()):
             # Login
@@ -55,14 +64,14 @@ def PNS(message):
 
 def login(message):
     # Login
-    message.privmsg("LOGIN %s %s" % (nick, passw), "P@cservice.netgamers.org")
+    message.privmsg("LOGIN %s %s" % (Config.get("Connection", "nick"), Config.get("Connection", "passwd")), "P@cservice.netgamers.org")
 
 @callback('396')
 def loggedin(message):
     # Authentication complete
     if "is now your hidden host" == message.get_msg():
-        for chan in channels.values():
-            message.privmsg("INVITE %s" % (chan,), "P")
+        for key, channel in Config.items("Channels"):
+            message.privmsg("INVITE %s" % (channel,), "P")
 
 @callback('INVITE')
 def pinvite(message):

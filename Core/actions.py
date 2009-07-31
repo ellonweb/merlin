@@ -81,7 +81,6 @@ class Action(Message):
     def nick(self, new_nick):
         # Change the bots nick to new_nick
         self.write("NICK %s" % new_nick)
-        self.bot.nick = new_nick
     
     def join(self, target, key=None):
         # Join a channel

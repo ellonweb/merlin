@@ -1,8 +1,6 @@
 update LICENSE in all files (some files don't have any license atm)
     add jester to the list of (C) names: a _lot_ of code is copy/pasted straight from munin
 
-rewrite the way merlin handles nick changes to wait for server confirmation
-
 rewrite Connection.write and Action.write to use detached threaded system
 
 update all hooks to use new loader(session) system, test thoroughly etc
