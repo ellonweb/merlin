@@ -20,6 +20,7 @@
 # owners.
 
 import sys
+import time
 from traceback import format_exc
 
 mods = ["Core.connection", "Core.db", "Core.maps", "Core.chanusertracker",
@@ -52,10 +53,10 @@ class loader(object):
                     #  previous state. This should only occur during the
                     #  initial imports. Exit and wait to be provided with
                     #  working code! Hehehehehe :D
-                    print "Error in initial Core import."
+                    print "%s Error in initial Core import." % (time.asctime(),)
                     print format_exc()
                     sys.exit()
-            print "Error in Core import, successfully reverted to previous state."
+            print "%s Error in Core, reverted to previous." % (time.asctime(),)
             print format_exc()
             return False
         else:

@@ -23,6 +23,7 @@
 
 import socket
 import sys
+import time
 from traceback import format_exc
 
 if not 2.6 <= float(sys.version[:3]) < 3.0:
@@ -57,9 +58,12 @@ class Merlin(object):
                     from Core.config import Config
                     self.nick = Config.get("Connection", "nick")
                     
-                    # Connect using raw socket
-                    print "Connecting..."
-                    self.connect(Config)
+                    # Load up the Core and connect
+                    Loader.reload()
+                    from Core.connection import Connection
+                    print "%s Connecting..." % (time.asctime(),)
+                    Connection.connect()
+                    self.sock, self.file = Connection.detach()
                     self.Message = None
                     
                     # System loop
@@ -74,21 +78,21 @@ class Merlin(object):
                             from Core.actions import Action
                             from Core.callbacks import Callbacks
                             
+                            # Attach the socket to the connection handler
+                            Connection.attach(self.sock, self.file)
+                            
                             # If we've been asked to reload, report if it worked
                             if self.Message is not None:
                                 if Loader.success: self.Message.reply("Core reloaded successfully.")
                                 else: self.Message.reply("Error reloading the core.")
                             
-                            # Connection handler
-                            self.conn = Connection(self.sock, self.file)
-                            
                             # Configure Core
-                            self.conn.write("WHOIS %s" % self.nick)
+                            Connection.write("WHOIS %s" % self.nick)
                             
                             # Operation loop
                             #   Loop to parse every line received over connection
                             while True:
-                                line = self.conn.read()
+                                line = Connection.read()
                                 if not line:
                                     raise Reboot
                                 
@@ -101,37 +105,25 @@ class Merlin(object):
                                     raise
                                 except:
                                     # Error while executing a callback/mod/hook
-                                    print "ERROR RIGHT HERE!!"
+                                    print "%s ERROR RIGHT HERE!!" % (time.asctime(),)
                                     print format_exc()
                                     self.Message.alert("An exception occured and has been logged.")
                                     continue
                                 
                             
                         except Reload:
-                            print "Attempting to reload the system..."
+                            print "%s Reloading..." % (time.asctime(),)
                             continue
                     
                 except (Reboot, socket.error) as exc:
-                    print "Rebooting..."
-                    self.disconnect()
+                    Connection.disconnect(str(exc) or "Rebooting")
+                    print "%s Rebooting..." % (time.asctime(),)
                     continue
             
-        except (Quit, KeyboardInterrupt):
-            self.disconnect()
+        except (Quit, KeyboardInterrupt) as exc:
+            Connection.disconnect(str(exc) or "Bye!")
             sys.exit("Bye!")
     
-    def connect(self, Config):
-        # Configure socket
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(300)
-        self.sock.connect((Config.get("Connection", "server"), Config.getint("Connection", "port"),))
-        self.sock.send("NICK %s\r\n" % (self.nick,))
-        self.sock.send("USER %s 0 * : %s\r\n" % (self.nick, self.nick,))
-        self.file = self.sock.makefile('rb')
-    def disconnect(self):
-        # Cleanly close sockets
-        self.sock.close()
-        self.file.close()
-    
+
 if __name__ == "__main__":
     Merlin() # Start the bot here, if we're the main module.

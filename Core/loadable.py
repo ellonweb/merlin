@@ -22,9 +22,9 @@
 # owners.
 
 import re
-from .variables import admins
-from exceptions_ import ParseError, PNickParseError, UserError
-import chanusertracker as CUT
+from Core.exceptions_ import ParseError, PNickParseError, UserError
+from Core.config import Config
+#import chanusertracker as CUT
 
 # ########################################################################### #
 # ##############################    LOADABLE    ############################# #
@@ -192,7 +192,7 @@ class function(object):
         if (self.command is True) and (self.commandre.search(message.get_msg()) is None):
             return
         try:
-            if (self.admin is True) and (message.get_pnick() not in admins):
+            if (self.admin is True) and (message.get_pnick() not in Config.options("Admins")):
                 raise PNickParseError
         except PNickParseError:
             message.alert("You don't have access for that.")

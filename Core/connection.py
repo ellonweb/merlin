@@ -21,20 +21,48 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-import re, time
+import re
+import socket
+import time
+from Core.config import Config
 
 CRLF = "\r\n"
 
-class Connection(object):
+class connection(object):
     # Socket/Connection handler
     
-    def __init__(self, socket, file):
+    def __init__(self):
         # Socket to handle is provided
-        self.sock = socket
-        self.file = file
         self.ping = re.compile(r"PING\s*:\s*(\S+)", re.I)
         self.pong = re.compile(r"PONG\s*:", re.I)
         self.last = time.time()
+    
+    def connect(self):
+        # Configure socket
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.settimeout(300)
+        self.sock.connect((Config.get("Connection", "server"), Config.getint("Connection", "port"),))
+        self.write("NICK %s" % (Config.get("Connection", "nick"),))
+        self.write("USER %s 0 * : %s" % (Config.get("Connection", "nick"), Config.get("Connection", "nick"),))
+        self.file = self.sock.makefile('rb')
+    
+    def attach(self, sock, file):
+        # Attach the socket
+        self.sock = sock
+        self.file = file
+    
+    def detach(self):
+        return self.sock, self.file
+    
+    def disconnect(self, line):
+        # Cleanly close sockets
+        try:
+            self.write("QUIT %s" % (line,))
+        except socket.error:
+            pass
+        else:
+            self.sock.close()
+            self.file.close()
     
     def write(self, line):
         # Write to socket/server
@@ -75,3 +103,4 @@ class Connection(object):
         # And again...
         return self.sock.close()
     
+Connection = connection()

@@ -21,8 +21,9 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
+from Core.exceptions_ import ParseError
+from Core.connection import Connection
 from Core.messages import Message
-from exceptions_ import ParseError
 
 class Action(Message):
     # This object holds the parse, and will enable users to send messages to the server on a higher level
@@ -30,7 +31,6 @@ class Action(Message):
     def __init__(self, line, bot):
         # The object takes a line as a parameter
         Message.__init__(self, line, bot)
-        self.connection = bot.conn
     
     def write(self, text):
         # Write something to the server, the message will be split up by newlines and at 450chars max
@@ -39,11 +39,10 @@ class Action(Message):
         if text:            
             for line in text.split("\n"):
                 while line:
-                    self.connection.write((params + line)[:(450 - len(params))])
+                    Connection.write((params + line)[:(450 - len(params))])
                     line = line[(450 - len(params)):]
         else:
-            self.connection.write(params[:-1])
-        print
+            Connection.write(params[:-1])
     
     def privmsg(self, text, target=None):
         # Privmsg someone. Target defaults to the person who triggered this line
