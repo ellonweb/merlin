@@ -180,7 +180,6 @@ class loadable(object):
 # ########################################################################### #
 class function(object):
     def __init__(self, hook, trigger, command, admin):
-        print hook, hook.__name__, hook.__doc__
         self.__name__ = hook.__name__
         self.__doc__ = hook.__doc__
         self.hook = hook
