@@ -176,6 +176,37 @@ class loadable(object):
             raise ValueError
 
 # ########################################################################### #
+# ###############################    SYSTEM    ############################## #
+# ########################################################################### #
+class system(object):
+    def __init__(oself, trigger, command=False, admin=False):
+        oself.trigger = trigger
+        oself.command = command or admin
+        oself.admin = admin
+    def __call__(oself, function):
+        class temp(object):
+            trigger = oself.trigger
+            command = oself.command
+            admin = oself.admin
+            execute = function
+            __doc__ = execute.__doc__
+            def __init__(self):
+                self.commandre = re.compile(r"^[!|.|\-|~|@]"+self.__class__.__name__,re.IGNORECASE)
+            def __call__(self, message):
+                if self.command is True and self.commandre.search(message.get_msg()) is None:
+                    return
+                if self.admin is True:
+                    try:
+                        if message.get_pnick() not in Config.options("Admins"):
+                            raise PNickParseError
+                    except PNickParseError:
+                        message.alert("You don't have access for that.")
+                        return
+                self.execute(message)
+        temp.__name__ = function.__name__
+        return temp
+
+# ########################################################################### #
 # ##############################    CALLBACK    ############################# #
 # ########################################################################### #
 class function(object):
