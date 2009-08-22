@@ -27,12 +27,11 @@ from time import time
 from sqlalchemy import *
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates, relation, backref, dynamic_loader
-import sqlalchemy.sql as SQL
-import sqlalchemy.sql.functions
-SQL.f = sys.modules['sqlalchemy.sql.functions']
-from .variables import access
+from sqlalchemy.sql import desc
+from sqlalchemy.sql.functions import current_timestamp
 
-from db import Base, Session
+from Core.config import Config
+from Core.db import Base, Session
 
 # ########################################################################### #
 # #############################    DUMP TABLES    ########################### #
@@ -44,12 +43,12 @@ class Updates(Base):
     galaxies = Column(Integer)
     planets = Column(Integer)
     alliances = Column(Integer)
-    timestamp = Column(DateTime, default=SQL.f.current_timestamp())
+    timestamp = Column(DateTime, default=current_timestamp())
     
     @staticmethod
     def current_tick():
         session = Session()
-        tick = session.query(Updates.id).order_by(SQL.desc(Updates.id)).scalar() or 0
+        tick = session.query(Updates.id).order_by(desc(Updates.id)).scalar() or 0
         session.close()
         return tick
 
@@ -140,7 +139,7 @@ class Planet(Base):
         return self.history_loader.filter_by(tick=tick).first()
     
     def scan(self, type):
-        return self.scans.filter_by(scantype=type[0].upper()).order_by(SQL.desc(Scan.id)).first()
+        return self.scans.filter_by(scantype=type[0].upper()).order_by(desc(Scan.id)).first()
     
     @staticmethod
     def load(x,y,z, active=True, session=None):
@@ -326,10 +325,10 @@ Planet.user = relation(User, uselist=False, backref="planet")
 def user_access_function(num):
     # Function generator for access check
     def func(self):
-        if self.access & num == num:
+        if self.access >= num:
             return True
     return func
-for lvl, num in access.items():
+for lvl, num in Config.items("Access"):
     # Bind user access functions
     setattr(User, "is_"+lvl, user_access_function(num))
 
