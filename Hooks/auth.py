@@ -40,9 +40,11 @@ def nick(message):
     if message.get_nick() == message.bot.nick:
         message.bot.nick = message.get_msg()
 
-@callback('376')
+@callback('001')
 def connected(message):
-    # Successfully connected to the IRC server
+    # Successfully registered on the IRC server, check what nick
+    message.bot.nick = message.get_chan()
+    # Hide ourself
     message.write("MODE %s +ix" % message.bot.nick)
     # Kill the ghost
     nick = Config.get("Connection", "nick")

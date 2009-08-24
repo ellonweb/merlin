@@ -22,6 +22,7 @@
 # owners.
 
 import os
+import sys
 from Core.loader import Loader
 from Core.loadable import loadable, function
 
@@ -70,7 +71,8 @@ class callbacks(object):
     def load_module(self, mod):
         # Keep a list of all modules imported so Loader can back them up
         self.modules.append(mod)
-        return Loader.load_module(mod)
+        Loader.load_module(mod)
+        return sys.modules[mod]
     
     def hook_module(self, mod):
         for object in dir(mod):

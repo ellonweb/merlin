@@ -38,8 +38,6 @@ class Merlin(object):
     # Main bot container
     
     def __init__(self):
-        from Core.loader import Loader
-        
         try: # break out with Quit exceptions
             
             # Connection loop
