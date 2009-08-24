@@ -23,51 +23,96 @@ import sys
 import time
 from traceback import format_exc
 
-mods = ["Core.connection", "Core.db", "Core.maps", "Core.chanusertracker",
+mods = ["Core.connection", "Core.db", "Core.maps",# "Core.chanusertracker",
         "Core.messages", "Core.actions", "Core.loadable", "Core.paconf", "Core.callbacks"]
 
 class loader(object):
     # Module controller
+    success = False
+    modules = {}
+    
+    def init(self):
+        # First things first: backup ourselves
+        self.backup("Core.config", "Core.loader")
+        try:
+            # Load all the main modules, they will also be
+            #  backed up if they're all loaded successfully.
+            self._reload()
+        except:
+            # They weren't loaded successfully. If this is the first run,
+            #  raise the error and exit. Otherwise, the error will be caught
+            #  by the calling Loader, which will then .restore() everything.
+            print "%s Error in Loader initialization." % (time.asctime(),)
+            raise
     
     def reboot(self):
-        self.success = self.load_modules(["Core.loader", "Core.config"])
+        # If the reboot succeeds, this Loader instance will be
+        #  replaced, so this .success is only tested if it fails.
+        self.success = False
+        try:
+            # Reload this module, which will instantiate a new
+            #  Loader, which in turn will do all the main loading.
+            self.load_module("Core.config", "Core.loader")
+            # Check the new loader has a successful status
+            if sys.modules["Core.loader"].Loader.success is not True: raise ImportError
+        except:
+            # If the new Loader fails, catch the error and restore everything
+            print format_exc()
+            print "%s Reboot failed, reverting to previous." % (time.asctime(),)
+            self.restore()
     
     def reload(self):
-        self.success = self.load_modules()
-    
-    def load_modules(self, mods = mods):
-        # Reload everything in the provided list
+        self.success = False
         try:
-            # Temporarily store the new imports
-            temp = {}
-            for mod in mods:
-                temp[mod] = self.load(mod)
-        except (ImportError, SyntaxError) as exc:
-            # There was an error importing the modules,
-            #  so reset them all back to their previous state.
-            for mod in mods:
-                if hasattr(self, mod):
-                    sys.modules[mod] = getattr(self, mod)
-                else:
-                    # One of the modules (probably all!) doesn't have a
-                    #  previous state. This should only occur during the
-                    #  initial imports. Exit and wait to be provided with
-                    #  working code! Hehehehehe :D
-                    print "%s Error in initial Core import." % (time.asctime(),)
-                    print format_exc()
-                    sys.exit()
-            print "%s Error in Core, reverted to previous." % (time.asctime(),)
+            # Load all the main modules, they will also be
+            #  backed up if they're all loaded successfully.
+            self._reload()
+        except:
+            # If the reload fails, catch the error and restore everything
             print format_exc()
-            return False
-        else:
-            # If no errors occurred during imports,
-            #  assign modules to self, everything worked.
-            for mod in mods:
-                setattr(self, mod, temp[mod])
-            return True
+            print "%s Reload failed, reverting to previous." % (time.asctime(),)
+            self.restore()
     
-    def load(self, name):
-        # Load a module
-        return reload(__import__(name, globals(), locals(), [''], 0))
+    def _reload(self):
+        try:
+            # Reload everything
+            self.load_module(*mods)
+        except:
+            # Exceptions will be dealt with in init or reload
+            raise
+        else:
+            # Now everything has been (re)loaded, back them up
+            # Note that nothing is backed up until after everything has
+            #  been successfully reloaded - key transactional functionality.
+            self.backup(*mods)
+            # We also need to backup the modules used by Callbacks
+            # The call to backup could be done in Callbacks, this
+            #  is only transaction safe if Callbacks is the last module
+            #  loaded though. Doing it here is ugly and hackish but safe.
+            self.backup(*sys.modules["Core.callbacks"].Callbacks.modules)
+            # Success is tested by the calling Loader or reported to the user
+            self.success = True
+    
+    def load_module(self, *mods):
+        # Reload (or import for the first time) the module
+        for mod in mods:
+            if mod in sys.modules:
+                reload(sys.modules[mod])
+            else:
+                __import__(mod, globals(), locals(), [''], 0)
+    
+    def backup(self, *mods):
+        for mod in mods:
+            # Shallow copy of the module's __dict__
+            self.modules[mod] = sys.modules[mod].__dict__.copy()
+    
+    def restore(self):
+        for mod in self.modules.keys():
+            # Clear the module's __dict__, this is not
+            #  strictly neccessary, but good practice.
+            sys.modules[mod].__dict__.clear()
+            # Copy the old objects from the backup back
+            sys.modules[mod].__dict__.update(self.modules[mod])
 
 Loader = loader()
+Loader.init()

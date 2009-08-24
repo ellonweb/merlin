@@ -50,16 +50,17 @@ class Merlin(object):
                 
                 try: # break out with Reboot exceptions
                     
-                    # Reload everything
-                    Loader.reboot()
-                    from Core.loader import Loader
-                    
                     # Load up configuration
                     from Core.config import Config
                     self.nick = Config.get("Connection", "nick")
                     
-                    # Load up the Core and connect
-                    Loader.reload()
+                    # Import the Loader
+                    # In first run this will do the initial import
+                    # Later the import is done by a call to .reboot(),
+                    #  but we need to import each time to get the new Loader
+                    from Core.loader import Loader
+                    
+                    # Connect
                     from Core.connection import Connection
                     print "%s Connecting..." % (time.asctime(),)
                     Connection.connect()
@@ -72,8 +73,9 @@ class Merlin(object):
                         
                         try: # break out with Reload exceptions
                             
-                            # Load up the Core
-                            Loader.reload()
+                            # Import elements of Core we need
+                            # These will have been refreshed by a call to
+                            #  either Loader.reboot() or Loader.reload()
                             from Core.connection import Connection
                             from Core.actions import Action
                             from Core.callbacks import Callbacks
@@ -113,11 +115,16 @@ class Merlin(object):
                             
                         except Reload:
                             print "%s Reloading..." % (time.asctime(),)
+                            # Reimport all the modules
+                            Loader.reload()
                             continue
                     
                 except (Reboot, socket.error) as exc:
+                    # Reset the connection first
                     Connection.disconnect(str(exc) or "Rebooting")
                     print "%s Rebooting..." % (time.asctime(),)
+                    # Reboot the Loader and reimport all the modules
+                    Loader.reboot()
                     continue
             
         except (Quit, KeyboardInterrupt) as exc:

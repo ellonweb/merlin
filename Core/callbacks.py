@@ -30,16 +30,21 @@ use_init_all = True
 class callbacks(object):
     # Modules/Callbacks/Hooks controller
     callbacks = {}
+    modules = []
     
     def __init__(self):
         # Load in everything in /Hooks/
         self.load_package("Hooks")
+        # Tell the Loader to back up the modules we've used
+        # The backup call is currently done in Loader._reload() for
+        #  better transactional safety, despite this being more elegant.
+        #Loader.backup(*self.modules)
     
     def load_package(self, path):
         if use_init_all:
         # Using __init__'s __all__ to detect module list
             # Load the current module/package
-            package = Loader.load(path)
+            package = self.load_module(path)
             if "__all__" in dir(package):
             # Package pointing to more modules/subpackages
                 for subpackage in package.__all__:
@@ -47,7 +52,7 @@ class callbacks(object):
                     self.load_package(path+"."+subpackage)
             else:
                 # Search the module for callbacks to hook in
-                self.load_module(package)
+                self.hook_module(package)
         else:
         # Loading everything available, for future use
             # Generate an iterator with all file contents of /Hooks/
@@ -58,11 +63,16 @@ class callbacks(object):
                     # Check the file is a valid module we want to hook in
                     if module != "__init__.py" and module[-3:] == ".py" and len(module) > 3:
                         # Load the module
-                        module = Loader.load(package.replace("\\",".")+"."+module[:-3])
+                        module = self.load_module(package.replace("\\",".")+"."+module[:-3])
                         # Search the module for callbacks to hook in
-                        self.load_module(module)
+                        self.hook_module(module)
     
     def load_module(self, mod):
+        # Keep a list of all modules imported so Loader can back them up
+        self.modules.append(mod)
+        return Loader.load_module(mod)
+    
+    def hook_module(self, mod):
         for object in dir(mod):
             # Iterate over objects in the module
             callback = getattr(mod, object)
