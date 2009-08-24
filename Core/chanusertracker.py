@@ -22,9 +22,9 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-from .variables import usercache
-from exceptions_ import PNickParseError, UserError
-import DB
+from Core.exceptions_ import PNickParseError, UserError
+from Core.config import Config
+from Core import maps
 
 Channels = {}
 Nicks = {}
@@ -117,15 +117,15 @@ def auth_user(name, pnickf, username, passwd):
     try:
         pnick = pnickf()
         # They have a pnick, so shouldn't need to auth, let's auth them anyway
-        user = DB.Maps.User.load(name=pnick)
+        user = maps.User.load(name=pnick)
     except PNickParseError:
         # They don't have a pnick, expected
-        user = DB.Maps.User.load(name=username, passwd=passwd)
+        user = maps.User.load(name=username, passwd=passwd)
     
     if user is None:
         raise UserError
     
-    if (nick is not None) and (usercache in ("join", "command",)):
+    if (nick is not None) and (Config.get("Misc","usercache") in ("join", "command",)):
         if Users.get(user.name) is None:
             # Add the user to the tracker
             Users[user.name] = User(user.name)
@@ -157,11 +157,11 @@ def get_user(name, pnick=None, pnickf=None):
         # Call the pnick function, might raise PNickParseError
         pnick = pnickf()
     
-    user = DB.Maps.User.load(name=pnick)
+    user = maps.User.load(name=pnick)
     if user is None:
         raise UserError
     
-    if usercache in ("join", "command",):
+    if Config.get("Misc","usercache") in ("join", "command",):
         if Users.get(user.name) is None:
             # Add the user to the tracker
             Users[user.name] = User(user.name)

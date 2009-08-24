@@ -23,7 +23,7 @@
 __all__ = ["system",
 #           "help",
            "auth",
-#           "chanusertracker",
+           "chanusertracker",
 #           "robocop",
 #           "hop",
 #           "relay",

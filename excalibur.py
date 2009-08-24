@@ -21,7 +21,7 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-import re, sys, time, traceback, urllib2
+import re, time, traceback, urllib2
 from sqlalchemy.sql import text, bindparam
 from Core.config import Config
 from Core.db import Session
