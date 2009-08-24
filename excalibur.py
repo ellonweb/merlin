@@ -1,85 +1,37 @@
 #!/usr/local/bin/python
 
+# This file is part of Merlin.
+ 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+ 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+ 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ 
+# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 import re, sys, time, traceback, urllib2
-from variables import urlPlanet, urlGalaxy, urlAlliance
-import Core.db as DB
-from sqlalchemy import Table, Column, Integer, String
 from sqlalchemy.sql import text, bindparam
-
-
-# Some tables used only for excalibur during the tick process
-# TODO: move these definitions to somewhere with the other tables
-# Also remove all the drop/create statements below once these tables
-#  have been combined into a collective so all tables will be created
-#  together.
-# TODO: add in
-planet_temp = Table('planet_temp', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('x', Integer, primary_key=True),
-    Column('y', Integer, primary_key=True),
-    Column('z', Integer, primary_key=True),
-    Column('planetname', String(20)),
-    Column('rulername', String(20)),
-    Column('race', String(3)),
-    Column('size', Integer),
-    Column('score', Integer),
-    Column('value', Integer),
-    Column('xp', Integer))
-planet_new_id_search = Table('planet_new_id_search', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('x', Integer, primary_key=True),
-    Column('y', Integer, primary_key=True),
-    Column('z', Integer, primary_key=True),
-    Column('race', String(3)),
-    Column('size', Integer),
-    Column('score', Integer),
-    Column('value', Integer),
-    Column('xp', Integer))
-planet_old_id_search = Table('planet_old_id_search', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('x', Integer, primary_key=True),
-    Column('y', Integer, primary_key=True),
-    Column('z', Integer, primary_key=True),
-    Column('race', String(3)),
-    Column('size', Integer),
-    Column('score', Integer),
-    Column('value', Integer),
-    Column('xp', Integer),
-    Column('vdiff', Integer))
-galaxy_temp = Table('galaxy_temp', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('x', Integer, primary_key=True),
-    Column('y', Integer, primary_key=True),
-    Column('name', String(64)),
-    Column('size', Integer),
-    Column('score', Integer),
-    Column('value', Integer),
-    Column('xp', Integer))
-alliance_temp = Table('alliance_temp', DB.Maps.Base.metadata,
-    Column('id', Integer),
-    Column('name', String(20), primary_key=True),
-    Column('size', Integer),
-    Column('members', Integer),
-    Column('score', Integer),
-    Column('score_rank', Integer),
-    Column('size_avg', Integer),
-    Column('score_avg', Integer))
-
-planet_temp.drop(checkfirst=True)
-planet_new_id_search.drop(checkfirst=True)
-planet_old_id_search.drop(checkfirst=True)
-galaxy_temp.drop(checkfirst=True)
-alliance_temp.drop(checkfirst=True)
-planet_temp.create()
-planet_new_id_search.create()
-planet_old_id_search.create()
-galaxy_temp.create()
-alliance_temp.create()
+from Core.config import Config
+from Core.db import Session
+from Core.maps import Updates, Galaxy, Planet, Alliance, epenis, galpenis, apenis
+from Core.maps import galaxy_temp, planet_temp, alliance_temp, planet_new_id_search, planet_old_id_search
 
 # Get the previous tick number!
-last_tick = DB.Maps.Updates.current_tick()
+last_tick = Updates.current_tick()
 
-session = DB.Session()
+session = Session()
 
 t_start=time.time()
 t1=t_start
@@ -89,9 +41,9 @@ while True:
 
         # Open the dump files
         try:
-            planets = urllib2.urlopen(urlPlanet)
-            galaxies = urllib2.urlopen(urlGalaxy)
-            alliances = urllib2.urlopen(urlAlliance)
+            planets = urllib2.urlopen(Config.get("URL", "planets"))
+            galaxies = urllib2.urlopen(Config.get("URL", "galaxies"))
+            alliances = urllib2.urlopen(Config.get("URL", "alliances"))
         except Exception, e:
             print "Failed gathering dump files."
             print e.__str__()
@@ -152,9 +104,9 @@ while True:
         print "Loaded dumps from webserver in %.3f seconds" % (t2,)
         t1=time.time()
 
-        # Empty out the temp tables - this is legacy, will remove it later
-        session.execute(planet_temp.delete())
+        # Empty out the temp tables
         session.execute(galaxy_temp.delete())
+        session.execute(planet_temp.delete())
         session.execute(alliance_temp.delete())
 
         # Insert the data to the temporary tables, some DBMS do not support
@@ -429,11 +381,11 @@ while True:
 
         # Insert a record of the tick, with counts of the dumps
         #  and a timestamp generated by SQLA
-        session.execute(DB.Maps.Updates.__table__.insert().values(
+        session.execute(Updates.__table__.insert().values(
                           id=planet_tick,
-                          galaxies=DB.Maps.Galaxy.__table__.count(DB.Maps.Galaxy.active==True),
-                          planets=DB.Maps.Planet.__table__.count(DB.Maps.Planet.active==True),
-                          alliances=DB.Maps.Alliance.__table__.count(DB.Maps.Alliance.active==True)
+                          galaxies=Galaxy.__table__.count(Galaxy.active==True),
+                          planets=Planet.__table__.count(Planet.active==True),
+                          alliances=Alliance.__table__.count(Alliance.active==True)
                         ))
 
         # Create records of planet movements or deletions
@@ -464,27 +416,24 @@ while True:
 
 t1=time.time()-t_start
 print "Total time taken: %.3f seconds" % (t1,)
-# TODO: remove all these drop tables
-planet_new_id_search.drop()
-planet_old_id_search.drop()
 
 # Measure some dicks
-last_tick = DB.Maps.Updates.current_tick()
+last_tick = Updates.current_tick()
 history_tick = max(last_tick-72, 1)
-session = DB.Session()
+session = Session()
 t_start=time.time()
 t1=t_start
-session.execute(DB.Maps.epenis.__table__.delete())
+session.execute(epenis.__table__.delete())
 session.execute(text("INSERT INTO epenis (user_id, penis) SELECT users.id, planet.score - planet_history.score FROM users, planet, planet_history WHERE users.planet_id = planet.id AND planet.id = planet_history.id AND planet_history.tick = :tick ORDER BY planet.score - planet_history.score DESC;", bindparams=[bindparam("tick",history_tick)]))
 t2=time.time()-t1
 print "epenis in %.3f seconds" % (t2,)
 t1=time.time()
-session.execute(DB.Maps.galpenis.__table__.delete())
+session.execute(galpenis.__table__.delete())
 session.execute(text("INSERT INTO galpenis (galaxy_id, penis) SELECT galaxy.id, galaxy.score - galaxy_history.score FROM galaxy, galaxy_history WHERE galaxy.id = galaxy_history.id AND galaxy_history.tick = :tick ORDER BY galaxy.score - galaxy_history.score DESC;", bindparams=[bindparam("tick",history_tick)]))
 t2=time.time()-t1
 print "galpenis in %.3f seconds" % (t2,)
 t1=time.time()
-session.execute(DB.Maps.apenis.__table__.delete())
+session.execute(apenis.__table__.delete())
 session.execute(text("INSERT INTO apenis (alliance_id, penis) SELECT alliance.id, alliance.score - alliance_history.score FROM alliance, alliance_history WHERE alliance.id = alliance_history.id AND alliance_history.tick = :tick ORDER BY alliance.score - alliance_history.score DESC;", bindparams=[bindparam("tick",history_tick)]))
 t2=time.time()-t1
 print "galpenis in %.3f seconds" % (t2,)

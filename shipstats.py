@@ -23,13 +23,15 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-import re, urllib2
-from variables import urlStats
-import Core.db as DB
-session = DB.Session()
+import re
+import urllib2
+from Core.config import Config
+from Core.db import Session
+from Core.maps import Ship
 
-stats = urllib2.urlopen(urlStats).read()
-session.execute(DB.Maps.Ship.__table__.delete())
+stats = urllib2.urlopen(Config.get("URL", "ships")).read()
+session = Session()
+session.execute(Ship.__table__.delete())
 
 regex = r'^<tr class="(Ter|Cath|Xan|Zik|Etd)">.+?(\w+)</td>' # race & name
 regex += r'<td>(\w+)</td>' # class
@@ -57,7 +59,7 @@ keys = ['race', 'name', 'class_', 't1', 't2', 't3', 'type', 'init',
         'guns', 'armor', 'damage', 'empres', 'metal', 'crystal', 'eonium']
 
 for line in sre.findall(stats):
-    ship = DB.Maps.Ship()
+    ship = Ship()
     line = list(line)
     for index, key in enumerate(keys):
         if line[index] in mapping:

@@ -1,4 +1,4 @@
-# SQLAlchemy DB interface
+#!/usr/local/bin/python
 
 # This file is part of Merlin.
  
@@ -21,20 +21,15 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-import sys
-import sqlalchemy
-if not 5.4 <= float(sqlalchemy.__version__[2:5]) < 6.0:
-    sys.exit("SQLAlchemy 0.5.4+ Required")
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import text
+print "Importing database models"
+from Core.db import Base
+import Core.maps
 
-from Core.config import Config
+print "Creating tables"
+Base.metadata.create_all()
 
-engine = create_engine(Config.get("DB", "DB"))#, echo='debug')
-if engine.name != "postgres" or "PostgreSQL 8.4" not in engine.connect().execute(text("SELECT version();")).scalar():
-    sys.exit("PostgreSQL 8.4+ Required.")
+# in future add migrate code here
+# will require a second engine for the old db
 
-Session = sessionmaker(bind=engine)
-Base = declarative_base(bind=engine)
+print "Inserting ship stats"
+import shipstats

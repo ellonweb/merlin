@@ -264,6 +264,62 @@ class AllianceHistory(Base):
 Alliance.history_loader = dynamic_loader(AllianceHistory, backref="current")
 
 # ########################################################################### #
+# ##########################    EXCALIBUR TABLES    ######################### #
+# ########################################################################### #
+
+galaxy_temp = Table('galaxy_temp', Base.metadata,
+    Column('id', Integer),
+    Column('x', Integer, primary_key=True),
+    Column('y', Integer, primary_key=True),
+    Column('name', String(64)),
+    Column('size', Integer),
+    Column('score', Integer),
+    Column('value', Integer),
+    Column('xp', Integer))
+planet_temp = Table('planet_temp', Base.metadata,
+    Column('id', Integer),
+    Column('x', Integer, primary_key=True),
+    Column('y', Integer, primary_key=True),
+    Column('z', Integer, primary_key=True),
+    Column('planetname', String(20)),
+    Column('rulername', String(20)),
+    Column('race', String(3)),
+    Column('size', Integer),
+    Column('score', Integer),
+    Column('value', Integer),
+    Column('xp', Integer))
+alliance_temp = Table('alliance_temp', Base.metadata,
+    Column('id', Integer),
+    Column('name', String(20), primary_key=True),
+    Column('size', Integer),
+    Column('members', Integer),
+    Column('score', Integer),
+    Column('score_rank', Integer),
+    Column('size_avg', Integer),
+    Column('score_avg', Integer))
+planet_new_id_search = Table('planet_new_id_search', Base.metadata,
+    Column('id', Integer),
+    Column('x', Integer, primary_key=True),
+    Column('y', Integer, primary_key=True),
+    Column('z', Integer, primary_key=True),
+    Column('race', String(3)),
+    Column('size', Integer),
+    Column('score', Integer),
+    Column('value', Integer),
+    Column('xp', Integer))
+planet_old_id_search = Table('planet_old_id_search', Base.metadata,
+    Column('id', Integer),
+    Column('x', Integer, primary_key=True),
+    Column('y', Integer, primary_key=True),
+    Column('z', Integer, primary_key=True),
+    Column('race', String(3)),
+    Column('size', Integer),
+    Column('score', Integer),
+    Column('value', Integer),
+    Column('xp', Integer),
+    Column('vdiff', Integer))
+
+# ########################################################################### #
 # #############################    USER TABLES    ########################### #
 # ########################################################################### #
 
