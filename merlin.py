@@ -30,8 +30,6 @@ if not 2.6 <= float(sys.version[:3]) < 3.0:
     sys.exit("Python 2.6.x Required")
 
 from Core.exceptions_ import Quit, Reboot, Reload
-#import Core.modules
-#import Hooks
 
 # Redirect stderr to stdout
 sys.stderr = sys.stdout
