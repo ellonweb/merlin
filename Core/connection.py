@@ -66,7 +66,7 @@ class connection(object):
     
     def write(self, line):
         # Write to socket/server
-        ponging = self.pong.search(line)
+        ponging = self.pong.match(line)
         if ponging:
             self.sock.send(line + CRLF)
         else:
@@ -84,9 +84,10 @@ class connection(object):
                 line = line[:-2]
             if line[-1] in CRLF:
                 line = line[:-1]
-            pinging = self.ping.search(line)
+            pinging = self.ping.match(line)
             if pinging:
                 self.write("PONG :%s" % pinging.group(1))
+                print "%s <<< PING? PONG!" % (time.asctime(),)
             else:
                 print "%s <<< %s" % (time.asctime(),line,)
             return line
