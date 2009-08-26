@@ -99,9 +99,9 @@ class Merlin(object):
                                 try:
                                     # Callbacks
                                     Callbacks.callback(self.Message)
-                                except (Reload, Reboot, socket.error, Quit, KeyboardInterrupt):
+                                except (Reload, Reboot, socket.error, Quit):
                                     raise
-                                except:
+                                except Exception:
                                     # Error while executing a callback/mod/hook
                                     print "%s ERROR RIGHT HERE!!" % (time.asctime(),)
                                     print format_exc()
@@ -123,7 +123,7 @@ class Merlin(object):
                     Loader.reboot()
                     continue
             
-        except (Quit, KeyboardInterrupt) as exc:
+        except (Quit, KeyboardInterrupt, SystemExit) as exc:
             Connection.disconnect(str(exc) or "Bye!")
             sys.exit("Bye!")
     
