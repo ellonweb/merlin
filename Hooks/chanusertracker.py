@@ -145,6 +145,6 @@ def letmein(message):
     try:
         user = auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
         if (user is not None) and user.is_member():
-            message.invite(message.get_nick(), Config.get("Misc","home"))
+            message.invite(message.get_nick(), Config.get("Alliance","home"))
     except UserError:
         message.alert("You don't have access to this command")
