@@ -30,7 +30,6 @@ class bigdicks(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = self.commandre
     
     @loadable.run_with_access(access['member'])
     def execute(self, message, user, params):

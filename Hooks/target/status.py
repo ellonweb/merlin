@@ -31,7 +31,7 @@ class status(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = (re.compile(r"status(?:\s([\w-]+)(?:\s(\d+))?)?"), re.compile(self.coordre.pattern+r"(?:\s(\d+))?"),)
+        self.paramre = (re.compile(self.coordre.pattern+r"(?:\s(\d+))?"), re.compile(r"(?:\s([\w-]+))?(?:\s(\d+))?"),)
         self.usage += " [user|x:y[:z]|alliance] [tick]"
     
     @loadable.run_with_access(access.get('hc',0) | access.get('bc',0) | access['member'])

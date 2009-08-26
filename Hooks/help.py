@@ -31,7 +31,6 @@ class help(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = self.commandre
         self.usage += " [command]"
     
     @loadable.run

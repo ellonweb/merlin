@@ -31,7 +31,7 @@ class epenis(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = re.compile(r"epenis(?:\s([\w-]+))?")
+        self.paramre = re.compile(r"(?:\s([\w-]+))?")
         self.usage += " user"
     
     @loadable.run_with_access(access['member'])

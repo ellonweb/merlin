@@ -31,7 +31,7 @@ class bitches(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = re.compile(r"bitches(?:\s(\d+))?")
+        self.paramre = re.compile(r"(?:\s(\d+))?")
         self.usage += " [minimum eta]"
     
     @loadable.run_with_access(access.get('hc',0) | access.get('bc',access['member']))

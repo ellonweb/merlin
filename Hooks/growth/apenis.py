@@ -31,7 +31,7 @@ class apenis(loadable):
     
     def __init__(self):
         loadable.__init__(self)
-        self.paramre = re.compile(r"apenis(?:\s([\w-]+))?")
+        self.paramre = re.compile(r"(?:\s([\w-]+))?")
         self.usage += " alliance"
     
     @loadable.run_with_access()
