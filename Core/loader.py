@@ -59,7 +59,7 @@ class loader(object):
             # If the new Loader fails, catch the error and restore everything
             print format_exc()
             print "%s Reboot failed, reverting to previous." % (time.asctime(),)
-            self.restore()
+            self.restore(sys)
     
     def reload(self):
         self.success = False
@@ -71,7 +71,7 @@ class loader(object):
             # If the reload fails, catch the error and restore everything
             print format_exc()
             print "%s Reload failed, reverting to previous." % (time.asctime(),)
-            self.restore()
+            self.restore(sys)
     
     def _reload(self):
         try:
@@ -106,7 +106,8 @@ class loader(object):
             # Shallow copy of the module's __dict__
             self.modules[mod] = sys.modules[mod].__dict__.copy()
     
-    def restore(self):
+    def restore(self, sys):
+        # We have to pass sys in, or we'd lose it when we .clear() this module
         for mod in self.modules.keys():
             # Clear the module's __dict__, this is not
             #  strictly neccessary, but good practice.

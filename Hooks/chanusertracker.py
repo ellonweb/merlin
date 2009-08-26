@@ -29,7 +29,7 @@ from Core.loadable import callback
 @callback('JOIN')
 def join(message):
     # Someone is joining a channel
-    if message.get_nick() == message.botnick:
+    if message.get_nick() == message.bot.nick:
         # Bot is joining the channel, so add a new object to the dict
         Channels[message.get_chan()] = Channel(message.get_chan())
     else:
@@ -60,7 +60,7 @@ def names(message):
 @callback('PART')
 def part(message):
     # Someone is leaving a channel
-    if message.get_nick() == message.botnick:
+    if message.get_nick() == message.bot.nick:
         # Bot is leaving the channel
         del Channels[message.get_chan()]
     else:
@@ -71,7 +71,7 @@ def part(message):
 def kick(message):
     # Someone is kicked
     kname = message.line.split()[3]
-    if message.botnick == kname:
+    if message.bot.nick == kname:
         # Bot is kicked from the channel
         del Channels[message.get_chan()]
     else:
@@ -81,7 +81,7 @@ def kick(message):
 @callback('QUIT')
 def quit(message):
     # Someone is quitting
-    if message.get_nick() != message.botnick:
+    if message.get_nick() != message.bot.nick:
         # It's not the bot that's quitting
         Nicks[message.get_nick()].quit()
 
