@@ -24,14 +24,12 @@
 # owners.
 
 import re
+import sys
 import urllib2
+from sqlalchemy.sql import text, bindparam
 from Core.config import Config
 from Core.db import Session
 from Core.maps import Ship
-
-stats = urllib2.urlopen(Config.get("URL", "ships")).read()
-session = Session()
-session.execute(Ship.__table__.delete())
 
 regex = r'^<tr class="(Ter|Cath|Xan|Zik|Etd)">.+?(\w+)</td>' # race & name
 regex += r'<td>(\w+)</td>' # class
@@ -58,20 +56,32 @@ mapping = {    "Fi": "Fighter",
 keys = ['race', 'name', 'class_', 't1', 't2', 't3', 'type', 'init',
         'guns', 'armor', 'damage', 'empres', 'metal', 'crystal', 'eonium']
 
-for line in sre.findall(stats):
-    ship = Ship()
-    line = list(line)
-    for index, key in enumerate(keys):
-        if line[index] in mapping:
-            line[index] = mapping[line[index]]
-        elif line[index].isdigit():
-            line[index] = int(line[index])
-        if line[index] != '-':
-            setattr(ship,key,line[index])
-    ship.total_cost = ship.metal + ship.crystal + ship.eonium
-    print "%12s%12s%12s%12s" % (ship.name, ship.class_, ship.race, ship.type,)
+def main(url = Config.get("URL", "ships"), debug=False):
+    stats = urllib2.urlopen(url).read()
+    session = Session()
+    session.execute(Ship.__table__.delete())
+    session.execute(text("SELECT setval('ships_id_seq', 1, :false);", bindparams=[bindparam("false",False)]))
     
-    session.add(ship)
+    for line in sre.findall(stats):
+        ship = Ship()
+        line = list(line)
+        for index, key in enumerate(keys):
+            if line[index] in mapping:
+                line[index] = mapping[line[index]]
+            elif line[index].isdigit():
+                line[index] = int(line[index])
+            if line[index] != '-':
+                setattr(ship,key,line[index])
+        ship.total_cost = ship.metal + ship.crystal + ship.eonium
+        if debug: print "%12s%12s%12s%12s" % (ship.name, ship.class_, ship.race, ship.type,)
+        
+        session.add(ship)
+    
+    session.commit()
+    session.close()
 
-session.commit()
-session.close()
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        sys.exit(main(url=sys.argv[1],debug=True))
+    else:
+        sys.exit(main(debug=True))

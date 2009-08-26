@@ -33,3 +33,5 @@ Base.metadata.create_all()
 
 print "Inserting ship stats"
 import shipstats
+shipstats.main()
+
