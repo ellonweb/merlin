@@ -64,6 +64,8 @@ class Channel(object):
                 # Might occur when the bot is quitting
                 except AttributeError:
                     pass
+                except KeyError:
+                    pass
                 except TypeError:
                     pass
     
@@ -94,6 +96,8 @@ class Nick(object):
                     del Users[self.user.name]
             # Might occur when the bot is quitting
             except AttributeError:
+                pass
+            except KeyError:
                 pass
             except TypeError:
                 pass

@@ -23,6 +23,8 @@
 
 from traceback import format_exc
 from Core.exceptions_ import Quit, Reboot, Reload
+from Core.chanusertracker import Channels, Nicks, Users
+from Core.callbacks import Callbacks
 from Core.loadable import loadable
 
 @loadable.system('PRIVMSG', admin=True)
