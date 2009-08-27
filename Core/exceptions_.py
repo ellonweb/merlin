@@ -30,6 +30,9 @@ class Reboot(Exception):
 class Reload(Exception):
     pass
 
+class LoadableError(Exception):
+    pass
+
 class ParseError(Exception):
     pass
 

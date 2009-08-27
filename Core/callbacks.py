@@ -24,7 +24,7 @@
 import os
 import sys
 from Core.loader import Loader
-from Core.loadable import loadable, function
+from Core.loadable import loadable
 
 use_init_all = True
 
@@ -33,7 +33,7 @@ class callbacks(object):
     callbacks = {}
     modules = []
     
-    def __init__(self):
+    def init(self):
         # Load in everything in /Hooks/
         self.load_package("Hooks")
         # Tell the Loader to back up the modules we've used
@@ -79,11 +79,8 @@ class callbacks(object):
             # Iterate over objects in the module
             callback = getattr(mod, object)
             if isinstance(callback, type) and issubclass(callback, loadable) and (callback is not loadable):
-                # loadable.loadable, i.e. PRIVMSG only
-                self.add_callback("PRIVMSG", callback(),)
-            if isinstance(callback, function):
-                # loadable.function, speciality stuff
-                self.add_callback(callback.trigger, callback,)
+                # loadable.loadable
+                self.add_callback(callback.trigger, callback(),)
     
     def add_callback(self, event, callback):
         # Add the callback to the dictionary of callbacks
@@ -104,3 +101,4 @@ class callbacks(object):
                 callback(message)
 
 Callbacks = callbacks()
+Callbacks.init()

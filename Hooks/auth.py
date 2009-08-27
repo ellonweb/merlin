@@ -24,9 +24,9 @@
 import re
 from Core.exceptions_ import PNickParseError
 from Core.config import Config
-from Core.loadable import callback
+from Core.loadable import loadable
 
-@callback('433')
+@loadable.system('433')
 def altnick(message):
     # Need to register with an alternate nick
     if message.bot.nick == Config.get("Connection", "nick"):
@@ -34,13 +34,13 @@ def altnick(message):
     else:
         message.nick(Config.get("Connection", "nick"))
 
-@callback('NICK')
+@loadable.system('NICK')
 def nick(message):
     # Changing nick
     if message.get_nick() == message.bot.nick:
         message.bot.nick = message.get_msg()
 
-@callback('001')
+@loadable.system('001')
 def connected(message):
     # Successfully registered on the IRC server, check what nick
     message.bot.nick = message.get_chan()
@@ -52,7 +52,7 @@ def connected(message):
         message.privmsg("RECOVER %s %s %s" % (nick, nick, Config.get("Connection", "passwd")), "P@cservice.netgamers.org")
     else: login(message)
 
-@callback('NOTICE')
+@loadable.system('NOTICE')
 def PNS(message):
     # Message from P or NickServ
     if message.get_hostmask() in ("P!cservice@netgamers.org","NS!NickServ@netgamers.org"):
@@ -68,20 +68,20 @@ def login(message):
     # Login
     message.privmsg("LOGIN %s %s" % (Config.get("Connection", "nick"), Config.get("Connection", "passwd")), "P@cservice.netgamers.org")
 
-@callback('396')
+@loadable.system('396')
 def loggedin(message):
     # Authentication complete
     if "is now your hidden host" == message.get_msg():
         for key, channel in Config.items("Channels"):
             message.privmsg("INVITE %s" % (channel,), "P")
 
-@callback('INVITE')
+@loadable.system('INVITE')
 def pinvite(message):
     # P invites us to a channel
     if message.get_hostmask() == "P!cservice@netgamers.org":
         message.join(message.get_msg())
 
-@callback('PRIVMSG', admin=True)
+@loadable.system('PRIVMSG', admin=True)
 def secure(message):
     """Secures the PNick of the bot."""
     message.privmsg("SET MAXLOGINS 2\nSET INVISIBLE ON\nSET AUTOKILL ON", "P")

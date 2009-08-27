@@ -21,7 +21,7 @@
 
 # List of package modules
 __all__ = ["system",
-#           "help",
+           "help",
            "auth",
            "chanusertracker",
 #           "robocop",

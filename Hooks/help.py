@@ -21,44 +21,28 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
+import re
 from Core.exceptions_ import PNickParseError, UserError
-from Core.config import Config
 from Core.loadable import loadable
 from Core.callbacks import Callbacks
 
+@loadable.module()
 class help(loadable):
     """Help"""
+    usage = " [command]"
+    paramre = re.compile(r"\s*(\S*)")
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.usage += " [command]"
-    
-    @loadable.run
     def execute(self, message, user, params):
-        
-        if len(message.get_msg().split()) == 1:
-            commands = []
-            message.reply(self.helptext+". For more information use: "+self.usage)
-            for callback in Callbacks.callbacks:
-                try:
-                    if hasattr(callback, "has_access"):
-                        if callback.has_access(message):
-                            commands.append(callback.__class__.__name__)
-                    else:
-                        if message.get_pnick() in Config.options("Admins"):
-                            commands.append(callback.__name__)
-                except PNickParseError:
-                    continue
-                except UserError:
-                    continue
-            message.reply("Loaded commands: " + ", ".join(commands))
-        else:
-            for callback in Callbacks.callbacks:
-                try:
-                    if hasattr(callback, "help"):
-                        continue
-                    else:
-                        if (message.get_pnick() in Config.options("Admins")) and (message.get_msg().split()[1] == callback.__name__):
-                            message.reply(callback.__doc__)
-                except PNickParseError:
-                    continue
+        if params.group(1) is not "":
+            return
+        commands = []
+        message.reply(self.doc+". For more information use: "+self.usage)
+        for callback in Callbacks.callbacks["PRIVMSG"]:
+            try:
+                if callback.check_access(message) is not None:
+                    commands.append(callback.name)
+            except PNickParseError:
+                continue
+            except UserError:
+                continue
+        message.reply("Loaded commands: " + ", ".join(commands))

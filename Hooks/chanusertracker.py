@@ -24,9 +24,9 @@
 from Core.exceptions_ import PNickParseError, UserError
 from Core.config import Config
 from Core.chanusertracker import Channels, Channel, Nicks, get_user, auth_user
-from Core.loadable import callback
+from Core.loadable import loadable
 
-@callback('JOIN')
+@loadable.system('JOIN')
 def join(message):
     # Someone is joining a channel
     if message.get_nick() == message.bot.nick:
@@ -42,12 +42,12 @@ def join(message):
             except PNickParseError:
                 pass
 
-@callback('332')
+@loadable.system('332')
 def topic(message):
     # Topic of a channel is set
     Channels[message.get_chan()].topic = message.get_msg()
 
-@callback('353')
+@loadable.system('353')
 def names(message):
     # List of users in a channel
     for nick in message.get_msg().split():
@@ -57,7 +57,7 @@ def names(message):
             # Use whois to get the user's pnick
             message.write("WHOIS %s" % (nick,))
 
-@callback('PART')
+@loadable.system('PART')
 def part(message):
     # Someone is leaving a channel
     if message.get_nick() == message.bot.nick:
@@ -67,7 +67,7 @@ def part(message):
         # Someone is leaving a channel we're in
         Channels[message.get_chan()].remnick(message.get_nick())
 
-@callback('KICK')
+@loadable.system('KICK')
 def kick(message):
     # Someone is kicked
     kname = message.line.split()[3]
@@ -78,20 +78,20 @@ def kick(message):
         # Someone is kicked from a channel we're in
         Channels[message.get_chan()].remnick(kname)
 
-@callback('QUIT')
+@loadable.system('QUIT')
 def quit(message):
     # Someone is quitting
     if message.get_nick() != message.bot.nick:
         # It's not the bot that's quitting
         Nicks[message.get_nick()].quit()
 
-@callback('NICK')
+@loadable.system('NICK')
 def nick(message):
     # Someone is changing their nick
     if message.get_nick() != message.bot.nick:
         Nicks[message.get_nick()].nick(message.get_msg())
 
-@callback('330')
+@loadable.system('330')
 def pnick(message):
     # Part of a WHOIS result
     if message.get_msg() == "is logged in as":
@@ -100,7 +100,7 @@ def pnick(message):
         # Set the user's pnick
         get_user(nick, pnick=pnick)
 
-@callback('319')
+@loadable.system('319')
 def channels(message):
     # Part of a WHOIS result
     if message.get_chan() == message.line.split()[2] == message.line.split()[3]:
@@ -110,7 +110,7 @@ def channels(message):
             Channels[chan] = Channel(chan)
             message.write("NAMES %s" % (chan,))
 
-@callback('PRIVMSG', admin=True)
+@loadable.system('PRIVMSG', admin=True)
 def flush(message):
     """Flush entire usercache"""
     for chan in Channels.values():
@@ -119,7 +119,7 @@ def flush(message):
         message.write("NAMES %s" % (chan.chan,))
     message.reply("Usercache is now being rebuilt.")
 
-@callback('PRIVMSG', command=True)
+@loadable.system('PRIVMSG', command=True)
 def auth(message):
     """Authenticates the user, if they provide their username and password"""
     # P redundancy
@@ -134,7 +134,7 @@ def auth(message):
     except UserError:
         message.alert("You don't have access to this command")
 
-@callback('PRIVMSG', command=True)
+@loadable.system('PRIVMSG', command=True)
 def letmein(message):
     """Invites the user to the private channel, if they provide their username and password"""
     # P redundancy

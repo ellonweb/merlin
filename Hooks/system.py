@@ -23,9 +23,9 @@
 
 from traceback import format_exc
 from Core.exceptions_ import Quit, Reboot, Reload
-from Core.loadable import callback
+from Core.loadable import loadable
 
-@callback('PRIVMSG', admin=True)
+@loadable.system('PRIVMSG', admin=True)
 def quit(message):
     """Quit IRC and close down"""
     msg = message.get_msg().split(None,1)
@@ -34,7 +34,7 @@ def quit(message):
     else:
         raise Quit
 
-@callback('PRIVMSG', admin=True)
+@loadable.system('PRIVMSG', admin=True)
 def reboot(message):
     """Quit IRC reboot, reload and reconnect"""
     msg = message.get_msg().split(None,1)
@@ -43,7 +43,7 @@ def reboot(message):
     else:
         raise Reboot
 
-@callback('PRIVMSG', admin=True)
+@loadable.system('PRIVMSG', admin=True)
 def reload(message):
     """Dynamically reload the Core and Hooks"""
     msg = message.get_msg().split(None,1)
@@ -52,14 +52,14 @@ def reload(message):
     else:
         raise Reload
 
-@callback('PRIVMSG', admin=True)
+@loadable.system('PRIVMSG', admin=True)
 def raw(message):
     """Send a raw message to the server."""
     msg = message.get_msg().split(None,1)
     if len(msg) > 1:
         message.write(msg[1])
 
-@callback('PRIVMSG', admin=True)
+@loadable.system('PRIVMSG', admin=True)
 def debug(message):
     """Execute a statement. Warning: Playing with this is risky!"""
     msg = message.get_msg().split(None,1)

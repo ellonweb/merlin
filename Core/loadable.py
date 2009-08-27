@@ -22,126 +22,132 @@
 # owners.
 
 import re
-from Core.exceptions_ import ParseError, PNickParseError, UserError
+from Core.exceptions_ import LoadableError, ParseError, PNickParseError, UserError
 from Core.config import Config
-#import chanusertracker as CUT
+from Core.chanusertracker import get_user
 
 # ########################################################################### #
 # ##############################    LOADABLE    ############################# #
 # ########################################################################### #
+
 class loadable(object):
+    # Base loadable class for callbacks
     ""
+    usage = ""
+    paramre = re.compile("")
     PParseError = "You need to login and set mode +x to use this command"
     AccessError = "You don't have access to this command"
+    coordre = re.compile(r"\s*(\d+)[. :\-](\d+)(?:[. :\-](\d+))?")
+    planet_coordre = re.compile(r"\s*(\d+)[. :\-](\d+)[. :\-](\d+)")
     
     def __init__(self):
-        self.access = -1
-        self.coordre = re.compile(r"(\d+)[. :\-](\d+)(?:[. :\-](\d+))?")
-        self.planet_coordre = re.compile(r"(\d+)[. :\-](\d+)[. :\-](\d+)")
-        self.commandre = re.compile(r"^[!|.|\-|~|@]"+self.__class__.__name__,re.IGNORECASE)
-        self.paramre = self.commandre
-        self.robore = self.paramre
-        self.helpre = re.compile(r"^[!|.|\-|~|@]help "+self.__class__.__name__,re.IGNORECASE)
-        self.usage = self.__class__.__name__
-        self.helptext = self.__doc__
+        self.isdecorated()
+        self.commandre = re.compile(r"[!|.|\-|~|@]"+self.name+"(.*)",re.I)
+        self.helpre = re.compile(r"^[!|.|\-|~|@]help "+self.name,re.I)
+        self.usage = self.name + self.usage
     
-    def __call__(self, message):
-        self.execute(message)
+    def isdecorated(self):
+            raise LoadableError
     
-    @staticmethod
-    def run_with_access(level=0):
-        def wrapper(f):
-            def execute(self, message):
-                self.access = level
-                userparams = loadable.execute(self, message)
-                if userparams:
-                    f(self, message, *userparams)
-            return execute
-        return wrapper
-    
-    @staticmethod
-    def with_access(level):
-        def wrapper(f):
-            def execute(self, message):
-                self.access = level
-                f(self, message)
-            return execute
-        return wrapper
-    
-    @staticmethod
-    def run(f):
-        def execute(self, message):
-            userparams = loadable.execute(self, message)
-            if userparams:
-                f(self, message, *userparams)
-        return execute
-    
-    @staticmethod
-    def runcop(f):
-        def robocop(self, message):
-            params = loadable.robocop(self, message)
-            if params:
-                f(self, message, params)
-        return robocop
-    
-    def execute(self, message):
-        m = self.commandre.search(message.get_msg())
-        if not m:
-            m = self.helpre.search(message.get_msg())
-            if m:
+    def run(self, message):
+        m = self.commandre.match(message.get_msg())
+        if m is None:
+            if self.helpre.match(message.get_msg()) is not None:
                 self.help(message)
             return
+        command = m.group(1)
         try:
-            user = self.has_access(message)
-            if not user:
+            access = self.check_access(message)
+            if access is None:
                 raise UserError
-            m = self.params_match(message)
-            if not m:
+            params = self.check_params(command)
+            if params is None:
                 raise ParseError
-            return user, m
+            self.execute(message, access, params)
         except PNickParseError:
             message.alert(self.PParseError)
         except UserError:
             message.alert(self.AccessError)
         except ParseError:
             message.alert(self.usage)
-        return
     
-    def has_access(self, message):
+    @staticmethod
+    def module(access=-1):
+        def wrapper(hook):
+            acc = access
+            class callback(hook):
+                name = hook.__name__
+                doc = hook.__doc__
+                trigger = "PRIVMSG"
+                access = acc
+                def isdecorated(self):
+                    pass
+                def __call__(self, message):
+                    self.run(message)
+            
+            callback.__name__ = hook.__name__
+            return callback
+        return wrapper
+    
+    @staticmethod
+    def system(trigger, command=False, admin=False):
+        command = command or admin
+        def wrapper(hook):
+            trigg = trigger
+            class callback(loadable):
+                name = hook.__name__
+                doc = hook.__doc__
+                trigger = trigg
+                def isdecorated(self):
+                    pass
+                def __call__(self, message):
+                    if command is True:
+                        self.run(message)
+                    else:
+                        self.execute(message, True, None)
+                def execute(self, message, access, params):
+                    hook(message)
+                def check_access(self, message):
+                    if admin is not True:
+                        return True
+                    if message.get_pnick() in Config.options("Admins"):
+                        return True
+                    return None
+            
+            callback.__name__ = hook.__name__
+            return callback
+        return wrapper
+    
+    def check_access(self, message):
         if self.access == -1:
             return 1
-        user = CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
+        user = get_user(message.get_nick(), pnickf=message.get_pnick)
         if user is None:
             raise UserError
         if self.access == 0 or user.access & self.access > 0:
             return user
         return
     
-    def params_match(self, message):
+    def check_params(self, command):
         if type(self.paramre) == tuple:
             for p in self.paramre:
-                m = p.search(message.get_msg())
-                if m: break
+                m = p.match(command)
+                if m is not None:
+                    break
             return m
-        return self.paramre.search(message.get_msg())
+        else:
+            return self.paramre.match(command)
     
     def help(self, message):
         try:
-            if not self.has_access(message):
+            if self.check_access(message) is None:
                 raise UserError
-            message.reply(self.usage + "\n" + (self.helptext or ""))
+            message.reply(self.usage + "\n" + (self.doc or ""))
         except PNickParseError:
             message.alert(self.PParseError)
         except UserError:
             message.alert(self.AccessError)
         return
-    
-    def robocop(self, message):
-        m = self.commandre.search(message.get_msg())
-        if not m:
-            return
-        m = self.robore.search(message.get_msg())
-        return m
     
     def split_opts(self,params):
         param_dict={}
@@ -174,62 +180,3 @@ class loadable(object):
             return int(ret)
         except:
             raise ValueError
-
-# ########################################################################### #
-# ###############################    SYSTEM    ############################## #
-# ########################################################################### #
-class system(object):
-    def __init__(oself, trigger, command=False, admin=False):
-        oself.trigger = trigger
-        oself.command = command or admin
-        oself.admin = admin
-    def __call__(oself, function):
-        class temp(object):
-            trigger = oself.trigger
-            command = oself.command
-            admin = oself.admin
-            execute = function
-            __doc__ = execute.__doc__
-            def __init__(self):
-                self.commandre = re.compile(r"^[!|.|\-|~|@]"+self.__class__.__name__,re.IGNORECASE)
-            def __call__(self, message):
-                if self.command is True and self.commandre.search(message.get_msg()) is None:
-                    return
-                if self.admin is True:
-                    try:
-                        if message.get_pnick() not in Config.options("Admins"):
-                            raise PNickParseError
-                    except PNickParseError:
-                        message.alert("You don't have access for that.")
-                        return
-                self.execute(message)
-        temp.__name__ = function.__name__
-        return temp
-
-# ########################################################################### #
-# ##############################    CALLBACK    ############################# #
-# ########################################################################### #
-class function(object):
-    def __init__(self, hook, trigger, command, admin):
-        self.__name__ = hook.__name__
-        self.__doc__ = hook.__doc__
-        self.hook = hook
-        self.trigger = trigger
-        self.command = command
-        self.commandre = re.compile(r"^[!|.|\-|~|@]"+self.__name__,re.IGNORECASE)
-        self.admin = admin
-    def __call__(self, message):
-        if (self.command is True) and (self.commandre.search(message.get_msg()) is None):
-            return
-        try:
-            if (self.admin is True) and (message.get_pnick() not in Config.options("Admins")):
-                raise PNickParseError
-        except PNickParseError:
-            message.alert("You don't have access for that.")
-            return
-        self.hook(message)
-def callback(trigger, command=False, admin=False):
-    command = command or admin
-    def wrapper(hook):
-        return function(hook, trigger, command, admin)
-    return wrapper
