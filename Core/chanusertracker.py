@@ -62,11 +62,7 @@ class Channel(object):
                 try:
                     del Nicks[nick.name]
                 # Might occur when the bot is quitting
-                except AttributeError:
-                    pass
-                except KeyError:
-                    pass
-                except TypeError:
+                except (AttributeError, KeyError, TypeError):
                     pass
     
 
@@ -85,7 +81,7 @@ class Nick(object):
     
     def quit(self):
         # Quitting
-        for channel in self.channels[:]:
+        for channel in self.channels.copy():
             Channels[channel].remnick(self.name)
     
     def __del__(self):
@@ -95,11 +91,7 @@ class Nick(object):
                 if len(self.user.nicks) == 0:
                     del Users[self.user.name]
             # Might occur when the bot is quitting
-            except AttributeError:
-                pass
-            except KeyError:
-                pass
-            except TypeError:
+            except (AttributeError, KeyError, TypeError):
                 pass
     
 
