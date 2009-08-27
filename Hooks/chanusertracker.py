@@ -110,15 +110,6 @@ def channels(message):
             Channels[chan] = Channel(chan)
             message.write("NAMES %s" % (chan,))
 
-@loadable.system('PRIVMSG', admin=True)
-def flush(message):
-    """Flush entire usercache"""
-    for chan in Channels.values():
-        for nick in chan.nicks[:]:
-            chan.remnick(nick)
-        message.write("NAMES %s" % (chan.chan,))
-    message.reply("Usercache is now being rebuilt.")
-
 @loadable.system('PRIVMSG', command=True)
 def auth(message):
     """Authenticates the user, if they provide their username and password"""
