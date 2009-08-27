@@ -425,6 +425,13 @@ class Gimp(Base):
 Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gimps')
 '''
 
+class Channel(Base):
+    __tablename__ = 'channels'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(150))
+    userlevel = Column(Integer)
+    maxlevel = Column(Integer)
+
 # ########################################################################### #
 # ############################    INTEL TABLE    ############################ #
 # ########################################################################### #
