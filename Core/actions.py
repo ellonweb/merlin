@@ -23,6 +23,7 @@
 
 from Core.exceptions_ import ParseError
 from Core.connection import Connection
+from Core.chanusertracker import Channels, Nicks
 from Core.messages import Message
 
 class Action(Message):
@@ -49,12 +50,21 @@ class Action(Message):
         self.write("PRIVMSG %s :%s" % (target or self.get_nick(), text))
     
     def notice(self, text, target=None):
-        # As above
-        self.write("NOTICE %s :%s" % (target or self.get_nick(), text))
+        # If we're opped in a channel in common with the user, we can reply with
+        #  CNOTICE instead of NOTICE which doesn't count towards the flood limit.
+        if (self.get_chan() in Channels.keys()
+            and Channels[self.get_chan()].opped is True
+            and Nicks[target or self.get_nick()] in Channels[self.get_chan()].nicks):
+            self.write("CNOTICE %s %s :%s" % (target or self.get_nick(), self.get_chan(), text))
+        else:
+            self.write("NOTICE %s :%s" % (target or self.get_nick(), text))
     
     def reply(self, text):
         # Always reply to a PM with a PM, otherwise only ! replies with privmsg
-        if self.get_chan()[0] not in ("#","&") or self.get_msg()[0] not in (".","-","~"):
+        # Always reply to an @command with a PM
+        if self.get_msg()[0] == "@":
+            self.privmsg(text, self.get_nick())
+        elif self.get_chan()[0] not in ("#","&") or self.get_msg()[0] not in (".","-","~"):
             self.privmsg(text, self.reply_target())
         else:
             self.notice(text)

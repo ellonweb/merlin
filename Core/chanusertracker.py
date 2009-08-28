@@ -36,6 +36,7 @@ class Channel(object):
         self.chan = chan
         self.nicks = set()
         self.topic = ""
+        self.opped = False
     
     def addnick(self, name):
         # Add a new nick to the channel

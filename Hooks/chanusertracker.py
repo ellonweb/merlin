@@ -43,7 +43,12 @@ def join(message):
                 pass
 
 @loadable.system('332')
-def topic(message):
+def topic_join(message):
+    # Topic of a channel is set
+    Channels[message.get_chan()].topic = message.get_msg()
+
+@loadable.system('TOPIC')
+def topic_change(message):
     # Topic of a channel is set
     Channels[message.get_chan()].topic = message.get_msg()
 
@@ -51,6 +56,8 @@ def topic(message):
 def names(message):
     # List of users in a channel
     for nick in message.get_msg().split():
+        if nick == "@"+message.bot.nick:
+            Channels[message.get_chan()].opped = True
         if nick[0] in ("@","+"): nick = nick[1:]
         Channels[message.get_chan()].addnick(nick)
         if Config.get("Misc","usercache") == "join":
@@ -103,12 +110,51 @@ def pnick(message):
 @loadable.system('319')
 def channels(message):
     # Part of a WHOIS result
-    if message.get_chan() == message.line.split()[2] == message.line.split()[3]:
+    if message.get_chan() == message.bot.nick:
         # Cycle through the list of channels
         for chan in message.get_msg().split():
+            if chan[0] in ("@","+"): chan = chan[1:]
             # Reset the channel and get a list of nicks
             Channels[chan] = Channel(chan)
-            message.write("NAMES %s" % (chan,))
+            message.write("NAMES %s\nTOPIC %s" % (chan,chan,))
+
+@loadable.system('MODE')
+def op(message):
+    # Used for tracking whether or not we're opped in channels
+    if message.get_chan() not in Channels.keys():
+        # Probably a user mode change, not a channel
+        return
+    modes = message.line.split(None,4)[3:]
+    if "o" in modes[0] and message.bot.nick in modes[1].split():
+        # The change in mode involves ops, and the ops might involve us
+        modes, args = modes[0], modes[1].split()
+        if modes[0] not in "+-":
+            # add a '+' before the modes if it isn't specified (e.g. MODE s)
+            modes = "+" + modes
+        # modes that require args, [0] for -, [1] for +
+        require_args = {
+            'o': (True, True),
+            'v': (True, True),
+            'b': (True, True),
+            'l': (False, True),
+            'k': (False, True),
+        }
+        for mode in modes:
+            # cycle through modes changed
+            if mode == "+":
+                set = True
+            elif mode == "-":
+                set = False
+            else:
+                if mode == "o":
+                    # ops changing, pop out the target being changed
+                    target = args.pop(0)
+                    if target == message.bot.nick:
+                        # update our op status
+                        Channels[message.get_chan()].opped = set
+                elif require_args.get(mode, (False, False))[set] is True:
+                    # some other mode that requires an argument
+                    target = args.pop(0)
 
 @loadable.system('PRIVMSG', command=True)
 def auth(message):
