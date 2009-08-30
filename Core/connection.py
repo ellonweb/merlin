@@ -87,7 +87,7 @@ class connection(object):
             pinging = self.ping.match(line)
             if pinging:
                 self.write("PONG :%s" % pinging.group(1))
-                print "%s <<< PING? PONG!" % (time.asctime(),)
+                #print "%s <<< PING? PONG!" % (time.asctime(),)
             else:
                 print "%s <<< %s" % (time.asctime(),line,)
             return line

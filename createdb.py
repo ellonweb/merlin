@@ -22,11 +22,17 @@
 # owners.
 
 print "Importing database models"
-from Core.db import Base
-import Core.maps
+from Core.db import Base, Session
+from Core.maps import Channel
 
 print "Creating tables"
 Base.metadata.create_all()
+
+print "Setting up home channel"
+from Core.config import Config
+session = Session()
+session.add(Channel(name=Config.get("Alliance","home"),userlevel=100,maxlevel=1000))
+session.commit()
 
 # in future add migrate code here
 # will require a second engine for the old db
@@ -34,4 +40,3 @@ Base.metadata.create_all()
 print "Inserting ship stats"
 import shipstats
 shipstats.main()
-
