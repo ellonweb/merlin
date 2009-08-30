@@ -34,10 +34,10 @@ from Core.exceptions_ import Quit, Reboot, Reload
 # Redirect stderr to stdout
 sys.stderr = sys.stdout
 
-class Merlin(object):
+class merlin(object):
     # Main bot container
     
-    def __init__(self):
+    def run(self):
         try: # break out with Quit exceptions
             
             # Connection loop
@@ -95,7 +95,7 @@ class Merlin(object):
                                     raise Reboot
                                 
                                 # Parse the line
-                                self.Message = Action(line, self)
+                                self.Message = Action(line)
                                 try:
                                     # Callbacks
                                     Callbacks.callback(self.Message)
@@ -126,7 +126,8 @@ class Merlin(object):
         except (Quit, KeyboardInterrupt, SystemExit) as exc:
             Connection.disconnect(str(exc) or "Bye!")
             sys.exit("Bye!")
-    
 
+Merlin = merlin()
 if __name__ == "__main__":
-    Merlin() # Start the bot here, if we're the main module.
+    # Start the bot here, if we're the main module.
+    Merlin.run()

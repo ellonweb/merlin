@@ -22,6 +22,7 @@
 # owners.
 
 import re
+from merlin import Merlin
 from Core.exceptions_ import PNickParseError
 from Core.config import Config
 from Core.loadable import loadable
@@ -29,7 +30,7 @@ from Core.loadable import loadable
 @loadable.system('433')
 def altnick(message):
     # Need to register with an alternate nick
-    if message.bot.nick == Config.get("Connection", "nick"):
+    if Merlin.nick == Config.get("Connection", "nick"):
         message.nick(Config.get("Connection", "nick")+"2")
     else:
         message.nick(Config.get("Connection", "nick"))
@@ -37,18 +38,18 @@ def altnick(message):
 @loadable.system('NICK')
 def nick(message):
     # Changing nick
-    if message.get_nick() == message.bot.nick:
-        message.bot.nick = message.get_msg()
+    if message.get_nick() == Merlin.nick:
+        Merlin.nick = message.get_msg()
 
 @loadable.system('001')
 def connected(message):
     # Successfully registered on the IRC server, check what nick
-    message.bot.nick = message.get_chan()
+    Merlin.nick = message.get_chan()
     # Hide ourself
-    message.write("MODE %s +ix" % message.bot.nick)
+    message.write("MODE %s +ix" % Merlin.nick)
     # Kill the ghost
     nick = Config.get("Connection", "nick")
-    if message.bot.nick != nick:
+    if Merlin.nick != nick:
         message.privmsg("RECOVER %s %s %s" % (nick, nick, Config.get("Connection", "passwd")), "P@cservice.netgamers.org")
     else: login(message)
 

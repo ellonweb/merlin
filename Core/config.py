@@ -26,8 +26,8 @@ def load_config(path):
     try:
         config = configparser()
         if len(config.read(path)) != 1:
-            raise Exception
-    except:
+            raise IOError
+    except StandardError:
         # Either couldn't read/find the file, or couldn't parse it.
         print "Warning! Could not load %s" % (path,)
         raise ImportError

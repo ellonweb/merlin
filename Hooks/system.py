@@ -22,6 +22,7 @@
 # owners.
 
 from traceback import format_exc
+from merlin import Merlin
 from Core.exceptions_ import Quit, Reboot, Reload
 from Core.chanusertracker import Channels, Nicks, Users
 from Core.callbacks import Callbacks
@@ -68,5 +69,5 @@ def debug(message):
     if len(msg) > 1:
         try:
             exec(msg[1])
-        except:
+        except Exception:
             message.alert(format_exc())

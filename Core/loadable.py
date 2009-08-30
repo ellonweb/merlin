@@ -166,7 +166,7 @@ class loadable(object):
                 return str(round(num/1000.0,1))+"k"
             else:
                 return str(round(num))
-        except:
+        except Exception:
             raise ValueError
     
     def short2num(self,short):
@@ -178,5 +178,5 @@ class loadable(object):
             else:
                 ret = float(short)
             return int(ret)
-        except:
+        except Exception:
             raise ValueError

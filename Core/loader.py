@@ -38,7 +38,7 @@ class loader(object):
             # Load all the main modules, they will also be
             #  backed up if they're all loaded successfully.
             self._reload()
-        except:
+        except Exception:
             # They weren't loaded successfully. If this is the first run,
             #  raise the error and exit. Otherwise, the error will be caught
             #  by the calling Loader, which will then .restore() everything.
@@ -55,7 +55,7 @@ class loader(object):
             self.load_module("Core.config", "Core.loader")
             # Check the new loader has a successful status
             if sys.modules["Core.loader"].Loader.success is not True: raise ImportError
-        except:
+        except Exception:
             # If the new Loader fails, catch the error and restore everything
             print format_exc()
             print "%s Reboot failed, reverting to previous." % (time.asctime(),)
@@ -67,7 +67,7 @@ class loader(object):
             # Load all the main modules, they will also be
             #  backed up if they're all loaded successfully.
             self._reload()
-        except:
+        except Exception:
             # If the reload fails, catch the error and restore everything
             print format_exc()
             print "%s Reload failed, reverting to previous." % (time.asctime(),)
@@ -77,7 +77,7 @@ class loader(object):
         try:
             # Reload everything
             self.load_module(*mods)
-        except:
+        except Exception:
             # Exceptions will be dealt with in init or reload
             raise
         else:

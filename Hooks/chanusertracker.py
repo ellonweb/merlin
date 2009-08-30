@@ -21,6 +21,7 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
+from merlin import Merlin
 from Core.exceptions_ import PNickParseError, UserError
 from Core.config import Config
 from Core.chanusertracker import Channels, Channel, Nicks, get_user, auth_user
@@ -29,7 +30,7 @@ from Core.loadable import loadable
 @loadable.system('JOIN')
 def join(message):
     # Someone is joining a channel
-    if message.get_nick() == message.bot.nick:
+    if message.get_nick() == Merlin.nick:
         # Bot is joining the channel, so add a new object to the dict
         Channels[message.get_chan()] = Channel(message.get_chan())
     else:
@@ -56,7 +57,7 @@ def topic_change(message):
 def names(message):
     # List of users in a channel
     for nick in message.get_msg().split():
-        if nick == "@"+message.bot.nick:
+        if nick == "@"+Merlin.nick:
             Channels[message.get_chan()].opped = True
         if nick[0] in ("@","+"): nick = nick[1:]
         Channels[message.get_chan()].addnick(nick)
@@ -67,7 +68,7 @@ def names(message):
 @loadable.system('PART')
 def part(message):
     # Someone is leaving a channel
-    if message.get_nick() == message.bot.nick:
+    if message.get_nick() == Merlin.nick:
         # Bot is leaving the channel
         del Channels[message.get_chan()]
     else:
@@ -78,7 +79,7 @@ def part(message):
 def kick(message):
     # Someone is kicked
     kname = message.line.split()[3]
-    if message.bot.nick == kname:
+    if Merlin.nick == kname:
         # Bot is kicked from the channel
         del Channels[message.get_chan()]
     else:
@@ -88,14 +89,14 @@ def kick(message):
 @loadable.system('QUIT')
 def quit(message):
     # Someone is quitting
-    if message.get_nick() != message.bot.nick:
+    if message.get_nick() != Merlin.nick:
         # It's not the bot that's quitting
         Nicks[message.get_nick()].quit()
 
 @loadable.system('NICK')
 def nick(message):
     # Someone is changing their nick
-    if message.get_nick() != message.bot.nick:
+    if message.get_nick() != Merlin.nick:
         Nicks[message.get_nick()].nick(message.get_msg())
 
 @loadable.system('330')
@@ -110,7 +111,7 @@ def pnick(message):
 @loadable.system('319')
 def channels(message):
     # Part of a WHOIS result
-    if message.get_chan() == message.bot.nick:
+    if message.get_chan() == Merlin.nick:
         # Cycle through the list of channels
         for chan in message.get_msg().split():
             if chan[0] in ("@","+"): chan = chan[1:]
@@ -125,7 +126,7 @@ def op(message):
         # Probably a user mode change, not a channel
         return
     modes = message.line.split(None,4)[3:]
-    if "o" in modes[0] and message.bot.nick in modes[1].split():
+    if "o" in modes[0] and Merlin.nick in modes[1].split():
         # The change in mode involves ops, and the ops might involve us
         modes, args = modes[0], modes[1].split()
         if modes[0] not in "+-":
@@ -149,7 +150,7 @@ def op(message):
                 if mode == "o":
                     # ops changing, pop out the target being changed
                     target = args.pop(0)
-                    if target == message.bot.nick:
+                    if target == Merlin.nick:
                         # update our op status
                         Channels[message.get_chan()].opped = set
                 elif require_args.get(mode, (False, False))[set] is True:

@@ -30,10 +30,9 @@ pnickre = re.compile(r"^:.+!.+@(.+)\.users.netgamers.org")
 class Message(object):
     # The message object will be passed around to callbacks for inspection and ability to write to the server
     
-    def __init__(self, line, bot):
-        # A raw irc line and a connection
+    def __init__(self, line):
+        # A raw irc line
         self.line = line
-        self.bot = bot
         self._chanerror = False # Will be set to True on failure to parse.
         self._msgerror = False # Will be set to True on failure to parse.
         self.parse(line)

@@ -29,10 +29,6 @@ from Core.messages import Message
 class Action(Message):
     # This object holds the parse, and will enable users to send messages to the server on a higher level
     
-    def __init__(self, line, bot):
-        # The object takes a line as a parameter
-        Message.__init__(self, line, bot)
-    
     def write(self, text):
         # Write something to the server, the message will be split up by newlines and at 450chars max
         params = text.split(":")[0] + ":"
