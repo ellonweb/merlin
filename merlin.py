@@ -72,6 +72,7 @@ class merlin(object):
                             # Import elements of Core we need
                             # These will have been refreshed by a call to
                             #  either Loader.reboot() or Loader.reload()
+                            from Core.db import session
                             from Core.connection import Connection
                             from Core.actions import Action
                             from Core.callbacks import Callbacks
@@ -107,6 +108,9 @@ class merlin(object):
                                     print format_exc()
                                     self.Message.alert("An exception occured and has been logged.")
                                     continue
+                                finally:
+                                    # Remove any uncommitted or unrolled-back state
+                                    session.close()
                                 
                             
                         except Reload:

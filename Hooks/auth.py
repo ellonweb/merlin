@@ -24,6 +24,8 @@
 import re
 from merlin import Merlin
 from Core.exceptions_ import PNickParseError
+from Core.db import session
+from Core.maps import Channel
 from Core.config import Config
 from Core.loadable import loadable
 
@@ -73,8 +75,8 @@ def login(message):
 def loggedin(message):
     # Authentication complete
     if "is now your hidden host" == message.get_msg():
-        for key, channel in Config.items("Channels"):
-            message.privmsg("INVITE %s" % (channel,), "P")
+        for channel in session.query(Channel):
+            message.privmsg("INVITE %s" % (channel.name,), "P")
 
 @loadable.system('INVITE')
 def pinvite(message):

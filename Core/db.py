@@ -36,5 +36,6 @@ engine = create_engine(Config.get("DB", "DB"))#, echo='debug')
 if engine.name != "postgres" or "PostgreSQL 8.4" not in engine.connect().execute(text("SELECT version();")).scalar():
     sys.exit("PostgreSQL 8.4+ Required.")
 
-Session = sessionmaker(bind=engine)
 Base = declarative_base(bind=engine)
+Session = sessionmaker(bind=engine)
+session = Session()
