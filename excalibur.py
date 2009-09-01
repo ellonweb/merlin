@@ -24,7 +24,7 @@
 import re, time, traceback, urllib2
 from sqlalchemy.sql import text, bindparam
 from Core.config import Config
-from Core.db import Session
+from Core.db import true, false, Session
 from Core.maps import Updates, Galaxy, Planet, Alliance, epenis, galpenis, apenis
 from Core.maps import galaxy_temp, planet_temp, alliance_temp, planet_new_id_search, planet_old_id_search
 
@@ -152,7 +152,7 @@ while True:
                                   id = g.id
                                 FROM (SELECT id, x, y FROM galaxy WHERE active = :true) AS g
                                   WHERE t.x = g.x AND t.y = g.y
-                            ;""", bindparams=[bindparam("true",True)]))
+                            ;""", bindparams=[true]))
 
         t2=time.time()-t1
         print "Copy galaxy ids to temp in %.3f seconds" % (t2,)
@@ -165,13 +165,13 @@ while True:
                                   name = NULL, size = NULL, score = NULL, value = NULL, xp = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
                                 WHERE id NOT IN (SELECT id FROM galaxy_temp)
-                            ;""", bindparams=[bindparam("false",False)]))
+                            ;""", bindparams=[false]))
 
         # Any galaxies in the temp table without an id are new
         # Insert them to the current table and the id(serial/auto_increment)
         #  will be generated, and we can then copy it back to the temp table
-        session.execute(text("INSERT INTO galaxy (x, y, active) SELECT x, y, :true FROM galaxy_temp WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
-        session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y AND galaxy.active = :true ORDER BY galaxy.id DESC) WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
+        session.execute(text("INSERT INTO galaxy (x, y, active) SELECT x, y, :true FROM galaxy_temp WHERE id IS NULL;", bindparams=[true]))
+        session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y AND galaxy.active = :true ORDER BY galaxy.id DESC) WHERE id IS NULL;", bindparams=[true]))
 
         t2=time.time()-t1
         print "Deactivate old galaxies and generate new galaxy ids in %.3f seconds" % (t2,)
@@ -191,7 +191,7 @@ while True:
                                 FROM galaxy_temp) AS t
                                   WHERE g.id = t.id
                                 AND g.active = :true
-                            ;""", bindparams=[bindparam("true",True)]))
+                            ;""", bindparams=[true]))
 
         t2=time.time()-t1
         print "Update galaxies from temp and generate ranks in %.3f seconds" % (t2,)
@@ -207,7 +207,7 @@ while True:
                                   id = p.id
                                 FROM (SELECT id, rulername, planetname FROM planet WHERE active = :true) AS p
                                   WHERE t.rulername = p.rulername AND t.planetname = p.planetname
-                            ;""", bindparams=[bindparam("true",True)]))
+                            ;""", bindparams=[true]))
 
         t2=time.time()-t1
         print "Copy planet ids to temp in %.3f seconds" % (t2,)
@@ -229,7 +229,7 @@ while True:
                     return None
                 # Insert from the previous tick any planets without
                 #  an equivalent planet from the new tick
-                if session.execute(text("INSERT INTO planet_old_id_search (id, x, y, z, race, size, score, value, xp, vdiff) SELECT id, x, y, z, race, size, score, value, xp, vdiff FROM planet WHERE planet.id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL) AND planet.active = :true;", bindparams=[bindparam("true",True)])).rowcount < 1:
+                if session.execute(text("INSERT INTO planet_old_id_search (id, x, y, z, race, size, score, value, xp, vdiff) SELECT id, x, y, z, race, size, score, value, xp, vdiff FROM planet WHERE planet.id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL) AND planet.active = :true;", bindparams=[true])).rowcount < 1:
                     return None
                 # If either of the two search tables do not have any planets
                 #  to match moved in (.rowcount() < 1) then return None, else:
@@ -281,13 +281,13 @@ while True:
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL,
                                   vdiff = NULL, idle = NULL
                                 WHERE id NOT IN (SELECT id FROM planet_temp)
-                            ;""", bindparams=[bindparam("false",False)]))
+                            ;""", bindparams=[false]))
 
         # Any planets in the temp table without an id are new
         # Insert them to the current table and the id(serial/auto_increment)
         #  will be generated, and we can then copy it back to the temp table
-        session.execute(text("INSERT INTO planet (rulername, planetname, active) SELECT rulername, planetname, :true FROM planet_temp WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
-        session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.rulername = planet_temp.rulername AND planet.planetname = planet_temp.planetname AND planet.active = :true ORDER BY planet.id DESC) WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
+        session.execute(text("INSERT INTO planet (rulername, planetname, active) SELECT rulername, planetname, :true FROM planet_temp WHERE id IS NULL;", bindparams=[true]))
+        session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.rulername = planet_temp.rulername AND planet.planetname = planet_temp.planetname AND planet.active = :true ORDER BY planet.id DESC) WHERE id IS NULL;", bindparams=[true]))
 
         t2=time.time()-t1
         print "Deactivate old planets and generate new planet ids in %.3f seconds" % (t2,)
@@ -310,7 +310,7 @@ while True:
                                 FROM planet_temp) AS t
                                   WHERE p.id = t.id
                                 AND p.active = :true
-                            ;""", bindparams=[bindparam("true",True)]))
+                            ;""", bindparams=[true]))
 
         t2=time.time()-t1
         print "Update planets from temp and generate ranks in %.3f seconds" % (t2,)
@@ -326,7 +326,7 @@ while True:
                                   id = a.id
                                 FROM (SELECT id, name FROM alliance WHERE active = :true) AS a
                                   WHERE t.name = a.name
-                            ;""", bindparams=[bindparam("true",True)]))
+                            ;""", bindparams=[true]))
 
         t2=time.time()-t1
         print "Copy alliance ids to temp in %.3f seconds" % (t2,)
@@ -339,13 +339,13 @@ while True:
                                   size = NULL, members = NULL, score = NULL, size_avg = NULL, score_avg = NULL,
                                   size_rank = NULL, members_rank = NULL, score_rank = NULL, size_avg_rank = NULL, score_avg_rank = NULL
                                 WHERE id NOT IN (SELECT id FROM alliance_temp)
-                            ;""", bindparams=[bindparam("false",False)]))
+                            ;""", bindparams=[false]))
 
         # Any alliances in the temp table without an id are new
         # Insert them to the current table and the id(serial/auto_increment)
         #  will be generated, and we can then copy it back to the temp table
-        session.execute(text("INSERT INTO alliance (name, active) SELECT name, :true FROM alliance_temp WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
-        session.execute(text("UPDATE alliance_temp SET id = (SELECT id FROM alliance WHERE alliance.name = alliance_temp.name AND alliance.active = :true ORDER BY alliance.id DESC) WHERE id IS NULL;", bindparams=[bindparam("true",True)]))
+        session.execute(text("INSERT INTO alliance (name, active) SELECT name, :true FROM alliance_temp WHERE id IS NULL;", bindparams=[true]))
+        session.execute(text("UPDATE alliance_temp SET id = (SELECT id FROM alliance WHERE alliance.name = alliance_temp.name AND alliance.active = :true ORDER BY alliance.id DESC) WHERE id IS NULL;", bindparams=[true]))
 
         t2=time.time()-t1
         print "Deactivate old alliances and generate new alliance ids in %.3f seconds" % (t2,)
@@ -366,7 +366,7 @@ while True:
                                 FROM alliance_temp) AS t
                                   WHERE a.id = t.id
                                 AND a.active = :true
-                            ;""", bindparams=[bindparam("true",True)]))
+                            ;""", bindparams=[true]))
 
         t2=time.time()-t1
         print "Update alliances from temp and generate ranks in %.3f seconds" % (t2,)
@@ -389,12 +389,12 @@ while True:
                         ))
 
         # Create records of planet movements or deletions
-        session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz, newx, newy, newz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z, planet.x, planet.y, planet.z FROM planet, planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :oldtick AND (planet.active = :true AND (planet.x != planet_history.x OR planet.y != planet_history.y OR planet.z != planet_history.z) OR planet.active = :false);", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), bindparam("true",True), bindparam("false",False)]))
+        session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz, newx, newy, newz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z, planet.x, planet.y, planet.z FROM planet, planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :oldtick AND (planet.active = :true AND (planet.x != planet_history.x OR planet.y != planet_history.y OR planet.z != planet_history.z) OR planet.active = :false);", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), true, false]))
 
         # Copy the dumps to their respective history tables
-        session.execute(text("INSERT INTO galaxy_history (tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank) SELECT :tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank FROM galaxy WHERE galaxy.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), bindparam("true",True)]))
-        session.execute(text("INSERT INTO planet_history (tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff) SELECT :tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff FROM planet WHERE planet.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), bindparam("true",True)]))
-        session.execute(text("INSERT INTO alliance_history (tick, id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank) SELECT :tick, id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank FROM alliance WHERE alliance.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), bindparam("true",True)]))
+        session.execute(text("INSERT INTO galaxy_history (tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank) SELECT :tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank FROM galaxy WHERE galaxy.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
+        session.execute(text("INSERT INTO planet_history (tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff) SELECT :tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff FROM planet WHERE planet.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
+        session.execute(text("INSERT INTO alliance_history (tick, id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank) SELECT :tick, id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank FROM alliance WHERE alliance.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
 
         # Finally we can commit!
         session.commit()

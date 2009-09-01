@@ -28,13 +28,17 @@ if not 5.4 <= float(sqlalchemy.__version__[2:5]) < 6.0:
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import text
+from sqlalchemy.sql import text, bindparam
 
 from Core.config import Config
 
 engine = create_engine(Config.get("DB", "DB"))#, echo='debug')
 if engine.name != "postgres" or "PostgreSQL 8.4" not in engine.connect().execute(text("SELECT version();")).scalar():
     sys.exit("PostgreSQL 8.4+ Required.")
+
+# Some constants
+true = bindparam("true",True)
+false = bindparam("false",False)
 
 Base = declarative_base(bind=engine)
 Session = sessionmaker(bind=engine)
