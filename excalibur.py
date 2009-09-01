@@ -162,7 +162,7 @@ while True:
                                   active = :false,
                                   name = NULL, size = NULL, score = NULL, value = NULL, xp = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
-                                WHERE id NOT IN (SELECT id FROM galaxy_temp)
+                                WHERE id NOT IN (SELECT id FROM galaxy_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[false]))
 
         # Any galaxies in the temp table without an id are new
@@ -278,7 +278,7 @@ while True:
                                   size = NULL, score = NULL, value = NULL, xp = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL,
                                   vdiff = NULL, idle = NULL
-                                WHERE id NOT IN (SELECT id FROM planet_temp)
+                                WHERE id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[false]))
 
         # Any planets in the temp table without an id are new
@@ -336,7 +336,7 @@ while True:
                                   active = :false,
                                   size = NULL, members = NULL, score = NULL, size_avg = NULL, score_avg = NULL,
                                   size_rank = NULL, members_rank = NULL, score_rank = NULL, size_avg_rank = NULL, score_avg_rank = NULL
-                                WHERE id NOT IN (SELECT id FROM alliance_temp)
+                                WHERE id NOT IN (SELECT id FROM alliance_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[false]))
 
         # Any alliances in the temp table without an id are new
