@@ -32,7 +32,7 @@ from sqlalchemy.sql import text, bindparam
 
 from Core.config import Config
 
-engine = create_engine(Config.get("DB", "DB"))#, echo='debug')
+engine = create_engine(Config.get("DB", "URL"))#, echo='debug')
 if engine.name != "postgres" or "PostgreSQL 8.4" not in engine.connect().execute(text("SELECT version();")).scalar():
     sys.exit("PostgreSQL 8.4+ Required.")
 
