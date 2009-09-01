@@ -28,7 +28,7 @@ import sys
 import urllib2
 from sqlalchemy.sql import text
 from Core.config import Config
-from Core.db import true, false, Session
+from Core.db import true, false, session
 from Core.maps import Ship
 
 regex = r'^<tr class="(Ter|Cath|Xan|Zik|Etd)">.+?(\w+)</td>' # race & name
@@ -58,7 +58,6 @@ keys = ['race', 'name', 'class_', 't1', 't2', 't3', 'type', 'init',
 
 def main(url = Config.get("URL", "ships"), debug=False):
     stats = urllib2.urlopen(url).read()
-    session = Session()
     session.execute(Ship.__table__.delete())
     session.execute(text("SELECT setval('ships_id_seq', 1, :false);", bindparams=[false]))
     

@@ -24,14 +24,12 @@
 import re, time, traceback, urllib2
 from sqlalchemy.sql import text, bindparam
 from Core.config import Config
-from Core.db import true, false, Session
+from Core.db import true, false, session
 from Core.maps import Updates, Galaxy, Planet, Alliance, epenis, galpenis, apenis
 from Core.maps import galaxy_temp, planet_temp, alliance_temp, planet_new_id_search, planet_old_id_search
 
 # Get the previous tick number!
 last_tick = Updates.current_tick()
-
-session = Session()
 
 t_start=time.time()
 t1=t_start
@@ -398,8 +396,6 @@ while True:
 
         # Finally we can commit!
         session.commit()
-        # TODO: empty temp tables here?
-        session.close()
 
         t2=time.time()-t1
         print "History and final update in %.3f seconds" % (t2,)
@@ -414,13 +410,14 @@ while True:
         time.sleep(15)
         continue
 
+session.close()
+
 t1=time.time()-t_start
 print "Total time taken: %.3f seconds" % (t1,)
 
 # Measure some dicks
 last_tick = Updates.current_tick()
 history_tick = max(last_tick-72, 1)
-session = Session()
 t_start=time.time()
 t1=t_start
 session.execute(epenis.__table__.delete())
@@ -438,6 +435,6 @@ session.execute(text("INSERT INTO apenis (alliance_id, penis) SELECT alliance.id
 t2=time.time()-t1
 print "galpenis in %.3f seconds" % (t2,)
 session.commit()
-session.close()
 t1=time.time()-t_start
 print "Total penis time: %.3f seconds" % (t1,)
+session.close()
