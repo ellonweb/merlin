@@ -105,7 +105,7 @@ class User(object):
         self.nicks = set()
     
 
-def auth_user(name, pnickf, username, passwd):
+def auth_user(name, pnickf, username, password):
     # Trying to authenticate with !letmein or !auth
     nick = Nicks.get(name)
     if (nick is not None) and (nick.user is not None):
@@ -118,7 +118,7 @@ def auth_user(name, pnickf, username, passwd):
         user = maps.User.load(name=pnick)
     except PNickParseError:
         # They don't have a pnick, expected
-        user = maps.User.load(name=username, passwd=passwd)
+        user = maps.User.load(name=username, passwd=password)
     
     if user is None:
         raise UserError
