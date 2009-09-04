@@ -97,7 +97,7 @@ class loadable(object):
     @staticmethod
     def module(access=0):
         def wrapper(hook):
-            acc = access
+            acc = access if type(access) is int else Config.getint("Access",access)
             class callback(hook):
                 name = hook.__name__
                 doc = hook.__doc__
