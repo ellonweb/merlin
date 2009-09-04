@@ -37,11 +37,8 @@ def join(message):
         # Someone is joining a channel we're in
         Channels[message.get_chan()].addnick(message.get_nick())
         if Config.get("Misc","usercache") == "join":
-            try:
-                # Set the user's pnick
-                get_user(message.get_nick(), pnickf=message.get_pnick)
-            except PNickParseError:
-                pass
+            # Set the user's pnick
+            get_user(message.get_nick(), pnickf=message.get_pnick)
 
 @loadable.system('332')
 def topic_join(message):

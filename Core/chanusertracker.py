@@ -24,6 +24,7 @@
 
 from Core.exceptions_ import PNickParseError, UserError
 from Core.config import Config
+from Core.db import session
 from Core import maps
 
 Channels = {}
@@ -105,7 +106,7 @@ class User(object):
     
 
 def auth_user(name, pnickf, username, passwd):
-    # Trying to authenticate with !invite or !auth
+    # Trying to authenticate with !letmein or !auth
     nick = Nicks.get(name)
     if (nick is not None) and (nick.user is not None):
         # They already have a user associated
@@ -152,11 +153,14 @@ def get_user(name, pnick=None, pnickf=None):
         pnick = nick.user.name
     if pnickf is not None:
         # Call the pnick function, might raise PNickParseError
-        pnick = pnickf()
+        try:
+            pnick = pnickf()
+        except PNickParseError:
+            return None
     
-    user = maps.User.load(name=pnick)
+    user = maps.User.load(name=pnick, session=session)
     if user is None:
-        raise UserError
+        return None
     
     if Config.get("Misc","usercache") in ("join", "command",):
         if Users.get(user.name) is None:

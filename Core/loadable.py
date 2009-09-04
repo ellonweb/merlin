@@ -24,6 +24,7 @@
 import re
 from Core.exceptions_ import LoadableError, ParseError, PNickParseError, UserError
 from Core.config import Config
+from Core.maps import User, Channel
 from Core.chanusertracker import get_user
 
 # ########################################################################### #
@@ -42,17 +43,21 @@ class loadable(object):
     
     def __init__(self):
         self.isdecorated()
-        self.commandre = re.compile(r"[!|.|\-|~|@]"+self.name+"(.*)",re.I)
-        self.helpre = re.compile(r"^[!|.|\-|~|@]help "+self.name,re.I)
+        self.commandre = re.compile(self.name+"(.*)",re.I)
+        self.helpre = re.compile("help "+self.name,re.I)
         self.usage = self.name + self.usage
     
     def isdecorated(self):
-            raise LoadableError
+        raise LoadableError
+    
+    def match(self, message, regexp):
+        if message.get_prefix():
+            return regexp.match(message.get_msg()[1:])
     
     def run(self, message):
-        m = self.commandre.match(message.get_msg())
+        m = self.match(message, self.commandre)
         if m is None:
-            if self.helpre.match(message.get_msg()) is not None:
+            if self.match(message, self.helpre) is not None:
                 self.help(message)
             return
         command = m.group(1)
@@ -71,8 +76,26 @@ class loadable(object):
         except ParseError:
             message.alert(self.usage)
     
+    def execute(self, message, user, params):
+        pass
+    
     @staticmethod
-    def module(access=-1):
+    def require_user(hook):
+        def execute(self, message, user, params):
+            if self.is_user(user):
+                hook(self, message, user, params)
+                return
+            elif message.get_pnick():
+                raise UserError
+        return execute
+    
+    def is_user(self, user):
+        if isinstance(user, User):
+            return True
+        return False
+    
+    @staticmethod
+    def module(access=0):
         def wrapper(hook):
             acc = access
             class callback(hook):
@@ -119,14 +142,23 @@ class loadable(object):
         return wrapper
     
     def check_access(self, message):
-        if self.access == -1:
-            return 1
+        if message.in_chan():
+            channel = Channel.load(message.get_chan()) or Channel(maxlevel=0, userlevel=0)
+            if channel.maxlevel < self.access:
+                raise UserError
+        else:
+            channel = Channel(userlevel=0)
         user = get_user(message.get_nick(), pnickf=message.get_pnick)
-        if user is None:
-            raise UserError
-        if self.access == 0 or user.access & self.access > 0:
-            return user
-        return
+        if self.is_user(user):
+            if max(user.access, channel.userlevel) >= self.access:
+                return user
+            else:
+                raise UserError
+        else:
+            if channel.userlevel >= self.access:
+                return True
+            elif message.get_pnick():
+                raise UserError
     
     def check_params(self, command):
         if type(self.paramre) == tuple:

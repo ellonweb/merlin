@@ -8,9 +8,6 @@ rewrite Connection.write and Action.write to use detached threaded system
 
 update all hooks to use new loader(session) system, test thoroughly etc
 
-Channel access min/max system
-    inc a way to check for a user but proceed even if user doesn't exist
-
 Hooks.request
     !request cancel id
     intel.dists
