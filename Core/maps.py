@@ -431,6 +431,14 @@ class Channel(Base):
     name = Column(String(150))
     userlevel = Column(Integer)
     maxlevel = Column(Integer)
+    
+    @staticmethod
+    def load(name, session=None):
+        s = session or Session()
+        Q = s.query(Channel)
+        channel = Q.filter(Channel.name.ilike(name)).first()
+        s.close() if session is None else None
+        return channel
 
 # ########################################################################### #
 # ############################    INTEL TABLE    ############################ #
