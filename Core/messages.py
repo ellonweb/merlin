@@ -23,9 +23,17 @@
 
 import re, time
 
+from merlin import Merlin
 from Core.exceptions_ import ChanParseError, MsgParseError, PNickParseError
 
-pnickre = re.compile(r"^:.+!.+@(.+)\.users.netgamers.org")
+PUBLIC_PREFIX  = ("!",)
+PRIVATE_PREFIX = ("@",)
+NOTICE_PREFIX  = (".","-","~",)
+PUBLIC_REPLY  = 1
+PRIVATE_REPLY = 2
+NOTICE_REPLY  = 3
+
+pnickre = re.compile(r"^:.+!.+@(.+)\.users\.netgamers\.org")
 
 class Message(object):
     # The message object will be passed around to callbacks for inspection and ability to write to the server
@@ -79,11 +87,9 @@ class Message(object):
             raise ChanParseError("Could not parse target.")
         return self._channel
     
-    def reply_target(self):
-        # Return the proper target to reply to
-        if self._chanerror:
-            raise ChanParseError("Could not parse target.")
-        return self._channel if (self._channel != self.bot.nick) else self.get_nick()
+    def in_chan(self):
+        # Return True if the message was in a channel (as opposed to PM)
+        return False if self.get_chan() == Merlin.nick else True
     
     def get_pnick(self):
         #Return the pnick. Raises ParseError on failure
@@ -97,4 +103,20 @@ class Message(object):
         if self._msgerror: # Raise a ParseError: Some RAWs do not containt a target
             raise MsgParseError("Could not parse line.")
         return self._msg
+    
+    def get_prefix(self):
+        # Return the prefix used for commands
+        return self.get_msg()[0] if self.get_msg()[0] in PUBLIC_PREFIX+PRIVATE_PREFIX+NOTICE_PREFIX else None
+    
+    def reply_type(self):
+        # Return the proper way to respond based on the command prefix used
+        # Always reply to a PM with a PM, otherwise only ! replies with privmsg
+        # Always reply to an @command with a PM
+        p = self.get_prefix()
+        if p in PUBLIC_PREFIX and self.in_chan():
+            return PUBLIC_REPLY
+        if p in PRIVATE_PREFIX or not self.in_chan():
+            return PRIVATE_REPLY
+        if p in NOTICE_PREFIX and self.in_chan():
+            return NOTICE_REPLY
     

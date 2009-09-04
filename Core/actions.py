@@ -21,10 +21,11 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
+from merlin import Merlin
 from Core.exceptions_ import ParseError
 from Core.connection import Connection
 from Core.chanusertracker import Channels, Nicks
-from Core.messages import Message
+from Core.messages import Message, PUBLIC_REPLY, PRIVATE_REPLY, NOTICE_REPLY
 
 class Action(Message):
     # This object holds the parse, and will enable users to send messages to the server on a higher level
@@ -58,30 +59,25 @@ class Action(Message):
     def reply(self, text):
         # Always reply to a PM with a PM, otherwise only ! replies with privmsg
         # Always reply to an @command with a PM
-        if self.get_msg()[0] == "@":
+        reply = self.reply_type()
+        if reply == PUBLIC_REPLY:
+            self.privmsg(text, self.get_chan())
+        if reply == PRIVATE_REPLY:
             self.privmsg(text, self.get_nick())
-        elif self.get_chan()[0] not in ("#","&") or self.get_msg()[0] not in (".","-","~"):
-            self.privmsg(text, self.reply_target())
-        else:
+        if reply == NOTICE_REPLY:
             self.notice(text)
     
     def alert(self, text):
         # Notice the user, unless it was a PM
-        if self.get_chan()[0] != "#":
-            self.privmsg(text, self.reply_target())
-        else:
+        if self.in_chan():
             self.notice(text)
+        else:
+            self.privmsg(text, self.get_nick())
     
-    def topic(self, text, target=None):
+    def topic(self, text, channel=None):
         # Set the topic in a channel
-        if target and not "#" in target:
-            target = "#" + target
-        if not target:
-            target = self.get_chan()
-            
-            if not "#" in target:
-                raise ValueError("Not a valid channelname!")
-        self.write("TOPIC %s :%s" % (target, text))
+        channel = channel or self.get_chan()
+        self.write("TOPIC %s :%s" % (channel, text))
     
     def nick(self, new_nick):
         # Change the bots nick to new_nick
@@ -97,20 +93,20 @@ class Action(Message):
     
     def invite(self, target, channel=None):
         # Invite target to channel
-        self.write(("INVITE %s %s" % (target, channel)) if channel else ("INVITE %s %s" % (target, self.get_chan())))
+        channel = channel or self.get_chan()
+        self.write(("INVITE %s %s" % (target, channel)))
     
     def quit(self, message=None):
         # Quit the bot from the network
         self.write(("QUIT :%s" % message) if message else "QUIT")
-        
+    
     def kick(self, target, channel=None, message=None):
         # Make the bot kick someone
-        if channel and message:
+        channel = channel or self.get_chan()
+        if message:
             self.write("KICK %s %s :%s" % (channel, target, message))
-        elif channel:
-            self.write("KICK %s %s" % (channel, target))
         else:
-            self.write("KICK %s %s" % (self.get_chan(), target))
+            self.write("KICK %s %s" % (channel, target))
     
     def __str__(self):
         # String representation of the Action object (Namely for debugging purposes)
