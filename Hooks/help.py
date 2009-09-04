@@ -23,6 +23,7 @@
 
 import re
 from Core.exceptions_ import PNickParseError, UserError
+from Core.maps import Channel
 from Core.loadable import loadable
 from Core.callbacks import Callbacks
 
@@ -37,9 +38,13 @@ class help(loadable):
             return
         commands = []
         message.reply(self.doc+". For more information use: "+self.usage)
+        if message.in_chan():
+            channel = Channel.load(message.get_chan())
+        else:
+            channel = None
         for callback in Callbacks.callbacks["PRIVMSG"]:
             try:
-                if callback.check_access(message) is not None:
+                if callback.check_access(message, user, channel) is not None:
                     commands.append(callback.name)
             except PNickParseError:
                 continue

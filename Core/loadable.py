@@ -130,7 +130,7 @@ class loadable(object):
                         self.execute(message, True, None)
                 def execute(self, message, access, params):
                     hook(message)
-                def check_access(self, message):
+                def check_access(self, message, user=None, channel=None):
                     if admin is not True:
                         return True
                     if message.get_pnick() in Config.options("Admins"):
@@ -141,14 +141,14 @@ class loadable(object):
             return callback
         return wrapper
     
-    def check_access(self, message):
+    def check_access(self, message, user=None, channel=None):
         if message.in_chan():
-            channel = Channel.load(message.get_chan()) or Channel(maxlevel=0, userlevel=0)
+            channel = channel or Channel.load(message.get_chan()) or Channel(maxlevel=0, userlevel=0)
             if channel.maxlevel < self.access:
                 raise UserError
         else:
             channel = Channel(userlevel=0)
-        user = get_user(message.get_nick(), pnickf=message.get_pnick)
+        user = user or get_user(message.get_nick(), pnickf=message.get_pnick)
         if self.is_user(user):
             if max(user.access, channel.userlevel) >= self.access:
                 return user
