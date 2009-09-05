@@ -40,6 +40,9 @@ class loadable(object):
     AccessError = "You don't have access to this command"
     coordre = re.compile(r"\s*(\d+)[. :\-](\d+)(?:[. :\-](\d+))?")
     planet_coordre = re.compile(r"\s*(\d+)[. :\-](\d+)[. :\-](\d+)")
+    true = ["1","yes","y","true","t"]
+    false = ["0","no","n","false","f"]
+    nulls = ["<>",".","-","?"]
     
     def __init__(self):
         self.isdecorated()
