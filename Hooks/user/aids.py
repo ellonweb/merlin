@@ -1,38 +1,34 @@
 # Aids
 
 import re
-from .variables import nick, access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.config import Config
+from Core.db import session
+from Core.maps import User
+from Core.loadable import loadable
 
+@loadable.module()
 class aids(loadable):
     """See who a user has sexed"""
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s([\w-]+)")
-        self.usage += " pnick"
-        
-    @loadable.run_with_access(access['member'])
+    usage = " pnick"
+    paramre = re.compile(r"\s(\S+)")
+    
     def execute(self, message, user, params):
 
         # assign param variables 
-        search=m.group(1)
+        search=params.group(1)
 
         # do stuff here
-        if search.lower() == nick.lower():
-            # Hardcoded == bad?
-            message.reply("I am %s. I gave aids to all you bitches." % (nick,))
+        if search.lower() == Config.get("Connection","nick").lower():
+            message.reply("I am %s. I gave aids to all you bitches." % (Config.get("Connection","nick"),))
             return
 
-        whore = M.DB.Maps.User.load(nick=search,exact=False)
+        whore = User.load(name=search,exact=False,session=session)
         if whore is None:
             message.reply("No users matching '%s'"%(search,))
             return
 
-        session = M.DB.Session()
-        Q=session.query(M.DB.Maps.User.name).filter(M.DB.Maps.User.sponsor == whore.name)
+        Q=session.query(User.name).filter(User.sponsor == whore.name)
         bitches = Q.all()
-        session.close()
 
         reply=""
         if whore == user:
@@ -42,13 +38,13 @@ class aids(loadable):
             else:
                 reply+=" You have given aids to:"
                 for bitch in bitches:
-                    reply+=" "+bitch
+                    reply+=" "+bitch[0]
         else:
             if len(bitches) < 1:
                 reply+="%s hasn't given anyone aids, what a selfish prick." %(whore.name,)
             else:
                 reply+="%s has given aids to:" % (whore.name,)
                 for bitch in bitches:
-                    reply+=" "+bitch
+                    reply+=" "+bitch[0]
 
         message.reply(reply)
