@@ -9,8 +9,8 @@ from Core.loadable import loadable
 @loadable.module("member")
 class whois(loadable):
     """Lookup a user's details"""
-    paramre = re.compile(r"\s(\S+)")
     usage = " pnick"
+    paramre = re.compile(r"\s(\S+)")
     
     def execute(self, message, user, params):
 

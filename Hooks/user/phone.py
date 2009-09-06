@@ -9,8 +9,8 @@ from Core.loadable import loadable
 @loadable.module()
 class phone(loadable):
     """Lookup someone's phone number or set permissions for who can view your number if you've not set public (pref)"""
-    paramre = re.compile(r"\s(list|allow|deny|show)(?:\s(\S+))?",re.I)
     usage = " <list|allow|deny|show> [pnick]"
+    paramre = re.compile(r"\s(list|allow|deny|show)(?:\s(\S+))?",re.I)
     
     @loadable.require_user
     def execute(self, message, user, params):

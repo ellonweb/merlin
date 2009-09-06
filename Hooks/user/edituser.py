@@ -31,8 +31,8 @@ from Core.loadable import loadable
 @loadable.module("admin")
 class edituser(loadable):
     """Used to change a user's access or (de)activate them"""
-    paramre = re.compile(r"\s(\S+)\s(\S+)")
     usage = " user <[access]|true|false>"
+    paramre = re.compile(r"\s(\S+)\s(\S+)")
     
     @loadable.require_user
     def execute(self, message, user, params):

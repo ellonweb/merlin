@@ -31,8 +31,8 @@ from Core.loadable import loadable
 @loadable.module()
 class apenis(loadable):
     """Schlong"""
-    paramre = re.compile(r"(?:\s(\S+))?")
     usage = " alliance"
+    paramre = re.compile(r"(?:\s(\S+))?")
     
     def execute(self, message, user, params):
         

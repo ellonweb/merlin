@@ -6,8 +6,8 @@ from Core.loadable import loadable
 
 @loadable.module("member")
 class quits(loadable):
-    paramre = re.compile(r"\s(\S+)")
     usage = " pnick"
+    paramre = re.compile(r"\s(\S+)")
 
     def execute(self, message, user, params):
 

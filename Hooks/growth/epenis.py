@@ -30,8 +30,8 @@ from Core.loadable import loadable
 @loadable.module("member")
 class epenis(loadable):
     """Penis"""
-    paramre = re.compile(r"(?:\s(\S+))?")
     usage = " user"
+    paramre = re.compile(r"(?:\s(\S+))?")
     
     def execute(self, message, user, params):
         

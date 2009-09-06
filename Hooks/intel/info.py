@@ -31,8 +31,8 @@ from Core.loadable import loadable
 @loadable.module("member")
 class info(loadable):
     """Alliance information (All information taken from intel, for tag information use the lookup command)"""
-    paramre = re.compile(r"\s(\S+)")
     usage = " alliance"
+    paramre = re.compile(r"\s(\S+)")
     
     def execute(self, message, user, params):
         

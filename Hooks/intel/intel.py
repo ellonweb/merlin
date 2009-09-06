@@ -31,8 +31,8 @@ options = ['alliance', 'nick', 'fakenick', 'defwhore', 'covop', 'scanner', 'dist
 class intel(loadable):
     """View or set intel for a planet. Valid options: """
     __doc__ += ", ".join(options)
-    paramre = loadable.coordre
     usage = " x.y[.z] [option=value]+"
+    paramre = loadable.coordre
     
     def execute(self, message, user, params):
         

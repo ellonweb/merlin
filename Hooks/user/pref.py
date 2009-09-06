@@ -30,8 +30,8 @@ from Core.loadable import loadable
 @loadable.module()
 class pref(loadable):
     """Set your planet, password for the webby, email and phone number; order doesn't matter"""
-    paramre = re.compile(r"\s(.+)")
     usage = " [planet=x.y.z] [pass=password] [email=my.email@address.com] [phone=999]"
+    paramre = re.compile(r"\s(.+)")
     
     @loadable.require_user
     def execute(self, message, user, params):

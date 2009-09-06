@@ -28,8 +28,8 @@ from Core.loadable import loadable
 @loadable.module()
 class galpenis(loadable):
     """Cock"""
-    paramre = loadable.coordre
     usage = " x:y"
+    paramre = loadable.coordre
     
     def execute(self, message, user, params):
         

@@ -30,8 +30,8 @@ from Core.loadable import loadable
 @loadable.module("member")
 class bumchums(loadable):
     """Pies"""
-    paramre = re.compile(r"\s(\S+)(?:\s(\d+))?")
     usage = " alliance number"
+    paramre = re.compile(r"\s(\S+)(?:\s(\d+))?")
     
     def execute(self, message, user, params):
         

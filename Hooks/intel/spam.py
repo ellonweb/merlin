@@ -30,8 +30,8 @@ from Core.loadable import loadable
 @loadable.module("member")
 class spam(loadable):
     """Spam alliance coords"""
-    paramre = re.compile(r"\s(\S+)")
     usage = " alliance"
+    paramre = re.compile(r"\s(\S+)")
     
     def execute(self, message, user, params):
         

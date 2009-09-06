@@ -30,8 +30,8 @@ from Core.loadable import loadable
 @loadable.module("member")
 class search(loadable):
     """Search for a planet by alliance or nick."""
-    paramre = re.compile(r"\s(\S+)")
     usage = " alliance|nick"
+    paramre = re.compile(r"\s(\S+)")
     
     def execute(self, message, user, params):
         
