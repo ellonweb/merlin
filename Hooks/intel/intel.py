@@ -41,14 +41,21 @@ class intel(loadable):
             if galaxy is None:
                 message.alert("No galaxy with coords %s:%s" % params.group(1,2))
                 return
-            reply = []
+            prev = []
             for planet in galaxy.planets:
                 if planet.intel is not None:
-                    intel = "Information stored for %s:%s:%s -"% (planet.x, planet.y, planet.z,) +str(planet.intel) if str(planet.intel) else None
-                    if intel:
-                        reply.append(intel)
-            if reply:
-                message.reply("\n".join(reply))
+                    reply = "#%s"%(planet.z,)
+                    if planet.intel.nick:
+                        reply += " %s"%(planet.intel.nick,)
+                    if planet.alliance:
+                        reply += " [%s]"%(planet.alliance.name[:3],)
+                    prev.append(reply)
+            if len(prev):
+                reply ="Intel %d:%d - "%(galaxy.x,galaxy.y,)
+                reply+="Score (%d) Value (%d) Size (%d)"%(galaxy.score_rank,galaxy.value_rank,galaxy.size_rank)
+                reply+=" - "
+                reply+=" - ".join(prev)
+                message.reply(reply)
             else:
                 message.reply("No information stored for %s:%s" % (galaxy.x, galaxy.y,))
             return
