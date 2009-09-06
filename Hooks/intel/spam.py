@@ -22,32 +22,28 @@
 # owners.
 
 import re
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from sqlalchemy import or_
+from Core.db import session
+from Core.maps import Planet, Alliance, Intel
+from Core.loadable import loadable
 
+@loadable.module("member")
 class spam(loadable):
     """Spam alliance coords"""
+    paramre = re.compile(r"\s(\S+)")
+    usage = " alliance"
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s([\w-]+)")
-        self.usage += " alliance"
-    
-    @loadable.run_with_access(access.get('hc',0) | access.get('intel',access['member']))
     def execute(self, message, user, params):
         
-        alliance = M.DB.Maps.Alliance.load(params.group(1))
+        alliance = Alliance.load(params.group(1), session=session)
         if alliance is None:
             message.reply("No alliance matching '%s' found"%(params.group(1),))
             return
         
-        session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel)
-        Q = Q.join(M.DB.Maps.Planet.intel)
-        Q = Q.filter(M.DB.Maps.Intel.alliance==alliance)
+        Q = session.query(Planet, Intel)
+        Q = Q.join(Planet.intel)
+        Q = Q.filter(Intel.alliance==alliance)
         result = Q.all()
-        session.close()
         if len(result) < 1:
             message.reply("No planets in intel match alliance %s"%(alliance.name,))
             return

@@ -22,29 +22,25 @@
 # owners.
 
 import re
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from sqlalchemy import or_
+from Core.db import session
+from Core.maps import Planet, Alliance, Intel
+from Core.loadable import loadable
 
+@loadable.module("member")
 class search(loadable):
     """Search for a planet by alliance or nick."""
+    paramre = re.compile(r"\s(\S+)")
+    usage = " alliance|nick"
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s([\w-]+)")
-        self.usage += " alliance|nick"
-    
-    @loadable.run_with_access(access.get('hc',0) | access.get('intel',access['member']))
     def execute(self, message, user, params):
         
         param = "%"+params.group(1)+"%"
-        session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, M.DB.Maps.Alliance)
-        Q = Q.join(M.DB.Maps.Planet.intel)
-        Q = Q.outerjoin(M.DB.Maps.Intel.alliance)
-        Q = Q.filter(M.DB.or_(M.DB.Maps.Intel.nick.ilike(param), M.DB.Maps.Alliance.name.ilike(param)))
+        Q = session.query(Planet, Intel, Alliance)
+        Q = Q.join(Planet.intel)
+        Q = Q.outerjoin(Intel.alliance)
+        Q = Q.filter(or_(Intel.nick.ilike(param), Alliance.name.ilike(param)))
         result = Q[:6]
-        session.close()
         if len(result) < 1:
             message.reply("No planets in intel matching nick or alliance: %s"%(params.group(1),))
             return

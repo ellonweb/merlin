@@ -22,35 +22,32 @@
 # owners.
 
 import re
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from sqlalchemy.sql import desc
+from sqlalchemy.sql.functions import count, sum
+from Core.db import session
+from Core.maps import Planet, Alliance, Intel
+from Core.loadable import loadable
 
+@loadable.module("member")
 class info(loadable):
     """Alliance information (All information taken from intel, for tag information use the lookup command)"""
+    paramre = re.compile(r"\s(\S+)")
+    usage = " alliance"
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s([\w-]+)")
-        self.usage += " alliance"
-    
-    @loadable.run_with_access(access.get('hc',0) | access.get('intel',access['member']))
     def execute(self, message, user, params):
         
-        alliance = M.DB.Maps.Alliance.load(params.group(1))
+        alliance = Alliance.load(params.group(1),session=session)
         if alliance is None:
             message.reply("No alliance matching '%s' found"%(params.group(1),))
             return
         
-        session = M.DB.Session()
-        Q = session.query(M.DB.SQL.f.sum(M.DB.Maps.Planet.value), M.DB.SQL.f.sum(M.DB.Maps.Planet.score),
-                          M.DB.SQL.f.sum(M.DB.Maps.Planet.size), M.DB.SQL.f.sum(M.DB.Maps.Planet.xp),
-                          M.DB.SQL.f.count())
-        Q = Q.join(M.DB.Maps.Planet.intel)
-        Q = Q.filter(M.DB.Maps.Intel.alliance==alliance)
-        Q = Q.group_by(M.DB.Maps.Intel.alliance_id)
+        Q = session.query(sum(Planet.value), sum(Planet.score),
+                          sum(Planet.size), sum(Planet.xp),
+                          count())
+        Q = Q.join(Planet.intel)
+        Q = Q.filter(Intel.alliance==alliance)
+        Q = Q.group_by(Intel.alliance_id)
         result = Q.first()
-        session.close()
         if result is None:
             message.reply("No planets in intel match alliance %s"%(alliance.name,))
             return
@@ -62,20 +59,18 @@ class info(loadable):
             reply+=" Size: %s, Avg: %s, XP: %s, Avg: %s" % (size,size/members,xp,xp/members)
             message.reply(reply)
         else:
-            session = M.DB.Session()
-            Q = session.query(M.DB.Maps.Planet.value, M.DB.Maps.Planet.score, 
-                              M.DB.Maps.Planet.size, M.DB.Maps.Planet.xp, 
-                              M.DB.Maps.Intel.alliance_id)
-            Q = Q.join(M.DB.Maps.Planet.intel)
-            Q = Q.filter(M.DB.Maps.Intel.alliance==alliance)
-            Q = Q.order_by(M.DB.SQL.desc(M.DB.Maps.Planet.score))
+            Q = session.query(Planet.value, Planet.score, 
+                              Planet.size, Planet.xp, 
+                              Intel.alliance_id)
+            Q = Q.join(Planet.intel)
+            Q = Q.filter(Intel.alliance==alliance)
+            Q = Q.order_by(desc(Planet.score))
             Q = Q.limit(60)
-            Q = Q.from_self(M.DB.SQL.f.sum(M.DB.Maps.Planet.value), M.DB.SQL.f.sum(M.DB.Maps.Planet.score),
-                            M.DB.SQL.f.sum(M.DB.Maps.Planet.size), M.DB.SQL.f.sum(M.DB.Maps.Planet.xp),
-                            M.DB.SQL.f.count())
-            Q = Q.group_by(M.DB.Maps.Intel.alliance_id)
+            Q = Q.from_self(sum(Planet.value), sum(Planet.score),
+                            sum(Planet.size), sum(Planet.xp),
+                            count())
+            Q = Q.group_by(Intel.alliance_id)
             ts_result = Q.first()
-            session.close()
             
             ts_value, ts_score, ts_size, ts_xp, ts_members = ts_result
             reply="%s Members: %s (%s)" % (alliance.name,members,ts_members)
