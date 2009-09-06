@@ -21,34 +21,31 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from sqlalchemy.sql import asc
+from Core.config import Config
+from Core.db import session
+from Core.maps import Alliance, User, epenis
+from Core.loadable import loadable
 
+@loadable.module("member")
 class bigdicks(loadable):
     """BEEFCAKE!!!11onetwo"""
     
-    def __init__(self):
-        loadable.__init__(self)
-    
-    @loadable.run_with_access(access['member'])
     def execute(self, message, user, params):
         
-        alliance = M.DB.Maps.Alliance.load(message.botally)
+        alliance = Alliance.load(Config.get("Alliance","name"), session=session)
         if alliance is None:
-            message.reply("No alliance matching '%s' found"%(message.botally,))
+            message.reply("No alliance matching '%s' found"%(Config.get("Alliance","name"),))
             return
-        session = M.DB.Session()
-        Q = session.query(M.DB.Maps.User, M.DB.Maps.epenis)
-        Q = Q.join(M.DB.Maps.User.epenis)
-        Q = Q.order_by(M.DB.SQL.desc(M.DB.Maps.epenis.rank))
+        Q = session.query(User, epenis)
+        Q = Q.join(User.epenis)
+        Q = Q.order_by(asc(epenis.rank))
         result = Q[:5]
-        session.close()
-
+        
         if len(result) < 1:
             msg.alert("There is no penis")
             return
-        reply="Big dicks:"
+        
         prev = []
         for user, penis in result:
             prev.append("%d:%s (%s)"%(penis.rank, user.name, self.num2short(penis.penis)))

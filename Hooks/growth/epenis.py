@@ -22,37 +22,32 @@
 # owners.
 
 import re
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.config import Config
+from Core.db import session
+from Core.maps import User
+from Core.loadable import loadable
 
+@loadable.module("member")
 class epenis(loadable):
     """Penis"""
+    paramre = re.compile(r"(?:\s(\S+))?")
+    usage = " user"
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"(?:\s([\w-]+))?")
-        self.usage += " user"
-    
-    @loadable.run_with_access(access['member'])
     def execute(self, message, user, params):
         
         if params.group(1) is not None:
-            penis = M.DB.Maps.User.load(name=params.group(1),exact=False)
+            penis = User.load(name=params.group(1),exact=False, session=session)
         else:
             penis = user
-        if penis is None:
+        if not self.is_user(penis):
             message.reply("Who the fuck is %s?" % (params.group(1),))
             return
         
-        session = M.DB.Session()
-        session.add(penis)
         if penis.planet is None:
             if user == penis:
                 message.reply("Set your planet first git.")
             else:
                 message.reply("%s is too embarrassed about his tiny penis that he won't let me tell you how small it is." % (penis.name,))
-            session.close()
             return
         
         if penis.epenis is None:
@@ -60,9 +55,7 @@ class epenis(loadable):
                 message.reply("Wait for the tick, bitch.")
             else:
                 message.reply("That freak %s doesn't have a penis!" % (penis.name,))
-            session.close()
             return
         
         message.reply("epenis for %s is %s score long. This makes %s rank: %s for epenis in %s!" % (
-                        penis.name, penis.epenis.penis, penis.name, penis.epenis.rank, message.botally,))
-        session.close()
+                        penis.name, penis.epenis.penis, penis.name, penis.epenis.rank, Config.get("Alliance","name"),))

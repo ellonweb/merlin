@@ -1,4 +1,4 @@
-# galpenis
+# bigdicks
 
 # This file is part of Merlin.
  
@@ -21,27 +21,32 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
+from sqlalchemy.sql import desc
+from Core.config import Config
 from Core.db import session
-from Core.maps import Galaxy
+from Core.maps import Alliance, User, epenis
 from Core.loadable import loadable
 
-@loadable.module()
-class galpenis(loadable):
-    """Cock"""
-    paramre = loadable.coordre
-    usage = " x:y"
+@loadable.module("member")
+class loosecunts(loadable):
     
     def execute(self, message, user, params):
         
-        galaxy = Galaxy.load(*params.group(1,2), session=session)
-        if galaxy is None:
-            message.alert("No galaxy with coords %s:%s" % params.group(1,2))
+        alliance = Alliance.load(Config.get("Alliance","name"), session=session)
+        if alliance is None:
+            message.reply("No alliance matching '%s' found"%(Config.get("Alliance","name"),))
+            return
+        Q = session.query(User, epenis)
+        Q = Q.join(User.epenis)
+        Q = Q.order_by(desc(epenis.rank))
+        result = Q[:5]
+        
+        if len(result) < 1:
+            msg.alert("There is no penis")
             return
         
-        penis = galaxy.galpenis
-        if penis is None:
-            message.alert("No galpenis stats matching %s:%s" % params.group(1,2))
-            return
-        
-        message.reply("galpenis for '%s' is %s score long. This makes %s:%s rank: %s for galpenis in the universe!" % (
-                        galaxy.name, penis.penis, galaxy.x, galaxy.y, penis.rank,))
+        prev = []
+        for user, penis in result:
+            prev.append("%d:%s (%s)"%(penis.rank, user.name, self.num2short(penis.penis)))
+        reply="Loose cunts: " + ", ".join(prev)
+        message.reply(reply)

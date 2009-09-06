@@ -72,7 +72,7 @@ class intel(loadable):
                     message.alert("No alliances match %s" % (val,))
                     continue
                 planet.intel.alliance = alliance
-            if (opt in self.options) and (val in self.nulls):
+            if (opt in options) and (val in self.nulls):
                 setattr(planet.intel, opt, None)
                 continue
             if opt in ("nick","fakenick","bg","gov","reportchan"):

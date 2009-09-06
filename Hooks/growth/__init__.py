@@ -20,4 +20,4 @@
 # owners.
 
 # List of package modules
-__all__ = ["epenis","galpenis","apenis","bigdicks"]
+__all__ = ["epenis","galpenis","apenis","bigdicks","loosecunts"]
