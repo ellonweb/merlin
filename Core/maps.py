@@ -170,10 +170,13 @@ class Planet(Base):
         bravery *= 10.0
         return bravery
     
-    def maxcap(self):
-        return self.size/4
+    def caprate(self, attacker=None):
+        if not attacker or not self.value:
+            return 0.25
+        modifier=(float(self.value)/float(attacker.value))**0.5
+        return min(.25*modifier,.25)
 Planet._idx_x_y_z = Index('planet_x_y_z', Planet.x, Planet.y, Planet.z)
-Planet.galaxy = relation(Galaxy, backref="planets")
+Galaxy.planets = relation(Planet, order_by=Planet.z, backref="galaxy")
 Galaxy.planet_loader = dynamic_loader(Planet)
 class PlanetHistory(Base):
     __tablename__ = 'planet_history'
@@ -197,7 +200,7 @@ class PlanetHistory(Base):
     idle = Column(Integer)
     vdiff = Column(Integer)
 Planet.history_loader = dynamic_loader(PlanetHistory, backref="current")
-PlanetHistory.galaxy = relation(GalaxyHistory, backref="planets")
+GalaxyHistory.planets = relation(PlanetHistory, order_by=PlanetHistory.z, backref="galaxy")
 GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory)
 class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
@@ -481,11 +484,11 @@ class Intel(Base):
             ret += "comment=%s"%(self.comment,)
         return ret
 Planet.intel = relation(Intel, uselist=False, backref="planet")
-Galaxy.intel = relation(Intel, Planet.__table__)
+Galaxy.intel = relation(Intel, Planet.__table__, order_by=Planet.z)
 Intel.alliance = relation(Alliance)
 #Planet.alliance = relation(Alliance, Intel.__table__, uselist=False, viewonly=True, backref="planets")
 Planet.alliance = association_proxy("intel", "alliance")
-Alliance.planets = relation(Planet, Intel.__table__, viewonly=True)
+Alliance.planets = relation(Planet, Intel.__table__, order_by=(Planet.x, Planet.y, Planet.z), viewonly=True)
 
 # ########################################################################### #
 # #############################    BOOKINGS    ############################## #
