@@ -1,3 +1,5 @@
+This is completely outdated and needs rewriting, don't bother reading.
+
 Readme o:
 
 Admins defined in `variables.admins` are developer only commands, Quit, Raw, Debug, Hop, Load etc. This is separate from the DB driven user system.
