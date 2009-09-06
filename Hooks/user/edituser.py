@@ -22,52 +22,52 @@
 # owners.
 
 import re
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.config import Config
+from Core.db import session
+from Core.maps import User
+from Core.chanusertracker import Users
+from Core.loadable import loadable
 
+@loadable.module("admin")
 class edituser(loadable):
-    """Used to set and unset a user's permissions, seperated by commas; order doesn't matter"""
+    """Used to change a user's access or (de)activate them"""
+    paramre = re.compile(r"\s(\S+)\s(\S+)")
+    usage = " user <[access]|true|false>"
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s([\w-]+)\s(.+)")
-        self.usage += " user [set=[access,]*] [unset=[access,]*] [active=1]"
-    
-    @loadable.run_with_access(access['admin'] | access.get('hc',0))
+    @loadable.require_user
     def execute(self, message, user, params):
         
         username = params.group(1)
-        params = self.split_opts(params.group(2))
+        access = params.group(2)
+        if not access.isdigit() and access not in self.true and access not in self.false:
+            try:
+                access = Config.getint("Access",access)
+            except Exception:
+                message.reply("Invalid access level '%s'" % (access,))
+                return
+        elif access in self.true:
+            access = True
+        elif access in self.false:
+            access = False
+        else:
+            access = int(access)
         
-        member = M.DB.Maps.User.load(name=username, exact=False, active=False)
+        member = User.load(name=username, exact=False, active=False, session=session)
         if member is None:
             message.alert("No such user '%s'" % (username,))
             return
-        sperm = uperm = active = ""
-        for opt, val in params.items():
-            if opt == "set":
-                for lvl in val.split(","):
-                    lvl = lvl.lower()
-                    if access.has_key(lvl) and user.access/2 >= access[lvl]:
-                        member.access = member.access | access[lvl]
-                        sperm += " " + lvl
-            if opt == "unset":
-                for lvl in val.split(","):
-                    lvl = lvl.lower()
-                    if access.has_key(lvl) and user.access/2 >= access[lvl]:
-                        if member.access & access[lvl]:
-                            member.access = member.access ^ access[lvl]
-                        uperm += " " + lvl
-            if opt == "active" and (val == "1" or val == "0") and user.access/2 >= member.access:
-                member.active = int(val)
-                active += " " + val
-        session = M.DB.Session()
-        session.add(member)
+        
+        if access > user.access or member.access > user.access:
+            message.reply("You may not change access higher than your own")
+            return
+        
+        if type(access) == int:
+            member.access = access
+        else:
+            member.active = access
         session.commit()
-        message.reply("Editted user %s set: %s unset: %s active: %s" % (member.name, sperm, uperm, active,))
-        if (not member.active) and M.CUT.Users.has_key(member.name):
-            for nick in M.CUT.Users[member.name].nicks:
+        message.reply("Editted user %s access: %s" % (member.name, access,))
+        if (not member.active) and Users.has_key(member.name):
+            for nick in Users[member.name].nicks:
                 nick.user = None
-            del M.CUT.Users[member.name]
-        session.close()
+            del Users[member.name]

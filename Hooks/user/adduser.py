@@ -45,6 +45,8 @@ class adduser(loadable):
             except Exception:
                 message.reply("Invalid access level '%s'" % (access,))
                 return
+        else:
+            access = int(access)
         
         if access > user.access:
             message.reply("You may not add a user with higher access to your own")
