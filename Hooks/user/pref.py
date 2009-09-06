@@ -22,22 +22,19 @@
 # owners.
 
 import re
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.config import Config
+from Core.db import session
+from Core.maps import Planet, Alliance, User, Intel
+from Core.loadable import loadable
 
+@loadable.module()
 class pref(loadable):
     """Set your planet, password for the webby, email and phone number; order doesn't matter"""
+    paramre = re.compile(r"\s(.+)")
+    usage = " [planet=x.y.z] [pass=password] [email=my.email@address.com] [phone=999]"
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s(.+)")
-        self.usage += " [planet=x.y.z] [pass=password] [email=my.email@address.com] [phone=999]"
-    
-    @loadable.run_with_access()
+    @loadable.require_user
     def execute(self, message, user, params):
-        
-        session = M.DB.Session()
-        session.add(user)
         
         params = self.split_opts(params.group(1))
         pl = pw = em = ph = ""
@@ -45,15 +42,15 @@ class pref(loadable):
             if opt == "planet":
                 m = self.planet_coordre.match(val)
                 if m:
-                    planet = M.DB.Maps.Planet.load(*m.groups(), session=session)
+                    planet = Planet.load(*m.groups(), session=session)
                     if planet is None:
                         continue
                     pl = val
                     user.planet = planet
                     if user.is_member():
-                        alliance = M.DB.Maps.Alliance.load(message.botally, session=session)
+                        alliance = Alliance.load(Config.get("Alliance","name"), session=session)
                         if planet.intel is None:
-                            planet.intel = M.DB.Maps.Intel(nick=user.name, alliance=alliance)
+                            planet.intel = Intel(nick=user.name, alliance=alliance)
                         else:
                             planet.intel.nick = user.name
                             planet.intel.alliance = alliance
@@ -67,5 +64,4 @@ class pref(loadable):
             if opt == "phone":
                 user.phone = ph = val
         session.commit()
-        session.close()
         message.reply("Updated your preferences: planet=%s pass=%s email=%s phone=%s" % (pl,pw,em,ph,))
