@@ -6,7 +6,7 @@ from Core.db import session
 from Core.maps import User
 from Core.loadable import loadable
 
-@loadable.module()
+@loadable.module("member")
 class aids(loadable):
     """See who a user has sexed"""
     usage = " pnick"
