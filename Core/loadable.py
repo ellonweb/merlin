@@ -194,13 +194,14 @@ class loadable(object):
         return param_dict
     
     def num2short(self,num):
+        flt2int = lambda x: int(x) if x.is_integer() else x
         try:
             if num/1000000 > 1:
-                return str(round(num/1000000.0,1))+"m"
+                return str(flt2int(round(num/1000000.0,1)))+"m"
             elif num/1000 > 1:
-                return str(round(num/1000.0,1))+"k"
+                return str(flt2int(round(num/1000.0,1)))+"k"
             else:
-                return str(round(num))
+                return str(flt2int(round(num)))
         except Exception:
             raise ValueError
     
