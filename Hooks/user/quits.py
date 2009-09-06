@@ -1,22 +1,21 @@
 import re
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.config import Config
+from Core.db import session
+from Core.maps import User
+from Core.loadable import loadable
 
+@loadable.module("member")
 class quits(loadable):
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s([\w-]+)")
-        self.usage += " pnick"
-        
-    @loadable.run_with_access(access['member'])
+    paramre = re.compile(r"\s(\S+)")
+    usage = " pnick"
+
     def execute(self, message, user, params):
 
         # assign param variables
-        search=m.group(1)
+        search=params.group(1)
 
         # do stuff here
-        whore = M.DB.Maps.User.load(nick=search,exact=False)
+        whore = User.load(name=search,exact=False)
         if whore is None:
             message.reply("No users matching '%s'"%(search,))
             return

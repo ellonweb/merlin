@@ -335,9 +335,7 @@ class User(Base):
     phone = Column(String(32))
     pubphone = Column(Boolean, default=False) # Asc
     sponsor = Column(String(15)) # Asc
-    invites = Column(Integer) # Asc
-    quits = Column(Integer) # Asc
-    stay = Column(Boolean) # Asc
+    quits = Column(Integer, default=0) # Asc
     emailre = re.compile("^([\w.-]+@[\w.-]+)")
     
     @validates('passwd')
@@ -347,10 +345,6 @@ class User(Base):
     def valid_email(self, key, email):
         assert self.emailre.match(email)
         return email
-    @validates('invites')
-    def valid_invites(self, key, invites):
-        assert invites > 0
-        return invites
     
     @staticmethod
     def hasher(passwd):
