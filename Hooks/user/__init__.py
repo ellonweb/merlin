@@ -20,5 +20,5 @@
 # owners.
 
 # List of package modules
-__all__ = ["adduser","edituser","galmate"]#,"phone","whois","pref"] # "Traditional"
+__all__ = ["adduser","edituser","galmate","getanewdaddy"]#,"phone","whois","pref"] # "Traditional"
 #__all__ = ["adduser","edituser","ascuser","pref"] # Asc
