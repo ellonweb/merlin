@@ -386,7 +386,7 @@ def user_access_function(num):
     return func
 for lvl, num in Config.items("Access"):
     # Bind user access functions
-    setattr(User, "is_"+lvl, user_access_function(num))
+    setattr(User, "is_"+lvl, user_access_function(int(num)))
 
 class PhoneFriend(Base):
     __tablename__ = 'phonefriends'
