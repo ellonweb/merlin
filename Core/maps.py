@@ -486,13 +486,13 @@ class Target(Base):
     __tablename__ = 'target'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'), index=True)
-    planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), ForeignKey(Intel.planet_id), index=True)
+    planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), index=True)
     tick = Column(Integer)
     unique = UniqueConstraint('planet_id','tick')
 User.bookings = dynamic_loader(Target, backref="user")
 Planet.bookings = dynamic_loader(Target, backref="planet")
 Galaxy.bookings = dynamic_loader(Target, Planet.__table__)
-Alliance.bookings = dynamic_loader(Target, Intel.__table__)
+#Alliance.bookings = dynamic_loader(Target, Intel.__table__)
 
 # ########################################################################### #
 # #############################    SHIP TABLE    ############################ #
