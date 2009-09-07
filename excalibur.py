@@ -422,19 +422,19 @@ t_start=time.time()
 t1=t_start
 session.execute(epenis.__table__.delete())
 session.execute(text("SELECT setval('epenis_rank_seq', 1, :false);", bindparams=[false]))
-session.execute(text("INSERT INTO epenis (user_id, penis) SELECT users.id, planet.score - planet_history.score FROM users, planet, planet_history WHERE users.planet_id = planet.id AND planet.id = planet_history.id AND planet_history.tick = :tick ORDER BY planet.score - planet_history.score DESC;", bindparams=[bindparam("tick",history_tick)]))
+session.execute(text("INSERT INTO epenis (user_id, penis) SELECT users.id, planet.score - planet_history.score FROM users, planet, planet_history WHERE planet.active = :true AND users.planet_id = planet.id AND planet.id = planet_history.id AND planet_history.tick = :tick ORDER BY planet.score - planet_history.score DESC;", bindparams=[true,bindparam("tick",history_tick)]))
 t2=time.time()-t1
 print "epenis in %.3f seconds" % (t2,)
 t1=time.time()
 session.execute(galpenis.__table__.delete())
 session.execute(text("SELECT setval('galpenis_rank_seq', 1, :false);", bindparams=[false]))
-session.execute(text("INSERT INTO galpenis (galaxy_id, penis) SELECT galaxy.id, galaxy.score - galaxy_history.score FROM galaxy, galaxy_history WHERE galaxy.id = galaxy_history.id AND galaxy_history.tick = :tick ORDER BY galaxy.score - galaxy_history.score DESC;", bindparams=[bindparam("tick",history_tick)]))
+session.execute(text("INSERT INTO galpenis (galaxy_id, penis) SELECT galaxy.id, galaxy.score - galaxy_history.score FROM galaxy, galaxy_history WHERE galaxy.active = :true AND galaxy.id = galaxy_history.id AND galaxy_history.tick = :tick ORDER BY galaxy.score - galaxy_history.score DESC;", bindparams=[true,bindparam("tick",history_tick)]))
 t2=time.time()-t1
 print "galpenis in %.3f seconds" % (t2,)
 t1=time.time()
 session.execute(apenis.__table__.delete())
 session.execute(text("SELECT setval('apenis_rank_seq', 1, :false);", bindparams=[false]))
-session.execute(text("INSERT INTO apenis (alliance_id, penis) SELECT alliance.id, alliance.score - alliance_history.score FROM alliance, alliance_history WHERE alliance.id = alliance_history.id AND alliance_history.tick = :tick ORDER BY alliance.score - alliance_history.score DESC;", bindparams=[bindparam("tick",history_tick)]))
+session.execute(text("INSERT INTO apenis (alliance_id, penis) SELECT alliance.id, alliance.score - alliance_history.score FROM alliance, alliance_history WHERE alliance.active = :true AND alliance.id = alliance_history.id AND alliance_history.tick = :tick ORDER BY alliance.score - alliance_history.score DESC;", bindparams=[true,bindparam("tick",history_tick)]))
 t2=time.time()-t1
 print "galpenis in %.3f seconds" % (t2,)
 session.commit()
