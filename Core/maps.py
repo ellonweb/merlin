@@ -31,7 +31,7 @@ from sqlalchemy.sql import desc
 from sqlalchemy.sql.functions import current_timestamp
 
 from Core.config import Config
-from Core.db import Base, Session
+from Core.db import Base, session
 
 # ########################################################################### #
 # #############################    DUMP TABLES    ########################### #
@@ -47,9 +47,7 @@ class Updates(Base):
     
     @staticmethod
     def current_tick():
-        session = Session()
         tick = session.query(Updates.id).order_by(desc(Updates.id)).scalar() or 0
-        session.close()
         return tick
 
 class Galaxy(Base):
@@ -75,14 +73,12 @@ class Galaxy(Base):
         return self.planet_loader.filter_by(z=z).first()
     
     @staticmethod
-    def load(x,y, active=True, session=None):
-        s = session or Session()
-        Q = s.query(Galaxy)
+    def load(x,y, active=True):
+        Q = session.query(Galaxy)
         if active is True:
             Q = Q.filter_by(active=True)
         Q = Q.filter_by(x=x, y=y)
         galaxy = Q.first()
-        s.close() if session is None else None
         return galaxy
     
     def __str__(self):
@@ -142,14 +138,12 @@ class Planet(Base):
         return self.scans.filter_by(scantype=type[0].upper()).order_by(desc(Scan.id)).first()
     
     @staticmethod
-    def load(x,y,z, active=True, session=None):
-        s = session or Session()
-        Q = s.query(Planet)
+    def load(x,y,z, active=True):
+        Q = session.query(Planet)
         if active is True:
             Q = Q.filter_by(active=True)
         Q = Q.filter_by(x=x, y=y, z=z)
         planet = Q.first()
-        s.close() if session is None else None
         return planet
     
     def __str__(self):
@@ -233,15 +227,13 @@ class Alliance(Base):
         return self.history_loader.filter_by(tick=tick).first()
     
     @staticmethod
-    def load(name, active=True, session=None):
-        s = session or Session()
-        Q = s.query(Alliance)
+    def load(name, active=True):
+        Q = session.query(Alliance)
         if active is True:
             Q = Q.filter_by(active=True)
         alliance = Q.filter(Alliance.name.ilike(name)).first()
         if alliance is None:
             alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
-        s.close() if session is None else None
         return alliance
     
     def __str__(self):
@@ -356,10 +348,9 @@ class User(Base):
         return hashlib.md5(passwd).hexdigest()
     
     @staticmethod
-    def load(name=None, id=None, passwd=None, exact=True, active=True, session=None):
+    def load(name=None, id=None, passwd=None, exact=True, active=True):
         assert id or name
-        s = session or Session()
-        Q = s.query(User)
+        Q = session.query(User)
         if id is not None:
             Q = Q.filter(User.id == id)
         if name is not None:
@@ -372,7 +363,6 @@ class User(Base):
         if active is True:
             Q = Q.filter(User.active == True)
         user = Q.first()
-        s.close() if session is None else None
         return user
 Planet.user = relation(User, uselist=False, backref="planet")
 def user_access_function(num):
@@ -430,11 +420,9 @@ class Channel(Base):
     maxlevel = Column(Integer)
     
     @staticmethod
-    def load(name, session=None):
-        s = session or Session()
-        Q = s.query(Channel)
+    def load(name):
+        Q = session.query(Channel)
         channel = Q.filter(Channel.name.ilike(name)).first()
-        s.close() if session is None else None
         return channel
 
 # ########################################################################### #
@@ -531,10 +519,9 @@ class Ship(Base):
     race = Column(String(10))
     
     @staticmethod
-    def load(name=None, id=None, session=None):
+    def load(name=None, id=None):
         assert id or name
-        s = session or Session()
-        Q = s.query(Ship)
+        Q = session.query(Ship)
         if id is not None:
             ship = Q.filter_by(Ship.id == id).first()
         if name is not None:
@@ -545,7 +532,6 @@ class Ship(Base):
                 ship = Q.filter(Ship.name.ilike("%"+name[:-1]+"%")).first()
             if ship is None and name[-3:].lower()=="ies":
                 ship = Q.filter(Ship.name.ilike("%"+name[:-3]+"%")).first()
-        s.close() if session is None else None
         return ship
     
     def __str__(self):

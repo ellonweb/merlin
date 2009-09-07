@@ -35,7 +35,7 @@ class bumchums(loadable):
     
     def execute(self, message, user, params):
         
-        alliance = Alliance.load(params.group(1),session=session)
+        alliance = Alliance.load(params.group(1))
         if alliance is None:
             message.reply("No alliance matching '%s' found"%(params.group(1),))
             return

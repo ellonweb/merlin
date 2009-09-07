@@ -37,7 +37,7 @@ class intel(loadable):
     def execute(self, message, user, params):
         
         if params.group(3) is None:
-            galaxy = Galaxy.load(*params.group(1,2), session=session)
+            galaxy = Galaxy.load(*params.group(1,2))
             if galaxy is None:
                 message.alert("No galaxy with coords %s:%s" % params.group(1,2))
                 return
@@ -60,7 +60,7 @@ class intel(loadable):
                 message.reply("No information stored for %s:%s" % (galaxy.x, galaxy.y,))
             return
         
-        planet = Planet.load(*params.group(1,2,3), session=session)
+        planet = Planet.load(*params.group(1,2,3))
         if planet is None:
             message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
             return

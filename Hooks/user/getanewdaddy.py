@@ -16,7 +16,7 @@ class getanewdaddy(loadable):
     def execute(self, message, user, params):
 
         # do stuff here
-        idiot = User.load(name=params.group(1), session=session)
+        idiot = User.load(name=params.group(1))
         if (idiot is None) or not idiot.is_member():
             print idiot.is_member()
             print idiot.access

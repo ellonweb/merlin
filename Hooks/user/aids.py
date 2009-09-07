@@ -22,7 +22,7 @@ class aids(loadable):
             message.reply("I am %s. I gave aids to all you bitches." % (Config.get("Connection","nick"),))
             return
 
-        whore = User.load(name=search,exact=False,session=session)
+        whore = User.load(name=search,exact=False)
         if whore is None:
             message.reply("No users matching '%s'"%(search,))
             return

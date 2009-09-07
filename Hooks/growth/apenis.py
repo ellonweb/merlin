@@ -24,7 +24,6 @@
 import re
 from Core.exceptions_ import PNickParseError
 from Core.config import Config
-from Core.db import session
 from Core.maps import Alliance
 from Core.loadable import loadable
 
@@ -37,12 +36,12 @@ class apenis(loadable):
     def execute(self, message, user, params):
         
         if params.group(1) is not None:
-            alliance = Alliance.load(params.group(1), session=session)
+            alliance = Alliance.load(params.group(1))
             if alliance is None:
                 message.alert("No alliances match %s" % (params.group(1),))
                 return
         elif self.is_user(user) and user.is_member():
-            alliance = Alliance.load(Config.get("Alliance","name"), session=session)
+            alliance = Alliance.load(Config.get("Alliance","name"))
             if alliance is None:
                 message.alert("No alliances match %s" % (Config.get("Alliance","name"),))
                 return

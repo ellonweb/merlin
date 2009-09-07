@@ -42,13 +42,13 @@ class pref(loadable):
             if opt == "planet":
                 m = self.planet_coordre.match(val)
                 if m:
-                    planet = Planet.load(*m.groups(), session=session)
+                    planet = Planet.load(*m.groups())
                     if planet is None:
                         continue
                     pl = val
                     user.planet = planet
                     if user.is_member():
-                        alliance = Alliance.load(Config.get("Alliance","name"), session=session)
+                        alliance = Alliance.load(Config.get("Alliance","name"))
                         if planet.intel is None:
                             planet.intel = Intel(nick=user.name, alliance=alliance)
                         else:

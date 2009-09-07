@@ -21,7 +21,6 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-from Core.db import session
 from Core.maps import Galaxy
 from Core.loadable import loadable
 
@@ -33,7 +32,7 @@ class galpenis(loadable):
     
     def execute(self, message, user, params):
         
-        galaxy = Galaxy.load(*params.group(1,2), session=session)
+        galaxy = Galaxy.load(*params.group(1,2))
         if galaxy is None:
             message.alert("No galaxy with coords %s:%s" % params.group(1,2))
             return

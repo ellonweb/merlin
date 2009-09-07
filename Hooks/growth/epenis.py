@@ -23,7 +23,6 @@
 
 import re
 from Core.config import Config
-from Core.db import session
 from Core.maps import User
 from Core.loadable import loadable
 
@@ -36,7 +35,7 @@ class epenis(loadable):
     def execute(self, message, user, params):
         
         if params.group(1) is not None:
-            penis = User.load(name=params.group(1),exact=False, session=session)
+            penis = User.load(name=params.group(1),exact=False)
         else:
             penis = user
         if not self.is_user(penis):

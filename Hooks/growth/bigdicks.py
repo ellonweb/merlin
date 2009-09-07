@@ -33,7 +33,7 @@ class bigdicks(loadable):
     
     def execute(self, message, user, params):
         
-        alliance = Alliance.load(Config.get("Alliance","name"), session=session)
+        alliance = Alliance.load(Config.get("Alliance","name"))
         if alliance is None:
             message.reply("No alliance matching '%s' found"%(Config.get("Alliance","name"),))
             return

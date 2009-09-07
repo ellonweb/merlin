@@ -2,7 +2,6 @@
 
 import re
 from Core.config import Config
-from Core.db import session
 from Core.maps import User
 from Core.loadable import loadable
 
@@ -22,7 +21,7 @@ class whois(loadable):
             message.reply("I am %s. Hear me roar." % (Config.get("Connection","nick"),))
             return
 
-        whore = User.load(name=search,exact=False,session=session)
+        whore = User.load(name=search,exact=False)
         if whore is None or not whore.is_member():
             message.reply("No users matching '%s'"%(search,))
             return
@@ -31,7 +30,7 @@ class whois(loadable):
         if whore == user:
             reply+="You are %s. Your sponsor is %s. You have %s invite%s left."
         else:
-            reply+="Information about %s: Their sponsor is %s. They have %s invite%s left."
-        reply=reply%(whore.name,whore.sponsor,whore.invites,['','s'][whore.invites!=1])
+            reply+="Information about %s: Their sponsor is %s."
+        reply=reply%(whore.name,whore.sponsor,)
 
         message.reply(reply)

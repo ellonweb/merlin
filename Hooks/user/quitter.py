@@ -15,7 +15,7 @@ class quitter(loadable):
         search=params.group(1)
 
         # do stuff here
-        whore = User.load(name=search,exact=False,session=session)
+        whore = User.load(name=search,exact=False)
         if whore is None:
             message.reply("No users matching '%s'"%(search,))
             return

@@ -34,7 +34,7 @@ class phone(loadable):
         if trustee is None:
             message.alert("None is not a valid user, retard.")
             return
-        member = User.load(name=trustee,exact=False,session=session)
+        member = User.load(name=trustee,exact=False)
         if member is None:
             message.alert("%s is not a valid user."%(trustee,))
             return

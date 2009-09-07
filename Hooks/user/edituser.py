@@ -52,7 +52,7 @@ class edituser(loadable):
         else:
             access = int(access)
         
-        member = User.load(name=username, exact=False, active=False, session=session)
+        member = User.load(name=username, exact=False, active=False)
         if member is None:
             message.alert("No such user '%s'" % (username,))
             return

@@ -55,7 +55,7 @@ class adduser(loadable):
         added = []
         exists = []
         for pnick in pnicks.split():
-            member = User.load(name=pnick, active=False, session=session)
+            member = User.load(name=pnick, active=False)
             if member is None:
                 member = User(name=pnick, access=access, sponsor=user.name)
                 session.add(member)

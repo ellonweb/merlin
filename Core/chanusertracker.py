@@ -24,7 +24,6 @@
 
 from Core.exceptions_ import PNickParseError, UserError
 from Core.config import Config
-from Core.db import session
 from Core import maps
 
 Channels = {}
@@ -158,7 +157,7 @@ def get_user(name, pnick=None, pnickf=None):
         except PNickParseError:
             return None
     
-    user = maps.User.load(name=pnick, session=session)
+    user = maps.User.load(name=pnick)
     if user is None:
         return None
     

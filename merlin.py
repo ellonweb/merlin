@@ -110,7 +110,7 @@ class merlin(object):
                                     continue
                                 finally:
                                     # Remove any uncommitted or unrolled-back state
-                                    session.close()
+                                    session.remove()
                                 
                             
                         except Reload:

@@ -35,7 +35,7 @@ class exp(loadable):
     
     def execute(self, message, user, params):
         
-        p = Planet.load(*params.group(1,2,3), session=session)
+        p = Planet.load(*params.group(1,2,3))
         if p is None:
             message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
             return
