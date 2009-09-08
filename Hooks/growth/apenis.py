@@ -48,7 +48,7 @@ class apenis(loadable):
         else:
             if not self.is_user(user):
                 raise PNickParseError
-            if user.planet is None or user.planet.alliance is None:
+            if user.planet is None or user.planet.intel is None or user.planet.alliance is None:
                 message.alert("Make sure you've set your planet with !pref and alliance with !intel")
                 return
             else:

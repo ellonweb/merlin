@@ -55,7 +55,7 @@ class book(loadable):
         if when > 32767:
             when = 32767        
         
-        if planet.intel and planet.intel.alliance and planet.alliance.name == Config.get("Alliance","name"):
+        if planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name"):
             message.reply("%s:%s:%s is %s in %s. Quick, launch before they notice the highlight." % (planet.x,planet.y,planet.z, planet.intel.nick or 'someone', Config.get("Alliance","name"),))
             return
         
