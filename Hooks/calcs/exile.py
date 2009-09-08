@@ -19,31 +19,30 @@
 # are included in this collective work with permission of the copyright
 # owners.
 
-from .Core.modules import M
-loadable = M.loadable.loadable
+from sqlalchemy.sql import asc, desc
+from sqlalchemy.sql.functions import count
+from Core.db import session
+from Core.maps import Planet
+from Core.loadable import loadable
 
+@loadable.module()
 class exile(loadable):
     """Calculate how long it will take to repay a value loss capping roids."""
     
-    def __init__(self):
-        loadable.__init__(self)
-    
-    @loadable.run
     def execute(self, message, user, params):
         
-        session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Planet.id, M.DB.SQL.f.count().label('planets'))
-        Q = Q.filter(M.DB.Maps.Planet.x < 200)
-        Q = Q.group_by(M.DB.Maps.Planet.x, M.DB.Maps.Planet.y)
-        Q = Q.order_by(M.DB.SQL.desc(M.DB.SQL.f.count()))
+        Q = session.query(Planet.x, Planet.y, count().label('planets'))
+        Q = Q.filter(Planet.active == True)
+        Q = Q.filter(Planet.x < 200)
+        Q = Q.group_by(Planet.x, Planet.y)
+        Q = Q.order_by(desc(count()))
         subQ = Q.subquery()
 
-        Q = session.query(subQ.c.planets, M.DB.SQL.f.count().label('count'))
+        Q = session.query(subQ.c.planets, count().label('count'))
         Q = Q.group_by(subQ.c.planets)
-        Q = Q.order_by(M.DB.SQL.asc(subQ.c.planets))
+        Q = Q.order_by(asc(subQ.c.planets))
 
         result = Q.all()
-        session.close()
 
         if len(result) < 1:
             message.reply("There is no spoon")
@@ -53,14 +52,14 @@ class exile(loadable):
         bracket=0
         max_planets=0
 
-        for planets, count in result:
-            gals+=count
+        for planets, galaxies in result:
+            gals+=galaxies
         bracket=int(gals*.2)
-        for planets, count in result:
-            bracket-=count
+        for planets, galaxies in result:
+            bracket-=galaxies
             if bracket < 0:
-                rest_gals=bracket+count
-                total_rest_gals=count
+                rest_gals=bracket+galaxies
+                total_rest_gals=galaxies
                 rest_planets=planets
                 break
             max_planets=planets

@@ -166,7 +166,7 @@ class Planet(Base):
         return bravery
     
     def caprate(self, attacker=None):
-        maxcap = PA.getfloat("maxcap","maxcap")
+        maxcap = PA.getfloat("roids","maxcap")
         if not attacker or not self.value:
             return maxcap
         modifier=(float(self.value)/float(attacker.value))**0.5

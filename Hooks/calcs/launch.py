@@ -21,11 +21,14 @@
 
 import datetime
 import re
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.maps import Updates
+from Core.loadable import loadable
 
+@loadable.module()
 class launch(loadable):
     """Calculate launch tick, launch time, prelaunch tick and prelaunch modifier for a given ship class or eta, and land tick."""
+    usage = " <class|eta> <land_tick>"
+    paramre = re.compile(r"\s+(\S+)\s+(\d+)")
     class_eta = {"fi": 8,
                  "co": 8,
                  "fr": 9,
@@ -33,12 +36,6 @@ class launch(loadable):
                  "cr": 10,
                  "bs": 10}
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s+(\S+|\d+)\s+(\d+)")
-        self.usage += " <class|eta> <land_tick>"
-    
-    @loadable.run
     def execute(self, message, user, params):
         
         eta, land_tick = params.groups()
@@ -53,7 +50,7 @@ class launch(loadable):
                 message.alert("Invalid class or eta '%s'" % (eta,))
                 return
 
-        current_tick=M.DB.Maps.Updates.current_tick()
+        current_tick=Updates.current_tick()
 
         current_time = datetime.datetime.utcnow()
         launch_tick = land_tick - eta

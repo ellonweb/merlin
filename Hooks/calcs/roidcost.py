@@ -20,24 +20,20 @@
 # owners.
 
 import re
-from .Core.modules import M
-loadable = M.loadable.loadable
-from Hooks.ships import feud
+from Core.paconf import PA
+from Core.loadable import loadable
 
+@loadable.module()
 class roidcost(loadable):
     """Calculate how long it will take to repay a value loss capping roids."""
+    usage = " <roids> <value_cost> [mining_bonus]"
+    paramre = re.compile(r"\s+(\d+)\s+(\d+(?:\.\d+)?[km]?)(?:\s+(\d+))?")
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s+(\d+)\s+(\d+(?:\.\d+)?[km]?)(?:\s+(\d+))?")
-        self.usage += " <roids> <value_cost> [mining_bonus]"
-    
-    @loadable.run
     def execute(self, message, user, params):
         
         roids, cost, bonus = params.groups()
         roids, cost, bonus = int(roids), self.short2num(cost), int(bonus or 0)
-        mining = 250
+        mining = PA.getint("roids","mining")
 
         if roids == 0:
             message.reply("Another NewDawn landing, eh?")
@@ -49,7 +45,7 @@ class roidcost(loadable):
 
         reply="Capping %s roids at %s value with %s%% bonus will repay in %s ticks (%s days)" % (roids,self.num2short(cost),bonus,repay,repay/24)
 
-        repay = int((cost*100)/(roids*mining*(1/(1-float(feud)))))
+        repay = int((cost*100)/(roids*mining*(1/(1+PA.getfloat("feud","prodcost")))))
         reply+=" Feudalism: %s ticks (%s days)" % (repay,repay/24)
 
         message.reply(reply)
