@@ -20,22 +20,4 @@
 # owners.
 
 # List of package modules
-__all__ = ["system",
-           "help",
-           "auth",
-           "chanusertracker",
-           "user",
-           "intel",
-           "growth",
-           "target",
-           "victim",
-#           "robocop",
-#           "hop",
-#           "relay",
-#           "relaybot",
-#           "ships",
-#           "details",
-#           "launch",
-#           "roidcost",
-#           "roidsave",
-           ]
+__all__ = ["victim"]
