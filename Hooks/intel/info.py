@@ -58,24 +58,25 @@ class info(loadable):
             reply+=" Score: %s, Avg: %s," % (score,score/members) 
             reply+=" Size: %s, Avg: %s, XP: %s, Avg: %s" % (size,size/members,xp,xp/members)
             message.reply(reply)
-        else:
-            Q = session.query(Planet.value, Planet.score, 
-                              Planet.size, Planet.xp, 
-                              Intel.alliance_id)
-            Q = Q.join(Planet.intel)
-            Q = Q.filter(Intel.alliance==alliance)
-            Q = Q.order_by(desc(Planet.score))
-            Q = Q.limit(60)
-            Q = Q.from_self(sum(Planet.value), sum(Planet.score),
-                            sum(Planet.size), sum(Planet.xp),
-                            count())
-            Q = Q.group_by(Intel.alliance_id)
-            ts_result = Q.first()
-            
-            ts_value, ts_score, ts_size, ts_xp, ts_members = ts_result
-            reply="%s Members: %s (%s)" % (alliance.name,members,ts_members)
-            reply+=", Value: %s (%s), Avg: %s (%s)" % (value,ts_value,value/members,ts_value/ts_members)
-            reply+=", Score: %s (%s), Avg: %s (%s)" % (score,ts_score,score/members,ts_score/ts_members)
-            reply+=", Size: %s (%s), Avg: %s (%s)" % (size,ts_size,size/members,ts_size/ts_members)
-            reply+=", XP: %s (%s), Avg: %s (%s)" % (xp,ts_xp,xp/members,ts_xp/ts_members)
-            message.reply(reply)
+            return
+        
+        Q = session.query(Planet.value, Planet.score, 
+                          Planet.size, Planet.xp, 
+                          Intel.alliance_id)
+        Q = Q.join(Planet.intel)
+        Q = Q.filter(Intel.alliance==alliance)
+        Q = Q.order_by(desc(Planet.score))
+        Q = Q.limit(60)
+        Q = Q.from_self(sum(Planet.value), sum(Planet.score),
+                        sum(Planet.size), sum(Planet.xp),
+                        count())
+        Q = Q.group_by(Intel.alliance_id)
+        ts_result = Q.first()
+        
+        ts_value, ts_score, ts_size, ts_xp, ts_members = ts_result
+        reply="%s Members: %s (%s)" % (alliance.name,members,ts_members)
+        reply+=", Value: %s (%s), Avg: %s (%s)" % (value,ts_value,value/members,ts_value/ts_members)
+        reply+=", Score: %s (%s), Avg: %s (%s)" % (score,ts_score,score/members,ts_score/ts_members)
+        reply+=", Size: %s (%s), Avg: %s (%s)" % (size,ts_size,size/members,ts_size/ts_members)
+        reply+=", XP: %s (%s), Avg: %s (%s)" % (xp,ts_xp,xp/members,ts_xp/ts_members)
+        message.reply(reply)
