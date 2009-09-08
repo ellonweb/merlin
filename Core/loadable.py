@@ -170,6 +170,14 @@ class loadable(object):
                 if m is not None:
                     break
             return m
+        elif type(self.paramre) == dict:
+            params = {}
+            for key, paramre in self.paramre:
+                params[key] = paramre.match(command)
+            if {}.fromkeys(params) == params:
+                return None
+            else:
+                return params
         else:
             return self.paramre.match(command)
     
