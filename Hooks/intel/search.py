@@ -22,7 +22,7 @@
 # owners.
 
 import re
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
 from Core.loadable import loadable
@@ -39,7 +39,8 @@ class search(loadable):
         Q = session.query(Planet, Intel, Alliance)
         Q = Q.join(Planet.intel)
         Q = Q.outerjoin(Intel.alliance)
-        Q = Q.filter(or_(Intel.nick.ilike(param), Alliance.name.ilike(param)))
+        Q = Q.filter(Planet.active == True)
+        Q = Q.filter(or_(Intel.nick.ilike(param), and_(Alliance.name.ilike(param), Alliance.active == True)))
         result = Q[:6]
         if len(result) < 1:
             message.reply("No planets in intel matching nick or alliance: %s"%(params.group(1),))

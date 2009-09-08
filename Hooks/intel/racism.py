@@ -45,6 +45,7 @@ class racism(loadable):
                           sum(Planet.size), sum(Planet.xp),
                           count(), Planet.race)
         Q = Q.join(Planet.intel)
+        Q = Q.filter(Planet.active == True)
         Q = Q.filter(Intel.alliance==alliance)
         Q = Q.group_by(Intel.alliance_id, Planet.race)
         Q = Q.order_by(asc(Planet.race))

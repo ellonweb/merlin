@@ -42,6 +42,7 @@ class spam(loadable):
         
         Q = session.query(Planet, Intel)
         Q = Q.join(Planet.intel)
+        Q = Q.filter(Planet.active == True)
         Q = Q.filter(Intel.alliance==alliance)
         result = Q.all()
         if len(result) < 1:

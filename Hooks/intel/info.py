@@ -45,6 +45,7 @@ class info(loadable):
                           sum(Planet.size), sum(Planet.xp),
                           count())
         Q = Q.join(Planet.intel)
+        Q = Q.filter(Planet.active == True)
         Q = Q.filter(Intel.alliance==alliance)
         Q = Q.group_by(Intel.alliance_id)
         result = Q.first()
@@ -64,6 +65,7 @@ class info(loadable):
                           Planet.size, Planet.xp, 
                           Intel.alliance_id)
         Q = Q.join(Planet.intel)
+        Q = Q.filter(Planet.active == True)
         Q = Q.filter(Intel.alliance==alliance)
         Q = Q.order_by(desc(Planet.score))
         Q = Q.limit(60)
