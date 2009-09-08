@@ -26,6 +26,7 @@ from Core.exceptions_ import PNickParseError
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
 from Core.loadable import loadable
+from Core.paconf import PA
 
 @loadable.module("member")
 class victim(loadable):
@@ -105,8 +106,8 @@ class victim(loadable):
         if value:
             Q = Q.filter(Planet.value.op(value_mod)(value))
         if bash:
-            Q = Q.filter(or_(Planet.value.op(">")(attacker.value*.4),
-                             Planet.score.op(">")(attacker.score*.6)))
+            Q = Q.filter(or_(Planet.value.op(">")(attacker.value*PA.getfloat("bash","value")),
+                             Planet.score.op(">")(attacker.score*PA.getfloat("bash","score"))))
         if cluster:
             Q = Q.filter(Planet.x == cluster)
         Q = Q.order_by(desc(Planet.size))

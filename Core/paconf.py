@@ -20,4 +20,4 @@
 # owners.
 
 from Core.config import load_config
-paconf = load_config("pa.cfg")
+PA = load_config("pa.cfg")

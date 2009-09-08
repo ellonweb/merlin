@@ -31,6 +31,7 @@ from sqlalchemy.sql import desc
 from sqlalchemy.sql.functions import current_timestamp
 
 from Core.config import Config
+from Core.paconf import PA
 from Core.db import Base, session
 
 # ########################################################################### #
@@ -165,10 +166,11 @@ class Planet(Base):
         return bravery
     
     def caprate(self, attacker=None):
+        maxcap = PA.getfloat("maxcap","maxcap")
         if not attacker or not self.value:
-            return 0.25
+            return maxcap
         modifier=(float(self.value)/float(attacker.value))**0.5
-        return min(.25*modifier,.25)
+        return min(maxcap*modifier, maxcap)
 Planet._idx_x_y_z = Index('planet_x_y_z', Planet.x, Planet.y, Planet.z)
 Galaxy.planets = relation(Planet, order_by=Planet.z, backref="galaxy")
 Galaxy.planet_loader = dynamic_loader(Planet)
