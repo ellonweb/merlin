@@ -20,4 +20,4 @@
 # owners.
 
 # List of package modules
-__all__ = ["exile","launch","roidcost","roidsave","bashee","basher"]
+__all__ = ["exile","launch","roidcost","roidsave","bashee","basher","maxcap"]

@@ -171,6 +171,9 @@ class Planet(Base):
             return maxcap
         modifier=(float(self.value)/float(attacker.value))**0.5
         return min(maxcap*modifier, maxcap)
+    
+    def maxcap(self, attacker=None):
+        return int(self.size * self.caprate(attacker))
 Planet._idx_x_y_z = Index('planet_x_y_z', Planet.x, Planet.y, Planet.z)
 Galaxy.planets = relation(Planet, order_by=Planet.z, backref="galaxy")
 Galaxy.planet_loader = dynamic_loader(Planet)
