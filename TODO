@@ -1,6 +1,3 @@
-update LICENSE in all files (some files don't have any license atm)
-    add jester to the list of (C) names: a _lot_ of code is copy/pasted straight from munin
-
 http://www.sqlalchemy.org/trac/ticket/1468
 http://www.sqlalchemy.org/trac/ticket/1529
 
