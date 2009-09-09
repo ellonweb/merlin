@@ -66,6 +66,6 @@ class xp(loadable):
         reply+="| Bravery: %.2f " % (attacker.bravery(target),)
 
         cap=target.maxcap(attacker)
-        xp=attacker.xp(target)
+        xp=attacker.calc_xp(target)
         reply+="| Roids: %s | XP: %s | Score: %s" % (cap,xp,xp*60)
         message.reply(reply)

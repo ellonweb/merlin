@@ -160,7 +160,7 @@ class Planet(Base):
         bravery = max(0,( min(2,float(target.value)/self.value)-0.1 ) * (min(2,float(target.score)/self.score)-0.2))*10
         return bravery
     
-    def xp(self, target, cap=None):
+    def calc_xp(self, target, cap=None):
         cap = cap or target.maxcap(self)
         return int(cap * self.bravery(target))
     
