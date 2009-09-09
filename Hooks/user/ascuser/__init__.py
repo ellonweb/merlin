@@ -20,5 +20,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 # List of package modules
-__all__ = ["sponsor","unsponsor","gimp","invite","getanewdaddy",
-            "handout","aids","whois","quitter","quits","phone"] # Asc
+__all__ = [
+           "sponsor",
+           "unsponsor",
+           "gimp",
+           "invite",
+           "handout",
+           ]

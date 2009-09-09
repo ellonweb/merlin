@@ -20,4 +20,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 # List of package modules
-__all__ = ["intel","search","bumchums","info","spam","racism"]
+__all__ = [
+           "intel",
+           "search",
+           "bumchums",
+           "info",
+           "spam",
+           "racism",
+           ]

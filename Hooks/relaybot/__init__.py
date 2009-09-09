@@ -20,7 +20,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 # List of package modules
-__all__ = ["relay","relayhopper"]
+__all__ = [
+           "relay",
+           "relayhopper",
+           ]
 
 # Relay channels
 # You should configure P to autoinvite the bot to your channels

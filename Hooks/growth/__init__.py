@@ -20,4 +20,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 # List of package modules
-__all__ = ["epenis","galpenis","apenis","bigdicks","loosecunts","value","exp"]
+__all__ = [
+           "epenis",
+           "galpenis",
+           "apenis",
+           "bigdicks",
+           "loosecunts",
+           "value",
+           "exp",
+           ]
