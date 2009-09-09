@@ -1,7 +1,10 @@
-# UnBook
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -16,37 +19,31 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
-
 import re
-from .variables import alliance, access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from sqlalchemy.sql import asc
+from Core.db import session
+from Core.maps import Updates, Planet, User, Target
+from Core.loadable import loadable
 
+@loadable.module("half")
 class unbook(loadable):
     """"""
+    usage = " x:y:z [eta|landing tick]"
+    paramre = re.compile(loadable.planet_coordre.pattern+r"(?:\s(\d+))?(?:\s(yes))?")
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(self.planet_coordre.pattern+r"(?:\s(\d+))?(?:\s(yes))?")
-        self.usage += " x:y:z (eta|landing tick)"
-    
-    @loadable.run_with_access(access.get('bc',0) | access['member'])
+    @loadable.require_user
     def execute(self, message, user, params):
-        planet = M.DB.Maps.Planet.load(*params.group(1,2,3))
+        planet = Planet.load(*params.group(1,2,3))
         if planet is None:
             message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
             return
         
-        tick = M.DB.Maps.Updates.current_tick()
+        tick = Updates.current_tick()
         when = int(params.group(4) or 0)
         if 0 < when < 80:
             eta = when
             when += tick
-        elif when <= tick:
+        elif 0 < when <= tick:
             message.alert("Can not unbook targets in the past. You wanted tick %s, but current tick is %s." % (when, tick,))
             return
         else:
@@ -56,16 +53,16 @@ class unbook(loadable):
         
         override = params.group(5)
         
-        session = M.DB.Session()
-        
-        Q = session.query(M.DB.Maps.User.name, M.DB.Maps.Target.tick)
-        Q = Q.join(M.DB.Maps.Target.user)
-        Q = Q.filter(M.DB.Maps.Target.planet == planet)
-        Q = Q.filter(M.DB.Maps.User == user) if override is None else Q
-        Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick >= tick)
-        Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Target.tick))
-        result = Q.all() if override else None
-        count = Q.delete(synchronize_session=False)
+        Q = session.query(Target)
+        Q = Q.join(Target.user)
+        Q = Q.filter(Target.planet == planet)
+        Q = Q.filter(Target.user == user) if override is None else Q
+        Q = Q.filter(Target.tick == when) if when else Q.filter(Target.tick >= tick)
+        Q = Q.order_by(asc(Target.tick))
+        result = Q.all()
+        for target in result:
+            session.delete(target)
+        count = len(result)
         session.commit()
         
         if count < 1:
@@ -78,14 +75,13 @@ class unbook(loadable):
             if when:
                 reply+=" for landing pt %s"%(when,)
                 if override:
-                    reply+=" (previously held by user %s)"%(result[0][0])
+                    reply+=" (previously held by user %s)"%(result[0].user.name)
             else:
                 reply+=" for %d booking(s)"%(count,)
                 if override:
-                    reply+=": "
                     prev=[]
-                    for booker, land in result:
-                        prev.append("(%s user:%s)" % (land,booker))
+                    for target in result:
+                        prev.append("(%s user:%s)" % (target.tick,target.user.name))
                     reply+=": "+", ".join(prev)
                         
             reply+="."

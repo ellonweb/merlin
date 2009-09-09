@@ -1,7 +1,10 @@
-# Lookup a user's details
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -16,36 +19,38 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
 
 import re
-from ..variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.config import Config
+from Core.maps import User
+from Core.loadable import loadable
 
+@loadable.module("member")
 class whois(loadable):
-    """Used to view a user's details"""
+    """Lookup a user's details"""
+    usage = " pnick"
+    paramre = re.compile(r"\s(\S+)")
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s([\w-]+)")
-        self.usage += " user"
-    
-    @loadable.run_with_access(access['admin'] | access['hc'])
     def execute(self, message, user, params):
-        
-        username = params.group(1)
-        
-        member = M.DB.Maps.User.load(name=username, exact=False)
-        if member is None:
-            message.alert("No such user '%s'" % (username,))
+
+        # assign param variables 
+        search=params.group(1)
+
+        # do stuff here
+        if search.lower() == Config.get("Connection","nick").lower():
+            message.reply("I am %s. Hear me roar." % (Config.get("Connection","nick"),))
             return
-        acc = ""
-        for lvl in access.keys():
-            if getattr(member, "is_"+lvl)():
-                acc += " " + lvl
-        
-        message.reply("User %s is: %s%s" % (member.name, acc,))
+
+        whore = User.load(name=search,exact=False)
+        if whore is None or not whore.is_member():
+            message.reply("No users matching '%s'"%(search,))
+            return
+
+        reply=""
+        if whore == user:
+            reply+="You are %s. Your sponsor is %s. You have %s invite%s left."
+        else:
+            reply+="Information about %s: Their sponsor is %s."
+        reply=reply%(whore.name,whore.sponsor,)
+
+        message.reply(reply)

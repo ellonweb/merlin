@@ -1,7 +1,10 @@
-# apenis
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -16,52 +19,40 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
-
 import re
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.exceptions_ import PNickParseError
+from Core.config import Config
+from Core.maps import Alliance
+from Core.loadable import loadable
 
+@loadable.module()
 class apenis(loadable):
     """Schlong"""
+    usage = " alliance"
+    paramre = re.compile(r"(?:\s(\S+))?")
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"apenis(?:\s([\w-]+))?")
-        self.usage += " alliance"
-    
-    @loadable.run_with_access()
     def execute(self, message, user, params):
         
         if params.group(1) is not None:
-            alliance = M.DB.Maps.Alliance.load(params.group(1))
+            alliance = Alliance.load(params.group(1))
             if alliance is None:
                 message.alert("No alliances match %s" % (params.group(1),))
                 return
-        elif user.is_member():
-            alliance = M.DB.Maps.Alliance.load(message.botally)
+        elif self.is_user(user) and user.is_member():
+            alliance = Alliance.load(Config.get("Alliance","name"))
             if alliance is None:
-                message.alert("No alliances match %s" % (message.botally,))
+                message.alert("No alliances match %s" % (Config.get("Alliance","name"),))
                 return
         else:
-            session = M.DB.Session()
-            session.add(user)
-            if user.planet is None or user.planet.alliance is None:
+            if not self.is_user(user):
+                raise PNickParseError
+            if user.planet is None or user.planet.intel is None or user.planet.alliance is None:
                 message.alert("Make sure you've set your planet with !pref and alliance with !intel")
-                session.close()
                 return
             else:
                 alliance = user.planet.alliance
-                session.close()
         
-        session = M.DB.Session()
-        session.add(alliance)
         penis = alliance.apenis
-        session.close()
         if penis is None:
             message.alert("No apenis stats matching %s" % (alliance.name,))
             return

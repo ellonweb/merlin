@@ -1,5 +1,10 @@
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -14,18 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
-
 import datetime
 import re
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.maps import Updates
+from Core.loadable import loadable
 
+@loadable.module()
 class launch(loadable):
     """Calculate launch tick, launch time, prelaunch tick and prelaunch modifier for a given ship class or eta, and land tick."""
+    usage = " <class|eta> <land_tick>"
+    paramre = re.compile(r"\s+(\S+)\s+(\d+)")
     class_eta = {"fi": 8,
                  "co": 8,
                  "fr": 9,
@@ -33,12 +36,6 @@ class launch(loadable):
                  "cr": 10,
                  "bs": 10}
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s+(\S+|\d+)\s+(\d+)")
-        self.usage += " <class|eta> <land_tick>"
-    
-    @loadable.run
     def execute(self, message, user, params):
         
         eta, land_tick = params.groups()
@@ -53,7 +50,7 @@ class launch(loadable):
                 message.alert("Invalid class or eta '%s'" % (eta,))
                 return
 
-        current_tick=M.DB.Maps.Updates.current_tick()
+        current_tick=Updates.current_tick()
 
         current_time = datetime.datetime.utcnow()
         launch_tick = land_tick - eta

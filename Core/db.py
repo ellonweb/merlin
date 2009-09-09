@@ -1,7 +1,10 @@
-# SQLAlchemy DB interface
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -16,33 +19,27 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
+# SQLAlchemy DB interface
 
 import sys
 import sqlalchemy
-if float(sqlalchemy.__version__[2:5]) < 5.4:
+if not 5.4 <= float(sqlalchemy.__version__[2:5]) < 6.0:
     sys.exit("SQLAlchemy 0.5.4+ Required")
-from sqlalchemy import *
-from sqlalchemy.orm import sessionmaker, clear_mappers
-import sqlalchemy.sql as SQL
-import sqlalchemy.sql.functions
-SQL.f = sys.modules['sqlalchemy.sql.functions']
-from .variables import DBeng
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.sql import text, bindparam
 
-engine = create_engine(DBeng)#, echo='debug')
+from Core.config import Config
 
+engine = create_engine(Config.get("DB", "URL"))#, echo='debug')
+if engine.name != "postgres" or "PostgreSQL 8.4" not in engine.connect().execute(text("SELECT version();")).scalar():
+    sys.exit("PostgreSQL 8.4+ Required.")
+
+# Some constants
+true = bindparam("true",True)
+false = bindparam("false",False)
+
+Base = declarative_base(bind=engine)
 Session = sessionmaker(bind=engine)
-
-def reload_mappings():
-    Maps.Base.metadata.clear()
-    clear_mappers()
-    reload(Maps)
-    Maps.Base.metadata.bind = engine
-    Maps.Base.metadata.create_all()
-    Maps.Session = Session
-
-import maps as Maps
-reload_mappings()
+session = scoped_session(Session)

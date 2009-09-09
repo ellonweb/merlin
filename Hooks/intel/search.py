@@ -1,7 +1,10 @@
-# Search
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -16,35 +19,27 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
-
 import re
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from sqlalchemy import and_, or_
+from Core.db import session
+from Core.maps import Planet, Alliance, Intel
+from Core.loadable import loadable
 
+@loadable.module("member")
 class search(loadable):
     """Search for a planet by alliance or nick."""
+    usage = " alliance|nick"
+    paramre = re.compile(r"\s(\S+)")
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s([\w-]+)")
-        self.usage += " alliance|nick"
-    
-    @loadable.run_with_access(access.get('hc',0) | access.get('intel',access['member']))
     def execute(self, message, user, params):
         
         param = "%"+params.group(1)+"%"
-        session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Intel, M.DB.Maps.Alliance)
-        Q = Q.join(M.DB.Maps.Planet.intel)
-        Q = Q.outerjoin(M.DB.Maps.Intel.alliance)
-        Q = Q.filter(M.DB.or_(M.DB.Maps.Intel.nick.ilike(param), M.DB.Maps.Alliance.name.ilike(param)))
+        Q = session.query(Planet, Intel, Alliance)
+        Q = Q.join(Planet.intel)
+        Q = Q.outerjoin(Intel.alliance)
+        Q = Q.filter(Planet.active == True)
+        Q = Q.filter(or_(Intel.nick.ilike(param), and_(Alliance.name.ilike(param), Alliance.active == True)))
         result = Q[:6]
-        session.close()
         if len(result) < 1:
             message.reply("No planets in intel matching nick or alliance: %s"%(params.group(1),))
             return

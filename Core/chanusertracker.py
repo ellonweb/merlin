@@ -1,8 +1,10 @@
-# System to implement channel, nick and user tracking
-# There are circular references used very carefully here, be wary when editting
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -17,14 +19,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
+# System to implement channel, nick and user tracking
+# There are circular references used very carefully here, be wary when editting
 
-from .variables import usercache
-from exceptions_ import PNickParseError, UserError
-#from modules import M
+from Core.exceptions_ import PNickParseError, UserError
+from Core.config import Config
+from Core import maps
 
 Channels = {}
 Nicks = {}
@@ -36,6 +36,7 @@ class Channel(object):
         self.chan = chan
         self.nicks = set()
         self.topic = ""
+        self.opped = False
     
     def addnick(self, name):
         # Add a new nick to the channel
@@ -62,9 +63,7 @@ class Channel(object):
                 try:
                     del Nicks[nick.name]
                 # Might occur when the bot is quitting
-                except AttributeError:
-                    pass
-                except TypeError:
+                except (AttributeError, KeyError, TypeError):
                     pass
     
 
@@ -83,7 +82,7 @@ class Nick(object):
     
     def quit(self):
         # Quitting
-        for channel in self.channels[:]:
+        for channel in self.channels.copy():
             Channels[channel].remnick(self.name)
     
     def __del__(self):
@@ -93,9 +92,7 @@ class Nick(object):
                 if len(self.user.nicks) == 0:
                     del Users[self.user.name]
             # Might occur when the bot is quitting
-            except AttributeError:
-                pass
-            except TypeError:
+            except (AttributeError, KeyError, TypeError):
                 pass
     
 
@@ -107,8 +104,8 @@ class User(object):
         self.nicks = set()
     
 
-def auth_user(name, pnickf, username, passwd):
-    # Trying to authenticate with !invite or !auth
+def auth_user(name, pnickf, username, password):
+    # Trying to authenticate with !letmein or !auth
     nick = Nicks.get(name)
     if (nick is not None) and (nick.user is not None):
         # They already have a user associated
@@ -117,15 +114,15 @@ def auth_user(name, pnickf, username, passwd):
     try:
         pnick = pnickf()
         # They have a pnick, so shouldn't need to auth, let's auth them anyway
-        user = M.DB.Maps.User.load(name=pnick)
+        user = maps.User.load(name=pnick)
     except PNickParseError:
         # They don't have a pnick, expected
-        user = M.DB.Maps.User.load(name=username, passwd=passwd)
+        user = maps.User.load(name=username, passwd=password)
     
     if user is None:
         raise UserError
     
-    if (nick is not None) and (usercache in ("join", "command",)):
+    if (nick is not None) and (Config.get("Misc","usercache") in ("join", "command",)):
         if Users.get(user.name) is None:
             # Add the user to the tracker
             Users[user.name] = User(user.name)
@@ -155,13 +152,16 @@ def get_user(name, pnick=None, pnickf=None):
         pnick = nick.user.name
     if pnickf is not None:
         # Call the pnick function, might raise PNickParseError
-        pnick = pnickf()
+        try:
+            pnick = pnickf()
+        except PNickParseError:
+            return None
     
-    user = M.DB.Maps.User.load(name=pnick)
+    user = maps.User.load(name=pnick)
     if user is None:
-        raise UserError
+        return None
     
-    if usercache in ("join", "command",):
+    if Config.get("Misc","usercache") in ("join", "command",):
         if Users.get(user.name) is None:
             # Add the user to the tracker
             Users[user.name] = User(user.name)

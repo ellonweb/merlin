@@ -1,7 +1,10 @@
-# Status
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -16,28 +19,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
-
 import re
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from sqlalchemy.sql import asc
+from Core.exceptions_ import PNickParseError
+from Core.db import session
+from Core.maps import Updates, Galaxy, Planet, Alliance, User, Intel, Target
+from Core.loadable import loadable
 
+@loadable.module("half")
 class status(loadable):
     """List of targets booked by user, or list of bookings for a given galaxy or planet"""
+    usage = " [user|x:y[:z]|alliance] [tick]"
+    paramre = (re.compile(loadable.coordre.pattern+r"(?:\s(\d+))?"), re.compile(r"(?:\s(\S+))?(?:\s(\d+))?"),)
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = (re.compile(r"status(?:\s([\w-]+)(?:\s(\d+))?)?"), re.compile(self.coordre.pattern+r"(?:\s(\d+))?"),)
-        self.usage += " [user|x:y[:z]|alliance] [tick]"
-    
-    @loadable.run_with_access(access.get('hc',0) | access.get('bc',0) | access['member'])
     def execute(self, message, user, params):
         
-        tick = M.DB.Maps.Updates.current_tick()
+        tick = Updates.current_tick()
         
         # Planet or Galaxy
         if params.group(1) is not None and params.group(1).isdigit():
@@ -50,19 +47,17 @@ class status(loadable):
             
             # Planet
             if params.group(3) is not None:
-                planet = M.DB.Maps.Planet.load(*params.group(1,2,3))
+                planet = Planet.load(*params.group(1,2,3))
                 if planet is None:
                     message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
                     return
                 
-                session = M.DB.Session()
-                Q = session.query(M.DB.Maps.User.name, M.DB.Maps.Target.tick)
-                Q = Q.join(M.DB.Maps.Target.user)
-                Q = Q.filter(M.DB.Maps.Target.planet == planet)
-                Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
-                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Target.tick))
+                Q = session.query(User.name, Target.tick)
+                Q = Q.join(Target.user)
+                Q = Q.filter(Target.planet == planet)
+                Q = Q.filter(Target.tick == when) if when else Q.filter(Target.tick > tick)
+                Q = Q.order_by(asc(Target.tick))
                 result = Q.all()
-                session.close()
                 
                 if len(result) < 1:
                     reply="No bookings matching planet %s:%s:%s" % (planet.x, planet.y, planet.z,)
@@ -85,21 +80,20 @@ class status(loadable):
             
             # Galaxy
             else:
-                galaxy = M.DB.Maps.Galaxy.load(*params.group(1,2))
-                if planet is None:
+                galaxy = Galaxy.load(*params.group(1,2))
+                if galaxy is None:
                     message.alert("No galaxy with coords %s:%s" % params.group(1,2))
                     return
                 
-                session = M.DB.Session()
-                Q = session.query(M.DB.Maps.Planet.z, M.DB.Maps.User.name, M.DB.Maps.Target.tick)
-                Q = Q.join(M.DB.Maps.Target.planet)
-                Q = Q.join(M.DB.Maps.Target.user)
-                Q = Q.filter(M.DB.Maps.Planet.x == galaxy.x)
-                Q = Q.filter(M.DB.Maps.Planet.y == galaxy.y)
-                Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
-                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.z))
+                Q = session.query(Planet.z, User.name, Target.tick)
+                Q = Q.join(Target.planet)
+                Q = Q.join(Target.user)
+                Q = Q.filter(Planet.active == True)
+                Q = Q.filter(Planet.x == galaxy.x)
+                Q = Q.filter(Planet.y == galaxy.y)
+                Q = Q.filter(Target.tick == when) if when else Q.filter(Target.tick > tick)
+                Q = Q.order_by(asc(Planet.z))
                 result = Q.all()
-                session.close()
                 
                 if len(result) < 1:
                     reply="No bookings matching galaxy %s:%s" % (galaxy.x, galaxy.y,)
@@ -139,26 +133,27 @@ class status(loadable):
                 message.alert("Can not check status on the past. You wanted tick %s, but current tick is %s." % (when, tick,))
                 return
             
-            booker = M.DB.Maps.User.load(params.group(1)) if params.group(1) is not None else user
-            alliance = (M.DB.Maps.Alliance(name="Unknown") if params.group(1).lower() == "unknown" else M.DB.Maps.Alliance.load(params.group(1))) if booker is None else None
+            if params.group(1) is None and not self.is_user(user):
+                raise PNickParseError
+            booker = User.load(params.group(1), exact=False) if params.group(1) is not None else user
+            alliance = (Alliance(name="Unknown") if params.group(1).lower() == "unknown" else Alliance.load(params.group(1))) if booker is None else None
             if (booker or alliance) is None:
-                message.reply("No alliance or user matching '%s' found" % (param.group(1),))
+                message.reply("No alliance or user matching '%s' found" % (params.group(1),))
                 return
             
             # User
             if booker is not None:
-                session = M.DB.Session()
-                Q = session.query(M.DB.Maps.Planet, M.DB.Maps.Target.tick)
-                Q = Q.join(M.DB.Maps.Target.planet)
-                Q = Q.join(M.DB.Maps.Target.user)
-                Q = Q.filter(M.DB.Maps.Target.user == booker)
-                Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
-                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Target.tick))
-                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.x))
-                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.y))
-                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.z))
+                Q = session.query(Planet, Target.tick)
+                Q = Q.join(Target.planet)
+                Q = Q.join(Target.user)
+                Q = Q.filter(Planet.active == True)
+                Q = Q.filter(Target.user == booker)
+                Q = Q.filter(Target.tick == when) if when else Q.filter(Target.tick > tick)
+                Q = Q.order_by(asc(Target.tick))
+                Q = Q.order_by(asc(Planet.x))
+                Q = Q.order_by(asc(Planet.y))
+                Q = Q.order_by(asc(Planet.z))
                 result = Q.all()
-                session.close()
                 
                 if len(result) < 1:
                     reply="No bookings matching user %s" % (booker.name,)
@@ -172,25 +167,24 @@ class status(loadable):
                 
                 prev=[]
                 for planet, land in result:
-                    prev.append("(%s:%s:%s%s)" % (planet.x, planet.y, planet.z, "" if when else " landing pt%s/eta %s" % (when,when-tick,),))
+                    prev.append("(%s:%s:%s%s)" % (planet.x, planet.y, planet.z, "" if when else " landing pt%s/eta %s" % (land,land-tick,),))
                 reply+=", ".join(prev)
                 message.reply(reply)
                 return
             
             # Alliance
             else:
-                session = M.DB.Session()
-                Q = session.query(M.DB.Maps.Planet, M.DB.Maps.User.name, M.DB.Maps.Target.tick)
-                Q = Q.join(M.DB.Maps.Target.planet)
-                Q = Q.join(M.DB.Maps.Planet.intel) if alliance.id else Q.outerjoin(M.DB.Maps.Planet.intel)
-                Q = Q.join(M.DB.Maps.Target.user)
-                Q = Q.filter(M.DB.Maps.Intel.alliance == alliance)
-                Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
-                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.x))
-                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.y))
-                Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.z))
+                Q = session.query(Planet, User.name, Target.tick)
+                Q = Q.join(Target.planet)
+                Q = Q.join(Planet.intel) if alliance.id else Q.outerjoin(Planet.intel)
+                Q = Q.join(Target.user)
+                Q = Q.filter(Planet.active == True)
+                Q = Q.filter(Intel.alliance == (alliance if alliance.id else None))
+                Q = Q.filter(Target.tick == when) if when else Q.filter(Target.tick > tick)
+                Q = Q.order_by(asc(Planet.x))
+                Q = Q.order_by(asc(Planet.y))
+                Q = Q.order_by(asc(Planet.z))
                 result = Q.all()
-                session.close()
                 
                 if len(result) < 1:
                     reply="No active bookings matching alliance %s" %(alliance.name)

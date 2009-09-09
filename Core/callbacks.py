@@ -1,7 +1,10 @@
-# This module handles callbacks
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -16,67 +19,86 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
+# This module handles callbacks
 
 import os
-from exceptions_ import LoadFailure
-from modules import M
+import sys
+from Core.loader import Loader
+from Core.loadable import loadable
 
-callbacks = []
+use_init_all = True
 
-def callback(message):
-    # Call a callback given a message object
-    cmd = message.get_command()
-    for hook in callbacks:
-        event, callback = hook[0:2]
-        if event == cmd:
-            callback(message)
-
-def robocop(message):
-    # Call a callback given a robocop message
-    for hook in callbacks:
-        callback = hook[1]
-        if hasattr(callback,"robocop"):
-            callback.robocop(message)
-
-def unload_mod(module_name):
-    # Unload a module, remove all its callbacks
-    cb = callbacks[:]
-    for hook in cb:
-        mod_name = hook[2]
-        if mod_name == module_name:
-            callbacks.remove(hook)
-
-def reload_mod(module_name):
-    # Reload a module. Entails removing / readding it's callbacks
-    new_callbacks = load_callbacks(module_name, load_mod(module_name))
-    unload_mod(module_name)
-    add_callbacks(module_name, new_callbacks)
-
-def load_mod(module_name):
-    # Load a module, and reload it in preparation to add it's callbacks
-    return reload(__import__("Hooks." + module_name, globals(), locals(), [''], 1))
-
-def load_callbacks(module_name, mod):# = None):
-    # Search through a module or package and collect all it's callbacks
-    new_callbacks = []
-    if "__all__" in dir(mod):
-        for submodule_name in mod.__all__:
-            subm = module_name+"."+submodule_name
-            new_callbacks += load_callbacks(subm, load_mod(subm))
-    else:
+class callbacks(object):
+    # Modules/Callbacks/Hooks controller
+    callbacks = {}
+    modules = []
+    
+    def init(self):
+        # Load in everything in /Hooks/
+        self.load_package("Hooks")
+        # Tell the Loader to back up the modules we've used
+        # The backup call is currently done in Loader._reload() for
+        #  better transactional safety, despite this being more elegant.
+        #Loader.backup(*self.modules)
+    
+    def load_package(self, path):
+        if use_init_all:
+        # Using __init__'s __all__ to detect module list
+            # Load the current module/package
+            package = self.load_module(path)
+            if "__all__" in dir(package):
+            # Package pointing to more modules/subpackages
+                for subpackage in package.__all__:
+                    # Cycle through __all__ and load each item
+                    self.load_package(path+"."+subpackage)
+            else:
+                # Search the module for callbacks to hook in
+                self.hook_module(package)
+        else:
+        # Loading everything available, for future use
+            # Generate an iterator with all file contents of /Hooks/
+            for package, subpackages, modules in os.walk(path):
+            # Cycle through each directory
+                for module in modules:
+                # Cycle through each module
+                    # Check the file is a valid module we want to hook in
+                    if module != "__init__.py" and module[-3:] == ".py" and len(module) > 3:
+                        # Load the module
+                        module = self.load_module(package.replace("\\",".")+"."+module[:-3])
+                        # Search the module for callbacks to hook in
+                        self.hook_module(module)
+    
+    def load_module(self, mod):
+        # Keep a list of all modules imported so Loader can back them up
+        self.modules.append(mod)
+        Loader.load_module(mod)
+        return sys.modules[mod]
+    
+    def hook_module(self, mod):
         for object in dir(mod):
+            # Iterate over objects in the module
             callback = getattr(mod, object)
-            if isinstance(callback, type) and issubclass(callback, M.loadable.loadable) and (callback is not M.loadable.loadable):
-                new_callbacks.append(("PRIVMSG", callback(),))
-            if isinstance(callback, M.loadable.function):
-                new_callbacks.append((callback.trigger, callback,))
-    return new_callbacks
+            if isinstance(callback, type) and issubclass(callback, loadable) and (callback is not loadable):
+                # loadable.loadable
+                self.add_callback(callback.trigger, callback(),)
+    
+    def add_callback(self, event, callback):
+        # Add the callback to the dictionary of callbacks
+        # {event: [callback,..]}
+        if self.callbacks.has_key(event):
+            self.callbacks[event]+= [callback,]
+        else:
+            self.callbacks[event] = [callback,]
+    
+    def callback(self, message):
+        # Call back a hooked module
+        event = message.get_command()
+        # Check we have some callbacks stored for this event,
+        if self.callbacks.has_key(event):
+            # cycle through them
+            for callback in self.callbacks[event]:
+                # and call each one, passing in the message
+                callback(message)
 
-def add_callbacks(module_name, new_callbacks):
-    # Add a module or package's callbacks to the global list
-    for event, callback in new_callbacks:
-        callbacks.append((event, callback, module_name))
+Callbacks = callbacks()
+Callbacks.init()

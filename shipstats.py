@@ -1,9 +1,10 @@
-#!/usr/local/bin/python
-
-# Download the shipstats and update the DB
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -18,18 +19,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
-
-import re, urllib2
-from variables import urlStats
-import Core.db as DB
-session = DB.Session()
-
-stats = urllib2.urlopen(urlStats).read()
-session.execute(DB.Maps.Ship.__table__.delete())
+import re
+import sys
+import urllib2
+from sqlalchemy.sql import text
+from Core.config import Config
+from Core.db import true, false, session
+from Core.maps import Ship
 
 regex = r'^<tr class="(Ter|Cath|Xan|Zik|Etd)">.+?(\w+)</td>' # race & name
 regex += r'<td>(\w+)</td>' # class
@@ -56,20 +52,31 @@ mapping = {    "Fi": "Fighter",
 keys = ['race', 'name', 'class_', 't1', 't2', 't3', 'type', 'init',
         'guns', 'armor', 'damage', 'empres', 'metal', 'crystal', 'eonium']
 
-for line in sre.findall(stats):
-    ship = DB.Maps.Ship()
-    line = list(line)
-    for index, key in enumerate(keys):
-        if line[index] in mapping:
-            line[index] = mapping[line[index]]
-        elif line[index].isdigit():
-            line[index] = int(line[index])
-        if line[index] != '-':
-            setattr(ship,key,line[index])
-    ship.total_cost = ship.metal + ship.crystal + ship.eonium
-    print "%12s%12s%12s%12s" % (ship.name, ship.class_, ship.race, ship.type,)
+def main(url = Config.get("URL", "ships"), debug=False):
+    stats = urllib2.urlopen(url).read()
+    session.execute(Ship.__table__.delete())
+    session.execute(text("SELECT setval('ships_id_seq', 1, :false);", bindparams=[false]))
     
-    session.add(ship)
+    for line in sre.findall(stats):
+        ship = Ship()
+        line = list(line)
+        for index, key in enumerate(keys):
+            if line[index] in mapping:
+                line[index] = mapping[line[index]]
+            elif line[index].isdigit():
+                line[index] = int(line[index])
+            if line[index] != '-':
+                setattr(ship,key,line[index])
+        ship.total_cost = ship.metal + ship.crystal + ship.eonium
+        if debug: print "%12s%12s%12s%12s" % (ship.name, ship.class_, ship.race, ship.type,)
+        
+        session.add(ship)
+    
+    session.commit()
+    session.close()
 
-session.commit()
-session.close()
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        sys.exit(main(url=sys.argv[1],debug=True))
+    else:
+        sys.exit(main(debug=True))

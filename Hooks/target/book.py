@@ -1,7 +1,10 @@
-# Book
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -16,32 +19,28 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
-
 import re
-from .variables import alliance, access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import asc
+from Core.config import Config
+from Core.db import session
+from Core.maps import Updates, Planet, User, Target
+from Core.loadable import loadable
 
+@loadable.module("half")
 class book(loadable):
     """Book a target for attack. You should always book your targets, so someone doesn't inadvertedly piggy your attack."""
+    usage = " x:y:z (eta|landing tick)"
+    paramre = re.compile(loadable.planet_coordre.pattern+r"\s(\d+)(?:\s(yes))?")
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(self.planet_coordre.pattern+r"\s(\d+)(?:\s(yes))?")
-        self.usage += " x:y:z (eta|landing tick)"
-    
-    @loadable.run_with_access(access['member'])
+    @loadable.require_user
     def execute(self, message, user, params):
-        planet = M.DB.Maps.Planet.load(*params.group(1,2,3))
+        planet = Planet.load(*params.group(1,2,3))
         if planet is None:
             message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
             return
         
-        tick = M.DB.Maps.Updates.current_tick()
+        tick = Updates.current_tick()
         when = int(params.group(4))
         if when < 80:
             eta = when
@@ -54,26 +53,21 @@ class book(loadable):
         if when > 32767:
             when = 32767        
         
-        session = M.DB.Session()
-        session.add(planet)
-        
-        if planet.intel and planet.intel.alliance and (planet.alliance.name == alliance):
-            message.reply("%s:%s:%s is %s in %s. Quick, launch before they notice the highlight." % (planet.x,planet.y,planet.z, planet.intel.nick or 'someone', alliance,))
-            session.close()
+        if planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name"):
+            message.reply("%s:%s:%s is %s in %s. Quick, launch before they notice the highlight." % (planet.x,planet.y,planet.z, planet.intel.nick or 'someone', Config.get("Alliance","name"),))
             return
         
-        Q = session.query(M.DB.Maps.User.name, M.DB.Maps.Target.tick)
-        Q = Q.join(M.DB.Maps.Target.user)
-        Q = Q.filter(M.DB.Maps.Target.planet == planet)
-        Q = Q.filter(M.DB.Maps.Target.tick >= when)
-        Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Target.tick))
+        Q = session.query(User.name, Target.tick)
+        Q = Q.join(Target.user)
+        Q = Q.filter(Target.planet == planet)
+        Q = Q.filter(Target.tick >= when)
+        Q = Q.order_by(asc(Target.tick))
         result = Q.all()
         
         if len(result) >= 1:
             booker, land = result[0]
             if land == when:
                 message.reply("Target %s:%s:%s is already booked for landing tick %s by user %s" % (planet.x,planet.y,planet.z, land, booker,))
-                session.close()
                 return
             
             if params.group(5) is None:
@@ -87,11 +81,11 @@ class book(loadable):
                 return
         
         try:
-            planet.bookings.append(M.DB.Maps.Target(user=user, tick=when))
+            planet.bookings.append(Target(user=user, tick=when))
             session.commit()
             message.reply("Booked landing on %s:%s:%s tick %s for user %s" % (planet.x,planet.y,planet.z, when, user.name,))
             return
-        except M.DB.sqlalchemy.exceptions.IntegrityError:
+        except IntegrityError:
             session.rollback()
             raise Exception("Integrity error? Unable to booking for pid %s and tick %s"%(planet.id, when,))
             return

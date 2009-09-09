@@ -1,10 +1,15 @@
 update LICENSE in all files (some files don't have any license atm)
     add jester to the list of (C) names: a _lot_ of code is copy/pasted straight from munin
 
-Channel access min/max system
-    inc a way to check for a user but proceed even if user doesn't exist
+http://www.sqlalchemy.org/trac/ticket/1468
+http://www.sqlalchemy.org/trac/ticket/1529
 
-reloading loadable is unsafe, needs fixing
+migrate db system for createdb.py
+    investigate schemas/namespaces as alternative to seperate DBs
+
+rewrite Connection.write and Action.write to use detached threaded system
+
+update all hooks to use new loader(session) system, test thoroughly etc
 
 Hooks.request
     !request cancel id
@@ -45,7 +50,6 @@ Access and Channels:
     addchan, 
     galchan, 
     remchan, 
-    galmate, 
 
 Intel:
 
@@ -56,20 +60,13 @@ Ships:
     move package vars to main var system
 
 Simple calcs and lookups:
-    bashee, 
-    basher, 
     lookup, 
-    maxcap, 
-    xp, 
 
 Growth:
-    exp, 
-    value, 
 
 Target search:
     cunts, 
     idler, 
-    victim, 
     whore, 
 
 Cookies and Props:

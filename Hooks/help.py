@@ -1,7 +1,10 @@
-# Help
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -16,55 +19,33 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
+import re
+from Core.exceptions_ import PNickParseError, UserError
+from Core.maps import Channel
+from Core.loadable import loadable
+from Core.callbacks import Callbacks
 
-from .variables import admins, access
-from .Core.exceptions_ import PNickParseError, UserError
-from .Core.modules import M
-loadable = M.loadable.loadable
-
+@loadable.module()
 class help(loadable):
     """Help"""
+    usage = " [command]"
+    paramre = re.compile(r"\s*(\S*)")
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = self.commandre
-        self.usage += " [command]"
-    
-    @loadable.run
     def execute(self, message, user, params):
-        
-        if len(message.get_msg().split()) == 1:
-            modules = {}
-            commands = []
-            message.alert(self.helptext+". For more information use: "+self.usage)
-            for event, callback, module_name in message.callbackmod.callbacks:
-                if event != "PRIVMSG":
-                    continue
-                try:
-                    if hasattr(callback, "has_access"):
-                        if callback.has_access(message):
-                            commands.append(callback.__class__.__name__)
-                    else:
-                        if message.get_pnick() in admins:
-                            commands.append(callback.__name__)
-                except PNickParseError:
-                    continue
-                except UserError:
-                    continue
-            message.alert("Loaded commands: " + ", ".join(commands))
+        if params.group(1) is not "":
+            return
+        commands = []
+        message.reply(self.doc+". For more information use: "+self.usage)
+        if message.in_chan():
+            channel = Channel.load(message.get_chan())
         else:
-            for event, callback, module_name in message.callbackmod.callbacks:
-                if event != "PRIVMSG":
-                    continue
-                try:
-                    if hasattr(callback, "help"):
-                        continue
-                    else:
-                        if (message.get_pnick() in admins) and (message.get_msg().split()[1] == callback.__name__):
-                            message.reply(callback.__doc__)
-                except PNickParseError:
-                    continue
+            channel = None
+        for callback in Callbacks.callbacks["PRIVMSG"]:
+            try:
+                if callback.check_access(message, user, channel) is not None:
+                    commands.append(callback.name)
+            except PNickParseError:
+                continue
+            except UserError:
+                continue
+        message.reply("Loaded commands: " + ", ".join(commands))

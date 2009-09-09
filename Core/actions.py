@@ -1,7 +1,10 @@
-# This determines what the bot can send to the server, and is basically the IRC-API for plugin writers
-
 # This file is part of Merlin.
- 
+# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+
+# Individual portions may be copyright by individual contributors, and
+# are included in this collective work with permission of the copyright
+# owners.
+
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -16,22 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# This work is Copyright (C)2008 of Robin K. Hansen, Elliot Rosemarine.
-# Individual portions may be copyright by individual contributors, and
-# are included in this collective work with permission of the copyright
-# owners.
+# This determines what the bot can send to the server, and is basically the IRC-API for plugin writers
 
-import messages
-from exceptions_ import ParseError
+from merlin import Merlin
+from Core.exceptions_ import ParseError
+from Core.connection import Connection
+from Core.chanusertracker import Channels, Nicks
+from Core.messages import Message, PUBLIC_REPLY, PRIVATE_REPLY, NOTICE_REPLY
 
-class Action(messages.Message):
+class Action(Message):
     # This object holds the parse, and will enable users to send messages to the server on a higher level
-    
-    def __init__(self, line, conn, nick, alliance, callbackmod):
-        # The object takes a line as a parameter
-        messages.Message.__init__(self, line, nick, alliance)
-        self.connection = conn
-        self.callbackmod = callbackmod
     
     def write(self, text):
         # Write something to the server, the message will be split up by newlines and at 450chars max
@@ -40,49 +37,51 @@ class Action(messages.Message):
         if text:            
             for line in text.split("\n"):
                 while line:
-                    self.connection.write((params + line)[:(450 - len(params))])
+                    Connection.write((params + line)[:(450 - len(params))])
                     line = line[(450 - len(params)):]
         else:
-            self.connection.write(params[:-1])
-        print
+            Connection.write(params[:-1])
     
     def privmsg(self, text, target=None):
         # Privmsg someone. Target defaults to the person who triggered this line
         self.write("PRIVMSG %s :%s" % (target or self.get_nick(), text))
     
     def notice(self, text, target=None):
-        # As above
-        self.write("NOTICE %s :%s" % (target or self.get_nick(), text))
+        # If we're opped in a channel in common with the user, we can reply with
+        #  CNOTICE instead of NOTICE which doesn't count towards the flood limit.
+        if (self.get_chan() in Channels.keys()
+            and Channels[self.get_chan()].opped is True
+            and Nicks[target or self.get_nick()] in Channels[self.get_chan()].nicks):
+            self.write("CNOTICE %s %s :%s" % (target or self.get_nick(), self.get_chan(), text))
+        else:
+            self.write("NOTICE %s :%s" % (target or self.get_nick(), text))
     
     def reply(self, text):
         # Always reply to a PM with a PM, otherwise only ! replies with privmsg
-        if self.get_chan()[0] not in ("#","&") or self.get_msg()[0] not in (".","-","~"):
-            self.privmsg(text, self.reply_target())
-        else:
+        # Always reply to an @command with a PM
+        reply = self.reply_type()
+        if reply == PUBLIC_REPLY:
+            self.privmsg(text, self.get_chan())
+        if reply == PRIVATE_REPLY:
+            self.privmsg(text, self.get_nick())
+        if reply == NOTICE_REPLY:
             self.notice(text)
     
     def alert(self, text):
         # Notice the user, unless it was a PM
-        if self.get_chan()[0] != "#":
-            self.privmsg(text, self.reply_target())
-        else:
+        if self.in_chan():
             self.notice(text)
+        else:
+            self.privmsg(text, self.get_nick())
     
-    def topic(self, text, target=None):
+    def topic(self, text, channel=None):
         # Set the topic in a channel
-        if target and not "#" in target:
-            target = "#" + target
-        if not target:
-            target = self.get_chan()
-            
-            if not "#" in target:
-                raise ValueError("Not a valid channelname!")
-        self.write("TOPIC %s :%s" % (target, text))
+        channel = channel or self.get_chan()
+        self.write("TOPIC %s :%s" % (channel, text))
     
     def nick(self, new_nick):
         # Change the bots nick to new_nick
         self.write("NICK %s" % new_nick)
-        self.botnick = new_nick
     
     def join(self, target, key=None):
         # Join a channel
@@ -94,20 +93,20 @@ class Action(messages.Message):
     
     def invite(self, target, channel=None):
         # Invite target to channel
-        self.write(("INVITE %s %s" % (target, channel)) if channel else ("INVITE %s %s" % (target, self.get_chan())))
+        channel = channel or self.get_chan()
+        self.write(("INVITE %s %s" % (target, channel)))
     
     def quit(self, message=None):
         # Quit the bot from the network
         self.write(("QUIT :%s" % message) if message else "QUIT")
-        
+    
     def kick(self, target, channel=None, message=None):
         # Make the bot kick someone
-        if channel and message:
+        channel = channel or self.get_chan()
+        if message:
             self.write("KICK %s %s :%s" % (channel, target, message))
-        elif channel:
-            self.write("KICK %s %s" % (channel, target))
         else:
-            self.write("KICK %s %s" % (self.get_chan(), target))
+            self.write("KICK %s %s" % (channel, target))
     
     def __str__(self):
         # String representation of the Action object (Namely for debugging purposes)
