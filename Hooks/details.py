@@ -19,54 +19,54 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.db import session
+from Core.maps import Updates, Planet, Target
+from Core.loadable import loadable
 
+@loadable.module("member")
 class details(loadable):
     """This command basically collates lookup, xp, intel and status into one simple to use command. Neat, huh?"""
+    usage = " x.y.z"
+    paramre = loadable.planet_coordre
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = self.planet_coordre
-        self.usage += " x.y.z"
-    
-    @loadable.run_with_access(access.get('hc',0) | access.get('intel',access['member']))
     def execute(self, message, user, params):
         
-        target = M.DB.Maps.Planet.load(*params.groups())
+        target = Planet.load(*params.groups())
         if target is None:
             message.reply("No planet matching '%s:%s:%s' found"%params.groups())
             return
         replies = [str(target)]
         
-        session = M.DB.Session()
-        session.add_all((user, target,))
-        if user.planet is not None:
+        if self.is_user(user) and user.planet is not None:
             attacker = user.planet
             reply="Target "
+            target_val = target.value
+            attacker_val = attacker.value
+            target_score = target.score
+            attacker_score = attacker.score
+
             reply+="%s:%s:%s (%s|%s) "%(target.x,target.y,target.z,
-                                        self.num2short(target.value),self.num2short(target.score))
+                                     self.num2short(target.value),self.num2short(target.score))
             reply+="| Attacker %s:%s:%s (%s|%s) "%(attacker.x,attacker.y,attacker.z,
-                                                   self.num2short(attacker.value),self.num2short(attacker.score))
-            bravery = attacker.bravery(target)
-            reply+="| Bravery: %.2f " % (bravery,)
-            cap=target.maxcap()
-            xp=int(cap*bravery)
+                                                self.num2short(attacker.value),self.num2short(attacker.score))
+
+            reply+="| Bravery: %.2f " % (attacker.bravery(target),)
+
+            cap=target.maxcap(attacker)
+            xp=attacker.calc_xp(target)
             reply+="| Roids: %s | XP: %s | Score: %s" % (cap,xp,xp*60)
             replies.append(reply)
         
         if target.intel is not None:
             replies.append(("Information stored for %s:%s:%s -"+str(target.intel) if str(target.intel) else "No information stored for %s:%s:%s") % (target.x, target.y, target.z,))
         
-        bookings = target.bookings.filter(M.DB.Maps.Target.tick > M.DB.Maps.Updates.current_tick()).all()
+        bookings = target.bookings.filter(Target.tick > Updates.current_tick()).all()
         if len(bookings) < 1:
             replies.append("No bookings matching planet %s:%s:%s" % (target.x, target.y, target.z,))
         else:
             prev = []
             for booking in bookings:
-                prev.append("(%s %s)" % (booking.tick,booking.user.name))
+                prev.append("(%s user:%s)" % (booking.tick,booking.user.name))
             replies.append("Status for %s:%s:%s - " % (target.x, target.y, target.z,) + ", ".join(prev))
         
-        session.close()
         message.reply("\n".join(replies))
