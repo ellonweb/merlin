@@ -566,6 +566,22 @@ class Scan(Base):
     pa_id = Column(String(32), index=True, unique=True)
     group_id = Column(String(32))
     scanner_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    
+    def __str__(self):
+        p = self.planet
+        head = "%s on %s:%s:%s " % (PA.get(self.scantype,"name"),p.x,p.y,p.z,)
+        id_tick = "(id: %s, pt: %s)" % (self.pa_id,self.tick,)
+        id_age_value = "(id: %s, age: %s, value diff: %s)" % (self.pa_id,Updates.current_tick()-self.tick,p.value-p.history(self.tick).value)
+        if self.scantype in ("P",):
+            return head + id_tick + str(self.planetscan)
+        if self.scantype in ("D",):
+            return head + id_tick + str(self.devscan)
+        if self.scantype in ("U","A",):
+            return head + id_age_value + " | ".join(map(str,self.units))
+        if self.scantype == "J":
+            return head + id_tick + " | ".join(map(str,self.fleets))
+        if self.scantype == "N":
+            return head + Config.get("URL","viewscan") % (self.pa_id,)
 Planet.scans = dynamic_loader(Scan, backref="planet")
 Scan.scanner = relation(User, backref="scans")
 
@@ -597,7 +613,12 @@ class PlanetScan(Base):
     prod_res = Column(Integer)
     agents = Column(Integer)
     guards = Column(Integer)
-Scan.planetscan = relation(PlanetScan, uselist=False)
+    def __str__(self):
+        reply = " Roids: (m:%s, c:%s, e:%s) |" % (self.roid_metal,self.roid_crystal,self.roid_eonium,)
+        reply+= " Resources: (m:%s, c:%s, e:%s) |" % (self.res_metal,self.res_crystal,self.res_eonium,)
+        reply+= " Hidden: %s | Agents: %s | Guards: %s" % (self.prod_res,self.agents,self.guards,)
+        return reply
+Scan.planetscan = relation(PlanetScan, uselist=False, backref="scan")
 
 class DevScan(Base):
     __tablename__ = 'devscan'
@@ -621,7 +642,119 @@ class DevScan(Base):
     core = Column(Integer)
     covert_op = Column(Integer)
     mining = Column(Integer)
-Scan.devscan = relation(DevScan, uselist=False)
+    def infra_str(self):
+        level = self.infrastructure
+        if level==0:
+            return "10 constructions"
+        if level==1:
+            return "20 constructions"
+        if level==2:
+            return "50 constructions"
+        if level==3:
+            return "100 constructions"
+        if level==4:
+            return "150 constructions"
+    
+    def hulls_str(self):
+        level = self.hulls
+        if level==1:
+            return "FI/CO"
+        if level==2:
+            return "FR/DE"
+        if level==3:
+            return "CR/BS"
+    
+    def waves_str(self):
+        level = self.waves
+        if level==0:
+            return "Planet"
+        if level==1:
+            return "Surface"
+        if level==2:
+            return "Technology"
+        if level==3:
+            return "Unit"
+        if level==4:
+            return "News"
+        if level==5:
+            return "Fleet"
+        if level==6:
+            return "JGP"
+        if level==7:
+            return "Advanced Unit"
+    
+    def covop_str(self):
+        level = self.covert_op
+        if level==0:
+            return "Research Hack"
+        if level==1:
+            return "Raise Stealth"
+        if level==2:
+            return "Blow up roids"
+        if level==3:
+            return "Blow up shits"
+        if level==4:
+            return "Blow up Amps/Dists"
+        if level==5:
+            return "Resource hacking (OMG!)"
+        if level==6:
+            return "Blow up Strucs"
+    
+    def mining_str(self):
+        level = self.mining+1
+        if level==0:
+            return "50 roids"
+        if level==1:
+            return "100 roids (scanner!)"
+        if level==2:
+            return "200 roids"
+        if level==3:
+            return "300 roids"
+        if level==4:
+            return "500 roids"
+        if level==5:
+            return "750 roids"
+        if level==6:
+            return "1k roids"
+        if level==7:
+            return "1250 roids"
+        if level==8:
+            return "1500 roids"
+        if level==9:
+            return "Jan 1. 1900"
+        if level==10:
+            return "2500 roids"
+        if level==11:
+            return "3000 roids"
+        if level==12:
+            return "3500 roids"
+        if level==13:
+            return "4500 roids"
+        if level==14:
+            return "5500 roids"
+        if level==15:
+            return "6500 roids"
+        if level==16:
+            return "8000 roids"
+        if level==17:
+            return "top10 or dumb"
+    
+    def total(self):
+        total = self.light_factory+self.medium_factory+self.heavy_factory
+        total+= self.wave_amplifier+self.wave_distorter
+        total+= self.metal_refinery+self.crystal_refinery+self.eonium_refinery
+        total+= self.research_lab+self.finance_centre+self.security_centre
+        return total
+        
+    def __str__(self):
+        reply = " Travel: %s, Infrajerome: %s, Hulls: %s," % (self.travel,self.infra_str(),self.hulls_str(),)
+        reply+= " Waves: %s, Core: %s, Covop: %s, Mining: %s" % (self.waves_str(),self.core,self.covop_str(),self.mining_str(),)
+        reply+= "\n"
+        reply+= " Structures: LFac: %s, MFac: %s, HFac: %s, Amp: %s," % (self.light_factory,self.medium_factory,self.heavy_factory,self.wave_amplifier,)
+        reply+= " Dist: %s, MRef: %s, CRef: %s, ERef: %s," % (self.wave_distorter,self.metal_refinery,self.crystal_refinery,self.eonium_refinery,)
+        reply+= " ResLab: %s (%s%%), FC: %s, Sec: %s (%s%%)" % (self.research_lab,int(float(self.research_lab)/self.total()*100),self.finance_centre,self.security_centre,int(float(self.security_centre)/self.total()*100),)
+        return reply
+Scan.devscan = relation(DevScan, uselist=False, backref="scan")
 
 class UnitScan(Base):
     __tablename__ = 'unitscan'
@@ -629,7 +762,9 @@ class UnitScan(Base):
     scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
     ship_id = Column(Integer, ForeignKey(Ship.id, ondelete='cascade'))
     amount = Column(Integer)
-Scan.units = relation(UnitScan)
+    def __str__(self):
+        return "%s %s" % (self.ship.name, self.amount,)
+Scan.units = relation(UnitScan, backref="scan")
 UnitScan.ship = relation(Ship)
 
 class FleetScan(Base):
@@ -644,7 +779,10 @@ class FleetScan(Base):
     launch_tick = Column(Integer)
     landing_tick = Column(Integer)
     mission = Column(String(7))
-Scan.fleets = relation(FleetScan)
+    def __str__(self):
+        p = self.owner
+        return "(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.landing-self.scan.tick,)
+Scan.fleets = relation(FleetScan, backref="scan")
 FleetScan.owner = relation(Planet, primaryjoin=FleetScan.owner_id==Planet.id)
 FleetScan.target = relation(Planet, primaryjoin=FleetScan.target_id==Planet.id)
 
@@ -654,7 +792,7 @@ class CovOp(Base):
     scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
     covopper_id = Column(Integer, ForeignKey(Planet.id, ondelete='set null'))
     target_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'))
-Scan.covops = relation(CovOp)
+Scan.covops = relation(CovOp, backref="scan")
 CovOp.covopper = relation(Planet, primaryjoin=CovOp.covopper_id==Planet.id)
 CovOp.target = relation(Planet, primaryjoin=CovOp.target_id==Planet.id)
 

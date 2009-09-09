@@ -21,19 +21,6 @@
  
 # List of package modules
 __all__ = [
-           "request",
-           "parser",
+#           "request",
+#           "parser",
            ]
-
-scans = {
-    "P": {"name":"Planet",         "type":"1"},
-    "L": {"name":"Landing",        "type":"2"},
-    "D": {"name":"Development",    "type":"3"},
-    "U": {"name":"Unit",           "type":"4"},
-    "N": {"name":"News",           "type":"5"},
-    "I": {"name":"Incoming",       "type":"6"},
-    "J": {"name":"Jumpgate Probe", "type":"7"},
-    "A": {"name":"Advanced Unit",  "type":"8"}
-}
-
-requesturl = "http://game.planetarion.com/waves.pl?action=single_scan&scan_type=%s&scan_x=%s&scan_y=%s&scan_z=%s"
