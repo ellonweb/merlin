@@ -20,27 +20,25 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from .variables import access
-from .Core.modules import M
-loadable = M.loadable.loadable
+from sqlalchemy.sql import asc
+from Core.db import session
+from Core.maps import Updates, Planet, Alliance, User, Intel, Target
+from Core.loadable import loadable
 
+@loadable.module("half")
 class gangbang(loadable):
     """List of booked targets in an alliance"""
+    usage = " alliance [tick]"
+    paramre = re.compile(r"\s([\w-]+)(?:\s(\d+))?")
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s([\w-]+)(?:\s(\d+))?")
-        self.usage += " alliance [tick]"
-    
-    @loadable.run_with_access(access.get('hc',0) | access.get('bc',access['member']))
     def execute(self, message, user, params):
         
-        alliance = M.DB.Maps.Alliance(name="Unknown") if params.group(1).lower() == "unknown" else M.DB.Maps.Alliance.load(params.group(1))
+        alliance = Alliance(name="Unknown") if params.group(1).lower() == "unknown" else Alliance.load(params.group(1))
         if alliance is None:
             message.reply("No alliance matching '%s' found"%(params.group(1),))
             return
         
-        tick = M.DB.Maps.Updates.current_tick()
+        tick = Updates.current_tick()
         
         when = int(params.group(2) or 0)
         if when and when < 80:
@@ -49,18 +47,17 @@ class gangbang(loadable):
             message.alert("Can not check status on the past. You wanted tick %s, but current tick is %s." % (when, tick,))
             return
         
-        session = M.DB.Session()
-        Q = session.query(M.DB.Maps.Planet, M.DB.Maps.User, M.DB.Maps.Target.tick)
-        Q = Q.join(M.DB.Maps.Target.planet)
-        Q = Q.join(M.DB.Maps.Planet.intel) if alliance.id else Q.outerjoin(M.DB.Maps.Planet.intel)
-        Q = Q.join(M.DB.Maps.Target.user)
-        Q = Q.filter(M.DB.Maps.Intel.alliance == alliance)
-        Q = Q.filter(M.DB.Maps.Target.tick == when) if when else Q.filter(M.DB.Maps.Target.tick > tick)
-        Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.x))
-        Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.y))
-        Q = Q.order_by(M.DB.SQL.asc(M.DB.Maps.Planet.z))
+        Q = session.query(Planet, User.name, Target.tick)
+        Q = Q.join(Target.planet)
+        Q = Q.join(Planet.intel) if alliance.id else Q.outerjoin(Planet.intel)
+        Q = Q.join(Target.user)
+        Q = Q.filter(Planet.active == True)
+        Q = Q.filter(Intel.alliance == (alliance if alliance.id else None))
+        Q = Q.filter(Target.tick == when) if when else Q.filter(Target.tick > tick)
+        Q = Q.order_by(asc(Planet.x))
+        Q = Q.order_by(asc(Planet.y))
+        Q = Q.order_by(asc(Planet.z))
         result = Q.all()
-        session.close()
         
         if len(result) < 1:
             reply="No active bookings matching alliance %s" %(alliance.name)
@@ -84,7 +81,7 @@ class gangbang(loadable):
         for land in sorted_keys:
             prev=[]
             for planet, user in ticks[land]:
-                prev.append("(%s:%s:%s %s)" % (planet.x,planet.y,planet.z,user.name))
+                prev.append("(%s:%s:%s %s)" % (planet.x,planet.y,planet.z,user))
             replies.append("Tick %s (eta %s) "%(land,land-tick) +", ".join(prev))
         replies[0] = reply + replies[0]
         
