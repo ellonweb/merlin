@@ -29,8 +29,8 @@ from Core.loadable import loadable
 from Core.paconf import PA
 
 @loadable.module("member")
-class victim(loadable):
-    """Target search, ordered by size"""
+class idler(loadable):
+    """Target search, ordered by idle ticks"""
     usage = "  [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
     paramre = re.compile(r"\s+(.+)")
     alliancere=re.compile(r"^(\S+)$")
@@ -110,7 +110,7 @@ class victim(loadable):
                              Planet.score.op(">")(attacker.score*PA.getfloat("bash","score"))))
         if cluster:
             Q = Q.filter(Planet.x == cluster)
-        Q = Q.order_by(desc(Planet.size))
+        Q = Q.order_by(desc(Planet.idle))
         Q = Q.order_by(desc(Planet.value))
         result = Q[:6]
         
@@ -133,7 +133,7 @@ class victim(loadable):
         replies = []
         for planet, intel in result[:5]:
             reply="%s:%s:%s (%s)" % (planet.x,planet.y,planet.z,planet.race)
-            reply+=" Value: %s Size: %s" % (planet.value,planet.size)
+            reply+=" Value: %s Size: %s Idle: %s" % (planet.value,planet.size, planet.idle)
             if intel:
                 if intel.nick:
                     reply+=" Nick: %s" % (intel.nick,)
