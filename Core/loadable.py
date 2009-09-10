@@ -95,6 +95,16 @@ class loadable(object):
                 raise UserError
         return execute
     
+    @staticmethod
+    def require_planet(hook):
+        def execute(self, message, user, params):
+            if self.is_user(user) and self.get_user_planet(user):
+                hook(self, message, user, params)
+                return
+            elif message.get_pnick():
+                raise UserError
+        return execute
+    
     def get_user_planet(self, user):
         if not self.is_user(user):
             raise PNickParseError
