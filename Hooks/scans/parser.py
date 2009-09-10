@@ -19,8 +19,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# Parse a scan
-
 import re
 from subprocess import Popen
 from time import time

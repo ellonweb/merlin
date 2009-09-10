@@ -22,6 +22,7 @@
 # List of package modules
 __all__ = [
            "scan",
+           "scans",
 #           "request",
            "parser",
            ]
