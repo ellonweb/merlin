@@ -19,11 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
-from sqlalchemy.sql import desc
 from sqlalchemy.sql.functions import count, max
-from Core.config import Config
-from Core.paconf import PA
 from Core.db import session
 from Core.maps import Planet, Scan
 from Core.loadable import loadable
