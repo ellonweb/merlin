@@ -22,7 +22,6 @@
 import re
 from sqlalchemy import or_
 from sqlalchemy.sql import desc
-from Core.exceptions_ import PNickParseError
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
 from Core.loadable import loadable
@@ -33,6 +32,7 @@ class victim(loadable):
     """Target search, ordered by size"""
     usage = "  [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
     paramre = re.compile(r"\s+(.+)")
+    PrefError = "You must set your planet with !pref to use the bash option"
     alliancere=re.compile(r"^(\S+)$")
     racere=re.compile(r"^(ter|cat|xan|zik|eit|etd)$",re.I)
     rangere=re.compile(r"^(<|>)?(\d+)$")
@@ -57,13 +57,7 @@ class victim(loadable):
             m=self.bashre.search(p)
             if m and not bash:
                 bash=True
-                if not self.is_user(user):
-                    raise PNickParseError
-                if user.planet is not None:
-                    attacker = user.planet
-                else:
-                    message.alert("Usage: %s (you must set your planet in preferences to use the bash option (!pref planet=x:y:z))" % (self.usage,))
-                    return
+                attacker = self.get_user_planet(user)
                 continue
             m=self.clusterre.search(p)
             if m and not cluster:

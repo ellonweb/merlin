@@ -33,6 +33,9 @@ class Reload(Exception):
 class LoadableError(Exception):
     pass
 
+class PrefError(LoadableError):
+    pass
+
 class ParseError(Exception):
     pass
 
@@ -47,4 +50,3 @@ class PNickParseError(ParseError):
 
 class UserError(Exception):
     pass
-    

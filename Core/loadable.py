@@ -22,7 +22,7 @@
 # Basic loadable class, the baseclass for most plugins
 
 import re
-from Core.exceptions_ import LoadableError, ParseError, PNickParseError, UserError
+from Core.exceptions_ import LoadableError, PrefError, ParseError, PNickParseError, UserError
 from Core.config import Config
 from Core.maps import User, Channel
 from Core.chanusertracker import get_user
@@ -38,6 +38,7 @@ class loadable(object):
     paramre = re.compile("")
     PParseError = "You need to login and set mode +x to use this command"
     AccessError = "You don't have access to this command"
+    PrefError = "You must set your planet with !pref to use this command"
     coordre = re.compile(r"\s*(\d+)[. :\-](\d+)(?:[. :\-](\d+))?")
     planet_coordre = re.compile(r"\s*(\d+)[. :\-](\d+)[. :\-](\d+)")
     true = ["1","yes","y","true","t"]
@@ -76,6 +77,8 @@ class loadable(object):
             message.alert(self.PParseError)
         except UserError:
             message.alert(self.AccessError)
+        except PrefError:
+            message.alert(self.PrefError)
         except ParseError:
             message.alert(self.usage)
     
@@ -91,6 +94,13 @@ class loadable(object):
             elif message.get_pnick():
                 raise UserError
         return execute
+    
+    def get_user_planet(self, user):
+        if not self.is_user(user):
+            raise PNickParseError
+        if user.planet is None:
+            raise PrefError
+        return user.planet
     
     def is_user(self, user):
         if isinstance(user, User):

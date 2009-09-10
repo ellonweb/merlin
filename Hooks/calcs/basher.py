@@ -19,7 +19,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from Core.exceptions_ import PNickParseError
 from Core.paconf import PA
 from Core.maps import Planet
 from Core.loadable import loadable
@@ -32,12 +31,7 @@ class basher(loadable):
     def execute(self, message, user, params):
         
         if len(params.groups()) < 3:
-            if not self.is_user(user):
-                raise PNickParseError
-            planet = user.planet
-            if planet is None:
-                message.alert("Make sure you've set your planet with !pref")
-                return
+            planet = self.get_user_planet(user)
         else:
             planet = Planet.load(*params.group(1,2,3))
             if planet is None:

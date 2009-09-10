@@ -64,15 +64,8 @@ class lookup(loadable):
             
             # User
             if params.group(1) is None:
-                if not self.is_user(user):
-                    raise PNickParseError
-                else:
-                    if user.planet is None:
-                        message.reply("Make sure you've set your planet with !pref")
-                        return
-                    else:
-                        message.reply(str(user.planet))
-                        return
+                message.reply(str(self.get_user_planet(user)))
+                return
             elif not self.is_user(user):
                 raise PNickParseError
             elif not user.is_member():
