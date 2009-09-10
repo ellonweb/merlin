@@ -126,7 +126,7 @@ class parse(object):
         session.commit()
         
         '''
-        push("!scan %s %s %s" % (scantype, pa_id, " ".join(users),))
+        push("!scans %s %s %s" % (scantype, pa_id, " ".join(users),))
         '''
     
     def parse_P(self, scan_id, scan, page):

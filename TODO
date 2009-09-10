@@ -8,19 +8,16 @@ rewrite Connection.write and Action.write to use detached threaded system
 
 update all hooks to use new loader(session) system, test thoroughly etc
 
-Hooks.request
+Reimplement Robocop (threaded?)
+    scan requests (!request)
+    scans parsed (!scans)
+
+Hooks.scans.request
     !request cancel id
-    intel.dists
-        fill in data from scan requests ("ellonweb informs that atleast n dists are needed")
-
-Hooks.scan
-    robocop interface
-    chanusertracker interface
-        pm all known users that their scan is done
-
-Hooks.blocked
-    more manual info for intel.dists
-    @require_access_level(access.get('scan',access['member']))
+    request.dists
+        fill in from scan requests ("ellonweb informs that atleast n dists are needed")
+        fill in from intel
+        fill in from Hooks.scans.blocked
 
 Quotes and slogans:
     addquote, 
