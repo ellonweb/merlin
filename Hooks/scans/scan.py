@@ -42,16 +42,16 @@ class scan(loadable):
                 message.reply("No planet with coords %s:%s:%s found" % params.group(1,2,3))
                 return
             
-            # List of last 5 scans
+            # List of last 10 scans
             if params.group(4) == "o":
-                scans = planet.scans.filter_by(scantype=self.type).order_by(desc(Scan.id))[:5]
+                scans = planet.scans.filter_by(scantype=self.type).order_by(desc(Scan.id))[:10]
                 if len(scans) < 1:
                     message.reply("No %s Scans of %s:%s:%s found"%(PA.get(self.type,"name"),planet.x,planet.y,planet.z))
                     return
                 prev = []
                 for scan in scans:
-                    prev.append("(pt%s: %s)" % (scan.tick, scan.pa_id,))
-                reply = "Last 5 %s Scans on %s:%s:%s "%(PA.get(self.type,"name"),planet.x,planet.y,planet.z) + " ".join(prev)
+                    prev.append("(pt%s %s)" % (scan.tick, scan.pa_id,))
+                reply = "Last 10 %s Scans on %s:%s:%s "%(PA.get(self.type,"name"),planet.x,planet.y,planet.z) + " ".join(prev)
                 message.reply(reply)
                 return
             

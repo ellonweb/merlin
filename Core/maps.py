@@ -750,7 +750,7 @@ class DevScan(Base):
         reply = " Travel: %s, Infrajerome: %s, Hulls: %s," % (self.travel,self.infra_str(),self.hulls_str(),)
         reply+= " Waves: %s, Core: %s, Covop: %s, Mining: %s" % (self.waves_str(),self.core,self.covop_str(),self.mining_str(),)
         reply+= "\n"
-        reply+= " Structures: LFac: %s, MFac: %s, HFac: %s, Amp: %s," % (self.light_factory,self.medium_factory,self.heavy_factory,self.wave_amplifier,)
+        reply+= "Structures: LFac: %s, MFac: %s, HFac: %s, Amp: %s," % (self.light_factory,self.medium_factory,self.heavy_factory,self.wave_amplifier,)
         reply+= " Dist: %s, MRef: %s, CRef: %s, ERef: %s," % (self.wave_distorter,self.metal_refinery,self.crystal_refinery,self.eonium_refinery,)
         reply+= " ResLab: %s (%s%%), FC: %s, Sec: %s (%s%%)" % (self.research_lab,int(float(self.research_lab)/self.total()*100),self.finance_centre,self.security_centre,int(float(self.security_centre)/self.total()*100),)
         return reply
