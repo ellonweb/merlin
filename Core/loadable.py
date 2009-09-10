@@ -134,6 +134,8 @@ class loadable(object):
                 def execute(self, message, access, params):
                     hook(message)
                 def check_access(self, message, user=None, channel=None):
+                    if command is not True:
+                        return None
                     if admin is not True:
                         return True
                     if message.get_pnick() in Config.options("Admins"):
