@@ -37,8 +37,8 @@ class Action(Message):
         if text:            
             for line in text.split("\n"):
                 while line:
-                    Connection.write((params + line)[:(450 - len(params))])
-                    line = line[(450 - len(params)):]
+                    Connection.write((params + line)[:450])
+                    line = line[450 - len(params):]
         else:
             Connection.write(params[:-1])
     
