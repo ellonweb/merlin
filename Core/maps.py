@@ -455,25 +455,25 @@ class Intel(Base):
         if self.alliance is not None:
             ret += " alliance=%s" % (self.alliance.name,)
         if self.fakenick:
-            ret += "fakenick=%s"%(self.fakenick,)
+            ret += " fakenick=%s"%(self.fakenick,)
         if self.defwhore:
-            ret += "defwhore=%s"%(self.defwhore,)
+            ret += " defwhore=%s"%(self.defwhore,)
         if self.covop:
-            ret += "covop=%s"%(self.covop,)
+            ret += " covop=%s"%(self.covop,)
         if self.scanner:
-            ret += "scanner=%s"%(self.scanner,)
+            ret += " scanner=%s"%(self.scanner,)
         if self.dists:
-            ret += "dists=%s"%(self.dists,)
+            ret += " dists=%s"%(self.dists,)
         if self.bg:
-            ret += "bg=%s"%(self.bg,)
+            ret += " bg=%s"%(self.bg,)
         if self.gov:
-            ret += "gov=%s"%(self.gov,)
+            ret += " gov=%s"%(self.gov,)
         if self.relay:
-            ret += "relay=%s"%(self.relay,)
+            ret += " relay=%s"%(self.relay,)
         if self.reportchan:
-            ret += "reportchan=%s"%(self.reportchan,)
+            ret += " reportchan=%s"%(self.reportchan,)
         if self.comment:
-            ret += "comment=%s"%(self.comment,)
+            ret += " comment=%s"%(self.comment,)
         return ret
 Planet.intel = relation(Intel, uselist=False, backref="planet")
 Galaxy.intel = relation(Intel, Planet.__table__, order_by=Planet.z)
