@@ -20,5 +20,5 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import sys
-import Hooks.scans.parser
-Hooks.scans.parser.parse(sys.argv[1:])
+from Hooks.scans.parser import parse
+parse(*sys.argv[1:])

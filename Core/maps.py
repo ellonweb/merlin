@@ -577,9 +577,9 @@ class Scan(Base):
         if self.scantype in ("D",):
             return head + id_tick + str(self.devscan)
         if self.scantype in ("U","A",):
-            return head + id_age_value + " | ".join(map(str,self.units))
+            return head + id_age_value + " " + " | ".join(map(str,self.units))
         if self.scantype == "J":
-            return head + id_tick + " | ".join(map(str,self.fleets))
+            return head + id_tick + " " + " | ".join(map(str,self.fleets))
         if self.scantype == "N":
             return head + Config.get("URL","viewscan") % (self.pa_id,)
 Planet.scans = dynamic_loader(Scan, backref="planet")
@@ -781,7 +781,7 @@ class FleetScan(Base):
     mission = Column(String(7))
     def __str__(self):
         p = self.owner
-        return "(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.landing-self.scan.tick,)
+        return "(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.landing_tick-self.scan.tick,)
 Scan.fleets = relation(FleetScan, backref="scan")
 FleetScan.owner = relation(Planet, primaryjoin=FleetScan.owner_id==Planet.id)
 FleetScan.target = relation(Planet, primaryjoin=FleetScan.target_id==Planet.id)

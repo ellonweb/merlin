@@ -14,7 +14,6 @@ Hooks.request
         fill in data from scan requests ("ellonweb informs that atleast n dists are needed")
 
 Hooks.scan
-    scans ala munin
     robocop interface
     chanusertracker interface
         pm all known users that their scan is done

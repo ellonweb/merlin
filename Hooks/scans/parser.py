@@ -23,20 +23,28 @@
 
 import re
 from subprocess import Popen
+from time import time
 import traceback
 from urllib2 import urlopen
-from .Core.modules import M
-callback = M.loadable.callback
+from sqlalchemy.exc import IntegrityError
+from Core.config import Config
+from Core.paconf import PA
+from Core.db import session
+from Core.maps import Updates, Planet, User, Intel, Ship, Scan, Request
+from Core.maps import PlanetScan, DevScan, UnitScan, FleetScan, CovOp
+from Core.loadable import loadable
+
+'''
 from .Core.robocop import push
-from Hooks.scans import scans
+'''
 
 scanre=re.compile("http://[^/]+/showscan.pl\?scan_id=([0-9a-zA-Z]+)")
 scangrpre=re.compile("http://[^/]+/showscan.pl\?scan_grp=([0-9a-zA-Z]+)")
 
-@callback('PRIVMSG')
+@loadable.system('PRIVMSG')
 def catcher(message):
     try:
-        user = M.DB.Maps.User.load(name=message.get_pnick())
+        user = User.load(name=message.get_pnick())
         uid = user.id if user else 0
     except PNickParseError:
         uid = 0
@@ -47,11 +55,13 @@ def catcher(message):
         scan(uid, "group", m.group(1))
         pass
 
-def scan(user, type, id):
+def scan(uid, type, id):
+    print time()
     Popen(map(str,["python", "morganleparser.py", uid, type, id,]))
 
 class parse(object):
-    def __init__(uid, type, id):
+    def __init__(self, uid, type, id):
+        print time()
         try:
             if type == "scan":
                 self.scan(uid, id)
@@ -60,9 +70,10 @@ class parse(object):
         except Exception, e:
             print "Exception in scan: "+e.__str__()
             traceback.print_exc()
+        print time()
     
-    def group(uid, gid):
-        page = urlopen('http://game.planetarion.com/showscan.pl?scan_grp='+ id).read()
+    def group(self, uid, gid):
+        page = urlopen(Config.get("URL","viewgroup")%(gid,)).read()
         for m in re.finditer('scan_id=([0-9a-zA-Z]+)',page):
             try:
                 self.scan(uid, m.group(1), gid)
@@ -70,12 +81,12 @@ class parse(object):
                 print "Exception in scan: "+e.__str__()
                 traceback.print_exc()
     
-    def scan(uid, pa_id, gid=None):
-        page = urlopen('http://game.planetarion.com/showscan.pl?scan_id='+ pa_id).read()
+    def scan(self, uid, pa_id, gid=None):
+        page = urlopen(Config.get("URL","viewscan")%(pa_id,)).read()
         
         m = re.search('>([^>]+) on (\d+)\:(\d+)\:(\d+) in tick (\d+)', page)
         if not m:
-            print "Expired/non-matchinng scan (id: %s)" %(id,)
+            print "Expired/non-matchinng scan (id: %s)" %(pa_id,)
             return
         
         scantype = m.group(1)[0].upper()
@@ -84,43 +95,42 @@ class parse(object):
         z = int(m.group(4))
         tick = int(m.group(5))
         
-        planet = M.DB.Maps.Planet.load(x,y,z)
+        planet = Planet.load(x,y,z)
         if planet is None:
             return
-        session = M.DB.Session()
-        session.add(planet)
         try:
-            scan = M.DB.Maps.Scan(pa_id=pa_id, scantype=scantype, tick=tick, group_id=gid, scanner_id=uid)
+            scan = Scan(pa_id=pa_id, scantype=scantype, tick=tick, group_id=gid, scanner_id=uid)
             planet.scans.append(scan)
             session.commit()
             scan_id = scan.id
-        except M.DB.sqlalchemy.exceptions.IntegrityError:
+        except IntegrityError, e:
             session.rollback()
             print "Scan %s may already exist" %(pa_id,)
             print e.__str__()
             return
         
-        session.close()
         if hasattr(self,"parse_"+scantype):
             getattr(self, "parse_"+scantype)(scan_id, scan, page)
-        print scans[scantype]['name'], "%s:%s:%s" % (x,y,z,)
+        print PA.get(scantype,"name"), "%s:%s:%s" % (x,y,z,)
         
-        Q = session.query(M.DB.Maps.User.name)
-        Q = Q.join(M.DB.Maps.Request.user)
-        Q = Q.filter(M.DB.Maps.Request.target==planet)
-        Q = Q.filter(M.DB.Maps.Request.scan==None)
+        Q = session.query(Request)
+        Q = Q.filter(Request.scantype==scantype)
+        Q = Q.filter(Request.target==planet)
+        Q = Q.filter(Request.scan==None)
+        result = Q.all()
         
-        users = Q.all()
-        push("!scan %s %s %s" % (scantype, pa_id, " ".join(users),))
-        
-        Q.update({"scan_id": scan_id})
+        users = []
+        for request in result:
+            request.scan_id = scan_id
+            users.append(request.user.name)
         session.commit()
+        
+        '''
+        push("!scan %s %s %s" % (scantype, pa_id, " ".join(users),))
+        '''
     
-    def parse_P(scan_id, scan, page):
-        session = M.DB.Session()
-        session.add(scan)
-
-        planetscan = scan.planetscan = M.DB.Maps.PlanetScan()
+    def parse_P(self, scan_id, scan, page):
+        planetscan = scan.planetscan = PlanetScan()
 
         #m = re.search('<tr><td class="left">Asteroids</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><td class="left">Resources</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><th>Score</th><td>(\d+)</td><th>Value</th><td>(\d+)</td></tr>', page)
         #m = re.search(r"""<tr><td class="left">Asteroids</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><td class="left">Resources</td><td>(\d+)</td><td>(\d+)</td><td>(\d+)</td></tr><tr><th>Score</th><td>(\d+)</td><th>Value</th><td>(\d+)</td></tr>""", page)
@@ -171,11 +181,8 @@ class parse(object):
 
         session.commit()
 
-    def parse_D(scan_id, scan, page):
-        session = M.DB.Session()
-        session.add(scan)
-
-        devscan = scan.devscan = M.DB.Maps.DevScan()
+    def parse_D(self, scan_id, scan, page):
+        devscan = scan.devscan = DevScan()
 
         m=re.search("""
             <tr><td[^>]*>Light\s+Factory</td><td[^>]*>(\d*)</td></tr>\s*
@@ -223,47 +230,38 @@ class parse(object):
 
         session.commit()
 
-        if (scan.planet.intel.dists < devscan.dists) or (scan.tick == M.DB.Maps.Updates.current_tick()):
-            scan.planet.intel.dists = devscan.dists
+        if scan.planet.intel is None:
+            scan.planet.intel = Intel()
+        if (scan.planet.intel.dists < devscan.wave_distorter) or (scan.tick == Updates.current_tick()):
+            scan.planet.intel.dists = devscan.wave_distorter
             session.commit()
             print "Updating planet-intel-dists"
 
-    def parse_U(scan_id, scan, page):
-        session = M.DB.Session()
-        session.add(scan)
-
+    def parse_U(self, scan_id, scan, page):
         for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+)</td>', page):
             print m.groups()
 
-            ship = M.DB.Maps.Ship.load(name=m.group(1))
+            ship = Ship.load(name=m.group(1))
             if ship is None:
                 print "No such unit %s" % (m.group(1),)
-                session.rollback()
                 continue
-            scan.units.append(M.DB.Maps.UnitScan(ship=ship, amount=m.group(2))
+            scan.units.append(UnitScan(ship=ship, amount=m.group(2)))
 
-            session.commit()
+        session.commit()
 
-    def parse_A(scan_id, scan, page):
-        session = M.DB.Session()
-        session.add(scan)
-
+    def parse_A(self, scan_id, scan, page):
         for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+)</td>', page):
             print m.groups()
 
-            ship = M.DB.Maps.Ship.load(name=m.group(1))
+            ship = Ship.load(name=m.group(1))
             if ship is None:
                 print "No such unit %s" % (m.group(1),)
-                session.rollback()
                 continue
-            scan.units.append(M.DB.Maps.UnitScan(ship=ship, amount=m.group(2))
+            scan.units.append(UnitScan(ship=ship, amount=m.group(2)))
 
-            session.commit()
+        session.commit()
 
-    def parse_J(scan_id, scan, page):
-        session = M.DB.Session()
-        session.add(scan)
-
+    def parse_J(self, scan_id, scan, page):
         # <td class=left>Origin</td><td class=left>Mission</td><td>Fleet</td><td>ETA</td><td>Fleetsize</td>
         # <td class=left>13:10:5</td><td class=left>Attack</td><td>Gamma</td><td>5</td><td>265</td>
 
@@ -274,7 +272,7 @@ class parse(object):
         #<tr><td class="left">10:1:10</td><td class="left">Defend</td><td class="left">Pesticide IV</td><td class="right">1</td><td class="right">0</td></tr>
 
         for m in re.finditer('<td[^>]*>(\d+)\:(\d+)\:(\d+)</td><td[^>]*>([^<]+)</td><td[^>]*>([^<]+)</td><td[^>]*>(\d+)</td><td[^>]*>(\d+)</td>', page):
-            fleetscan = M.DB.Maps.FleetScan()
+            fleetscan = FleetScan()
 
             originx = m.group(1)
             originy = m.group(2)
@@ -287,14 +285,13 @@ class parse(object):
             fleetscan.mission = mission
             fleetscan.fleet_name = fleet
             fleetscan.landing_tick = eta + scan.tick
-            fleetscan.fleetsize = fleet_size
+            fleetscan.fleet_size = fleetsize
 
             print "JGP fleet "
 
-            attacker=M.DB.Maps.Planet.load(originx,originy,originz)
+            attacker=Planet.load(originx,originy,originz)
             if attacker is None:
                 print "Can't find attacker in db: %s:%s:%s"%(originx,originy,originz)
-                session.rollback()
                 continue
             fleetscan.owner = attacker
             fleetscan.target = scan.planet
@@ -302,16 +299,16 @@ class parse(object):
             try:
                 scan.fleets.append(fleetscan)
                 session.commit()
-            except M.DB.sqlalchemy.exceptions.IntegrityError:
+            except IntegrityError:
                 session.rollback()
                 print "Caught exception in jgp: "+e.__str__()
                 traceback.print_exc()
                 print "Trying to update instead"
-                query = session.query(M.DB.Maps.FleetScan).filter_by(owner=attacker, target=scan.planet, fleet_size=fleetsize, fleet_name=fleet, landing_tick=eta+scan.tick, mission=mission)
+                query = session.query(FleetScan).filter_by(owner=attacker, target=scan.planet, fleet_size=fleetsize, fleet_name=fleet, landing_tick=eta+scan.tick, mission=mission)
                 try:
                     query.update({"scan_id": scan_id})
                     session.commit()
-                except:
+                except Exception, e:
                     session.rollback()
                     print "Exception trying to update jgp: "+e.__str__()
                     traceback.print_exc()
@@ -322,14 +319,11 @@ class parse(object):
                 traceback.print_exc()
                 continue
 
-    def parse_N(scan_id, scan, page):
-        session = M.DB.Session()
-        session.add(scan)
-
+    def parse_N(self, scan_id, scan, page):
         #incoming fleets
         #<td class=left valign=top>Incoming</td><td valign=top>851</td><td class=left valign=top>We have detected an open jumpgate from Tertiary, located at 18:5:11. The fleet will approach our system in tick 855 and appears to have roughly 95 ships.</td>
         for m in re.finditer('<td class="left" valign="top">Incoming</td><td valign="top">(\d+)</td><td class="left" valign="top">We have detected an open jumpgate from ([^<]+), located at (\d+):(\d+):(\d+). The fleet will approach our system in tick (\d+) and appears to have roughly (\d+) ships.</td>', page):
-            fleetscan = M.DB.Maps.FleetScan()
+            fleetscan = FleetScan()
 
             newstick = m.group(1)
             fleetname = m.group(2)
@@ -343,11 +337,10 @@ class parse(object):
             fleetscan.fleet_name = fleetname
             fleetscan.launch_tick = newstick
             fleetscan.landing_tick = arrivaltick
-            fleetscan.fleetsize = numships
+            fleetscan.fleet_size = numships
 
-            owner=M.DB.Maps.Planet.load(originx,originy,originz)
+            owner=Planet.load(originx,originy,originz)
             if owner is None:
-                session.rollback()
                 continue
             fleetscan.owner = owner
             fleetscan.target = scan.planet
@@ -365,7 +358,7 @@ class parse(object):
         #launched attacking fleets
         #<td class=left valign=top>Launch</td><td valign=top>848</td><td class=left valign=top>The Disposable Heroes fleet has been launched, heading for 15:9:8, on a mission to Attack. Arrival tick: 857</td>
         for m in re.finditer('<td class="left" valign="top">Launch</td><td valign="top">(\d+)</td><td class="left" valign="top">The ([^,]+) fleet has been launched, heading for (\d+):(\d+):(\d+), on a mission to Attack. Arrival tick: (\d+)</td>', page):
-            fleetscan = M.DB.Maps.FleetScan()
+            fleetscan = FleetScan()
 
             newstick = m.group(1)
             fleetname = m.group(2)
@@ -379,9 +372,8 @@ class parse(object):
             fleetscan.launch_tick = newstick
             fleetscan.landing_tick = arrivaltick
 
-            target=M.DB.Maps.Planet.load(originx,originy,originz)
+            target=Planet.load(originx,originy,originz)
             if target is None:
-                session.rollback()
                 continue
             fleetscan.owner = scan.planet
             fleetscan.target = target
@@ -400,7 +392,7 @@ class parse(object):
         #launched defending fleets
         #<td class=left valign=top>Launch</td><td valign=top>847</td><td class=left valign=top>The Ship Collection fleet has been launched, heading for 2:9:14, on a mission to Defend. Arrival tick: 853</td>
         for m in re.finditer('<td class="left" valign="top">Launch</td><td valign="top">(\d+)</td><td class="left" valign="top">The ([^<]+) fleet has been launched, heading for (\d+):(\d+):(\d+), on a mission to Defend. Arrival tick: (\d+)</td>', page):
-            fleetscan = M.DB.Maps.FleetScan()
+            fleetscan = FleetScan()
 
             newstick = m.group(1)
             fleetname = m.group(2)
@@ -414,9 +406,8 @@ class parse(object):
             fleetscan.launch_tick = newstick
             fleetscan.landing_tick = arrivaltick
 
-            target=M.DB.Maps.Planet.load(originx,originy,originz)
+            target=Planet.load(originx,originy,originz)
             if target is None:
-                session.rollback()
                 continue
             fleetscan.owner = scan.planet
             fleetscan.target = target
@@ -443,7 +434,7 @@ class parse(object):
         #failed security report
         #<td class=left valign=top>Security</td><td valign=top>873</td><td class=left valign=top>A covert operation was attempted by Ikaris (2:5:5), but our agents were able to stop them from doing any harm.</td>
         for m in re.finditer('<td class="left" valign="top">Security</td><td valign="top">(\d+)</td><td class="left" valign="top">A covert operation was attempted by ([^<]+) \\((\d+):(\d+):(\d+)\\), but our agents were able to stop them from doing any harm.</td>', page):
-            covop = M.DB.Maps.CovOp()
+            covop = CovOp()
 
             newstick = m.group(1)
             ruler = m.group(2)
@@ -451,9 +442,8 @@ class parse(object):
             originy = m.group(4)
             originz = m.group(5)
 
-            covopper=M.DB.Maps.Planet.load(originx,originy,originz)
+            covopper=Planet.load(originx,originy,originz)
             if covopper is None:
-                session.rollback()
                 continue
             fleetscan.covopper = covopper
             fleetscan.target = scan.planet
