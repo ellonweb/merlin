@@ -75,6 +75,8 @@ def login(message):
 def loggedin(message):
     # Authentication complete
     if "is now your hidden host" == message.get_msg():
+        return # This is now deprecated in favour of
+               #  setting autoinvite when adding the chan
         for channel in session.query(Channel):
             message.privmsg("INVITE %s" % (channel.name,), "P")
 

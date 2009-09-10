@@ -31,4 +31,7 @@ __all__ = [
            "phone",
            "quitter",
            "quits",
+           "addchan",
+           "galchan",
+           "remchan",
            ]

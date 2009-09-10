@@ -419,7 +419,7 @@ Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gim
 class Channel(Base):
     __tablename__ = 'channels'
     id = Column(Integer, primary_key=True)
-    name = Column(String(150))
+    name = Column(String(150), unique=True)
     userlevel = Column(Integer)
     maxlevel = Column(Integer)
     
