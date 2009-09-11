@@ -22,14 +22,15 @@
 import re
 from sqlalchemy import cast, Float, func, Integer, or_
 from sqlalchemy.sql import desc
+from sqlalchemy.sql.functions import max, min
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
 from Core.loadable import loadable
 from Core.paconf import PA
 
 @loadable.module("member")
-class victim(loadable):
-    """Target search, ordered by maxcap"""
+class whore(loadable):
+    """Target search, ordered by xp gain"""
     usage = "  [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
     paramre = re.compile(r"\s+(.+)")
     alliancere=re.compile(r"^(\S+)$")
@@ -88,7 +89,10 @@ class victim(loadable):
         caprate = func.float8smaller(modifier.op("*")(caprate),caprate)
         maxcap = cast(func.floor(cast(Planet.size,Float).op("*")(caprate)),Integer)
         
-        Q = session.query(Planet, Intel, maxcap.label("maxcap"))
+        bravery = (func.float8larger(0.0,( func.float8smaller(2.0, cast(Planet.value,Float).op("/")(float(attacker.value)))-0.1) * (func.float8smaller(2.0, cast(Planet.score,Float).op("/")(float(attacker.score)))-0.2))).op("*")(10.0)
+        xp_gain = cast(func.floor(maxcap.op("*")(bravery)),Integer)
+        
+        Q = session.query(Planet, Intel, xp_gain.label("xp_gain"))
         if alliance.id:
             Q = Q.join(Planet.intel)
             Q = Q.filter(Intel.alliance == alliance)
@@ -108,8 +112,8 @@ class victim(loadable):
                              Planet.score.op(">")(attacker.score*PA.getfloat("bash","score"))))
         if cluster:
             Q = Q.filter(Planet.x == cluster)
-        Q = Q.order_by(desc("maxcap"))
-        Q = Q.order_by(desc(Planet.size))
+        Q = Q.order_by(desc("xp_gain"))
+        Q = Q.order_by(desc(Planet.idle))
         Q = Q.order_by(desc(Planet.value))
         result = Q[:6]
         
@@ -130,9 +134,9 @@ class victim(loadable):
             return
         
         replies = []
-        for planet, intel, maxcap in result[:5]:
+        for planet, intel, xp_gain in result[:5]:
             reply="%s:%s:%s (%s)" % (planet.x,planet.y,planet.z,planet.race)
-            reply+=" Value: %s Size: %s MaxCap: %s" % (planet.value,planet.size, maxcap)
+            reply+=" Value: %s Size: %s Scoregain: %d" % (planet.value,planet.size, xp_gain*60)
             if intel:
                 if intel.nick:
                     reply+=" Nick: %s" % (intel.nick,)

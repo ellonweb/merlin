@@ -23,4 +23,5 @@
 __all__ = [
            "victim",
            "idler",
+           "whore",
            ]
