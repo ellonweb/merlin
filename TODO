@@ -1,5 +1,6 @@
 http://www.sqlalchemy.org/trac/ticket/1468
 http://www.sqlalchemy.org/trac/ticket/1529
+http://www.sqlalchemy.org/trac/ticket/1537
 
 migrate db system for createdb.py
     investigate schemas/namespaces as alternative to seperate DBs
@@ -47,8 +48,6 @@ Simple calcs and lookups:
 Growth:
 
 Target search:
-    cunts, 
-    whore, 
 
 Cookies and Props:
     cookie, 

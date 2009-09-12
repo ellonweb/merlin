@@ -20,26 +20,27 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from sqlalchemy import cast, Float, func, Integer, or_
+from sqlalchemy import or_
+from sqlalchemy.orm import aliased
 from sqlalchemy.sql import desc
-from sqlalchemy.sql.functions import max, min
 from Core.db import session
-from Core.maps import Planet, Alliance, Intel
+from Core.maps import Updates, Planet, Alliance, Intel, Scan, FleetScan
 from Core.loadable import loadable
+from Core.config import Config
 from Core.paconf import PA
 
 @loadable.module("member")
-class whore(loadable):
-    """Target search, ordered by xp gain"""
+class cunts(loadable):
+    """Target search, ordered by idle ticks"""
     usage = "  [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
     paramre = re.compile(r"\s+(.+)")
+    PrefError = "You must set your planet with !pref to use the bash option"
     alliancere=re.compile(r"^(\S+)$")
     racere=re.compile(r"^(ter|cat|xan|zik|eit|etd)$",re.I)
     rangere=re.compile(r"^(<|>)?(\d+)$")
     bashre=re.compile(r"^(bash)$",re.I)
     clusterre=re.compile(r"^c(\d+)$",re.I)
     
-    @loadable.require_planet
     def execute(self, message, user, params):
         
         alliance=Alliance()
@@ -49,7 +50,7 @@ class whore(loadable):
         value_mod=None
         value=None
         bash=False
-        attacker=user.planet
+        attacker=None
         cluster=None
 
         params=params.group(1).split()
@@ -58,6 +59,7 @@ class whore(loadable):
             m=self.bashre.search(p)
             if m and not bash:
                 bash=True
+                attacker = self.get_user_planet(user)
                 continue
             m=self.clusterre.search(p)
             if m and not cluster:
@@ -84,15 +86,18 @@ class whore(loadable):
                     return
                 continue
 
-        caprate = PA.getfloat("roids","maxcap")
-        modifier = (cast(Planet.value,Float).op("/")(float(attacker.value))).op("^")(0.5)
-        caprate = func.float8smaller(modifier.op("*")(caprate),caprate)
-        maxcap = cast(func.floor(cast(Planet.size,Float).op("*")(caprate)),Integer)
+        tick = Updates.current_tick()
+        target = aliased(Planet)
+        target_intel = aliased(Intel)
         
-        bravery = (func.float8larger(0.0,( func.float8smaller(2.0, cast(Planet.value,Float).op("/")(float(attacker.value)))-0.1) * (func.float8smaller(2.0, cast(Planet.score,Float).op("/")(float(attacker.score)))-0.2))).op("*")(10.0)
-        xp_gain = cast(func.floor(maxcap.op("*")(bravery)),Integer)
+        Q = session.query(Planet, Intel).distinct()
+        Q = Q.filter(FleetScan.landing_tick > tick)
+        Q = Q.filter(FleetScan.mission == "Attack")
+        Q = Q.join((FleetScan.owner, Planet))
+        Q = Q.join((FleetScan.target, target))
+        Q = Q.join((target.intel, target_intel))
+        Q = Q.filter(target_intel.alliance == Alliance.load(Config.get("Alliance","name")))
         
-        Q = session.query(Planet, Intel, xp_gain.label("xp_gain"))
         if alliance.id:
             Q = Q.join(Planet.intel)
             Q = Q.filter(Intel.alliance == alliance)
@@ -112,8 +117,7 @@ class whore(loadable):
                              Planet.score.op(">")(attacker.score*PA.getfloat("bash","score"))))
         if cluster:
             Q = Q.filter(Planet.x == cluster)
-        Q = Q.order_by(desc("xp_gain"))
-        Q = Q.order_by(desc(Planet.idle))
+        Q = Q.order_by(desc(Planet.size))
         Q = Q.order_by(desc(Planet.value))
         result = Q[:6]
         
@@ -121,7 +125,7 @@ class whore(loadable):
             reply="No"
             if race:
                 reply+=" %s"%(race,)
-            reply+=" planets"
+            reply+=" planets attacking %s" % (Config.get("Alliance","name"),)
             if alliance.name:
                 reply+=" in intel matching Alliance: %s"%(alliance.name,)
             else:
@@ -134,14 +138,27 @@ class whore(loadable):
             return
         
         replies = []
-        for planet, intel, xp_gain in result[:5]:
+        for planet, intel in result[:5]:
             reply="%s:%s:%s (%s)" % (planet.x,planet.y,planet.z,planet.race)
-            reply+=" Value: %s Size: %s Scoregain: %d" % (planet.value,planet.size, xp_gain*60)
+            reply+=" Value: %s Size: %s" % (planet.value,planet.size)
             if intel:
                 if intel.nick:
                     reply+=" Nick: %s" % (intel.nick,)
                 if not alliance.name and intel.alliance:
                     reply+=" Alliance: %s" % (intel.alliance.name,)
+            Q = session.query(FleetScan, Intel.nick).distinct()
+            Q = Q.join(FleetScan.target)
+            Q = Q.outerjoin(Planet.intel)
+            Q = Q.filter(FleetScan.owner == planet)
+            Q = Q.filter(FleetScan.landing_tick > tick)
+            Q = Q.filter(FleetScan.mission == "Attack")
+            result2 = Q.all()
+            if len(result2):
+                reply+=" Hitting: "
+                prev=[]
+                for fleet, nick in result2:
+                    prev.append((nick or 'Unknown') + " (%s, lands: %s)"% (fleet.fleet_size,fleet.landing_tick))
+                reply+=', '.join(prev)
             replies.append(reply)
         if len(result) > 5:
             replies[-1]+=" (Too many results to list, please refine your search)"

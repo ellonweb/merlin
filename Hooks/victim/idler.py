@@ -113,7 +113,7 @@ class idler(loadable):
             if race:
                 reply+=" %s"%(race,)
             reply+=" planets"
-            if alliance:
+            if alliance.name:
                 reply+=" in intel matching Alliance: %s"%(alliance.name,)
             else:
                 reply+=" matching"
