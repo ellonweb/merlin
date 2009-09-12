@@ -25,7 +25,7 @@ from Core.loadable import loadable
 
 @loadable.module()
 class roidsave(loadable):
-    """Tells you how much value will be mined by a number of roids in that many ticks. M=Max, F=Feudalism, D=Democracy."""
+    """Tells you how much value will be mined by a number of roids in that many ticks."""
     usage = " <roids> <ticks> [mining_bonus]"
     paramre = re.compile(r"\s+(\d+)\s+(\d+)(?:\s+(\d+))?")
     
