@@ -56,7 +56,7 @@ class scan(loadable):
                 return
             
             # Latest scan
-            scan = planet.scans.filter_by(scantype=self.type).order_by(desc(Scan.id)).first()
+            scan = planet.scan(self.type)
             if scan is None:
                 message.reply("No %s Scans of %s:%s:%s found"%(PA.get(self.type,"name"),planet.x,planet.y,planet.z))
                 return
