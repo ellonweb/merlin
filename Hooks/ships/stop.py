@@ -20,26 +20,24 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import math, re
-from .Core.modules import M
-loadable = M.loadable.loadable
-from Hooks.ships import effs
+from Core.paconf import PA
+from Core.db import session
+from Core.maps import Ship
+from Core.loadable import loadable
 
+@loadable.module()
 class stop(loadable):
     """Calculates the required defence to the specified number of ships"""
+    usage = " <number> <ship> [t1|t2|t3]"
+    paramre = re.compile(r"\s(\d+(?:\.\d+)?[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s(\d+(?:\.\d+)?[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
-        self.usage += " number ship [t1|t2|t3]"
-    
-    @loadable.run
     def execute(self, message, user, params):
         
         num, name, attacker = params.groups()
         attacker = attacker or "t1"
         
         num = self.short2num(num)
-        ship = M.DB.Maps.Ship.load(name=name)
+        ship = Ship.load(name=name)
         if "asteroids".rfind(name.lower()) > -1:
             total_armor = 50 * num
         elif "constructions".rfind(name.lower()) > -1:
@@ -49,11 +47,9 @@ class stop(loadable):
         else:
             message.alert("No Ship called: %s" % (name,))
             return
-        efficiency = effs[attacker]
-        attacker_class = getattr(M.DB.Maps.Ship, attacker)
-        session = M.DB.Session()
-        attackers = session.query(M.DB.Maps.Ship).filter(attacker_class == ship.class_)
-        session.close()
+        efficiency = PA.getfloat("teffs",attacker.lower())
+        attacker_class = getattr(Ship, attacker)
+        attackers = session.query(Ship).filter(attacker_class == ship.class_)
         if attackers.count() == 0:
             message.reply("%s is not hit by anything as that category (%s)" % (ship.name,attacker))
             return

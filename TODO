@@ -7,8 +7,6 @@ migrate db system for createdb.py
 
 rewrite Connection.write and Action.write to use detached threaded system
 
-update all hooks to use new loader(session) system, test thoroughly etc
-
 Reimplement Robocop (threaded?)
     scan requests (!request)
     scans parsed (!scans)
@@ -41,7 +39,6 @@ Penis:
 
 Ships:
     prod needs rewrite, race bonus, feud/demo etc
-    move package vars to main var system
 
 Simple calcs and lookups:
 

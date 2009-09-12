@@ -20,23 +20,20 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from .Core.modules import M
-loadable = M.loadable.loadable
+from Core.maps import Ship
+from Core.loadable import loadable
 
+@loadable.module()
 class ship(loadable):
     """Returns the stats of the specified ship"""
+    usage = " <ship>"
+    paramre = re.compile(r"\s+(\w+)")
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s(\w+)")
-        self.usage += " name"
-    
-    @loadable.run
     def execute(self, message, user, params):
         
         name = params.group(1)
         
-        ship = M.DB.Maps.Ship.load(name=name)
+        ship = Ship.load(name=name)
         if ship is None:
             message.alert("No Ship called: %s" % (name,))
             return
