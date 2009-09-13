@@ -31,7 +31,7 @@ from Core.paconf import PA
 
 @loadable.module("member")
 class cunts(loadable):
-    """Target search, ordered by idle ticks"""
+    """Target search, based on planets currently attacking our alliance, ordered by size"""
     usage = "  [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
     paramre = re.compile(r"\s+(.+)")
     PrefError = "You must set your planet with !pref to use the bash option"

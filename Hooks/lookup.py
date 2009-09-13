@@ -27,8 +27,8 @@ from Core.loadable import loadable
 
 @loadable.module()
 class lookup(loadable):
-    """List of targets booked by user, or list of bookings for a given galaxy or planet"""
-    usage = " [user|x:y[:z]|alliance]"
+    """"""
+    usage = " [x:y[:z]|alliance|user]"
     paramre = (loadable.coordre, re.compile(r"(?:\s(\S+))?"),)
     
     def execute(self, message, user, params):
