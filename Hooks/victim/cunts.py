@@ -24,7 +24,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import desc
 from Core.db import session
-from Core.maps import Updates, Planet, Alliance, Intel, Scan, FleetScan
+from Core.maps import Updates, Planet, Alliance, Intel, FleetScan
 from Core.loadable import loadable
 from Core.config import Config
 from Core.paconf import PA
