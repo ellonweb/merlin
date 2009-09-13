@@ -326,7 +326,7 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(String(15)) # pnick
-    alias = Column(String(15), CheckConstraint("alias NOT IN (name)"), unique=True)
+    alias = Column(String(15))
     passwd = Column(String(32))
     active = Column(Boolean, default=True)
     access = Column(Integer)
@@ -363,11 +363,11 @@ class User(Base):
         if name is not None:
             user = Q.filter(User.name.ilike(name)).first()
             if user is None and exact is not True:
-                user = Q.filter(User.name.ilike("%"+name+"%")).first()
+                user = Q.filter(User.name.ilike(name+"%")).first()
             if user is None and exact is not True:
                 user = Q.filter(User.alias.ilike(name)).first()
             if user is None and exact is not True:
-                user = Q.filter(User.alias.ilike("%"+name+"%")).first()
+                user = Q.filter(User.alias.ilike(name+"%")).first()
         if passwd is not None:
             user = user if user.passwd == User.hasher(passwd) else None
         return user

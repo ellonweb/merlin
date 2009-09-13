@@ -21,7 +21,6 @@
  
 
 import re
-from sqlalchemy.exc import IntegrityError
 from Core.db import session
 from Core.maps import User
 from Core.loadable import loadable
@@ -44,12 +43,15 @@ class alias(loadable):
             else:
                 message.reply("You are %s, your alias is %s"%(user.name,user.alias,))
                 return
+            
+        if alias is not None:
+            if User.load(name=alias) is not None:
+                message.reply("Your alias is already in use or is someone else's pnick (not allowed). Tough noogies.")
+                return
+            if session.query(User).filter(User.active==True).filter(User.alias.ilike(alias)).first() is not None:
+                message.reply("Your alias is already in use or is someone else's pnick (not allowed). Tough noogies.")
+                return
         
         user.alias = alias
-        try:
-            session.commit()
-        except IntegrityError:
-            session.rollback()
-            message.reply("Your alias is already in use or is someone else's pnick (not allowed). Tough noogies.")
-        else:
-            message.reply("Update alias for %s (that's you) to %s"%(user.name,user.alias,))
+        session.commit()
+        message.reply("Update alias for %s (that's you) to %s"%(user.name,user.alias,))
