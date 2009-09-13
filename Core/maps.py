@@ -326,6 +326,7 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(String(15)) # pnick
+    alias = Column(String(15), CheckConstraint("alias NOT IN (name)"), unique=True)
     passwd = Column(String(32))
     active = Column(Boolean, default=True)
     access = Column(Integer)
@@ -355,18 +356,20 @@ class User(Base):
     def load(name=None, id=None, passwd=None, exact=True, active=True):
         assert id or name
         Q = session.query(User)
-        if id is not None:
-            Q = Q.filter(User.id == id)
-        if name is not None:
-            if Q.filter(User.name.ilike(name)).count() > 0 or (exact is True):
-                Q = Q.filter(User.name.ilike(name))
-            else:
-                Q = Q.filter(User.name.ilike("%"+name+"%"))
-        if passwd is not None:
-            Q = Q.filter(User.passwd == User.hasher(passwd))
         if active is True:
             Q = Q.filter(User.active == True)
-        user = Q.first()
+        if id is not None:
+            user = Q.filter(User.id == id).first()
+        if name is not None:
+            user = Q.filter(User.name.ilike(name)).first()
+            if user is None and exact is not True:
+                user = Q.filter(User.name.ilike("%"+name+"%")).first()
+            if user is None and exact is not True:
+                user = Q.filter(User.alias.ilike(name)).first()
+            if user is None and exact is not True:
+                user = Q.filter(User.alias.ilike("%"+name+"%")).first()
+        if passwd is not None:
+            user = user if user.passwd == User.hasher(passwd) else None
         return user
 Planet.user = relation(User, uselist=False, backref="planet")
 def user_access_function(num):

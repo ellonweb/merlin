@@ -21,36 +21,35 @@
  
 
 import re
-from Core.config import Config
+from sqlalchemy.exc import IntegrityError
+from Core.db import session
 from Core.maps import User
 from Core.loadable import loadable
 
-@loadable.module("member")
-class whois(loadable):
-    """Lookup a user's details"""
-    usage = " pnick"
-    paramre = re.compile(r"\s(\S+)")
+@loadable.module()
+class alias(loadable):
+    """Set an alias that maps to your pnick, useful if you have a different nick than your pnick and people use autocomplete."""
+    usage = " <alias> (at most 15 characters)"
+    paramre = re.compile(r"(?:\s+(\S{3,15}))?")
     
+    @loadable.require_user
     def execute(self, message, user, params):
 
         # assign param variables 
-        search=params.group(1)
-
-        # do stuff here
-        if search.lower() == Config.get("Connection","nick").lower():
-            message.reply("I am %s. Hear me roar." % (Config.get("Connection","nick"),))
-            return
-
-        whore = User.load(name=search,exact=False)
-        if whore is None or not whore.is_member():
-            message.reply("No users matching '%s'"%(search,))
-            return
-
-        reply=""
-        if whore == user:
-            reply+="You are %s. Your sponsor is %s. You have alias %s."
+        alias=params.group(1)
+        if alias is None:
+            m = message.get_msg().split()
+            if len(m) > 1 and m[1] in self.nulls:
+                pass
+            else:
+                message.reply("You are %s, your alias is %s"%(user.name,user.alias,))
+                return
+        
+        user.alias = alias
+        try:
+            session.commit()
+        except IntegrityError:
+            session.rollback()
+            message.reply("Your alias is already in use or is someone else's pnick (not allowed). Tough noogies.")
         else:
-            reply+="Information about %s: Their sponsor is %s. They have alias %s."
-        reply=reply%(whore.name,whore.sponsor,whore.alias,)
-
-        message.reply(reply)
+            message.reply("Update alias for %s (that's you) to %s"%(user.name,user.alias,))
