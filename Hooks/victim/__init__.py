@@ -26,4 +26,5 @@ __all__ = [
            "whore",
            "cunts",
            "topcunts",
+           "surprisesex",
            ]

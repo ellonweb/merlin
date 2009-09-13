@@ -89,36 +89,37 @@ class cunts(loadable):
         tick = Updates.current_tick()
         target = aliased(Planet)
         target_intel = aliased(Intel)
+        owner = aliased(Planet)
+        owner_intel = aliased(Intel)
         
-        Q = session.query(Planet, Intel).distinct()
-        Q = Q.filter(FleetScan.landing_tick > tick)
-        Q = Q.filter(FleetScan.mission == "Attack")
-        Q = Q.join((FleetScan.owner, Planet))
+        Q = session.query(owner, owner_intel).distinct()
+        Q = Q.join((FleetScan.owner, owner))
         Q = Q.join((FleetScan.target, target))
         Q = Q.join((target.intel, target_intel))
         Q = Q.filter(target_intel.alliance == Alliance.load(Config.get("Alliance","name")))
-        
+        Q = Q.filter(FleetScan.landing_tick > tick)
+        Q = Q.filter(FleetScan.mission == "Attack")
         if alliance.id:
-            Q = Q.join(Planet.intel)
-            Q = Q.filter(Intel.alliance == alliance)
+            Q = Q.join((owner.intel, owner_intel))
+            Q = Q.filter(owner_intel.alliance == alliance)
         else:
-            Q = Q.outerjoin(Planet.intel)
+            Q = Q.outerjoin((owner.intel, owner_intel))
             if alliance.name:
-                Q = Q.filter(Intel.alliance == None)
-        Q = Q.filter(Planet.active == True)
+                Q = Q.filter(owner_intel.alliance == None)
+        Q = Q.filter(owner.active == True)
         if race:
-            Q = Q.filter(Planet.race.ilike(race))
+            Q = Q.filter(owner.race.ilike(race))
         if size:
-            Q = Q.filter(Planet.size.op(size_mod)(size))
+            Q = Q.filter(owner.size.op(size_mod)(size))
         if value:
-            Q = Q.filter(Planet.value.op(value_mod)(value))
+            Q = Q.filter(owner.value.op(value_mod)(value))
         if bash:
-            Q = Q.filter(or_(Planet.value.op(">")(attacker.value*PA.getfloat("bash","value")),
-                             Planet.score.op(">")(attacker.score*PA.getfloat("bash","score"))))
+            Q = Q.filter(or_(owner.value.op(">")(attacker.value*PA.getfloat("bash","value")),
+                             owner.score.op(">")(attacker.score*PA.getfloat("bash","score"))))
         if cluster:
-            Q = Q.filter(Planet.x == cluster)
-        Q = Q.order_by(desc(Planet.size))
-        Q = Q.order_by(desc(Planet.value))
+            Q = Q.filter(owner.x == cluster)
+        Q = Q.order_by(desc(owner.size))
+        Q = Q.order_by(desc(owner.value))
         result = Q[:6]
         
         if len(result) < 1:

@@ -30,8 +30,8 @@ from Core.config import Config
 from Core.paconf import PA
 
 @loadable.module("member")
-class topcunts(loadable):
-    """Top planets attacking the specified target"""
+class surprisesex(loadable):
+    """Top alliances attacking the specified target"""
     usage = " [x:y[:z]|alliance|user]"
     paramre = (loadable.coordre, re.compile(r"(?:\s(\S+))?"),)
     
@@ -81,10 +81,12 @@ class topcunts(loadable):
         owner = aliased(Planet)
         owner_intel = aliased(Intel)
         
-        Q = session.query(owner.x, owner.y, owner.z, count())
+        Q = session.query(Alliance.name, count())
         Q = Q.join((FleetScan.owner, owner))
         Q = Q.join((FleetScan.target, target))
         Q = Q.filter(FleetScan.mission == "Attack")
+        Q = Q.outerjoin((owner.intel, owner_intel))
+        Q = Q.outerjoin((owner_intel.alliance, Alliance))
         if planet:
             Q = Q.filter(FleetScan.target == planet)
         if galaxy:
@@ -92,7 +94,7 @@ class topcunts(loadable):
         if alliance:
             Q = Q.join((target.intel, target_intel))
             Q = Q.filter(target_intel.alliance == alliance)
-        Q = Q.group_by(owner.x, owner.y, owner.z)
+        Q = Q.group_by(Alliance.name)
         Q = Q.order_by(desc(count()))
         result = Q.all()
         
@@ -114,8 +116,8 @@ class topcunts(loadable):
             reply+=" coords %s:%s"%(galaxy.x,galaxy.y)
         if alliance:
             reply+=" alliance %s"%(alliance.name,)
-        reply+=" are (total: %s) "%(sum([attacks for x,y,z, attacks in result]),)
+        reply+=" are (total: %s) "%(sum([attacks for name, attacks in result]),)
         prev = []
-        for x, y, z, attacks in result[:5]:
-            prev.append("%s:%s:%s - %s"%(x,y,z,attacks))
+        for name, attacks in result[:5]:
+            prev.append("%s - %s"%(name or "Unknown",attacks))
         message.reply(reply+" | ".join(prev))

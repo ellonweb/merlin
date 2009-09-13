@@ -7,6 +7,8 @@ migrate db system for createdb.py
 
 rewrite Connection.write and Action.write to use detached threaded system
 
+galaxy status parsing
+
 Reimplement Robocop (threaded?)
     scan requests (!request)
     scans parsed (!scans)
@@ -62,5 +64,3 @@ SMS:
     showmethemoney, 
     sms, 
     smslog, 
-
-surprisesex, 
