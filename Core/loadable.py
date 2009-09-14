@@ -139,7 +139,7 @@ class loadable(object):
         return user.planet
     
     def is_chan(self, message, chan):
-        if message.get_chan() == chan:
+        if message.get_chan().lower() == chan.lower():
             return True
         return False
     
