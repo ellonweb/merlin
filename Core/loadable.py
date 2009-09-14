@@ -22,7 +22,7 @@
 # Basic loadable class, the baseclass for most plugins
 
 import re
-from Core.exceptions_ import LoadableError, PrefError, ParseError, PNickParseError, UserError
+from Core.exceptions_ import LoadableError, PrefError, ParseError, ChanParseError, PNickParseError, UserError
 from Core.config import Config
 from Core.paconf import PA
 from Core.maps import User, Channel
@@ -40,6 +40,7 @@ class loadable(object):
     PParseError = "You need to login and set mode +x to use this command"
     AccessError = "You don't have access to this command"
     PrefError = "You must set your planet with !pref to use this command"
+    ChanError = "This command may only be used in %s"
     coordre = re.compile(r"\s*(\d+)[. :\-](\d+)(?:[. :\-](\d+))?")
     planet_coordre = re.compile(r"\s*(\d+)[. :\-](\d+)[. :\-](\d+)")
     govre = re.compile(r"("+ "|".join(PA.options("govs")) +")", re.I)
@@ -83,6 +84,8 @@ class loadable(object):
             message.alert(self.AccessError)
         except PrefError:
             message.alert(self.PrefError)
+        except ChanParseError, e:
+            message.alert(self.ChanError%e)
         except ParseError:
             message.alert(self.usage)
     
@@ -109,6 +112,25 @@ class loadable(object):
                 raise UserError
         return execute
     
+    @staticmethod
+    def channel(chan):
+        if not chan.find("#") == 0:
+            chan = Config.get("Channels",chan)
+        def wrapper(hook):
+            def execute(self, message, user, params):
+                if self.is_chan(message, chan):
+                    hook(self, message, user, params)
+                    return
+                else:
+                    raise ChanParseError(chan)
+            return execute
+        return wrapper
+    
+    def is_user(self, user):
+        if isinstance(user, User):
+            return True
+        return False
+    
     def get_user_planet(self, user):
         if not self.is_user(user):
             raise PNickParseError
@@ -116,8 +138,8 @@ class loadable(object):
             raise PrefError
         return user.planet
     
-    def is_user(self, user):
-        if isinstance(user, User):
+    def is_chan(self, message, chan):
+        if message.get_chan() == chan:
             return True
         return False
     

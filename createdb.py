@@ -28,7 +28,7 @@ Base.metadata.create_all()
 
 print "Setting up home channel"
 from Core.config import Config
-session.add(Channel(name=Config.get("Alliance","home"),userlevel=100,maxlevel=1000))
+session.add(Channel(name=Config.get("Channels","home"),userlevel=100,maxlevel=1000))
 session.commit()
 session.close()
 
