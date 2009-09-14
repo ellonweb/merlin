@@ -24,6 +24,7 @@
 import re
 from Core.exceptions_ import LoadableError, PrefError, ParseError, PNickParseError, UserError
 from Core.config import Config
+from Core.paconf import PA
 from Core.maps import User, Channel
 from Core.chanusertracker import get_user
 

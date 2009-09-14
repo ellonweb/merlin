@@ -21,45 +21,62 @@
  
 import math
 import re
-from .Core.modules import M
-loadable = M.loadable.loadable
-from Hooks.ships import feud
+from Core.paconf import PA
+from Core.maps import Ship
+from Core.loadable import loadable
 
+@loadable.module()
 class prod(loadable):
-    """Calculate ticks it takes to produce <number> <ships> with <factories>."""
-    def __init__(self):
-
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s(\d+(?:\.\d+)?[km]?)\s(\S+)\s(\d+)")
-        self.usage += " <number> <ship> <factories>."
-
-    @loadable.run
+    """Calculate ticks it takes to produce <number> <ships> with <factories>. Specify race and/or government for bonuses."""
+    usage = " <number> <ship> <factories> [race] [government]"
+    paramre = re.compile(r"\s+(\d+(?:\.\d+)?[km]?)\s+(\S+)\s+(\d+)(?:\s+(.*))?")
+    
     def execute(self, message, user, params):
         
-        num, name, factories = params.groups()
+        num, name, factories = params.group(1,2,3)
 
-        ship = M.DB.Maps.Ship.load(name=name)
+        ship = Ship.load(name=name)
         if ship is None:
             message.alert("%s is not a ship." % name)
             return
         num = self.short2num(num)
         factories = int(factories)
 
-        ticks, feud_ticks = self.calc_ticks(ship, num, factories)
+        race = gov = None
+        for p in (params.group(4) or "").split():
+            m=self.racere.match(p)
+            if m and not race:
+                race=m.group(1).lower()
+                continue
+            m=self.govre.match(p)
+            if m and not gov:
+                gov=m.group(1).lower()
+                continue
 
-        message.reply("It will take %s ticks to build %s %s, or with feudalism %s ticks." % (
-                ticks, self.num2short(num), ship.name, feud_ticks))
+        cost = ship.total_cost
+        bonus = 1
+        if gov:
+            cost *= (1+PA.getfloat(gov,"prodcost"))
+            bonus += PA.getfloat(gov,"prodtime")
+        if race:
+            bonus += PA.getfloat(race,"prodtime")
 
-    def calc_ticks(self, ship, num, factories):
+        ticks = self.calc_ticks(cost, num, bonus, factories)
+
+        reply = "It will take %s ticks to build %s %s" % (ticks, self.num2short(num), ship.name)
+        reply += " with a" if race or gov else ""
+        reply += " %s"%(PA.get(gov,"name"),) if gov else ""
+        reply += " %s"%(PA.get(race,"name"),) if race else ""
+        reply += " planet" if race or gov else ""
+        message.reply(reply)
+
+    def calc_ticks(self, cost, num, bonus, factories):
         """Calculate the cost in ticks. Return (ticks, ticks_with_feudalism)."""
 
         ln = lambda x: math.log(x) / math.log(math.e)
-        norm_cost = num * ship.total_cost
-        feud_cost = num * ship.total_cost * (1-feud)
-        norm_req = 2 * math.sqrt(norm_cost) * ln(norm_cost)
-        feud_req = 2 * math.sqrt(feud_cost) * ln(feud_cost)
-        output = int((4000 * factories) ** 0.98)
+        norm_cost = num * cost
+        norm_req = math.sqrt(norm_cost) * ln(norm_cost**2)
+        output = int(((4000 * factories) ** 0.98) * bonus)
         norm_ticks = int(math.ceil((norm_req + 10000 * factories) / output))
-        feud_ticks = int(math.ceil((feud_req + 10000 * factories) / output))
 
-        return norm_ticks, feud_ticks
+        return norm_ticks
