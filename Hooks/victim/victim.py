@@ -30,13 +30,12 @@ from Core.paconf import PA
 @loadable.module("member")
 class victim(loadable):
     """Target search, ordered by maxcap"""
-    usage = "  [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
+    usage = " [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
     paramre = re.compile(r"\s+(.+)")
-    alliancere=re.compile(r"^(\S+)$")
-    racere=re.compile(r"^(ter|cat|xan|zik|eit|etd)$",re.I)
-    rangere=re.compile(r"^(<|>)?(\d+)$")
-    bashre=re.compile(r"^(bash)$",re.I)
-    clusterre=re.compile(r"^c(\d+)$",re.I)
+    alliancere=re.compile(r"(\S+)")
+    rangere=re.compile(r"(<|>)?(\d+)")
+    bashre=re.compile(r"(bash)",re.I)
+    clusterre=re.compile(r"c(\d+)",re.I)
     
     @loadable.require_planet
     def execute(self, message, user, params):
@@ -54,29 +53,29 @@ class victim(loadable):
         params=params.group(1).split()
 
         for p in params:
-            m=self.bashre.search(p)
+            m=self.bashre.match(p)
             if m and not bash:
                 bash=True
                 continue
-            m=self.clusterre.search(p)
+            m=self.clusterre.match(p)
             if m and not cluster:
                 cluster=int(m.group(1))
-            m=self.racere.search(p)
+            m=self.racere.match(p)
             if m and not race:
                 race=m.group(1)
                 continue
-            m=self.rangere.search(p)
+            m=self.rangere.match(p)
             if m and not size and int(m.group(2)) < 32768:
                 size_mod=m.group(1) or '>'
                 size=m.group(2)
                 continue
-            m=self.rangere.search(p)
+            m=self.rangere.match(p)
             if m and not value:
                 value_mod=m.group(1) or '<'
                 value=m.group(2)
                 continue
-            m=self.alliancere.search(p)
-            if m and not alliance.name and not self.clusterre.search(p):
+            m=self.alliancere.match(p)
+            if m and not alliance.name and not self.clusterre.match(p):
                 alliance = Alliance(name="Unknown") if m.group(1).lower() == "unknown" else Alliance.load(m.group(1))
                 if alliance is None:
                     message.reply("No alliance matching '%s' found" % (m.group(1),))

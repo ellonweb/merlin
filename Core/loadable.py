@@ -41,6 +41,9 @@ class loadable(object):
     PrefError = "You must set your planet with !pref to use this command"
     coordre = re.compile(r"\s*(\d+)[. :\-](\d+)(?:[. :\-](\d+))?")
     planet_coordre = re.compile(r"\s*(\d+)[. :\-](\d+)[. :\-](\d+)")
+    govre = re.compile(r"("+ "|".join(PA.options("govs")) +")", re.I)
+    racere = re.compile(r"("+ "|".join(PA.options("races")) +")", re.I)
+    scanre = re.compile(r"("+ "|".join(PA.options("scans")) +")", re.I)
     true = ["1","yes","y","true","t"]
     false = ["0","no","n","false","f"]
     nulls = ["<>",".","-","?"]
