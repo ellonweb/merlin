@@ -19,25 +19,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# List of package modules
-__all__ = ["system",
-           "chanusertracker",
-           "auth",
-           "help",
-           "user",
-           "lookup",
-#           "details",
-           "intel",
-           "growth",
-           "target",
-           "victim",
-           "calcs",
-           "scans",
-           "ships",
-           "quotes",
-           "bcalc",
-           "galstatus",
-#           "robocop",
-#           "relay",
-#           "relaybot",
-           ]
+import re
+from Core.db import session
+from Core.maps import Quote
+from Core.loadable import loadable
+
+@loadable.module("member")
+class addquote(loadable):
+    usage = " <quote goes here>"
+    paramre = re.compile(r"\s+(.*)")
+    timestampre=re.compile(r"\s*\[?\s*\d{2}:\d{2}(:\d{2})?\s*\]?\s*")
+    
+    def execute(self, message, user, params):
+        
+        params = params.group(1)
+        params=self.timestampre.sub(' ',params).strip()
+        
+        session.add(Quote(text=params))
+        session.commit()
+        
+        message.reply("Added your shitty quote: "+params)

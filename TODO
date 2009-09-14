@@ -19,12 +19,6 @@ Hooks.scans.request
         fill in from Hooks.scans.blocked
 
 Quotes and slogans:
-    addquote, 
-    quote, 
-    remquote, 
-    addslogan, 
-    slogan, 
-    remslogan, 
 
 Scans:
 

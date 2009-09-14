@@ -19,25 +19,26 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# List of package modules
-__all__ = ["system",
-           "chanusertracker",
-           "auth",
-           "help",
-           "user",
-           "lookup",
-#           "details",
-           "intel",
-           "growth",
-           "target",
-           "victim",
-           "calcs",
-           "scans",
-           "ships",
-           "quotes",
-           "bcalc",
-           "galstatus",
-#           "robocop",
-#           "relay",
-#           "relaybot",
-           ]
+import re
+from Core.db import session
+from Core.maps import Quote
+from Core.loadable import loadable
+
+@loadable.module("member")
+class remquote(loadable):
+    usage = " <quote to remove>"
+    paramre = re.compile(r"\s+(.*)")
+    
+    def execute(self, message, user, params):
+        
+        params = params.group(1)
+        quote, count = Quote.search(params)
+        if count < 1:
+            reply = "No quotes matching '%s'" % (params,)
+        if count > 1:
+            reply = "There were %d quotes matching your search, I can only be bothered to delete one quote at a time you demanding fuckwit" % (count,)
+        if count == 1:
+            session.delete(quote)
+            session.commit()
+            reply="Removed: '%s'" % (quote,)
+        message.reply(reply)

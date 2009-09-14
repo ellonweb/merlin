@@ -28,7 +28,7 @@ from sqlalchemy import *
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates, relation, backref, dynamic_loader
 from sqlalchemy.sql import desc
-from sqlalchemy.sql.functions import current_timestamp
+from sqlalchemy.sql.functions import current_timestamp, random
 
 from Core.config import Config
 from Core.paconf import PA
@@ -827,3 +827,33 @@ class apenis(Base):
     penis = Column(Integer)
 Alliance.apenis = relation(apenis, uselist=False)
 Alliance.penis = association_proxy("apenis", "penis")
+
+# ########################################################################### #
+# #########################    QUOTES AND SLOGANS    ######################## #
+# ########################################################################### #
+
+class Slogan(Base):
+    __tablename__ = 'slogans'
+    id = Column(Integer, primary_key=True)
+    text = Column(String(512))
+    @staticmethod
+    def search(text):
+        text = text or ""
+        Q = session.query(Slogan)
+        Q = Q.filter(Slogan.text.ilike("%"+text+"%")).order_by(random())
+        return Q.first(), Q.count()
+    def __str__(self):
+        return self.text
+
+class Quote(Base):
+    __tablename__ = 'quotes'
+    id = Column(Integer, primary_key=True)
+    text = Column(String(512))
+    @staticmethod
+    def search(text):
+        text = text or ""
+        Q = session.query(Quote)
+        Q = Q.filter(Quote.text.ilike("%"+text+"%")).order_by(random())
+        return Q.first(), Q.count()
+    def __str__(self):
+        return self.text

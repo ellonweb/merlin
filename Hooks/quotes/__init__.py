@@ -20,24 +20,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 # List of package modules
-__all__ = ["system",
-           "chanusertracker",
-           "auth",
-           "help",
-           "user",
-           "lookup",
-#           "details",
-           "intel",
-           "growth",
-           "target",
-           "victim",
-           "calcs",
-           "scans",
-           "ships",
-           "quotes",
-           "bcalc",
-           "galstatus",
-#           "robocop",
-#           "relay",
-#           "relaybot",
+__all__ = [
+           "addslogan",
+           "slogan",
+           "remslogan",
+           "addquote",
+           "quote",
+           "remquote",
            ]

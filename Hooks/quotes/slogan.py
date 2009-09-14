@@ -19,25 +19,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# List of package modules
-__all__ = ["system",
-           "chanusertracker",
-           "auth",
-           "help",
-           "user",
-           "lookup",
-#           "details",
-           "intel",
-           "growth",
-           "target",
-           "victim",
-           "calcs",
-           "scans",
-           "ships",
-           "quotes",
-           "bcalc",
-           "galstatus",
-#           "robocop",
-#           "relay",
-#           "relaybot",
-           ]
+import re
+from Core.maps import Slogan
+from Core.loadable import loadable
+
+@loadable.module()
+class slogan(loadable):
+    paramre = re.compile(r"(?:\s+(.*))?")
+    
+    def execute(self, message, user, params):
+        
+        params = params.group(1)
+        slogan, count = Slogan.search(params)
+        reply = str(slogan)
+        if count < 1:
+            reply = "No slogans matching '%s'" % (params,)
+        if count > 1 and params:
+            reply+=" (%d more slogans match this search)" % (count - 1,)
+        message.reply(reply)
