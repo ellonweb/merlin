@@ -20,7 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from subprocess import Popen
+from threading import Thread
 from time import time
 import traceback
 from urllib2 import urlopen
@@ -47,19 +47,22 @@ def catcher(message):
     except PNickParseError:
         uid = 0
     for m in scanre.finditer(message.get_msg()):
-        scan(uid, "scan", m.group(1))
-        pass
+        parse(uid, "scan", m.group(1)).start()
     for m in scangrpre.finditer(message.get_msg()):
-        scan(uid, "group", m.group(1))
-        pass
+        parse(uid, "group", m.group(1)).start()
 
-def scan(uid, type, id):
-    print time()
-    Popen(map(str,["python", "morganleparser.py", uid, type, id,]))
-
-class parse(object):
+class parse(Thread):
     def __init__(self, uid, type, id):
+        self.uid = uid
+        self.type = type
+        self.id = id
+        Thread.__init__(self)
+    
+    def run(self):
         print time()
+        uid = self.uid
+        type = self.type
+        id = self.id
         try:
             if type == "scan":
                 self.scan(uid, id)
