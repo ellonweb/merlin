@@ -55,6 +55,7 @@ class usedef(loadable):
     
     def drop_ships(self,user,taker,ships):
         removed={}
+        tick = Updates.current_tick()
         for name in ships.split():
             if name not in self.ship_classes:
                 ship = Ship.load(name=name)
@@ -65,10 +66,10 @@ class usedef(loadable):
                 ship_lookup = name
             for fleet in user.fleets.filter_by(ship=ship_lookup):
                 removed[fleet.ship] = fleet.ship_count
-                self.delete_ships(user,taker,fleet)
+                self.delete_ships(user,taker,fleet,tick)
         session.commit()
         return removed
     
-    def delete_ships(self,user,taker,fleet):
+    def delete_ships(self,user,taker,fleet,tick):
         session.delete(fleet)
-        session.add(FleetLog(taker=taker, user=user, ship=fleet.ship, ship_count=fleet.ship_count))
+        session.add(FleetLog(taker=taker, user=user, ship=fleet.ship, ship_count=fleet.ship_count, tick=tick))

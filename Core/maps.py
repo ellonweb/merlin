@@ -883,5 +883,6 @@ class FleetLog(Base):
     user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     ship = Column(String(30))
     ship_count = Column(Integer)
+    tick = Column(Integer)
 FleetLog.taker = relation(User, primaryjoin=FleetLog.taker_id==User.id)
 FleetLog.user = relation(User, primaryjoin=FleetLog.user_id==User.id)
