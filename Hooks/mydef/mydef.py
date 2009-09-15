@@ -86,11 +86,11 @@ class mydef(loadable):
                 break
             
             count=self.short2num(mc.group(1))
-            ship=ms.group(1)
+            ship=ms.group(1).lower()
             
-            s = Ship.load(ms.group(1))
+            s = Ship.load(name=ship)
             
-            if ship.lower() in self.ship_classes:
+            if ship in self.ship_classes:
                 pass
             elif s is not None:
                 ship=s.name

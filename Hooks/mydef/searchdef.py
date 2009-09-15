@@ -20,38 +20,45 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from Core.exceptions_ import PNickParseError
+from sqlalchemy.sql import desc
 from Core.db import session
-from Core.maps import Updates, User
+from Core.maps import Updates, User, Ship, UserFleet
 from Core.loadable import loadable
 
 @loadable.module(100)
-class showdef(loadable):
+class searchdef(loadable):
     """"""
-    usage = " <pnick>"
-    paramre = re.compile(r"\s*(\S+)?")
+    usage = " <number> <ship>"
+    paramre = re.compile(r"\s+(\d+(?:\.\d+)?[mk]?)\s+(\S+)")
+    ship_classes = ['fi','co','fr','de','cr','bs']
     
     def execute(self, message, user, params):
         
-        name=params.group(1)
-        if name:
-            u=User.load(name, exact=False)
-        elif not self.is_user(user):
-            raise PNickParseError
+        count = self.short2num(params.group(1))
+        name = params.group(2).lower()
+
+        if name not in self.ship_classes:
+            ship = Ship.load(name=name)
+            if ship is None:
+                message.alert("No Ship called: %s" % (name,))
+                return
+            ship_lookup = ship.name
         else:
-            u=user
-        if u is None or not u.is_member():
-            message.reply("No members matching %s found"%(name,))
-            return
+            ship_lookup = name
         
-        ships = u.fleets.all()
+        Q = session.query(User, UserFleet)
+        Q = Q.join(User.fleets)
+        Q = Q.filter(UserFleet.ship == ship_lookup)
+        Q = Q.filter(UserFleet.ship_count >= count)
+        Q = Q.filter(User.fleetcount > 0)
+        Q = Q.order_by(desc(UserFleet.ship_count))
+        result = Q.all()
         
-        if len(ships) < 1:
-            message.reply("%s is either a lazy pile of shit that hasn't entered any ships for def, or a popular whore who's already turned their tricks."%(u.name,))
+        if len(result) < 1:
+            message.reply("There are no planets with free fleets and at least %s ships matching '%s'"%(self.num2short(count),ship_lookup))
             return
         
         tick = Updates.current_tick()
-        reply ="%s def info: fleetcount %s, updated: %s (%s), ships: " %(u.name,u.fleetcount,u.fleetupdated,u.fleetupdated-tick)
-        reply+= ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship),ships))
-        reply+=" comment: %s"%(u.fleetcomment,)
+        reply = "Fleets matching query: "
+        reply+= ", ".join(map(lambda (u, x): "%s(%s) %s: %s %s"%(u.name,u.fleetupdated-tick,u.fleetcount,self.num2short(x.ship_count),x.ship),result))
         message.reply(reply)

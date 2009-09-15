@@ -23,4 +23,5 @@
 __all__ = [
            "mydef",
            "showdef",
+           "searchdef",
            ]

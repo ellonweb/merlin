@@ -874,7 +874,7 @@ class UserFleet(Base):
     user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     ship = Column(String(30))
     ship_count = Column(Integer)
-User.fleets = dynamic_loader(UserFleet)
+User.fleets = dynamic_loader(UserFleet, backref="user")
 
 class FleetLog(Base):
     __tablename__ = 'fleet_log'
