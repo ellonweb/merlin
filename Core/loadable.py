@@ -52,7 +52,7 @@ class loadable(object):
     
     def __init__(self):
         self.isdecorated()
-        self.commandre = re.compile(self.name+"(.*)",re.I)
+        self.commandre = re.compile(self.name+r"(\s+.*|$)",re.I)
         self.helpre = re.compile("help "+self.name,re.I)
         self.usage = self.name + self.usage
     
