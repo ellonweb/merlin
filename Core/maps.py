@@ -872,18 +872,16 @@ class UserFleet(Base):
     __tablename__ = 'user_fleet'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
-    ship_id = Column(Integer, ForeignKey(Ship.id, ondelete='cascade'))
-    amount = Column(Integer)
-User.units = relation(UserFleet)
-UserFleet.ship = relation(Ship)
+    ship = Column(String(30))
+    ship_count = Column(Integer)
+User.fleets = dynamic_loader(UserFleet)
 
 class FleetLog(Base):
     __tablename__ = 'fleet_log'
     id = Column(Integer, primary_key=True)
     taker_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
-    ship_id = Column(Integer, ForeignKey(Ship.id, ondelete='cascade'))
-    amount = Column(Integer)
+    ship = Column(String(30))
+    ship_count = Column(Integer)
 FleetLog.taker = relation(User, primaryjoin=FleetLog.taker_id==User.id)
 FleetLog.user = relation(User, primaryjoin=FleetLog.user_id==User.id)
-FleetLog.ship = relation(Ship)
