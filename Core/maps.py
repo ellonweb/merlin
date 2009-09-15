@@ -335,11 +335,17 @@ class User(Base):
     access = Column(Integer)
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='set null'), index=True)
     email = Column(String(32))
+    emailre = re.compile(r"^([\w.-]+@[\w.-]+)")
     phone = Column(String(32))
     pubphone = Column(Boolean, default=False) # Asc
     sponsor = Column(String(15)) # Asc
     quits = Column(Integer, default=0) # Asc
-    emailre = re.compile("^([\w.-]+@[\w.-]+)")
+    available_cookies = Column(Integer, default=0)
+    carebears = Column(Integer, default=0)
+    last_cookie_date = Column(DateTime)
+    fleetcount = Column(Integer, default=0)
+    fleetcomment = Column(String(512))
+    fleetupdated = Column(Integer, default=0)
     
     @validates('passwd')
     def valid_passwd(self, key, passwd):
@@ -857,3 +863,27 @@ class Quote(Base):
         return Q.first(), Q.count()
     def __str__(self):
         return self.text
+
+# ########################################################################### #
+# ##############################    DEFENCE    ############################## #
+# ########################################################################### #
+
+class UserFleet(Base):
+    __tablename__ = 'user_fleet'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    ship_id = Column(Integer, ForeignKey(Ship.id, ondelete='cascade'))
+    amount = Column(Integer)
+User.units = relation(UserFleet)
+UserFleet.ship = relation(Ship)
+
+class FleetLog(Base):
+    __tablename__ = 'fleet_log'
+    id = Column(Integer, primary_key=True)
+    taker_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    ship_id = Column(Integer, ForeignKey(Ship.id, ondelete='cascade'))
+    amount = Column(Integer)
+FleetLog.taker = relation(User, primaryjoin=FleetLog.taker_id==User.id)
+FleetLog.user = relation(User, primaryjoin=FleetLog.user_id==User.id)
+FleetLog.ship = relation(Ship)

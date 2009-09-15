@@ -18,6 +18,14 @@ Hooks.scans.request
         fill in from intel
         fill in from Hooks.scans.blocked
 
+Tables:
+    command_log
+    cookie_log
+    sms_log
+    invite_proposal
+    kick_proposal
+    prop_vote
+
 Quotes and slogans:
 
 Scans:
