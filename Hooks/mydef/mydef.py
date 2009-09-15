@@ -51,8 +51,9 @@ class mydef(loadable):
         
         ships = user.fleets.all()
         
-        ship_text = ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship),ships))
-        reply = "Updated your def info to: fleetcount %s, updated: pt%s ships: %s and comment: %s" %(user.fleetcount,user.fleetupdated,ship_text,user.fleetcomment)
+        reply = "Updated your def info to: fleetcount %s, updated: pt%s ships: " %(user.fleetcount,user.fleetupdated)
+        reply+= ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship),ships))
+        reply+= " and comment: %s" %(user.fleetcomment)
         message.reply(reply)
     
     def reset_ships_and_comment(self,user,ships,fleetcount,comment,reset_ships):

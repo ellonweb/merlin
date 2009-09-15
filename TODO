@@ -54,9 +54,7 @@ Cookies and Props:
 
 Defence:
     logdef, 
-    mydef, 
     searchdef, 
-    showdef, 
     usedef, 
 
 SMS:
