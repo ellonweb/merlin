@@ -22,4 +22,5 @@
 # List of package modules
 __all__ = [
            "cookie",
+           "gac",
            ]
