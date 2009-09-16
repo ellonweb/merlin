@@ -20,7 +20,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from Core.exceptions_ import PNickParseError
 from Core.db import session
 from Core.maps import Updates, User
 from Core.loadable import loadable
@@ -29,17 +28,16 @@ from Core.loadable import loadable
 class showdef(loadable):
     """"""
     usage = " <pnick>"
-    paramre = re.compile(r"\s*(\S+)?")
+    paramre = re.compile(r"(?:\s+(\S+))?")
     
+    @loadable.require_user
     def execute(self, message, user, params):
         
         name=params.group(1)
-        if name:
-            u=User.load(name, exact=False)
-        elif not self.is_user(user):
-            raise PNickParseError
+        if name is not None:
+            u = User.load(name=name,exact=False)
         else:
-            u=user
+            u = user
         if u is None or not u.is_member():
             message.reply("No members matching %s found"%(name,))
             return
