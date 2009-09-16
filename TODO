@@ -20,7 +20,6 @@ Hooks.scans.request
 
 Tables:
     command_log
-    cookie_log
     sms_log
     invite_proposal
     kick_proposal
@@ -47,13 +46,11 @@ Growth:
 Target search:
 
 Cookies and Props:
-    cookie, 
     gac, 
     prop, 
     yourmum, 
 
 Defence:
-    logdef, 
 
 SMS:
     showmethemoney, 

@@ -21,19 +21,5 @@
  
 # List of package modules
 __all__ = [
-           "propsandcookies",
-           "adduser",
-           "galmate",
-           "edituser",
-           "getanewdaddy",
-           "whois",
-           "aids",
-           "pref",
-           "phone",
-           "quitter",
-           "quits",
-           "addchan",
-           "galchan",
-           "remchan",
-           "alias",
+           "cookie",
            ]

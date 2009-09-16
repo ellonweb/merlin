@@ -886,3 +886,20 @@ class FleetLog(Base):
     tick = Column(Integer)
 FleetLog.taker = relation(User, primaryjoin=FleetLog.taker_id==User.id)
 FleetLog.user = relation(User, primaryjoin=FleetLog.user_id==User.id)
+
+# ########################################################################### #
+# #########################    PROPS AND COOKIES    ######################### #
+# ########################################################################### #
+
+class Cookie(Base):
+    __tablename__ = 'cookie_log'
+    id = Column(Integer, primary_key=True)
+    log_time = Column(DateTime, default=current_timestamp())
+    year = Column(Integer)
+    week = Column(Integer)
+    howmany = Column(Integer)
+    giver_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    receiver_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+User.cookies = dynamic_loader(Cookie, primaryjoin=User.id==Cookie.receiver_id, backref="receiver")
+Cookie.giver = relation(User, primaryjoin=Cookie.giver_id==User.id)
+
