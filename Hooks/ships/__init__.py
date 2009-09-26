@@ -26,5 +26,6 @@ __all__ = [
            "eff",
            "stop",
            "prod",
+           "rprod",
            "afford",
            ]

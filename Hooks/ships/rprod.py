@@ -26,20 +26,21 @@ from Core.maps import Ship
 from Core.loadable import loadable
 
 @loadable.module()
-class prod(loadable):
-    """Calculate ticks it takes to produce <number> <ships> with <factories>. Specify race and/or government for bonuses."""
-    usage = " <number> <ship> <factories> [race] [government]"
-    paramre = re.compile(r"\s+(\d+(?:\.\d+)?[km]?)\s+(\S+)\s+(\d+)(?:\s+(.*))?")
+class rprod(loadable):
+    """Calculate how many <ship> you can build in <ticks> with <factories>. Specify race and/or government for bonuses."""
+    usage = " <ship> <ticks> <factories> [race] [government]"
+    paramre = re.compile(r"\s+(\S+)\s+(\d+)\s+(\d+)(?:\s+(.*))?")
+    dx = tolerance = 0.00001
     
     def execute(self, message, user, params):
         
-        num, name, factories = params.group(1,2,3)
+        name, ticks, factories = params.group(1,2,3)
 
         ship = Ship.load(name=name)
         if ship is None:
             message.alert("%s is not a ship." % name)
             return
-        num = self.short2num(num)
+        ticks = int(ticks)
         factories = int(factories)
 
         race = gov = None
@@ -61,22 +62,52 @@ class prod(loadable):
         if race:
             bonus += PA.getfloat(race,"prodtime")
 
-        ticks = self.calc_ticks(cost, num, bonus, factories)
+        res = int(self.revprod(ticks, factories, bonus))
+        ships = int(res / cost)
 
-        reply = "It will take %s ticks to build %s %s (%s)" % (ticks, self.num2short(num), ship.name, self.num2short(ships*ship.total_cost/100))
+        reply = "You can build %s %s (%s) in %d ticks." % (self.num2short(ships), ship.name, self.num2short(ships*ship.total_cost/100), ticks)
         reply += " with a" if race or gov else ""
         reply += " %s"%(PA.get(gov,"name"),) if gov else ""
         reply += " %s"%(PA.get(race,"name"),) if race else ""
         reply += " planet" if race or gov else ""
         message.reply(reply)
 
-    def calc_ticks(self, cost, num, bonus, factories):
-        """Calculate the cost in ticks. Return (ticks, ticks_with_feudalism)."""
+    def derive(self, f):
+        """Numerical derivation of the function f."""
 
-        ln = lambda x: math.log(x) / math.log(math.e)
-        norm_cost = num * cost
-        norm_req = math.sqrt(norm_cost) * ln(norm_cost**2)
-        output = int(((4000 * factories) ** 0.98) * bonus)
-        norm_ticks = int(math.ceil((norm_req + 10000 * factories) / output))
+        return lambda x: (f(x + self.dx) - f(x)) / self.dx
 
-        return norm_ticks
+    def close(self, a, b):
+        """Is the result acceptable?"""
+
+        return abs(a - b) < self.tolerance
+
+    def newton_transform(self, f):
+        """Do a newton transform of the function f."""
+
+        return lambda x: x - (f(x) / self.derive(f)(x))
+
+    def fixed_point(self, f, guess):
+        """Fixed point search."""
+
+        while not self.close(guess, f(guess)):
+            guess = f(guess)
+        return guess
+
+    def newton(self, f, guess):
+        """Generic equation solver using newtons method."""
+
+        return self.fixed_point(self.newton_transform(f),
+                                guess)
+
+    def rpu(self, y, math):
+        """Curry it."""
+
+        return lambda x: 2 * math.sqrt(x) * math.log(x, math.e) - y
+
+    def revprod(self, ticks, facs, bonus):
+        """Reversed production formula."""
+
+        import math
+        output = ((4000 * facs) ** 0.98) * bonus
+        return self.newton(self.rpu(ticks * output - 10000 * facs, math), 10)
