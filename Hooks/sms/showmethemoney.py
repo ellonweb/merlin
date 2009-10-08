@@ -19,8 +19,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# List of package modules
-__all__ = [
-           "smslog",
-           "showmethemoney",
-           ]
+from clickatell import Clickatell
+from Core.config import Config
+from Core.loadable import loadable
+
+@loadable.module(100)
+class showmethemoney(loadable):
+    
+    def execute(self, message, user, params):
+        
+        username = Config.get("clickatell", "user")
+        password = Config.get("clickatell", "pass")
+        api_id = Config.get("clickatell", "api")
+
+        ct = Clickatell(username, password, api_id)
+        if not ct.auth():
+            message.reply("Could not authenticate with server. Super secret message not sent.")
+            return
+
+        balance = ct.getbalance()
+
+        if not balance:
+            reply="Help me help you. I need the kwan. SHOW ME THE MONEY"
+        else:
+            reply="Current kwan balance: %d"%(float(balance),)
+
+        message.reply(reply)
