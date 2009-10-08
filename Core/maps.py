@@ -403,31 +403,6 @@ User.phonefriends = relation(User,  secondary=PhoneFriend.__table__,
 PhoneFriend.user = relation(User, primaryjoin=PhoneFriend.user_id==User.id)
 PhoneFriend.friend = relation(User, primaryjoin=PhoneFriend.friend_id==User.id)
 
-'''
-class Gimp(Base):
-    __tablename__ = 'sponsor'
-    id = Column(Integer, primary_key=True)
-    sponsor_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
-    name = Column(String(15))
-    comment = Column(String(512))
-    timestamp = Column(Float, default=time)
-    wait = 36 #hours. use 0 for invite mode, -1 for recruitment closed
-    
-    def hoursleft(self):
-        return -ceil((time()-(self.timestamp+(self.wait*60*60)))/60/60)
-    
-    @staticmethod
-    def load(name, session=None):
-        s = session or Session()
-        Q = s.query(Gimp)
-        Q = Q.filter(Gimp.name.ilike(name))
-        gimp = Q.first()
-        s.close() if session is None else None
-        return gimp
-
-Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gimps')
-'''
-
 class Channel(Base):
     __tablename__ = 'channels'
     id = Column(Integer, primary_key=True)
