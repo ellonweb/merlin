@@ -336,7 +336,7 @@ class User(Base):
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='set null'), index=True)
     email = Column(String(32))
     emailre = re.compile(r"^([\w.-]+@[\w.-]+)")
-    phone = Column(String(32))
+    phone = Column(String(48))
     pubphone = Column(Boolean, default=False) # Asc
     sponsor = Column(String(15)) # Asc
     quits = Column(Integer, default=0) # Asc
@@ -903,3 +903,17 @@ class Cookie(Base):
 User.cookies = dynamic_loader(Cookie, primaryjoin=User.id==Cookie.receiver_id, backref="receiver")
 Cookie.giver = relation(User, primaryjoin=Cookie.giver_id==User.id)
 
+
+# ########################################################################### #
+# ##############################    SMS LOG    ############################## #
+# ########################################################################### #
+
+class SMS(Base):
+    __tablename__ = 'sms_log'
+    id = Column(Integer, primary_key=True)
+    sender_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    receiver_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    phone = Column(String(48))
+    sms_text = Column(String(160))
+SMS.sender = relation(User, primaryjoin=SMS.sender_id==User.id)
+SMS.receiver = relation(User, primaryjoin=SMS.receiver_id==User.id)
