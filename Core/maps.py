@@ -878,6 +878,45 @@ class Cookie(Base):
 User.cookies = dynamic_loader(Cookie, primaryjoin=User.id==Cookie.receiver_id, backref="receiver")
 Cookie.giver = relation(User, primaryjoin=Cookie.giver_id==User.id)
 
+class Invite(Base):
+    __tablename__ = 'invite_proposal'
+    id = Column(Integer, Sequence('proposal_id_seq'), primary_key=True, server_default=text("nextval('proposal_id_seq')"))
+    active = Column(Boolean, default=True)
+    proposer_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    person = Column(String(15))
+    created = Column(DateTime, default=current_timestamp())
+    closed = Column(DateTime)
+    padding = Column(Integer, default=0)
+    vote_result = Column(String(7))
+    compensation = Column(Integer)
+    comment_text = Column(Text)
+Invite.proposer = relation(User)
+
+class Kick(Base):
+    __tablename__ = 'kick_proposal'
+    id = Column(Integer, Sequence('proposal_id_seq'), primary_key=True, server_default=text("nextval('proposal_id_seq')"))
+    active = Column(Boolean, default=True)
+    proposer_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    person_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    created = Column(DateTime, default=current_timestamp())
+    closed = Column(DateTime)
+    padding = Column(Integer, default=0)
+    vote_result = Column(String(7))
+    compensation = Column(Integer)
+    comment_text = Column(Text)
+Kick.proposer = relation(User, primaryjoin=Kick.proposer_id==User.id)
+Kick.person = relation(User, primaryjoin=Kick.person_id==User.id)
+
+class Vote(Base):
+    __tablename__ = 'prop_vote'
+    id = Column(Integer, primary_key=True)
+    vote = Column(String(7))
+    carebears = Column(Integer)
+    prop_id = Column(Integer)
+    voter_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+Vote.voter = relation(User)
+Invite.votes = relation(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Invite.id==Vote.prop_id)
+Kick.votes = relation(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Kick.id==Vote.prop_id)
 
 # ########################################################################### #
 # ##############################    SMS LOG    ############################## #
