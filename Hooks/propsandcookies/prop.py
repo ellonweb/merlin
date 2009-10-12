@@ -47,30 +47,97 @@ class prop(loadable):
             pass
         elif mode == "kick":
             pass
+        
         elif mode == "show":
-            pass
+            id = params.group(2)
+            prop = self.load_prop(id)
+            if prop is None:
+                message.reply("No proposition number %s exists."%(id,))
+                return
+            
+            now = datetime.datetime.now()
+            age = (now - prop.created).days
+            reply = "proposition %s (%s days old):" %(prop.id,age,)
+            reply+= " %s %s." %(prop.type,prop.person,)
+            reply+= " %s commented '%s'." %(prop.proposer.name,prop.comment_text)
+            
+            if not prop.active:
+                reply+= " This prop expired %d days ago."%((now-prop.closed).days,)
+            
+            veto = prop.votes.filter_by(vote="veto").all()
+            if len(veto > 0):
+                reply+= " Vetoing: "
+                reply+= ", "join(map(lambda x: x.voter.name, veto))
+            
+            message.reply(reply)
+            
+            if prop.active:
+                vote = prop.votes.filter_by(voter=user).first()
+                if vote is not None:
+                    reply = "You are currently voting '%s'"%(vote.vote,)
+                    if vote.vote != "abstain":
+                        reply+= " with %s carebears"%(vote.carebears,)
+                    reply+= " on this proposition."
+                else:
+                    reply = " You are not currently voting on this proposition."
+                message.alert(reply)
+            
+            if not prop.active:
+                yes = session.query(sum(Vote.carebears)).filter_by(prop_id=id, vote="yes").scalar()
+                no = session.query(sum(Vote.carebears)).filter_by(prop_id=id, vote="no").scalar()
+                veto = session.query(sum(Vote.carebears)).filter_by(prop_id=id, vote="veto").scalar()
+                reply = "The prop"
+                if veto > 0:
+                    reply+= " failed because of %s vetos"%(veto)
+                elif yes > no:
+                    reply+= " passed by a vote of %s to %s"%(yes,no)
+                else:
+                    reply+= " failed by a vote of %s to %s"%(no,yes)
+                
+                pretty_print=lambda x:"%s (%s)"%(x.voter.name,x.carebears)
+                reply+= ". The voters in favor were ("
+                reply+= ", ".join(map(pretty_print,prop.votes.filter_by(vote="yes")))
+                reply+= ") and against ("
+                reply+= ", ".join(map(pretty_print,prop.votes.filter_by(vote="no")))
+                reply+= ")."
+                
+                if veto > 0:
+                    reply+= " Vetoing ("
+                    reply+= ", ".join([vote.user.name for vote in prop.votes.filter_by(vote="veto")])
+                    reply+= ")."
+                
+                message.reply(reply)
+        
         elif mode == "expire":
             pass
         elif mode == "cancel":
             pass
         elif mode == "vote":
             pass
+        
         elif mode == "list":
             prev = []
             for id, person, result, type in self.get_open_props():
                 prev.append("%s: %s %s"%(id,type,person))
             message.reply("Propositions currently being voted on: %s"%(", ".join(prev),))
+        
         elif mode == "recent":
             prev = []
             for id, person, result, type in self.get_recent_props():
                 prev.append("%s: %s %s %s"%(id,type,person,result[0].upper() if result else ""))
             message.reply("Recently expired propositions: %s"%(", ".join(prev),))
+        
         elif mode == "search":
             search = params.group(2)
             prev = []
             for id, person, result, type in self.search_props(search):
                 prev.append("%s: %s %s %s"%(id,type,person,result[0].upper() if result else ""))
             message.reply("Propositions matching '%s': %s"%(search, ", ".join(prev),))
+    
+    def load_prop(self, id):
+        invite = session.query(Invite).filter_by(id=id).first()
+        kick = session.query(Kick).filter_by(id=id).first()
+        return invite or kick
     
     def base_prop_search(self):
         invites = session.query(Invite.id, Invite.person, Invite.vote_result, literal("invite")).filter_by(active=False)

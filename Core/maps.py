@@ -890,6 +890,7 @@ class Invite(Base):
     vote_result = Column(String(7))
     compensation = Column(Integer)
     comment_text = Column(Text)
+    type = "invite"
 Invite.proposer = relation(User)
 
 class Kick(Base):
@@ -904,6 +905,7 @@ class Kick(Base):
     vote_result = Column(String(7))
     compensation = Column(Integer)
     comment_text = Column(Text)
+    type = "kick"
 Kick.proposer = relation(User, primaryjoin=Kick.proposer_id==User.id)
 Kick.kicked = relation(User, primaryjoin=Kick.person_id==User.id)
 Kick.person = association_proxy("kicked", "name")
@@ -916,8 +918,8 @@ class Vote(Base):
     prop_id = Column(Integer)
     voter_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
 Vote.voter = relation(User)
-Invite.votes = relation(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Invite.id==Vote.prop_id)
-Kick.votes = relation(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Kick.id==Vote.prop_id)
+Invite.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Invite.id==Vote.prop_id)
+Kick.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Kick.id==Vote.prop_id)
 
 # ########################################################################### #
 # ##############################    SMS LOG    ############################## #
