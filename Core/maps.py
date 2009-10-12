@@ -905,7 +905,8 @@ class Kick(Base):
     compensation = Column(Integer)
     comment_text = Column(Text)
 Kick.proposer = relation(User, primaryjoin=Kick.proposer_id==User.id)
-Kick.person = relation(User, primaryjoin=Kick.person_id==User.id)
+Kick.kicked = relation(User, primaryjoin=Kick.person_id==User.id)
+Kick.person = association_proxy("kicked", "name")
 
 class Vote(Base):
     __tablename__ = 'prop_vote'
