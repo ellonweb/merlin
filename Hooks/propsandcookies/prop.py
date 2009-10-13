@@ -41,12 +41,10 @@ class prop(loadable):
     
     @loadable.require_user
     def execute(self, message, user, params):
-        
         mode = params.group(1).lower()
-        if mode == "invite":
-            pass
-        elif mode == "kick":
-            pass
+        
+        if mode in ("invite", "kick", "expire", "cancel",):
+            self.execute2(message, user, params)
         
         elif mode == "show":
             id = params.group(2)
@@ -88,26 +86,6 @@ class prop(loadable):
                 reply+= self.text_summary(prop)
                 message.reply(reply)
         
-        elif mode == "expire":
-            pass
-        
-        elif mode == "cancel":
-            id = params.group(2)
-            prop = self.load_prop(id)
-            if prop is None:
-                message.reply("No proposition number %s exists."%(id,))
-                return
-            
-            if prop.proposer is not user and not user.is_admin():
-                message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
-                return
-            
-            reply = "Cancelled proposal %s to %s %s" %(prop.id,prop.type,prop.person,)
-            reply+= self.text_summary(prop)
-            
-            self.delete_prop(prop)
-            message.privmsg(reply, Config.get("Channels","home"))
-        
         elif mode == "vote":
             pass
         
@@ -129,6 +107,87 @@ class prop(loadable):
             for id, person, result, type in self.search_props(search):
                 prev.append("%s: %s %s %s"%(id,type,person,result[0].upper() if result else ""))
             message.reply("Propositions matching '%s': %s"%(search, ", ".join(prev),))
+    
+    @loadable.channel("home")
+    def execute2(self, message, user, params):
+        mode = params.group(1).lower()
+        
+        if mode == "invite":
+            person = params.group(2)
+            u = User.load(name=person,access="member")
+            if u is not None:
+                message.reply("Stupid %s, that wanker %s is already a member."%(user.name,person))
+                return
+            if self.is_already_proposed_invite(person):
+                message.reply("Silly %s, there's already a proposal to invite %s."%(user.name,person))
+                return
+            anc = user.has_ancestor(person)
+            if anc is True:
+                message.reply("Ew, incest.")
+                return
+            if anc is None:
+                message.reply("Filthy orphans should be castrated.")
+                return
+            
+            prop = Invite(proposer=user, person=person, comment_text=params.group(3))
+            session.add(prop)
+            session.commit()
+            
+            reply = "%s created a new proposition (nr. %d) to invite %s." %(user.name, prop.id, person)
+            reply+= " When people have been given a fair shot at voting you can call a count using !prop expire %d."%(prop.id,)
+            message.reply(reply)
+        
+        elif mode == "kick":
+            person = params.group(2)
+            if person.lower() == Config.get("Connection","nick").lower():
+                message.reply("I'll peck your eyes out, cunt.")
+                return
+            u = User.load(name=person,access="member")
+            if u is None:
+                message.reply("Stupid %s, you can't kick %s, they're not a member."%(user.name,person))
+                return
+            if self.is_already_proposed_invite(person):
+                message.reply("Silly %s, there's already a proposal to kick %s."%(user.name,person))
+                return
+            if u.access > user.access:
+                message.reply("Unfortunately I like %s more than you. So none of that."%(u.name,))
+                return
+            
+            prop = Kick(proposer=user, kicked=u, comment_text=params.group(3))
+            session.add(prop)
+            session.commit()
+            
+            reply = "%s created a new proposition (nr. %d) to kick %s." %(user.name, prop.id, person)
+            reply+= " When people have been given a fair shot at voting you can call a count using !prop expire %d."%(prop.id,)
+            message.reply(reply)
+        
+        elif mode == "expire":
+            pass
+        
+        elif mode == "cancel":
+            id = params.group(2)
+            prop = self.load_prop(id)
+            if prop is None:
+                message.reply("No proposition number %s exists."%(id,))
+                return
+            
+            if prop.proposer is not user and not user.is_admin():
+                message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
+                return
+            
+            reply = "Cancelled proposal %s to %s %s" %(prop.id,prop.type,prop.person,)
+            reply+= self.text_summary(prop)
+            
+            self.delete_prop(prop)
+            message.reply(reply)
+    
+    def is_already_proposed_invite(self, person):
+        Q = session.query(Invite).filter(Invite.person.ilike(person)).filter_by(active=True)
+        return Q > 0
+    
+    def is_already_proposed_kick(self, person):
+        Q = session.query(Kick).join(Kick.kicked).filter(User.name.ilike(person)).filter_by(active=True)
+        return Q > 0
     
     def load_prop(self, id):
         invite = session.query(Invite).filter_by(id=id).first()
@@ -174,16 +233,16 @@ class prop(loadable):
         session.commit()
     
     def base_prop_search(self):
-        invites = session.query(Invite.id, Invite.person, Invite.vote_result, literal("invite")).filter_by(active=False)
-        kicks = session.query(Kick.id, User.name, Kick.vote_result, literal("kick")).join(Kick.kicked).filter_by(active=False)
+        invites = session.query(Invite.id, Invite.person, Invite.vote_result, literal("invite"))
+        kicks = session.query(Kick.id, User.name, Kick.vote_result, literal("kick")).join(Kick.kicked)
         return invites.union(kicks)
     
     def get_open_props(self):
-        Q = self.base_prop_search().order_by(asc(Invite.id))
+        Q = self.base_prop_search().filter_by(active=True).order_by(asc(Invite.id))
         return Q.all()
     
     def get_recent_props(self):
-        Q = self.base_prop_search().order_by(desc(Invite.id))
+        Q = self.base_prop_search().filter_by(active=False).order_by(desc(Invite.id))
         return Q[:10]
     
     def search_props(self, search):

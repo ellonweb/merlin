@@ -387,6 +387,18 @@ class User(Base):
         if passwd is not None:
             user = user if user.passwd == User.hasher(passwd) else None
         return user
+    
+    def has_ancestor(self, possible_ancestor):
+        ancestor = User.load(name=self.sponsor, access="member")
+        if ancestor is not None:
+            if ancestor.name.lower() == possible_ancestor.lower():
+                return True
+            else:
+                return ancestor.has_ancestor(possible_ancestor)
+        elif ancestor.name.lower() == Config.get("Connection", "nick"):
+            return False
+        else:
+            return None
 Planet.user = relation(User, uselist=False, backref="planet")
 def user_access_function(num):
     # Function generator for access check
@@ -893,7 +905,6 @@ class Invite(Base):
     person = Column(String(15))
     created = Column(DateTime, default=current_timestamp())
     closed = Column(DateTime)
-    padding = Column(Integer, default=0)
     vote_result = Column(String(7))
     compensation = Column(Integer)
     comment_text = Column(Text)
@@ -908,7 +919,6 @@ class Kick(Base):
     person_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     created = Column(DateTime, default=current_timestamp())
     closed = Column(DateTime)
-    padding = Column(Integer, default=0)
     vote_result = Column(String(7))
     compensation = Column(Integer)
     comment_text = Column(Text)
