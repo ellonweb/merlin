@@ -50,7 +50,7 @@ class prop(loadable):
             id = params.group(2)
             prop = self.load_prop(id)
             if prop is None:
-                message.reply("No proposition number %s exists."%(id,))
+                message.reply("No proposition number %s exists (idiot)."%(id,))
                 return
             
             now = datetime.datetime.now()
@@ -87,7 +87,38 @@ class prop(loadable):
                 message.reply(reply)
         
         elif mode == "vote":
-            pass
+            id = params.group(2)
+            vote = params.group(3).lower()
+            prop = self.load_prop(id)
+            if prop is None:
+                message.reply("No proposition number %s exists (idiot)."%(id,))
+                return
+            if not prop.active:
+                message.reply("You can't vote on prop %s, it's expired."%(id,))
+                return
+            if prop.proposer == user:
+                message.reply("Arbitrary Munin rule #167: No voting on your own props.")
+                return
+            if prop.person == user.name and vote == 'veto':
+                message.reply("You can't veto a vote to kick you.")
+                return
+            
+            old_vote = prop.votes.filter(Vote.voter==user).first()
+            session.delete(old_vote)
+            prop.votes.append(Vote(voter=user, vote=vote, carebears=user.carebears))
+            session.commit()
+            
+            if old_vote is None:
+                reply = "Set your vote on proposition %s as %s"%(id,vote,)
+            else:
+                reply = "Changed your vote on proposition %s from %s"%(id,old_vote.vote,)
+                if old_vote.vote not in ("abstain","veto",):
+                    reply+= " (%s)"%(old_vote.carebears,)
+                reply+= " to %s"%(vote,)
+            if vote not in ("abstain","veto",):
+                reply+= " with %s carebears"%(user.carebears,)
+            reply+= "."
+            message.reply(reply)
         
         elif mode == "list":
             prev = []
@@ -168,7 +199,7 @@ class prop(loadable):
             id = params.group(2)
             prop = self.load_prop(id)
             if prop is None:
-                message.reply("No proposition number %s exists."%(id,))
+                message.reply("No proposition number %s exists (idiot)."%(id,))
                 return
             
             if prop.proposer is not user and not user.is_admin():
