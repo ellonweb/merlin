@@ -57,7 +57,7 @@ class loadable(object):
         self.usage = self.name + self.usage
     
     def isdecorated(self):
-        raise LoadableError
+        raise LoadableError("You need to decorate your hook")
     
     def match(self, message, regexp):
         if message.get_prefix():
@@ -115,7 +115,12 @@ class loadable(object):
     @staticmethod
     def channel(chan):
         if not chan.find("#") == 0:
-            chan = Config.get("Channels",chan)
+            if chan in Config.options("Channels"):
+                chan = Config.get("Channels",chan)
+            elif chan == "PM":
+                chan = Config.get("Connection","nick")
+            else:
+                raise LoadableError("Invalid channel")
         def wrapper(hook):
             def execute(self, message, user, params):
                 if self.is_chan(message, chan):
@@ -146,7 +151,12 @@ class loadable(object):
     @staticmethod
     def module(access=0):
         def wrapper(hook):
-            acc = access if type(access) is int else Config.getint("Access",access)
+            if access in Config.options("Access"):
+                acc = Config.getint("Access",access)
+            elif type(access) is int:
+                acc = access
+            else:
+                raise LoadableError("Invalid access level")
             class callback(hook):
                 name = hook.__name__
                 doc = hook.__doc__
