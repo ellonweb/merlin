@@ -30,6 +30,7 @@ from sqlalchemy.orm import validates, relation, backref, dynamic_loader
 from sqlalchemy.sql import desc
 from sqlalchemy.sql.functions import current_timestamp, max, random
 
+from Core.exceptions_ import LoadableError
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import Base, session
@@ -362,11 +363,17 @@ class User(Base):
         return hashlib.md5(passwd).hexdigest()
     
     @staticmethod
-    def load(name=None, id=None, passwd=None, exact=True, active=True):
+    def load(name=None, id=None, passwd=None, exact=True, active=True, access=0):
         assert id or name
         Q = session.query(User)
         if active is True:
-            Q = Q.filter(User.active == True)
+            if access in Config.options("Access"):
+                access = Config.getint("Access",access)
+            elif type(access) is int:
+                pass
+            else:
+                raise LoadableError("Invalid access level")
+            Q = Q.filter(User.active == True).filter(User.access >= access)
         if id is not None:
             user = Q.filter(User.id == id).first()
         if name is not None:

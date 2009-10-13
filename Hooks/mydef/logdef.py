@@ -43,8 +43,8 @@ class logdef(loadable):
         elif search not in self.ship_classes:
             ship = Ship.load(name=search)
             if ship is None:
-                u = User.load(search, exact=False)
-                if u is None or not u.is_member():
+                u = User.load(search, exact=False, access="member")
+                if u is None:
                     Q = Q.filter_by(id=-1)
                 else:
                     Q = Q.filter_by(user=u)

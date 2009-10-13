@@ -60,8 +60,8 @@ class cookie(loadable):
             message.reply("Cookies? Pah! I only eat carrion.")
             return
         
-        rec = User.load(receiver, exact=False)
-        if not rec or not rec.is_member():
+        rec = User.load(receiver, exact=False, access="member")
+        if not rec:
             message.reply("I don't know who '%s' is, so I can't very well give them any cookies can I?" % (receiver,))
             return
         if user == rec:

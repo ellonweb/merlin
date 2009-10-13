@@ -37,10 +37,10 @@ class yourmum(loadable):
         
         search = params.group(1)
         if search is not None:
-            u = User.load(name=search,exact=False)
+            u = User.load(name=search, exact=False, access="member")
         else:
             u = user
-        if u is None or not u.is_member():
+        if u is None:
             message.reply("No members matching %s found"%(search,))
             return
         

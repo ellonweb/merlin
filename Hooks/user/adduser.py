@@ -63,7 +63,7 @@ class adduser(loadable):
                 member.access = access
                 member.sponsor = user.name
                 added.append(pnick)
-            elif member.access < Config.getint("Access","member"):
+            elif not member.is_member():
                 member.access = access
                 member.sponsor = user.name
                 added.append(pnick)

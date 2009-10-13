@@ -41,8 +41,8 @@ class whois(loadable):
             message.reply("I am %s. Hear me roar." % (Config.get("Connection","nick"),))
             return
 
-        whore = User.load(name=search,exact=False)
-        if whore is None or not whore.is_member():
+        whore = User.load(name=search, exact=False, access="member")
+        if whore is None:
             message.reply("No users matching '%s'"%(search,))
             return
 
