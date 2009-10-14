@@ -395,7 +395,7 @@ class User(Base):
                 return True
             else:
                 return ancestor.has_ancestor(possible_ancestor)
-        elif ancestor.name.lower() == Config.get("Connection", "nick"):
+        elif self.sponsor == Config.get("Connection", "nick"):
             return False
         else:
             return None
