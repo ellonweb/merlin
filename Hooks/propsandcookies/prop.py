@@ -22,7 +22,7 @@
 import datetime
 import re
 from sqlalchemy.sql import asc, desc, literal
-from sqlalchemy.sql.functions import current_timestamp
+from sqlalchemy.sql.functions import current_timestamp, sum
 from Core.config import Config
 from Core.db import session
 from Core.maps import User, Invite, Kick, Vote
@@ -74,7 +74,7 @@ class prop(loadable):
                 vote = prop.votes.filter_by(voter=user).first()
                 if vote is not None:
                     reply = "You are currently voting '%s'"%(vote.vote,)
-                    if vote.vote != "abstain":
+                    if vote.vote not in ("abstain","veto",):
                         reply+= " with %s carebears"%(vote.carebears,)
                     reply+= " on this proposition."
                 else:
@@ -82,7 +82,7 @@ class prop(loadable):
                 message.alert(reply)
             
             if not prop.active:
-                reply = self.text_result(*self.sum_result(prop))
+                reply = self.text_result(*self.sum_votes(prop))
                 reply+= self.text_summary(prop)
                 message.reply(reply)
         
@@ -211,8 +211,13 @@ class prop(loadable):
             yes, no, veto = self.sum_votes(prop)
             passed = yes > no and veto <= 0
             
+            reply = self.text_result(yes, no, veto)
+            reply+= self.text_summary(prop)
+            message.reply(reply)
+        
             if prop.type == "invite" and passed:
                 pnick = prop.person
+                access = Config.getint("Access", "member")
                 member = User.load(name=pnick, active=False)
                 if member is None:
                     member = User(name=pnick, access=access, sponsor=prop.proposer.name)
@@ -243,10 +248,6 @@ class prop(loadable):
             prop.vote_result = ['no','yes'][passed]
             session.commit()
         
-            reply = self.text_result(yes, no, veto)
-            reply+= self.text_summary(prop)
-            message.reply(reply)
-        
         elif mode == "cancel":
             id = params.group(2)
             prop = self.load_prop(id)
@@ -265,7 +266,7 @@ class prop(loadable):
     
     def member_count_below_limit(self):
         Q = session.query(User).filter(User.active == True).filter(User.access >= Config.getint("Access", "member"))
-        return Q.count < Config.getint("Alliance", "members")
+        return Q.count() < Config.getint("Alliance", "members")
     
     def is_already_proposed_invite(self, person):
         Q = session.query(Invite).filter(Invite.person.ilike(person)).filter_by(active=True)
@@ -283,7 +284,7 @@ class prop(loadable):
     def sum_votes(self, prop):
         yes = session.query(sum(Vote.carebears)).filter_by(prop_id=prop.id, vote="yes").scalar()
         no = session.query(sum(Vote.carebears)).filter_by(prop_id=prop.id, vote="no").scalar()
-        veto = session.query(sum(Vote.carebears)).filter_by(prop_id=prop.id, vote="veto").scalar()
+        veto = session.query(Vote).filter_by(prop_id=prop.id, vote="veto").count()
         return yes, no, veto
     
     def text_result(self, yes, no, veto):
@@ -307,7 +308,7 @@ class prop(loadable):
         veto = prop.votes.filter_by(vote="veto").all()
         if len(veto) > 0:
             reply+= " Vetoing ("
-            reply+= ", ".join([vote.user.name for vote in veto])
+            reply+= ", ".join([vote.voter.name for vote in veto])
             reply+= ")."
         
         return reply
