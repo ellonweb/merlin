@@ -906,7 +906,6 @@ class Invite(Base):
     created = Column(DateTime, default=current_timestamp())
     closed = Column(DateTime)
     vote_result = Column(String(7))
-    compensation = Column(Integer)
     comment_text = Column(Text)
     type = "invite"
 Invite.proposer = relation(User)
@@ -920,7 +919,6 @@ class Kick(Base):
     created = Column(DateTime, default=current_timestamp())
     closed = Column(DateTime)
     vote_result = Column(String(7))
-    compensation = Column(Integer)
     comment_text = Column(Text)
     type = "kick"
 Kick.proposer = relation(User, primaryjoin=Kick.proposer_id==User.id)

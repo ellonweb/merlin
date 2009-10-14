@@ -82,7 +82,7 @@ class prop(loadable):
                 message.alert(reply)
             
             if not prop.active:
-                reply = self.text_result(prop)
+                reply = self.text_result(*self.sum_result(prop))
                 reply+= self.text_summary(prop)
                 message.reply(reply)
         
@@ -152,6 +152,9 @@ class prop(loadable):
             if self.is_already_proposed_invite(person):
                 message.reply("Silly %s, there's already a proposal to invite %s."%(user.name,person))
                 return
+            if not self.member_count_below_limit():
+                message.reply("You have tried to invite somebody, but we have too many losers and I can't be bothered dealing with more than %s of you."%(Config.getint("Alliance", "members"),))
+                return
             anc = user.has_ancestor(person)
             if anc is True:
                 message.reply("Ew, incest.")
@@ -193,7 +196,56 @@ class prop(loadable):
             message.reply(reply)
         
         elif mode == "expire":
-            pass
+            id = params.group(2)
+            prop = self.load_prop(id)
+            if prop is None:
+                message.reply("No proposition number %s exists (idiot)."%(id,))
+                return
+            if prop.proposer is not user and not user.is_admin():
+                message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
+                return
+            if prop.type == "invite" and not self.member_count_below_limit():
+                message.reply("You have tried to invite somebody, but we have too many losers and I can't be bothered dealing with more than %s of you."%(Config.getint("Alliance", "members"),))
+                return
+            
+            yes, no, veto = self.sum_votes(prop)
+            passed = yes > no and veto <= 0
+            
+            if prop.type == "invite" and passed:
+                pnick = prop.person
+                member = User.load(name=pnick, active=False)
+                if member is None:
+                    member = User(name=pnick, access=access, sponsor=prop.proposer.name)
+                    session.add(member)
+                elif not member.active:
+                    member.active = True
+                    member.access = access
+                    member.sponsor = prop.proposer.name
+                elif not member.is_member():
+                    member.access = access
+                    member.sponsor = prop.proposer.name
+                message.privmsg("adduser %s %s 399" %(Config.get("Channels","home"), pnick,), "P")
+                message.reply("%s has been added to %s and given member level access to me."%(pnick,Config.get("Channels","home")))
+            
+            if prop.type == "kick" and passed:
+                idiot = prop.kicked
+                if "galmate" in Config.options("Access"):
+                    idiot.access = Config.getint("Access","galmate")
+                else:
+                    idiot.access = 0
+                message.privmsg("remuser %s %s"%(Config.get("Channels","home"), idiot.name,),'p')
+                message.privmsg("ban %s *!*@%s.users.netgamers.org Your sponsor doesn't like you anymore"%(Config.get("Channels","home"), idiot.name,),'p')
+                message.privmsg("note send %s A proposition to kick you from %s has been raised by %s with reason '%s' and passed by a vote of %s to %s."%(idiot.name,Config.get("Alliance","name"),prop.proposer.name,prop.comment_text,yes,no),'p')
+                message.reply("%s has been reduced to \"galmate\" level and removed from the channel."%(idiot.name,))
+            
+            prop.active = False
+            prop.closed = current_timestamp()
+            prop.vote_result = ['no','yes'][passed]
+            session.commit()
+        
+            reply = self.text_result(yes, no, veto)
+            reply+= self.text_summary(prop)
+            message.reply(reply)
         
         elif mode == "cancel":
             id = params.group(2)
@@ -201,7 +253,6 @@ class prop(loadable):
             if prop is None:
                 message.reply("No proposition number %s exists (idiot)."%(id,))
                 return
-            
             if prop.proposer is not user and not user.is_admin():
                 message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
                 return
@@ -211,6 +262,10 @@ class prop(loadable):
             
             self.delete_prop(prop)
             message.reply(reply)
+    
+    def member_count_below_limit(self):
+        Q = session.query(User).filter(User.active == True).filter(User.access >= Config.getint("Access", "member"))
+        return Q.count < Config.getint("Alliance", "members")
     
     def is_already_proposed_invite(self, person):
         Q = session.query(Invite).filter(Invite.person.ilike(person)).filter_by(active=True)
@@ -231,8 +286,7 @@ class prop(loadable):
         veto = session.query(sum(Vote.carebears)).filter_by(prop_id=prop.id, vote="veto").scalar()
         return yes, no, veto
     
-    def text_result(self, prop):
-        yes, no, veto = self.sum_votes(prop)
+    def text_result(self, yes, no, veto):
         reply = "The prop"
         if veto > 0:
             reply+= " failed because of %s vetos"%(veto)
