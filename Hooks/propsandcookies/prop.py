@@ -21,7 +21,7 @@
  
 import datetime
 import re
-from sqlalchemy.sql import asc, desc, literal
+from sqlalchemy.sql import asc, desc, literal, union
 from sqlalchemy.sql.functions import current_timestamp, sum
 from Core.config import Config
 from Core.db import session
@@ -122,20 +122,20 @@ class prop(loadable):
         
         elif mode == "list":
             prev = []
-            for id, person, result, type, active in self.get_open_props():
+            for id, person, result, type in self.get_open_props():
                 prev.append("%s: %s %s"%(id,type,person))
             message.reply("Propositions currently being voted on: %s"%(", ".join(prev),))
         
         elif mode == "recent":
             prev = []
-            for id, person, result, type, active in self.get_recent_props():
+            for id, person, result, type in self.get_recent_props():
                 prev.append("%s: %s %s %s"%(id,type,person,result[0].upper() if result else ""))
             message.reply("Recently expired propositions: %s"%(", ".join(prev),))
         
         elif mode == "search":
             search = params.group(2)
             prev = []
-            for id, person, result, type, active in self.search_props(search):
+            for id, person, result, type in self.search_props(search):
                 prev.append("%s: %s %s %s"%(id,type,person,result[0].upper() if result else ""))
             message.reply("Propositions matching '%s': %s"%(search, ", ".join(prev),))
     
@@ -318,19 +318,26 @@ class prop(loadable):
         session.delete(prop)
         session.commit()
     
-    def base_prop_search(self):
-        invites = session.query(Invite.id, Invite.person, Invite.vote_result, literal("invite"), Invite.active)
-        kicks = session.query(Kick.id, User.name, Kick.vote_result, literal("kick"), Kick.active).join(Kick.kicked)
-        return invites.union(kicks)
+    def base_props_selectable(self):
+        invites = session.query(Invite.id, Invite.person, Invite.vote_result, literal("invite").label("type"), Invite.active)
+        kicks = session.query(Kick.id, User.name, Kick.vote_result, literal("kick").label("type"), Kick.active).join(Kick.kicked)
+        props = union(invites, kicks).alias("prop")
+        return props
     
     def get_open_props(self):
-        Q = self.base_prop_search().filter(Invite.active==True).order_by(asc(Invite.id))
+        props = self.base_props_selectable()
+        Q = session.query(props.c.id, props.c.person, props.c.vote_result, props.c.type)
+        Q = Q.filter(props.c.active==True).order_by(asc(props.c.id))
         return Q.all()
     
     def get_recent_props(self):
-        Q = self.base_prop_search().filter(Invite.active==False).order_by(desc(Invite.id))
+        props = self.base_props_selectable()
+        Q = session.query(props.c.id, props.c.person, props.c.vote_result, props.c.type)
+        Q = Q.filter(props.c.active==False).order_by(desc(props.c.id))
         return Q[:10]
     
     def search_props(self, search):
-        Q = self.base_prop_search().filter(Invite.person.ilike("%"+search+"%")).order_by(desc(Invite.id))
+        props = self.base_props_selectable()
+        Q = session.query(props.c.id, props.c.person, props.c.vote_result, props.c.type)
+        Q = Q.filter(props.c.person.ilike("%"+search+"%")).order_by(desc(props.c.id))
         return Q.all()

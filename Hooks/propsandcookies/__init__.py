@@ -21,6 +21,7 @@
  
 # List of package modules
 __all__ = [
+           "prop",
            "cookie",
            "gac",
            "yourmum",
