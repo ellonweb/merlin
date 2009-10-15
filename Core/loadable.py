@@ -81,10 +81,10 @@ class loadable(object):
             self.execute(message, access, params)
             session = Session()
             session.add(Command(command_prefix = message.get_prefix(),
-                                command = m.group(1),
-                                command_parameters = message.get_msg()[m.end():],
+                                command = self.name,
+                                command_parameters = message.get_msg()[len(self.name)+1:],
                                 nick = message.get_nick(),
-                                username = "" if user is True else user.name,
+                                username = "" if access is True else access.name,
                                 hostname = message.get_hostmask(),
                                 target = message.get_chan() if message.in_chan() else message.get_nick(),))
             session.commit()

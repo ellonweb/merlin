@@ -48,8 +48,8 @@ class adopt(loadable):
             message.reply("No members matching '%s'"%(adoptee,))
             return
 
-        s = User.load(name=a.sponsor, access="member")
-        if s is None:
+        s = User.load(name=a.sponsor, access="member") if a.sponsor else None
+        if s is not None:
             message.reply("%s already has a daddy you filthy would-be kidnapper!"%(a.name,))
             return
         
