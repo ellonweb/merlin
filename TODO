@@ -20,7 +20,6 @@ Hooks.scans.request
         fill in from Hooks.scans.blocked
 
 Tables:
-    command_log
 
 Quotes and slogans:
 

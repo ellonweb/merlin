@@ -25,7 +25,8 @@ import re
 from Core.exceptions_ import LoadableError, PrefError, ParseError, ChanParseError, PNickParseError, UserError
 from Core.config import Config
 from Core.paconf import PA
-from Core.maps import User, Channel
+from Core.db import Session
+from Core.maps import User, Channel, Command
 from Core.chanusertracker import get_user
 
 # ########################################################################### #
@@ -78,6 +79,15 @@ class loadable(object):
             if params is None:
                 raise ParseError
             self.execute(message, access, params)
+            session = Session()
+            session.add(Command(command_prefix = message.get_prefix(),
+                                command = m.group(1),
+                                command_parameters = message.get_msg()[m.end():],
+                                nick = message.get_nick(),
+                                username = "" if user is True else user.name,
+                                hostname = message.get_hostmask(),
+                                target = message.get_chan() if message.in_chan() else message.get_nick(),))
+            session.commit()
         except PNickParseError:
             message.alert(self.PParseError)
         except UserError:

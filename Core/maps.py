@@ -937,8 +937,20 @@ Invite.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=In
 Kick.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Kick.id==Vote.prop_id)
 
 # ########################################################################### #
-# ##############################    SMS LOG    ############################## #
+# ################################    LOGS    ############################### #
 # ########################################################################### #
+
+class Command(Base):
+    __tablename__ = 'command_log'
+    id = Column(Integer, primary_key=True)
+    command_prefix = Column(String(1))
+    command = Column(String(20))
+    command_parameters = Column(String(512))
+    nick = Column(String(15))
+    username = Column(String(15))
+    hostname = Column(String(64))
+    target = Column(String(150))
+    command_time = Column(DateTime, default=current_timestamp())
 
 class SMS(Base):
     __tablename__ = 'sms_log'
