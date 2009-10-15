@@ -3,6 +3,8 @@ http://www.sqlalchemy.org/trac/ticket/1529
 http://www.sqlalchemy.org/trac/ticket/1537
 http://www.sqlalchemy.org/trac/ticket/1565
 
+rewrite CLI
+
 migrate db system for createdb.py
     investigate schemas/namespaces as alternative to seperate DBs
 
@@ -18,31 +20,3 @@ Hooks.scans.request
         fill in from scan requests ("ellonweb informs that atleast n dists are needed")
         fill in from intel
         fill in from Hooks.scans.blocked
-
-Tables:
-
-Quotes and slogans:
-
-Scans:
-
-Bookings:
-
-Access and Channels:
-
-Intel:
-
-Penis:
-
-Ships:
-
-Simple calcs and lookups:
-
-Growth:
-
-Target search:
-
-Cookies and Props:
-
-Defence:
-
-SMS:
