@@ -208,6 +208,8 @@ class prop(loadable):
                 message.reply("You have tried to invite somebody, but we have too many losers and I can't be bothered dealing with more than %s of you."%(Config.getint("Alliance", "members"),))
                 return
             
+            self.recalculate_carebears(prop)
+            
             yes, no, veto = self.sum_votes(prop)
             passed = yes > no and veto <= 0
             
@@ -280,6 +282,11 @@ class prop(loadable):
         invite = session.query(Invite).filter_by(id=id).first()
         kick = session.query(Kick).filter_by(id=id).first()
         return invite or kick
+    
+    def recalculate_carebears(self, prop):
+        Q = session.query(Vote, User.carebears).join(Vote.voter).filter(Vote.prop_id==prop.id)
+        for vote, carebears in Q:
+            vote.carebears = carebears
     
     def sum_votes(self, prop):
         yes = session.query(sum(Vote.carebears)).filter_by(prop_id=prop.id, vote="yes").scalar()
