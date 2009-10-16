@@ -41,6 +41,4 @@ __all__ = ["system",
            "bcalc",
            "galstatus",
 #           "robocop",
-#           "relay",
-#           "relaybot",
            ]
