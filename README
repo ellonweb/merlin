@@ -10,8 +10,7 @@ PostgreSQL 8.4
 psycopg2 (recommended) or pg8000 (untested)
 SQLAlchemy 0.5.6
 If using the SMS module, PycURL
-It is also recommended you install Git so you can track
- any changes you need to make
+It is also recommended you install Git so you can track your changes
 
 Installation instructions:
 
@@ -19,8 +18,13 @@ Installation instructions:
 2) Follow Postgre's instructions to create a database, use UTF8 encoding.
    You could also use pgAdmin or execute:
    CREATE DATABASE yourdbnamehere WITH ENCODING = 'UTF8';
-3) If you've decided to use Git, use this command to download the code:
+3) If you've decided to use Git, use these commands to download the code and
+   create your own branch to future-proof any changes you make:
    git clone git://github.com/ellonweb/merlin.git
+   cd merlin
+   git checkout -b <yourbranchname>
+   After making changes you should use git add and git commit. When you want to
+   upgrade Merlin, just do git pull followed by git rebase master.
 4) Edit merlin.cfg as required. You should only need to change the Connection,
    Admin, Alliance and DB settings. If you're using the SMS features you'll
    need to add your details in the clickatell section.
