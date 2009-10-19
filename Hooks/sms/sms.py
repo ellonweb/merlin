@@ -19,8 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from clickatell import Clickatell
-from hashlib import md5
+import re
+from urllib import urlencode
+from urllib2 import urlopen
 from Core.config import Config
 from Core.db import session
 from Core.maps import User, SMS
@@ -59,36 +60,23 @@ class sms(loadable):
             message.reply("Max length for a text is 160 characters. Your text was %i characters long. Super secret message not sent." % (len(text),))
             return
 
-        username = Config.get("clickatell", "user")
-        password = Config.get("clickatell", "pass")
-        api_id = Config.get("clickatell", "api")
-
-        ct = Clickatell(username, password, api_id)
-        if not ct.auth():
-            message.reply("Could not authenticate with server. Super secret message not sent.")
-            return
-
-        hasher = md5()
-        hasher.update(phone)
-        hasher.update(text)
-        msg_id = hasher.hexdigest()
-
-        message = {
-            'to': str(phone),
-            'sender': Config.get("Connection","nick"),
-            'text': str(text),
-            'climsgid': str(msg_id),
-            'msg_type': 'SMS_TEXT'
-        }
-
-        ret = ct.sendmsg(message)
-        if not ret[0]:
+        get = urlencode({"user": Config.get("clickatell", "user"),
+                         "password": Config.get("clickatell", "pass"),
+                         "api_id": Config.get("clickatell", "api"),
+                         "to": phone,
+                         "text": text,
+                        })
+        
+        status, msg = urlopen("https://api.clickatell.com/http/sendmsg", get).read().split(":")
+        
+        if status in ("OK","ID",):
+            message.reply("Successfully processed To: %s Message: %s" % (receiver.name,text))
+            self.log_message(user,receiver,phone, public_text)
+        elif status in ("ERR",):
+            message.reply("Error sending message: %s" % (msg.strip(),))
+        else:
             message.reply("That wasn't supposed to happen. I don't really know what wrong. Maybe your mother dropped you.")
-            return
-        reply="Successfully processed To: %s Message: %s"
-        message.reply(reply % (receiver.name,text))
-        self.log_message(user,receiver,phone, public_text)
-
+    
     def prepare_phone_number(self,text):
         if not text:
             return text

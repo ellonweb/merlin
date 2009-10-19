@@ -1,7 +1,5 @@
 Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 Please read the included LICENSE.
-This project also includes the file clickatell.py which is the work of Jacques Marneweck
-and is subject to its own license, please see /Hooks/sms/clickatell.py for details.
 
 Requirements:
 
@@ -9,7 +7,6 @@ Python 2.6
 PostgreSQL 8.4
 psycopg2 (recommended) or pg8000 (untested)
 SQLAlchemy 0.5.6
-If using the SMS module, PycURL
 It is also recommended you install Git so you can track your changes
 
 Installation instructions:

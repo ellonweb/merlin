@@ -19,7 +19,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from clickatell import Clickatell
+from urllib import urlencode
+from urllib2 import urlopen
 from Core.config import Config
 from Core.loadable import loadable
 
@@ -32,16 +33,20 @@ class showmethemoney(loadable):
         password = Config.get("clickatell", "pass")
         api_id = Config.get("clickatell", "api")
 
-        ct = Clickatell(username, password, api_id)
-        if not ct.auth():
-            message.reply("Could not authenticate with server. Super secret message not sent.")
-            return
-
-        balance = ct.getbalance()
-
-        if not balance:
-            reply="Help me help you. I need the kwan. SHOW ME THE MONEY"
+        get = urlencode({"user": Config.get("clickatell", "user"),
+                         "password": Config.get("clickatell", "pass"),
+                         "api_id": Config.get("clickatell", "api"),
+                        })
+        
+        status, msg = urlopen("https://api.clickatell.com/http/getbalance", get).read().split(":")
+        
+        if status in ("Credit",):
+            balance = float(msg.strip())
+            if not balance:
+                message.reply("Help me help you. I need the kwan. SHOW ME THE MONEY")
+            else:
+                message.reply("Current kwan balance: %d"%(balance,))
+        elif status in ("ERR",):
+            message.reply("Error sending message: %s" % (msg.strip(),))
         else:
-            reply="Current kwan balance: %d"%(float(balance),)
-
-        message.reply(reply)
+            message.reply("That wasn't supposed to happen. I don't really know what wrong. Maybe your mother dropped you.")
