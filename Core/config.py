@@ -26,6 +26,7 @@ def load_config(path):
     # Load and parse required config file
     try:
         config = configparser()
+        config.optionxform = str
         if len(config.read(path)) != 1:
             raise IOError
     except StandardError:
