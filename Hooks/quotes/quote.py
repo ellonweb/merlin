@@ -19,6 +19,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import sys
-import Hooks.scans.parser
-Hooks.scans.parser.parse(sys.argv[1:])
+import re
+from Core.maps import Quote
+from Core.loadable import loadable
+
+@loadable.module()
+class quote(loadable):
+    paramre = re.compile(r"(?:\s+(.*))?")
+    
+    def execute(self, message, user, params):
+        
+        params = params.group(1)
+        quote, count = Quote.search(params)
+        reply = str(quote)
+        if count < 1:
+            reply = "No quotes matching '%s'" % (params,)
+        if count > 1 and params:
+            reply+=" (%d more quotes match this search)" % (count - 1,)
+        message.reply(reply)

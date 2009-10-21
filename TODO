@@ -1,93 +1,23 @@
-update LICENSE in all files (some files don't have any license atm)
-    add jester to the list of (C) names: a _lot_ of code is copy/pasted straight from munin
-
 http://www.sqlalchemy.org/trac/ticket/1468
 http://www.sqlalchemy.org/trac/ticket/1529
+http://www.sqlalchemy.org/trac/ticket/1537
+http://www.sqlalchemy.org/trac/ticket/1565
+http://www.sqlalchemy.org/trac/ticket/1576
+
+rewrite CLI
 
 migrate db system for createdb.py
     investigate schemas/namespaces as alternative to seperate DBs
 
 rewrite Connection.write and Action.write to use detached threaded system
 
-update all hooks to use new loader(session) system, test thoroughly etc
+Reimplement Robocop (threaded?)
+    scan requests (!request)
+    scans parsed (!scans)
 
-Hooks.request
+Hooks.scans.request
     !request cancel id
-    intel.dists
-        fill in data from scan requests ("ellonweb informs that atleast n dists are needed")
-
-Hooks.scan
-    scans ala munin
-    robocop interface
-    chanusertracker interface
-        pm all known users that their scan is done
-
-Hooks.blocked
-    more manual info for intel.dists
-    @require_access_level(access.get('scan',access['member']))
-
-Quotes and slogans:
-    addquote, 
-    quote, 
-    remquote, 
-    addslogan, 
-    slogan, 
-    remslogan, 
-
-Scans:
-    au, 
-    dev, 
-    jgp, 
-    news, 
-    planet, 
-    scans, 
-    unit, 
-
-Bookings:
-
-Access and Channels:
-    alias, 
-    addchan, 
-    galchan, 
-    remchan, 
-
-Intel:
-
-Penis:
-
-Ships:
-    prod needs rewrite, race bonus, feud/demo etc
-    move package vars to main var system
-
-Simple calcs and lookups:
-    lookup, 
-
-Growth:
-
-Target search:
-    cunts, 
-    idler, 
-    whore, 
-
-Cookies and Props:
-    cookie, 
-    gac, 
-    prop, 
-    yourmum, 
-
-Defence:
-    logdef, 
-    mydef, 
-    searchdef, 
-    showdef, 
-    usedef, 
-
-SMS:
-    showmethemoney, 
-    sms, 
-    smslog, 
-
-afford, 
-bcalc, 
-surprisesex, 
-topcunts, 
+    request.dists
+        fill in from scan requests ("ellonweb informs that atleast n dists are needed")
+        fill in from intel
+        fill in from Hooks.scans.blocked

@@ -19,19 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# Relays everything it sees to Robocop
-
-from Hooks.relaybot import channels
-from .Core.modules import M
-from .Core.robocop import push
-callback = M.loadable.callback
-
-addr = "../RoBoCoP"
-
-@callback('PRIVMSG')
-def relay(message):
-    if message.get_chan() in channels:
-        send(message.get_nick(), message.get_msg())
-
-def send(nick, msg):
-    push("!relay %s %s" % (nick, msg,))
+# List of package modules
+__all__ = [
+           "sms",
+           "smslog",
+           "showmethemoney",
+           ]

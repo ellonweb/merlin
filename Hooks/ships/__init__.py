@@ -20,10 +20,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 # List of package modules
-__all__ = ["ship","cost","eff","stop"]
-
-# Package variables
-feud = 0.12
-effs = {"t1": 1.0,
-        "t2": 0.6,
-        "t3": 0.3}
+__all__ = [
+           "ship",
+           "cost",
+           "eff",
+           "stop",
+           "prod",
+           "rprod",
+           "afford",
+           ]

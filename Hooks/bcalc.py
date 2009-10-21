@@ -19,11 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# List of package modules
-__all__ = ["relay","relayhopper"]
+from Core.loadable import loadable
 
-# Relay channels
-# You should configure P to autoinvite the bot to your channels
-channels = frozenset((
-            
-))
+@loadable.module()
+class bcalc(loadable):
+    
+    def execute(self, message, user, params):
+        
+        bcalc = ["http://bcalc.thrud.co.uk/","http://beta.5th-element.org/","http://bcalc.lch-hq.org/index.php",
+                 "http://parser.5th-element.org/","http://munin.ascendancy.tv/",
+                 "http://pa.xqwzts.com/prod.aspx","http://www.everyday-hero.net/reshack.html",
+                 "http://patools.thrud.co.uk/", "http://game.planetarion.com/bcalc.pl"]
+        
+        message.reply("Bcalcs: "+" | ".join(bcalc))

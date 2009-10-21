@@ -20,9 +20,8 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from sqlalchemy import or_
+from sqlalchemy import cast, Float, func, Integer, or_
 from sqlalchemy.sql import desc
-from Core.exceptions_ import PNickParseError
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
 from Core.loadable import loadable
@@ -30,15 +29,15 @@ from Core.paconf import PA
 
 @loadable.module("member")
 class victim(loadable):
-    """Target search"""
-    usage = "  [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
+    """Target search, ordered by maxcap"""
+    usage = " [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
     paramre = re.compile(r"\s+(.+)")
-    alliancere=re.compile(r"^(\S+)$")
-    racere=re.compile(r"^(ter|cat|xan|zik|eit|etd)$",re.I)
-    rangere=re.compile(r"^(<|>)?(\d+)$")
-    bashre=re.compile(r"^(bash)$",re.I)
-    clusterre=re.compile(r"^c(\d+)$",re.I)
+    alliancere=re.compile(r"(\S+)")
+    rangere=re.compile(r"(<|>)?(\d+)")
+    bashre=re.compile(r"(bash)",re.I)
+    clusterre=re.compile(r"c(\d+)",re.I)
     
+    @loadable.require_planet
     def execute(self, message, user, params):
         
         alliance=Alliance()
@@ -48,49 +47,47 @@ class victim(loadable):
         value_mod=None
         value=None
         bash=False
-        attacker=None
+        attacker=user.planet
         cluster=None
 
         params=params.group(1).split()
 
         for p in params:
-            m=self.bashre.search(p)
+            m=self.bashre.match(p)
             if m and not bash:
                 bash=True
-                if not self.is_user(user):
-                    raise PNickParseError
-                if user.planet is not None:
-                    attacker = user.planet
-                else:
-                    message.alert("Usage: %s (you must set your planet in preferences to use the bash option (!pref planet=x:y:z))" % (self.usage,))
-                    return
                 continue
-            m=self.clusterre.search(p)
+            m=self.clusterre.match(p)
             if m and not cluster:
                 cluster=int(m.group(1))
-            m=self.racere.search(p)
+            m=self.racere.match(p)
             if m and not race:
                 race=m.group(1)
                 continue
-            m=self.rangere.search(p)
+            m=self.rangere.match(p)
             if m and not size and int(m.group(2)) < 32768:
                 size_mod=m.group(1) or '>'
                 size=m.group(2)
                 continue
-            m=self.rangere.search(p)
+            m=self.rangere.match(p)
             if m and not value:
                 value_mod=m.group(1) or '<'
                 value=m.group(2)
                 continue
-            m=self.alliancere.search(p)
-            if m and not alliance.name and not self.clusterre.search(p):
+            m=self.alliancere.match(p)
+            if m and not alliance.name and not self.clusterre.match(p):
                 alliance = Alliance(name="Unknown") if m.group(1).lower() == "unknown" else Alliance.load(m.group(1))
                 if alliance is None:
                     message.reply("No alliance matching '%s' found" % (m.group(1),))
                     return
                 continue
 
-        Q = session.query(Planet, Intel)
+        caprate = PA.getfloat("roids","maxcap")
+        modifier = (cast(Planet.value,Float).op("/")(float(attacker.value))).op("^")(0.5)
+        caprate = func.float8smaller(modifier.op("*")(caprate),caprate)
+        maxcap = cast(func.floor(cast(Planet.size,Float).op("*")(caprate)),Integer)
+        
+        Q = session.query(Planet, Intel, maxcap.label("maxcap"))
         if alliance.id:
             Q = Q.join(Planet.intel)
             Q = Q.filter(Intel.alliance == alliance)
@@ -110,6 +107,7 @@ class victim(loadable):
                              Planet.score.op(">")(attacker.score*PA.getfloat("bash","score"))))
         if cluster:
             Q = Q.filter(Planet.x == cluster)
+        Q = Q.order_by(desc("maxcap"))
         Q = Q.order_by(desc(Planet.size))
         Q = Q.order_by(desc(Planet.value))
         result = Q[:6]
@@ -119,7 +117,7 @@ class victim(loadable):
             if race:
                 reply+=" %s"%(race,)
             reply+=" planets"
-            if alliance:
+            if alliance.name:
                 reply+=" in intel matching Alliance: %s"%(alliance.name,)
             else:
                 reply+=" matching"
@@ -131,9 +129,9 @@ class victim(loadable):
             return
         
         replies = []
-        for planet, intel in result[:5]:
+        for planet, intel, maxcap in result[:5]:
             reply="%s:%s:%s (%s)" % (planet.x,planet.y,planet.z,planet.race)
-            reply+=" Value: %s Size: %s" % (planet.value,planet.size)
+            reply+=" Value: %s Size: %s MaxCap: %s" % (planet.value,planet.size, maxcap)
             if intel:
                 if intel.nick:
                     reply+=" Nick: %s" % (intel.nick,)

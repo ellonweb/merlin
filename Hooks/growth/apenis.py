@@ -20,7 +20,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from Core.exceptions_ import PNickParseError
 from Core.config import Config
 from Core.maps import Alliance
 from Core.loadable import loadable
@@ -44,9 +43,8 @@ class apenis(loadable):
                 message.alert("No alliances match %s" % (Config.get("Alliance","name"),))
                 return
         else:
-            if not self.is_user(user):
-                raise PNickParseError
-            if user.planet is None or user.planet.intel is None or user.planet.alliance is None:
+            self.get_user_planet(user)
+            if user.planet.intel is None or user.planet.alliance is None:
                 message.alert("Make sure you've set your planet with !pref and alliance with !intel")
                 return
             else:

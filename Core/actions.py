@@ -37,8 +37,8 @@ class Action(Message):
         if text:            
             for line in text.split("\n"):
                 while line:
-                    Connection.write((params + line)[:(450 - len(params))])
-                    line = line[(450 - len(params)):]
+                    Connection.write((params + line)[:450])
+                    line = line[450 - len(params):]
         else:
             Connection.write(params[:-1])
     
@@ -49,8 +49,11 @@ class Action(Message):
     def notice(self, text, target=None):
         # If we're opped in a channel in common with the user, we can reply with
         #  CNOTICE instead of NOTICE which doesn't count towards the flood limit.
+        print self.get_chan(), self.get_chan() in Channels, self.get_nick(), self.get_nick() in Nicks, target, target in Nicks
+        print Channels.keys(), Nicks.keys()
         if (self.get_chan() in Channels.keys()
             and Channels[self.get_chan()].opped is True
+            and (target or self.get_nick()) in Nicks.keys()
             and Nicks[target or self.get_nick()] in Channels[self.get_chan()].nicks):
             self.write("CNOTICE %s %s :%s" % (target or self.get_nick(), self.get_chan(), text))
         else:

@@ -30,7 +30,7 @@ from Core.callbacks import Callbacks
 from Core.loadable import loadable
 
 @loadable.system('PRIVMSG', admin=True)
-def exit(message):
+def quit(message):
     """Quit IRC and close down"""
     msg = message.get_msg().split(None,1)
     if len(msg) > 1:

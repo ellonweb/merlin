@@ -19,28 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# Relay a message
-
-import re
-from .variables import channels, access
-from .Core.modules import M
-loadable = M.loadable.loadable
-
-class relay(loadable):
-    """Relays a message"""
-    
-    def __init__(self):
-        loadable.__init__(self)
-        self.robore = re.compile(r"\s(\S+?)\s(.+)")
-        self.usage += " message"
-    
-    @loadable.run_with_access(access['admin'])
-    def execute(self, message, user, params):
-        self.relay(message, message.get_nick(), params.group(1))
-    
-    @loadable.runcop
-    def robocop(self, message, params):
-        self.relay(message, params.group(1), params.group(2))
-    
-    def relay(self, message, nick, msg):
-        message.privmsg(r"04,01 %s Reports: 08,01%s " % (nick, msg.replace("\t"," "),), channels['off'])
+# List of package modules
+__all__ = [
+           "prop",
+           "adopt",
+           "cookie",
+           "gac",
+           "yourmum",
+           ]

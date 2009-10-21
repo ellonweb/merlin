@@ -23,8 +23,8 @@
 
 import sys
 import sqlalchemy
-if not 5.4 <= float(sqlalchemy.__version__[2:5]) < 6.0:
-    sys.exit("SQLAlchemy 0.5.4+ Required")
+if not 5.6 <= float(sqlalchemy.__version__[2:5]) < 6.0:
+    sys.exit("SQLAlchemy 0.5.6+ Required")
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base

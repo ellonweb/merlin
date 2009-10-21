@@ -20,30 +20,28 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from .Core.modules import M
-loadable = M.loadable.loadable
-from Hooks.ships import effs
+from Core.paconf import PA
+from Core.db import session
+from Core.maps import Ship
+from Core.loadable import loadable
 
+@loadable.module()
 class eff(loadable):
     """Calculates the efficiency of the specified number of ships"""
+    usage = " <number> <ship> [t1|t2|t3]"
+    paramre = re.compile(r"\s(\d+(?:\.\d+)?[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s(\d+(?:\.\d+)?[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
-        self.usage += " number ship [t1|t2|t3]"
-    
-    @loadable.run
     def execute(self, message, user, params):
         
         num, name, target = params.groups()
         target = target or "t1"
         
-        ship = M.DB.Maps.Ship.load(name=name)
+        ship = Ship.load(name=name)
         num = self.short2num(num)
         if ship is None:
             message.alert("No Ship called: %s" % (name,))
             return
-        efficiency = effs[target]
+        efficiency = PA.getfloat("teffs",target.lower())
         target_class = getattr(ship, target)
         if ship.damage:
             total_damage = ship.damage * num
@@ -59,9 +57,7 @@ class eff(loadable):
                 num, ship.name, self.num2short(num*ship.total_cost/100),
                 killed, self.num2short(killed*1500),))
             return
-        session = M.DB.Session()
-        targets = session.query(M.DB.Maps.Ship).filter(M.DB.Maps.Ship.class_ == target_class)
-        session.close()
+        targets = session.query(Ship).filter(Ship.class_ == target_class)
         if targets.count() == 0:
             message.reply("%s does not have any targets in that category (%s)" % (ship.name,target))
             return
@@ -69,7 +65,7 @@ class eff(loadable):
         if ship.type.lower() == "norm" or ship.type.lower() == 'cloak':
             reply+="destroy "
         elif ship.type.lower() == "emp":
-            reply+="freeze "
+            reply+="hug "
         elif ship.type.lower() == "steal":
             reply+="steal "
         else:

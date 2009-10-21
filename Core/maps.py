@@ -28,8 +28,9 @@ from sqlalchemy import *
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates, relation, backref, dynamic_loader
 from sqlalchemy.sql import desc
-from sqlalchemy.sql.functions import current_timestamp
+from sqlalchemy.sql.functions import current_timestamp, max, random
 
+from Core.exceptions_ import LoadableError
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import Base, session
@@ -48,7 +49,7 @@ class Updates(Base):
     
     @staticmethod
     def current_tick():
-        tick = session.query(Updates.id).order_by(desc(Updates.id)).scalar() or 0
+        tick = session.query(max(Updates.id)).scalar() or 0
         return tick
 
 class Galaxy(Base):
@@ -160,7 +161,7 @@ class Planet(Base):
         bravery = max(0,( min(2,float(target.value)/self.value)-0.1 ) * (min(2,float(target.score)/self.score)-0.2))*10
         return bravery
     
-    def xp(self, target, cap=None):
+    def calc_xp(self, target, cap=None):
         cap = cap or target.maxcap(self)
         return int(cap * self.bravery(target))
     
@@ -173,6 +174,9 @@ class Planet(Base):
     
     def maxcap(self, attacker=None):
         return int(self.size * self.caprate(attacker))
+    
+    def resources_per_agent(self, target):
+        return min(10000,(target.value * 2000)/self.value)
 Planet._idx_x_y_z = Index('planet_x_y_z', Planet.x, Planet.y, Planet.z)
 Galaxy.planets = relation(Planet, order_by=Planet.z, backref="galaxy")
 Galaxy.planet_loader = dynamic_loader(Planet)
@@ -326,16 +330,23 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(String(15)) # pnick
+    alias = Column(String(15))
     passwd = Column(String(32))
     active = Column(Boolean, default=True)
     access = Column(Integer)
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='set null'), index=True)
     email = Column(String(32))
-    phone = Column(String(32))
+    emailre = re.compile(r"^([\w.-]+@[\w.-]+)")
+    phone = Column(String(48))
     pubphone = Column(Boolean, default=False) # Asc
     sponsor = Column(String(15)) # Asc
     quits = Column(Integer, default=0) # Asc
-    emailre = re.compile("^([\w.-]+@[\w.-]+)")
+    available_cookies = Column(Integer, default=0)
+    carebears = Column(Integer, default=0)
+    last_cookie_date = Column(DateTime)
+    fleetcount = Column(Integer, default=0)
+    fleetcomment = Column(String(512))
+    fleetupdated = Column(Integer, default=0)
     
     @validates('passwd')
     def valid_passwd(self, key, passwd):
@@ -352,22 +363,42 @@ class User(Base):
         return hashlib.md5(passwd).hexdigest()
     
     @staticmethod
-    def load(name=None, id=None, passwd=None, exact=True, active=True):
+    def load(name=None, id=None, passwd=None, exact=True, active=True, access=0):
         assert id or name
         Q = session.query(User)
-        if id is not None:
-            Q = Q.filter(User.id == id)
-        if name is not None:
-            if Q.filter(User.name.ilike(name)).count() > 0 or (exact is True):
-                Q = Q.filter(User.name.ilike(name))
-            else:
-                Q = Q.filter(User.name.ilike("%"+name+"%"))
-        if passwd is not None:
-            Q = Q.filter(User.passwd == User.hasher(passwd))
         if active is True:
-            Q = Q.filter(User.active == True)
-        user = Q.first()
+            if access in Config.options("Access"):
+                access = Config.getint("Access",access)
+            elif type(access) is int:
+                pass
+            else:
+                raise LoadableError("Invalid access level")
+            Q = Q.filter(User.active == True).filter(User.access >= access)
+        if id is not None:
+            user = Q.filter(User.id == id).first()
+        if name is not None:
+            user = Q.filter(User.name.ilike(name)).first()
+            if user is None and exact is not True:
+                user = Q.filter(User.name.ilike(name+"%")).first()
+            if user is None and exact is not True:
+                user = Q.filter(User.alias.ilike(name)).first()
+            if user is None and exact is not True:
+                user = Q.filter(User.alias.ilike(name+"%")).first()
+        if passwd is not None:
+            user = user if user.passwd == User.hasher(passwd) else None
         return user
+    
+    def has_ancestor(self, possible_ancestor):
+        ancestor = User.load(name=self.sponsor, access="member")
+        if ancestor is not None:
+            if ancestor.name.lower() == possible_ancestor.lower():
+                return True
+            else:
+                return ancestor.has_ancestor(possible_ancestor)
+        elif self.sponsor == Config.get("Connection", "nick"):
+            return False
+        else:
+            return None
 Planet.user = relation(User, uselist=False, backref="planet")
 def user_access_function(num):
     # Function generator for access check
@@ -391,35 +422,10 @@ User.phonefriends = relation(User,  secondary=PhoneFriend.__table__,
 PhoneFriend.user = relation(User, primaryjoin=PhoneFriend.user_id==User.id)
 PhoneFriend.friend = relation(User, primaryjoin=PhoneFriend.friend_id==User.id)
 
-'''
-class Gimp(Base):
-    __tablename__ = 'sponsor'
-    id = Column(Integer, primary_key=True)
-    sponsor_id = Column(Integer, ForeignKey('users.id', ondelete='cascade'))
-    name = Column(String(15))
-    comment = Column(String(512))
-    timestamp = Column(Float, default=time)
-    wait = 36 #hours. use 0 for invite mode, -1 for recruitment closed
-    
-    def hoursleft(self):
-        return -ceil((time()-(self.timestamp+(self.wait*60*60)))/60/60)
-    
-    @staticmethod
-    def load(name, session=None):
-        s = session or Session()
-        Q = s.query(Gimp)
-        Q = Q.filter(Gimp.name.ilike(name))
-        gimp = Q.first()
-        s.close() if session is None else None
-        return gimp
-
-Gimp.sponsor = relation(User, primaryjoin=Gimp.sponsor_id==User.id, backref='gimps')
-'''
-
 class Channel(Base):
     __tablename__ = 'channels'
     id = Column(Integer, primary_key=True)
-    name = Column(String(150))
+    name = Column(String(150), unique=True)
     userlevel = Column(Integer)
     maxlevel = Column(Integer)
     
@@ -455,25 +461,25 @@ class Intel(Base):
         if self.alliance is not None:
             ret += " alliance=%s" % (self.alliance.name,)
         if self.fakenick:
-            ret += "fakenick=%s"%(self.fakenick,)
+            ret += " fakenick=%s"%(self.fakenick,)
         if self.defwhore:
-            ret += "defwhore=%s"%(self.defwhore,)
+            ret += " defwhore=%s"%(self.defwhore,)
         if self.covop:
-            ret += "covop=%s"%(self.covop,)
+            ret += " covop=%s"%(self.covop,)
         if self.scanner:
-            ret += "scanner=%s"%(self.scanner,)
+            ret += " scanner=%s"%(self.scanner,)
         if self.dists:
-            ret += "dists=%s"%(self.dists,)
+            ret += " dists=%s"%(self.dists,)
         if self.bg:
-            ret += "bg=%s"%(self.bg,)
+            ret += " bg=%s"%(self.bg,)
         if self.gov:
-            ret += "gov=%s"%(self.gov,)
+            ret += " gov=%s"%(self.gov,)
         if self.relay:
-            ret += "relay=%s"%(self.relay,)
+            ret += " relay=%s"%(self.relay,)
         if self.reportchan:
-            ret += "reportchan=%s"%(self.reportchan,)
+            ret += " reportchan=%s"%(self.reportchan,)
         if self.comment:
-            ret += "comment=%s"%(self.comment,)
+            ret += " comment=%s"%(self.comment,)
         return ret
 Planet.intel = relation(Intel, uselist=False, backref="planet")
 Galaxy.intel = relation(Intel, Planet.__table__, order_by=Planet.z)
@@ -566,6 +572,22 @@ class Scan(Base):
     pa_id = Column(String(32), index=True, unique=True)
     group_id = Column(String(32))
     scanner_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    
+    def __str__(self):
+        p = self.planet
+        head = "%s on %s:%s:%s " % (PA.get(self.scantype,"name"),p.x,p.y,p.z,)
+        id_tick = "(id: %s, pt: %s)" % (self.pa_id,self.tick,)
+        id_age_value = "(id: %s, age: %s, value diff: %s)" % (self.pa_id,Updates.current_tick()-self.tick,p.value-p.history(self.tick).value)
+        if self.scantype in ("P",):
+            return head + id_tick + str(self.planetscan)
+        if self.scantype in ("D",):
+            return head + id_tick + str(self.devscan)
+        if self.scantype in ("U","A",):
+            return head + id_age_value + " " + " | ".join(map(str,self.units))
+        if self.scantype == "J":
+            return head + id_tick + " " + " | ".join(map(str,self.fleets))
+        if self.scantype == "N":
+            return head + Config.get("URL","viewscan") % (self.pa_id,)
 Planet.scans = dynamic_loader(Scan, backref="planet")
 Scan.scanner = relation(User, backref="scans")
 
@@ -597,7 +619,12 @@ class PlanetScan(Base):
     prod_res = Column(Integer)
     agents = Column(Integer)
     guards = Column(Integer)
-Scan.planetscan = relation(PlanetScan, uselist=False)
+    def __str__(self):
+        reply = " Roids: (m:%s, c:%s, e:%s) |" % (self.roid_metal,self.roid_crystal,self.roid_eonium,)
+        reply+= " Resources: (m:%s, c:%s, e:%s) |" % (self.res_metal,self.res_crystal,self.res_eonium,)
+        reply+= " Hidden: %s | Agents: %s | Guards: %s" % (self.prod_res,self.agents,self.guards,)
+        return reply
+Scan.planetscan = relation(PlanetScan, uselist=False, backref="scan")
 
 class DevScan(Base):
     __tablename__ = 'devscan'
@@ -621,7 +648,119 @@ class DevScan(Base):
     core = Column(Integer)
     covert_op = Column(Integer)
     mining = Column(Integer)
-Scan.devscan = relation(DevScan, uselist=False)
+    def infra_str(self):
+        level = self.infrastructure
+        if level==0:
+            return "10 constructions"
+        if level==1:
+            return "20 constructions"
+        if level==2:
+            return "50 constructions"
+        if level==3:
+            return "100 constructions"
+        if level==4:
+            return "150 constructions"
+    
+    def hulls_str(self):
+        level = self.hulls
+        if level==1:
+            return "FI/CO"
+        if level==2:
+            return "FR/DE"
+        if level==3:
+            return "CR/BS"
+    
+    def waves_str(self):
+        level = self.waves
+        if level==0:
+            return "Planet"
+        if level==1:
+            return "Surface"
+        if level==2:
+            return "Technology"
+        if level==3:
+            return "Unit"
+        if level==4:
+            return "News"
+        if level==5:
+            return "Fleet"
+        if level==6:
+            return "JGP"
+        if level==7:
+            return "Advanced Unit"
+    
+    def covop_str(self):
+        level = self.covert_op
+        if level==0:
+            return "Research Hack"
+        if level==1:
+            return "Raise Stealth"
+        if level==2:
+            return "Blow up roids"
+        if level==3:
+            return "Blow up shits"
+        if level==4:
+            return "Blow up Amps/Dists"
+        if level==5:
+            return "Resource hacking (OMG!)"
+        if level==6:
+            return "Blow up Strucs"
+    
+    def mining_str(self):
+        level = self.mining+1
+        if level==0:
+            return "50 roids"
+        if level==1:
+            return "100 roids (scanner!)"
+        if level==2:
+            return "200 roids"
+        if level==3:
+            return "300 roids"
+        if level==4:
+            return "500 roids"
+        if level==5:
+            return "750 roids"
+        if level==6:
+            return "1k roids"
+        if level==7:
+            return "1250 roids"
+        if level==8:
+            return "1500 roids"
+        if level==9:
+            return "Jan 1. 1900"
+        if level==10:
+            return "2500 roids"
+        if level==11:
+            return "3000 roids"
+        if level==12:
+            return "3500 roids"
+        if level==13:
+            return "4500 roids"
+        if level==14:
+            return "5500 roids"
+        if level==15:
+            return "6500 roids"
+        if level==16:
+            return "8000 roids"
+        if level==17:
+            return "top10 or dumb"
+    
+    def total(self):
+        total = self.light_factory+self.medium_factory+self.heavy_factory
+        total+= self.wave_amplifier+self.wave_distorter
+        total+= self.metal_refinery+self.crystal_refinery+self.eonium_refinery
+        total+= self.research_lab+self.finance_centre+self.security_centre
+        return total
+        
+    def __str__(self):
+        reply = " Travel: %s, Infrajerome: %s, Hulls: %s," % (self.travel,self.infra_str(),self.hulls_str(),)
+        reply+= " Waves: %s, Core: %s, Covop: %s, Mining: %s" % (self.waves_str(),self.core,self.covop_str(),self.mining_str(),)
+        reply+= "\n"
+        reply+= "Structures: LFac: %s, MFac: %s, HFac: %s, Amp: %s," % (self.light_factory,self.medium_factory,self.heavy_factory,self.wave_amplifier,)
+        reply+= " Dist: %s, MRef: %s, CRef: %s, ERef: %s," % (self.wave_distorter,self.metal_refinery,self.crystal_refinery,self.eonium_refinery,)
+        reply+= " ResLab: %s (%s%%), FC: %s, Sec: %s (%s%%)" % (self.research_lab,int(float(self.research_lab)/self.total()*100),self.finance_centre,self.security_centre,int(float(self.security_centre)/self.total()*100),)
+        return reply
+Scan.devscan = relation(DevScan, uselist=False, backref="scan")
 
 class UnitScan(Base):
     __tablename__ = 'unitscan'
@@ -629,7 +768,9 @@ class UnitScan(Base):
     scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
     ship_id = Column(Integer, ForeignKey(Ship.id, ondelete='cascade'))
     amount = Column(Integer)
-Scan.units = relation(UnitScan)
+    def __str__(self):
+        return "%s %s" % (self.ship.name, self.amount,)
+Scan.units = relation(UnitScan, backref="scan")
 UnitScan.ship = relation(Ship)
 
 class FleetScan(Base):
@@ -644,7 +785,10 @@ class FleetScan(Base):
     launch_tick = Column(Integer)
     landing_tick = Column(Integer)
     mission = Column(String(7))
-Scan.fleets = relation(FleetScan)
+    def __str__(self):
+        p = self.owner
+        return "(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.landing_tick-self.scan.tick,)
+Scan.fleets = relation(FleetScan, backref="scan")
 FleetScan.owner = relation(Planet, primaryjoin=FleetScan.owner_id==Planet.id)
 FleetScan.target = relation(Planet, primaryjoin=FleetScan.target_id==Planet.id)
 
@@ -654,7 +798,7 @@ class CovOp(Base):
     scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
     covopper_id = Column(Integer, ForeignKey(Planet.id, ondelete='set null'))
     target_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'))
-Scan.covops = relation(CovOp)
+Scan.covops = relation(CovOp, backref="scan")
 CovOp.covopper = relation(Planet, primaryjoin=CovOp.covopper_id==Planet.id)
 CovOp.target = relation(Planet, primaryjoin=CovOp.target_id==Planet.id)
 
@@ -683,3 +827,137 @@ class apenis(Base):
     penis = Column(Integer)
 Alliance.apenis = relation(apenis, uselist=False)
 Alliance.penis = association_proxy("apenis", "penis")
+
+# ########################################################################### #
+# #########################    QUOTES AND SLOGANS    ######################## #
+# ########################################################################### #
+
+class Slogan(Base):
+    __tablename__ = 'slogans'
+    id = Column(Integer, primary_key=True)
+    text = Column(String(512))
+    @staticmethod
+    def search(text):
+        text = text or ""
+        Q = session.query(Slogan)
+        Q = Q.filter(Slogan.text.ilike("%"+text+"%")).order_by(random())
+        return Q.first(), Q.count()
+    def __str__(self):
+        return self.text
+
+class Quote(Base):
+    __tablename__ = 'quotes'
+    id = Column(Integer, primary_key=True)
+    text = Column(String(512))
+    @staticmethod
+    def search(text):
+        text = text or ""
+        Q = session.query(Quote)
+        Q = Q.filter(Quote.text.ilike("%"+text+"%")).order_by(random())
+        return Q.first(), Q.count()
+    def __str__(self):
+        return self.text
+
+# ########################################################################### #
+# ##############################    DEFENCE    ############################## #
+# ########################################################################### #
+
+class UserFleet(Base):
+    __tablename__ = 'user_fleet'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    ship = Column(String(30))
+    ship_count = Column(Integer)
+User.fleets = dynamic_loader(UserFleet, backref="user")
+
+class FleetLog(Base):
+    __tablename__ = 'fleet_log'
+    id = Column(Integer, primary_key=True)
+    taker_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    ship = Column(String(30))
+    ship_count = Column(Integer)
+    tick = Column(Integer)
+FleetLog.taker = relation(User, primaryjoin=FleetLog.taker_id==User.id)
+FleetLog.user = relation(User, primaryjoin=FleetLog.user_id==User.id)
+
+# ########################################################################### #
+# #########################    PROPS AND COOKIES    ######################### #
+# ########################################################################### #
+
+class Cookie(Base):
+    __tablename__ = 'cookie_log'
+    id = Column(Integer, primary_key=True)
+    log_time = Column(DateTime, default=current_timestamp())
+    year = Column(Integer)
+    week = Column(Integer)
+    howmany = Column(Integer)
+    giver_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    receiver_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+User.cookies = dynamic_loader(Cookie, primaryjoin=User.id==Cookie.receiver_id, backref="receiver")
+Cookie.giver = relation(User, primaryjoin=Cookie.giver_id==User.id)
+
+class Invite(Base):
+    __tablename__ = 'invite_proposal'
+    id = Column(Integer, Sequence('proposal_id_seq'), primary_key=True, server_default=text("nextval('proposal_id_seq')"))
+    active = Column(Boolean, default=True)
+    proposer_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    person = Column(String(15))
+    created = Column(DateTime, default=current_timestamp())
+    closed = Column(DateTime)
+    vote_result = Column(String(7))
+    comment_text = Column(Text)
+    type = "invite"
+Invite.proposer = relation(User)
+
+class Kick(Base):
+    __tablename__ = 'kick_proposal'
+    id = Column(Integer, Sequence('proposal_id_seq'), primary_key=True, server_default=text("nextval('proposal_id_seq')"))
+    active = Column(Boolean, default=True)
+    proposer_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    person_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    created = Column(DateTime, default=current_timestamp())
+    closed = Column(DateTime)
+    vote_result = Column(String(7))
+    comment_text = Column(Text)
+    type = "kick"
+Kick.proposer = relation(User, primaryjoin=Kick.proposer_id==User.id)
+Kick.kicked = relation(User, primaryjoin=Kick.person_id==User.id)
+Kick.person = association_proxy("kicked", "name")
+
+class Vote(Base):
+    __tablename__ = 'prop_vote'
+    id = Column(Integer, primary_key=True)
+    vote = Column(String(7))
+    carebears = Column(Integer)
+    prop_id = Column(Integer)
+    voter_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+Vote.voter = relation(User)
+Invite.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Invite.id==Vote.prop_id)
+Kick.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Kick.id==Vote.prop_id)
+
+# ########################################################################### #
+# ################################    LOGS    ############################### #
+# ########################################################################### #
+
+class Command(Base):
+    __tablename__ = 'command_log'
+    id = Column(Integer, primary_key=True)
+    command_prefix = Column(String(1))
+    command = Column(String(20))
+    command_parameters = Column(String(512))
+    nick = Column(String(15))
+    username = Column(String(15))
+    hostname = Column(String(64))
+    target = Column(String(150))
+    command_time = Column(DateTime, default=current_timestamp())
+
+class SMS(Base):
+    __tablename__ = 'sms_log'
+    id = Column(Integer, primary_key=True)
+    sender_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    receiver_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    phone = Column(String(48))
+    sms_text = Column(String(160))
+SMS.sender = relation(User, primaryjoin=SMS.sender_id==User.id)
+SMS.receiver = relation(User, primaryjoin=SMS.receiver_id==User.id)

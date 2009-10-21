@@ -22,9 +22,11 @@
 # Basic loadable class, the baseclass for most plugins
 
 import re
-from Core.exceptions_ import LoadableError, ParseError, PNickParseError, UserError
+from Core.exceptions_ import LoadableError, PrefError, ParseError, ChanParseError, PNickParseError, UserError
 from Core.config import Config
-from Core.maps import User, Channel
+from Core.paconf import PA
+from Core.db import Session
+from Core.maps import User, Channel, Command
 from Core.chanusertracker import get_user
 
 # ########################################################################### #
@@ -38,20 +40,25 @@ class loadable(object):
     paramre = re.compile("")
     PParseError = "You need to login and set mode +x to use this command"
     AccessError = "You don't have access to this command"
+    PrefError = "You must set your planet with !pref to use this command"
+    ChanError = "This command may only be used in %s"
     coordre = re.compile(r"\s*(\d+)[. :\-](\d+)(?:[. :\-](\d+))?")
     planet_coordre = re.compile(r"\s*(\d+)[. :\-](\d+)[. :\-](\d+)")
+    govre = re.compile(r"("+ "|".join(PA.options("govs")) +")", re.I)
+    racere = re.compile(r"("+ "|".join(PA.options("races")) +")", re.I)
+    scanre = re.compile(r"("+ "|".join(PA.options("scans")) +")", re.I)
     true = ["1","yes","y","true","t"]
     false = ["0","no","n","false","f"]
     nulls = ["<>",".","-","?"]
     
     def __init__(self):
         self.isdecorated()
-        self.commandre = re.compile(self.name+"(.*)",re.I)
+        self.commandre = re.compile(self.name+r"(\s+.*|$)",re.I)
         self.helpre = re.compile("help "+self.name,re.I)
         self.usage = self.name + self.usage
     
     def isdecorated(self):
-        raise LoadableError
+        raise LoadableError("You need to decorate your hook")
     
     def match(self, message, regexp):
         if message.get_prefix():
@@ -72,10 +79,23 @@ class loadable(object):
             if params is None:
                 raise ParseError
             self.execute(message, access, params)
+            session = Session()
+            session.add(Command(command_prefix = message.get_prefix(),
+                                command = self.name,
+                                command_parameters = message.get_msg()[len(self.name)+1:],
+                                nick = message.get_nick(),
+                                username = "" if access is True else access.name,
+                                hostname = message.get_hostmask(),
+                                target = message.get_chan() if message.in_chan() else message.get_nick(),))
+            session.commit()
         except PNickParseError:
             message.alert(self.PParseError)
         except UserError:
             message.alert(self.AccessError)
+        except PrefError:
+            message.alert(self.PrefError)
+        except ChanParseError, e:
+            message.alert(self.ChanError%e)
         except ParseError:
             message.alert(self.usage)
     
@@ -92,15 +112,61 @@ class loadable(object):
                 raise UserError
         return execute
     
+    @staticmethod
+    def require_planet(hook):
+        def execute(self, message, user, params):
+            if self.is_user(user) and self.get_user_planet(user):
+                hook(self, message, user, params)
+                return
+            elif message.get_pnick():
+                raise UserError
+        return execute
+    
+    @staticmethod
+    def channel(chan):
+        if not chan.find("#") == 0:
+            if chan in Config.options("Channels"):
+                chan = Config.get("Channels",chan)
+            elif chan == "PM":
+                chan = Config.get("Connection","nick")
+            else:
+                raise LoadableError("Invalid channel")
+        def wrapper(hook):
+            def execute(self, message, user, params):
+                if self.is_chan(message, chan):
+                    hook(self, message, user, params)
+                    return
+                else:
+                    raise ChanParseError(chan)
+            return execute
+        return wrapper
+    
     def is_user(self, user):
         if isinstance(user, User):
+            return True
+        return False
+    
+    def get_user_planet(self, user):
+        if not self.is_user(user):
+            raise PNickParseError
+        if user.planet is None:
+            raise PrefError
+        return user.planet
+    
+    def is_chan(self, message, chan):
+        if message.get_chan().lower() == chan.lower():
             return True
         return False
     
     @staticmethod
     def module(access=0):
         def wrapper(hook):
-            acc = access if type(access) is int else Config.getint("Access",access)
+            if access in Config.options("Access"):
+                acc = Config.getint("Access",access)
+            elif type(access) is int:
+                acc = access
+            else:
+                raise LoadableError("Invalid access level")
             class callback(hook):
                 name = hook.__name__
                 doc = hook.__doc__
@@ -134,6 +200,8 @@ class loadable(object):
                 def execute(self, message, access, params):
                     hook(message)
                 def check_access(self, message, user=None, channel=None):
+                    if command is not True:
+                        return None
                     if admin is not True:
                         return True
                     if message.get_pnick() in Config.options("Admins"):

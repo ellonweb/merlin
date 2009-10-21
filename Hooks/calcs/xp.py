@@ -20,7 +20,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from Core.exceptions_ import PNickParseError
 from Core.maps import Planet
 from Core.loadable import loadable
 
@@ -36,12 +35,7 @@ class xp(loadable):
             if target is None:
                 message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
                 return
-            if not self.is_user(user):
-                raise PNickParseError
-            attacker = user.planet
-            if attacker is None:
-                message.alert("Make sure you've set your planet with !pref")
-                return
+            attacker = self.get_user_planet(user)
         else:
             target = Planet.load(*params.group(1,2,3))
             if target is None:
@@ -66,6 +60,6 @@ class xp(loadable):
         reply+="| Bravery: %.2f " % (attacker.bravery(target),)
 
         cap=target.maxcap(attacker)
-        xp=attacker.xp(target)
+        xp=attacker.calc_xp(target)
         reply+="| Roids: %s | XP: %s | Score: %s" % (cap,xp,xp*60)
         message.reply(reply)

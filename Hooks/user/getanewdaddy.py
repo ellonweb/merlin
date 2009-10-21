@@ -35,11 +35,8 @@ class getanewdaddy(loadable):
     def execute(self, message, user, params):
 
         # do stuff here
-        idiot = User.load(name=params.group(1))
-        if (idiot is None) or not idiot.is_member():
-            print idiot.is_member()
-            print idiot.access
-            
+        idiot = User.load(name=params.group(1), access="member")
+        if idiot is None:
             message.reply("That idiot isn't a member!")
             return
         if (not user.is_admin()) and idiot.sponsor != user.name:
@@ -51,8 +48,8 @@ class getanewdaddy(loadable):
         else:
             idiot.access = 0
         session.commit()
-        message.privmsg('remuser %s %s'%(Config.get("Alliance","home"), idiot.name,),'p')
-        message.privmsg("ban %s *!*@%s.users.netgamers.org Your sponsor doesn't like you anymore"%(Config.get("Alliance","home"), idiot.name,),'p')
+        message.privmsg("remuser %s %s"%(Config.get("Channels","home"), idiot.name,),'p')
+        message.privmsg("ban %s *!*@%s.users.netgamers.org Your sponsor doesn't like you anymore"%(Config.get("Channels","home"), idiot.name,),'p')
         if idiot.sponsor != user.name:
             message.privmsg("note send %s Some admin has removed you for whatever reason. If you still wish to be a member, go ahead and find someone else to sponsor you back."%(idiot.name,),'p')
             message.reply("%s has been reduced to \"galmate\" level and removed from the channel. %s is no longer %s's sponsor. If anyone else would like to sponsor that person back, they may."%(idiot.name,idiot.sponsor,idiot.name))

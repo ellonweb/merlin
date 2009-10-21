@@ -1,0 +1,66 @@
+Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+Please read the included LICENSE.
+
+Requirements:
+
+Python 2.6
+PostgreSQL 8.4
+psycopg2 (recommended) or pg8000 (untested)
+SQLAlchemy 0.5.6
+It is also recommended you install Git so you can track your changes
+
+Installation instructions:
+
+1) Install all the requirements and their dependancies.
+2) Follow Postgre's instructions to create a database, use UTF8 encoding.
+   You could also use pgAdmin or execute:
+   CREATE DATABASE yourdbnamehere WITH ENCODING = 'UTF8';
+3) If you've decided to use Git, use these commands to download the code and
+   create your own branch to future-proof any changes you make:
+   git clone git://github.com/ellonweb/merlin.git
+   cd merlin
+   git checkout -b <yourbranchname>
+   After making changes you should use git add and git commit. When you want to
+   upgrade Merlin, just do git pull followed by git rebase master.
+4) Edit merlin.cfg as required. You should only need to change the Connection,
+   Admin, Alliance and DB settings. If you're using the SMS features you'll
+   need to add your details in the clickatell section.
+5) Inspect and modify /Hooks/__init__.py as needed. This controls which groups
+   of commands will be enabled. The SMS package is disabled by default, if you
+   have a clickatell account to use you will want to remove the # character.
+   Many alliances will want to disable the prop/cookie package, use a #
+   character at the beginning of the line.
+5) Run createdb.py. This will create all the neccessary tables for you, as
+   well as configuring the bot to join your alliance's main channel and
+   downloading the shipstats from PA.
+6) Run merlin.py. Hopefully it will connect to IRC without any errors and join
+   your alliance channel without trouble.
+7) You will need to add yourself to the bot using !adduser:
+   !adduser yourpnickhere admin
+   If you haven't added yourself to the Admin section of merlin.cfg this won't
+   work! (You can add other admins/members without adding them to the config
+   once you've added yourself.)
+8) Configure crontab or another task scheduler to run excalibur.py every tick.
+
+Access settings:
+
+Merlin's system hooks use the list of admins defined in merlin.cfg to control
+access. System hooks can be identified by the system modifier:
+@loadable.system(..)
+
+Merlin's non-system hooks (the majority of the functionality) use a two-level
+access system. The access requirement of a hook is provided in the modifier:
+@loadable.module("member")
+This can be changed to any of the access levels defined in merlin.cfg, or
+instead of passing a string you can provide an actual number.
+
+If a command is executed in a channel Merlin first checks the channel's
+min and max levels. If the channel's max level is higher than the command's
+requirement the command is denied. If the user's access level or the channel's
+min level match or exceed the requirement the command is executed.
+
+If you want to limit a command to use in a specific channel or in PM, you
+can use this modifier on the execute method of the hook:
+@loadable.channel("home")
+This can be changed to any channels defined in merlin.cfg or simply "PM", or
+you can specify the specific channel.
