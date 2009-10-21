@@ -25,6 +25,7 @@ from time import time
 import traceback
 from urllib2 import urlopen
 from sqlalchemy.exc import IntegrityError
+from Core.exceptions_ import PNickParseError
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session

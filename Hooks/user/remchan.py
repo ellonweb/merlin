@@ -35,9 +35,13 @@ class remchan(loadable):
     @loadable.require_user
     def execute(self, message, user, params):
         
-        chan = Channel.load(params.group(1))
+        channel = params.group(1)
+        chan = Channel.load(channel)
         if chan is None:
-            message.reply("Channel '%s' does not exist" % (chan.name,))
+            message.reply("Channel '%s' does not exist" % (channel,))
+            if user.is_admin():
+                message.privmsg("remuser %s %s" %(channel, Config.get('Connection', 'nick')),'P')
+                message.part(channel)
             return
         
         if chan.userlevel >= user.access:
