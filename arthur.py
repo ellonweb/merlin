@@ -20,9 +20,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import sys
-import variables
-import Core.modules
-import Django.manage as D
+from Core.config import Config
+from Core.db import session
+import Arthur.manage as django
 if len(sys.argv) == 1:
     sys.argv.append("runserver")
-D.execute_manager(D.settings)
+django.execute_manager(django.settings)

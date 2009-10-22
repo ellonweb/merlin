@@ -21,3 +21,9 @@ Hooks.scans.request
         fill in from scan requests ("ellonweb informs that atleast n dists are needed")
         fill in from intel
         fill in from Hooks.scans.blocked
+
+Django auth system
+# Code based on information from the django docs on middleware:
+# http://docs.djangoproject.com/en/dev/topics/http/middleware/
+# class Session based on django.contrib.sessions.middleware.SessionMiddleware
+# class Auth based on django.contrib.auth.middleware.AuthMiddleware
