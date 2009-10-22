@@ -28,6 +28,7 @@ from Core.paconf import PA
 from Core.db import Session
 from Core.maps import User, Channel, Command
 from Core.chanusertracker import get_user
+from Core.messages import PUBLIC_REPLY
 
 # ########################################################################### #
 # ##############################    LOADABLE    ############################# #
@@ -215,7 +216,7 @@ class loadable(object):
     def check_access(self, message, user=None, channel=None):
         if message.in_chan():
             channel = channel or Channel.load(message.get_chan()) or Channel(maxlevel=0, userlevel=0)
-            if channel.maxlevel < self.access:
+            if channel.maxlevel < self.access and message.reply_type() == PUBLIC_REPLY:
                 raise UserError
         else:
             channel = Channel(userlevel=0)
