@@ -23,7 +23,6 @@ import hashlib
 from math import ceil
 import re
 import sys
-from time import time
 from sqlalchemy import *
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates, relation, backref, dynamic_loader
@@ -409,6 +408,23 @@ def user_access_function(num):
 for lvl, num in Config.items("Access"):
     # Bind user access functions
     setattr(User, "is_"+lvl, user_access_function(int(num)))
+
+class Session(Base):
+    __tablename__ = 'arthur_session'
+    key = Column(String(40), primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='set null'))
+    expire_date = Column(DateTime)
+    @staticmethod
+    def load(key, now=None):
+        Q = session.query(Session)
+        if now is not None:
+            Q = Q.filter(Session.expire > now)
+        session = Q.filter(Session.key == key).first()
+        if session is not None and session.user is not None and session.user.active == True:
+            return user
+        else:
+            return None
+Session.user = relation(User)
 
 class PhoneFriend(Base):
     __tablename__ = 'phonefriends'
