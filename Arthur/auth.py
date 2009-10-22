@@ -1,4 +1,5 @@
 import datetime
+import random
 from django.http import HttpResponse
 from Core.config import Config
 from Core.db import session
@@ -34,7 +35,7 @@ class Authentication(object):
                 HttpResponse.delete_cookie(SESSION_KEY)
                 return HttpResponse("login page user|None")
             else:
-                key = self.generate_key()
+                key = self.generate_key(request, user)
                 auth = Session(key=key, expire=datetime.datetime.now()+datetime.timedelta(days=1))
                 session.add(auth)
                 session.commit()
@@ -50,5 +51,5 @@ class Authentication(object):
     def process_exception(self, request, exception):
         session.close()
     
-    def generate_key(self):
-        return 1
+    def generate_key(self, user):
+        return user.hasher(user.name+user.passwd+str(datetime.datetime.now())+str(random.randrange(1,1000000000)))
