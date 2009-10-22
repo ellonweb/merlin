@@ -272,9 +272,9 @@ class loadable(object):
     def num2short(self,num):
         flt2int = lambda x: int(x) if x.is_integer() else x
         try:
-            if num/1000000 > 1:
+            if num/10000000 >= 1:
                 return str(flt2int(round(num/1000000.0,1)))+"m"
-            elif num/1000 > 1:
+            elif num/10000 >= 1:
                 return str(flt2int(round(num/1000.0,1)))+"k"
             else:
                 return str(flt2int(round(num)))
