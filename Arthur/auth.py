@@ -37,6 +37,7 @@ class Authentication(object):
                 auth = Session(key=key, expire=datetime.datetime.now()+datetime.timedelta(days=1))
                 session.add(auth)
                 session.commit()
+                request.session = auth
                 HttpResponse().set_cookie(SESSION_KEY, request.session.key)
                 return
         else:
