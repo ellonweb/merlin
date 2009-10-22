@@ -413,7 +413,7 @@ class Session(Base):
     __tablename__ = 'arthur_session'
     key = Column(String(40), primary_key=True)
     user_id = Column(Integer, ForeignKey(User.id, ondelete='set null'))
-    expire_date = Column(DateTime)
+    expire = Column(DateTime)
     @staticmethod
     def load(key, now=None):
         Q = session.query(Session)
