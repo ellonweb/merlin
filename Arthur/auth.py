@@ -14,38 +14,43 @@ PASS = "password"
 
 class Authentication(object):
     def process_request(self, request):
+        request.response = HttpResponse()
         key = request.COOKIES.get(SESSION_KEY)
         if key:
             auth = Session.load(key, datetime.datetime.now())
             if auth is None:
-                HttpResponse().delete_cookie(SESSION_KEY)
-                return HttpResponse("login page session|None")
+                request.response.delete_cookie(SESSION_KEY)
+                request.response.write("login page session|None")
+                return request.response
             if request.REQUEST.get(SUBMIT) == LOGOUT:
                 session.delete(auth)
                 session.commit()
-                HttpResponse().delete_cookie(SESSION_KEY)
-                return HttpResponse("login page session|logout")
+                request.response.delete_cookie(SESSION_KEY)
+                request.response.write("login page session|logout")
+                return request.response
             request.session = auth
             return
         elif (request.REQUEST.get(USER) is not None and request.REQUEST.get(PASS) is not None):
             user = User.load(name=request.REQUEST.get(USER), passwd=request.REQUEST.get(PASS))
             if user is None:
-                HttpResponse().delete_cookie(SESSION_KEY)
-                return HttpResponse("login page user|None")
+                request.response.delete_cookie(SESSION_KEY)
+                request.response.write("login page user|None")
+                return request.response
             else:
                 key = self.generate_key(user)
-                auth = Session(key=key, expire=datetime.datetime.now()+datetime.timedelta(days=1))
+                auth = Session(key=key, expire=datetime.datetime.now()+datetime.timedelta(days=1), user=user)
                 session.add(auth)
                 session.commit()
                 request.session = auth
-                HttpResponse().set_cookie(SESSION_KEY, request.session.key)
+                request.response.set_cookie(SESSION_KEY, request.session.key)
                 return
         else:
-            return HttpResponse("login page session|fresh")
+            request.response.write("login page session|fresh")
+            return request.response
     
     def process_response(self, request, response):
         session.close()
-        return response
+        return request.response
     
     def process_exception(self, request, exception):
         session.close()

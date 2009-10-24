@@ -419,9 +419,9 @@ class Session(Base):
         Q = session.query(Session)
         if now is not None:
             Q = Q.filter(Session.expire > now)
-        session = Q.filter(Session.key == key).first()
-        if session is not None and session.user is not None and session.user.active == True:
-            return user
+        auth = Q.filter(Session.key == key).first()
+        if auth is not None and auth.user is not None and auth.user.active == True:
+            return auth
         else:
             return None
 Session.user = relation(User)
