@@ -52,6 +52,9 @@ class pref(loadable):
                         else:
                             planet.intel.nick = user.name
                             planet.intel.alliance = alliance
+                elif val in self.nulls:
+                    user.planet = None
+                    reply += " planet=None"
             if opt == "password":
                 user.passwd = val
                 reply += " password=%s"%(val)
@@ -66,10 +69,10 @@ class pref(loadable):
                 user.phone = val
                 reply += " phone=%s"%(val)
             if opt == "pubphone":
-                if val in self.true:
+                if val.lower() in self.true:
                     user.pubphone = True
                     reply += " pubphone=%s"%(True)
-                elif val in self.false:
+                elif val.lower() in self.false:
                     user.pubphone = False
                     reply += " pubphone=%s"%(False)
         session.commit()

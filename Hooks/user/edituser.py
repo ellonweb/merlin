@@ -36,7 +36,7 @@ class edituser(loadable):
     def execute(self, message, user, params):
         
         username = params.group(1)
-        access = params.group(2)
+        access = params.group(2).lower()
         if not access.isdigit() and access not in self.true and access not in self.false:
             try:
                 access = Config.getint("Access",access)

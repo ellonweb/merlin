@@ -83,9 +83,9 @@ class intel(loadable):
             if opt in ("nick","fakenick","bg","gov","reportchan"):
                 setattr(planet.intel, opt, val)
             if opt in ("defwhore","covop","scanner","relay"):
-                if val in self.true:
+                if val.lower() in self.true:
                     setattr(planet.intel, opt, True)
-                if val in self.false:
+                if val.lower() in self.false:
                     setattr(planet.intel, opt, False)
             if opt == "dists":
                 try:
