@@ -42,6 +42,7 @@ class Authentication(object):
             else:
                 key = self.generate_key(user)
                 auth = Session(key=key, expire=datetime.datetime.now()+datetime.timedelta(days=1), user=user)
+                session.query(Session).filter(Session.user == user).delete()
                 session.add(auth)
                 session.commit()
                 request.session = auth

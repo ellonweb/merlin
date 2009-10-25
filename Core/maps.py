@@ -383,7 +383,7 @@ class User(Base):
                 user = Q.filter(User.alias.ilike(name)).first()
             if user is None and exact is not True:
                 user = Q.filter(User.alias.ilike(name+"%")).first()
-        if passwd is not None:
+        if (user and passwd) is not None:
             user = user if user.passwd == User.hasher(passwd) else None
         return user
     
