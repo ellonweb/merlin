@@ -1,7 +1,6 @@
 from django.template import RequestContext
-from django.template.loader import render_to_string
+from django.shortcuts import render_to_response
 
 def index(request):
     planet = request.session.user.planet
-    request.response.write(render_to_string("index.tpl", {"planet": planet}, RequestContext(request)))
-    return request.response
+    return render_to_response("index.tpl", {"planet": planet}, RequestContext(request))
