@@ -20,11 +20,11 @@ TEMPLATE_LOADERS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-    'Arthur.auth.Context',
+    'Arthur.auth.context',
 )
 
 MIDDLEWARE_CLASSES = (
-    'Arthur.auth.Authentication',
+    'Arthur.auth.authentication',
 )
 
 ROOT_URLCONF = 'Arthur.urls'

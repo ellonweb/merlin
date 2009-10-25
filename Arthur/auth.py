@@ -14,7 +14,7 @@ LOGIN = "Login"
 USER = "username"
 PASS = "password"
 
-class Authentication(object):
+class authentication(object):
     def process_request(self, request):
         request.session = None
         key = request.COOKIES.get(SESSION_KEY)
@@ -60,12 +60,12 @@ class Authentication(object):
         session.close()
     
     def login_page(self, request, msg):
-        return render_to_response("login.tpl", {"msg": msg}, RequestContext(request))
+        return render("login.tpl", request, msg=msg)
     
     def generate_key(self, user):
         return User.hasher(user.name+user.passwd+str(datetime.datetime.now())+str(random.randrange(1,1000000000)))
 
-def Context(request):
+def context(request):
     context = {"alliance": Config.get("Alliance", "name")}
     slogan, count = Slogan.search("")
     if slogan is not None:
@@ -73,3 +73,6 @@ def Context(request):
     if request.session is not None:
         context["user"] = request.session.user.name
     return context
+
+def render(tpl, request, **context):
+    return render_to_response(tpl, context, RequestContext(request))

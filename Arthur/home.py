@@ -1,6 +1,5 @@
-from django.template import RequestContext
-from django.shortcuts import render_to_response
+from Arthur.auth import render
 
 def index(request):
     planet = request.session.user.planet
-    return render_to_response("index.tpl", {"planet": planet}, RequestContext(request))
+    return render("index.tpl", request, planet=planet)
