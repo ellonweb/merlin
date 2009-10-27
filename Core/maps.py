@@ -410,7 +410,7 @@ for lvl, num in Config.items("Access"):
     setattr(User, "is_"+lvl, user_access_function(int(num)))
 
 class Session(Base):
-    __tablename__ = 'arthur_session'
+    __tablename__ = 'session'
     key = Column(String(40), primary_key=True)
     user_id = Column(Integer, ForeignKey(User.id, ondelete='set null'))
     expire = Column(DateTime)

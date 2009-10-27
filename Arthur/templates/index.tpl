@@ -1,4 +1,5 @@
 {% extends "base.tpl" %}
+{% load growth %}
 {% block content %}
 <center>
 <p>Welcome {{ user }}!</p>
@@ -13,12 +14,14 @@
 	<tr class="header">
 		<th colspan="4">Rank</th>
 		<th colspan="10">&nbsp;</th>
+		<th colspan="3">Growth (since midnight)</th>
 	</tr>
 	<tr class="header">
 		<th>Score</th>
 		<th>Value</th>
 		<th>Size</th>
 		<th>XP</th>
+        
 		<th>X</th>
 		<th>Y</th>
 		<th>Z</th>
@@ -29,12 +32,17 @@
 		<th>Value</th>
 		<th>Score</th>
 		<th>XP</th>
+        
+		<th>Size</th>
+		<th>Value</th>
+		<th>Score</th>
 	</tr>
 	<tr class="odd">
 		<td align="right">{{ planet.score_rank }}</td>
 		<td align="right">{{ planet.value_rank }}</td>
 		<td align="right">{{ planet.size_rank }}</td>
 		<td align="right">{{ planet.xp_rank }}</td>
+        
 		<td align="right">{{ planet.x }}</td>
 		<td align="right">{{ planet.y }}</td>
 		<td align="right">{{ planet.z }}</td>
@@ -45,6 +53,10 @@
 		<td align="right">{{ planet.value }}</td>
 		<td align="right">{{ planet.score }}</td>
 		<td align="right">{{ planet.xp }}</td>
+        
+		<td align="right">{% if ph %}{{ planet.value|growth:ph.value }}{% endif %}</td>
+		<td align="right">{% if ph %}{{ planet.score|growth:ph.score }}{% endif %}</td>
+		<td align="right">{% if ph %}{{ planet.xp|growth:ph.xp }}{% endif %}</td>
 	</tr>
 </table>
 </td>

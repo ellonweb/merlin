@@ -4,7 +4,7 @@ from django.conf.urls.defaults import *
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('Arthur',
+urlpatterns = patterns('Arthur.views',
     # Example:
     # (r'^Arthur/', include('Arthur.foo.urls')),
 
