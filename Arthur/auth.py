@@ -8,9 +8,7 @@ from Core.db import session
 from Core.maps import User, Session, Slogan
 
 SESSION_KEY = "%sSESSID" % (Config.get("Alliance", "name")[:3].upper(),)
-SUBMIT = "submit"
-LOGOUT = "Logout"
-LOGIN = "Login"
+LOGOUT = "/logout/"
 USER = "username"
 PASS = "password"
 
@@ -25,7 +23,7 @@ class authentication(object):
             if auth is None:
                 request._COOKIE = None
                 return self.login_page(request, "Your session has expired, please login again.")
-            if request.REQUEST.get(SUBMIT) == LOGOUT:
+            if request.path == LOGOUT:
                 session.delete(auth)
                 session.commit()
                 request._COOKIE = None
@@ -74,7 +72,7 @@ def context(request):
         if slogan is not None:
             context["slogan"] = str(slogan)
         context["user"] = request.session.user.name
-        context["menu"] = (("Logout", "?submit=Logout", None,),
+        context["menu"] = (("Logout", "/logout/", None,),
                           )
     return context
 
