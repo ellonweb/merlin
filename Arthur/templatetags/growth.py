@@ -38,11 +38,11 @@ def growth_rank_image(present, past):
     diff = present - past
     ret = '<img src='
     if diff > 0:
-        ret += '"static/down.gif"'
+        ret += '"/static/down.gif"'
     elif diff < 0:
-        ret += '"static/up.gif"'
+        ret += '"/static/up.gif"'
     else:
-        ret += '"static/nonemover.gif"'
+        ret += '"/static/nonemover.gif"'
     ret += ' title='
     if diff > 0:
         ret += '"Down %s places"' %(diff,)

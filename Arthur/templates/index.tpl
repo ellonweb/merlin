@@ -38,10 +38,10 @@
 		<th>Score</th>
 	</tr>
 	<tr class="odd">
-		<td align="right">{{ planet.score_rank }} {{ planet.score_rank|growth_rank_image:ph.score_rank }}</td>
-		<td align="right">{{ planet.value_rank }} {{ planet.value_rank|growth_rank_image:ph.value_rank }}</td>
-		<td align="right">{{ planet.size_rank }} {{ planet.size_rank|growth_rank_image:ph.size_rank }}</td>
-		<td align="right">{{ planet.xp_rank }} {{ planet.xp_rank|growth_rank_image:ph.xp_rank }}</td>
+		<td align="right">{{ planet.score_rank }}{% if ph %} {{ planet.score_rank|growth_rank_image:ph.score_rank }}{% endif %}</td>
+		<td align="right">{{ planet.value_rank }}{% if ph %} {{ planet.value_rank|growth_rank_image:ph.value_rank }}{% endif %}</td>
+		<td align="right">{{ planet.size_rank }}{% if ph %} {{ planet.size_rank|growth_rank_image:ph.size_rank }}{% endif %}</td>
+		<td align="right">{{ planet.xp_rank }}{% if ph %} {{ planet.xp_rank|growth_rank_image:ph.xp_rank }}{% endif %}</td>
         
 		<td align="right">{{ planet.x }}</td>
 		<td align="right">{{ planet.y }}</td>

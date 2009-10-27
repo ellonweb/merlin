@@ -69,11 +69,13 @@ class authentication(object):
 
 def context(request):
     context = {"alliance": Config.get("Alliance", "name")}
-    slogan, count = Slogan.search("")
-    if slogan is not None:
-        context["slogan"] = str(slogan)
     if request.session is not None:
+        slogan, count = Slogan.search("")
+        if slogan is not None:
+            context["slogan"] = str(slogan)
         context["user"] = request.session.user.name
+        context["menu"] = (("Logout", "?submit=Logout", None,),
+                          )
     return context
 
 def render(tpl, request, **context):

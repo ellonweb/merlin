@@ -1,6 +1,6 @@
 {% extends "base.tpl" %}
 {% block content %}
-<form method="post">
+<form method="post"{% ifequal msg "Logged out." %} action="/"{% endifequal %}>
 <center>
 <p>{{ msg }}</p>
 <table cellspacing="0" cellpadding="0" class="black">
