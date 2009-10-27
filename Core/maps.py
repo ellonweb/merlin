@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from datetime import datetime
 import hashlib
 from math import ceil
 import re
@@ -68,6 +69,15 @@ class Galaxy(Base):
     xp_rank = Column(Integer)
     
     def history(self, tick):
+        return self.history_loader.filter_by(tick=tick).first()
+    
+    def midnight(self, current=None):
+        current = current or Updates.current_tick()
+        now = datetime.now()
+        d1 = datetime(now.year, now.month, now.day, now.hour)
+        d2 = datetime(now.year, now.month, now.day)
+        hours = (d1-d2).seconds/60/60
+        tick = current - hours
         return self.history_loader.filter_by(tick=tick).first()
     
     def planet(self, z):
@@ -133,6 +143,15 @@ class Planet(Base):
     idle = Column(Integer)
     
     def history(self, tick):
+        return self.history_loader.filter_by(tick=tick).first()
+    
+    def midnight(self, current=None):
+        current = current or Updates.current_tick()
+        now = datetime.now()
+        d1 = datetime(now.year, now.month, now.day, now.hour)
+        d2 = datetime(now.year, now.month, now.day)
+        hours = (d1-d2).seconds/60/60
+        tick = current - hours
         return self.history_loader.filter_by(tick=tick).first()
     
     def scan(self, type):
@@ -231,6 +250,15 @@ class Alliance(Base):
     score_avg_rank = Column(Integer)
     
     def history(self, tick):
+        return self.history_loader.filter_by(tick=tick).first()
+    
+    def midnight(self, current=None):
+        current = current or Updates.current_tick()
+        now = datetime.now()
+        d1 = datetime(now.year, now.month, now.day, now.hour)
+        d2 = datetime(now.year, now.month, now.day)
+        hours = (d1-d2).seconds/60/60
+        tick = current - hours
         return self.history_loader.filter_by(tick=tick).first()
     
     @staticmethod
