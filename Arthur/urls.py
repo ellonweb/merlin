@@ -14,7 +14,6 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # (r'^admin/', include(admin.site.urls)),
-    (r'^$', 'Arthur.views.home.index'),
+    (r'^$', 'Arthur.home.index'),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/Code/git/merlin/Arthur/static/'}),
-
 )
