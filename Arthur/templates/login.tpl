@@ -2,7 +2,7 @@
 {% block content %}
 <form method="post">
 <center>
-{{ msg }}
+<p>{{ msg }}</p>
 <table cellspacing="0" cellpadding="0" class="black">
 <tr>
 <td>

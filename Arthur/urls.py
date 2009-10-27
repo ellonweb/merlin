@@ -4,7 +4,7 @@ from django.conf.urls.defaults import *
 # from django.contrib import admin
 # admin.autodiscover()
 
-urlpatterns = patterns('Arthur.views',
+urlpatterns = patterns('',
     # Example:
     # (r'^Arthur/', include('Arthur.foo.urls')),
 
@@ -14,5 +14,7 @@ urlpatterns = patterns('Arthur.views',
 
     # Uncomment the next line to enable the admin:
     # (r'^admin/', include(admin.site.urls)),
-    (r'^$', 'home.index'),
+    (r'^$', 'Arthur.views.home.index'),
+    (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/Code/git/merlin/Arthur/static/'}),
+
 )

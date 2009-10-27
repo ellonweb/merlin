@@ -21,3 +21,5 @@ Hooks.scans.request
         fill in from scan requests ("ellonweb informs that atleast n dists are needed")
         fill in from intel
         fill in from Hooks.scans.blocked
+
+Remove use of django.views.static.serve (configure for apache, etc)

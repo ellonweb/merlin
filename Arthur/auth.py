@@ -16,6 +16,8 @@ PASS = "password"
 
 class authentication(object):
     def process_request(self, request):
+        if request.path[:8] == "/static/":
+            return
         request.session = None
         key = request.COOKIES.get(SESSION_KEY)
         if key:
