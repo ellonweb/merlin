@@ -77,6 +77,37 @@
     </tr>
     {% endif %}
     
+    {% if galaxy %}
+    <tr class="header">
+        <td colspan="20" height="6"/>
+    </tr>
+    <tr class="datahigh">
+        <td></td>
+        <td align="right">{{ galaxy.score_rank }}{% if gh %} {{ galaxy.score_rank|growth_rank_image:gh.score_rank }}{% endif %}</td>
+        <td align="right">{{ galaxy.value_rank }}{% if gh %} {{ galaxy.value_rank|growth_rank_image:gh.value_rank }}{% endif %}</td>
+        <td align="right">{{ galaxy.size_rank }}{% if gh %} {{ galaxy.size_rank|growth_rank_image:gh.size_rank }}{% endif %}</td>
+        <td align="right">{{ galaxy.xp_rank }}{% if gh %} {{ galaxy.xp_rank|growth_rank_image:gh.xp_rank }}{% endif %}</td>
+        
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td align="right">{{ galaxy.size }}</td>
+        <td align="right">{{ galaxy.value }}</td>
+        <td align="right">{{ galaxy.score }}</td>
+        <td align="right">{{ galaxy.xp }}</td>
+        
+        <td align="right">{% if gh %}{{ galaxy.size|growth_roid:gh.size }}{% endif %}</td>
+        <td align="right">{% if gh %}{{ galaxy.value|growth:gh.value }}{% endif %}</td>
+        <td align="right">{% if gh %}{{ galaxy.score|growth:gh.score }}{% endif %}</td>
+        
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+    {% endif %}
+    
 </table>
 </td>
 </tr>
