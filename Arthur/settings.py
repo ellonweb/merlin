@@ -24,8 +24,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
     'Arthur.auth.authentication',
 )
+
+APPEND_SLASH = True
 
 ROOT_URLCONF = 'Arthur.urls'
 
