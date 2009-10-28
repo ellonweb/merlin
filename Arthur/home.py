@@ -10,4 +10,4 @@ def index(request):
     hours = (d1-d2).seconds/60/60
     tick = Updates.current_tick() - hours
     ph = planet.history(tick)
-    return render("index.tpl", request, planet=planet, ph=ph)
+    return render("index.tpl", request, planets=((planet, ph, None, None),), title="Your planet")

@@ -42,4 +42,4 @@ def planets(request, page="1", sort="score", race="all"):
     for o in order:
         Q = Q.order_by(o)
     Q = Q.limit(50).offset(offset)
-    return render("planets.tpl", request, planets=Q.all(), offset=offset, pages=pages, page=page, sort=sort, race=race)
+    return render("planets.tpl", request, planets=Q.all(), title="Planet listing", intel=True, offset=offset, pages=pages, page=page, sort=sort, race=race)
