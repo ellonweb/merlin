@@ -26,7 +26,7 @@
             <ul>
             {% if drop.2 %}
                 {% for sub in drop.2 %}
-                <a href="{{ sub.1 }}">{{ sub.0 }}</a>
+                <li><a href="{{ sub.1 }}">{{ sub.0 }}</a></li>
                 {% endfor%}
             {% endif %}
             </ul>

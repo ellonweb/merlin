@@ -72,7 +72,9 @@ def context(request):
         if slogan is not None:
             context["slogan"] = str(slogan)
         context["user"] = request.session.user.name
-        context["menu"] = (("Logout", "/logout/", None,),
+        context["menu"] = (("Rankings", "/planets/",
+                                (("Planets", "/planets/"),),),
+                           ("Logout", "/logout/", None,),
                           )
     return context
 
