@@ -49,8 +49,8 @@
         <td align="right">{{ planet.size_rank }}{% if ph %} {{ planet.size_rank|growth_rank_image:ph.size_rank }}{% endif %}</td>
         <td align="right">{{ planet.xp_rank }}{% if ph %} {{ planet.xp_rank|growth_rank_image:ph.xp_rank }}{% endif %}</td>
         
-        <td align="right">{{ planet.x }}</td>
-        <td align="right">{{ planet.y }}</td>
+        <td align="right"><a href="{% url galaxy planet.x planet.y %}">{{ planet.x }}</a></td>
+        <td align="right"><a href="{% url galaxy planet.x planet.y %}">{{ planet.y }}</a></td>
         <td align="right">{{ planet.z }}</td>
         <td>{{ planet.rulername }}</td>
         <td>{{ planet.planetname }}</td>
