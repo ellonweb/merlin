@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.http import HttpResponseRedirect
 from sqlalchemy.sql import asc, desc
 from Core.paconf import PA
 from Core.db import session
@@ -13,6 +14,8 @@ def galaxy(request, x, y):
     tick = Updates.current_tick() - hours
     
     galaxy = Galaxy.load(x,y)
+    if galaxy is None:
+        return HttpResponseRedirect("/galaxies/")
     gh = galaxy.history(tick)
     
     Q = session.query(Planet, PlanetHistory, Intel.nick, Alliance.name)
