@@ -16,17 +16,39 @@
     </tr>
     <tr class="header">
         <th>#</th>
+        {% if not alliance and not galaxy %}
         <th><a href="{% url planets race|default:"all" "score" page|default:1 %}">Score</a></th>
         <th><a href="{% url planets race|default:"all" "value" page|default:1 %}">Value</a></th>
         <th><a href="{% url planets race|default:"all" "size" page|default:1 %}">Size</a></th>
         <th><a href="{% url planets race|default:"all" "xp" page|default:1 %}">XP</a></th>
+        {% endif %}
+        {% if galaxy %}
+        <th>Score</th>
+        <th>Value</th>
+        <th>Size</th>
+        <th>XP</th>
+        {% endif %}
+        {% if alliance %}
+        <th><a href="{% url alliance alliance.name race|default:"all" "score" page|default:1 %}">Score</a></th>
+        <th><a href="{% url alliance alliance.name race|default:"all" "value" page|default:1 %}">Value</a></th>
+        <th><a href="{% url alliance alliance.name race|default:"all" "size" page|default:1 %}">Size</a></th>
+        <th><a href="{% url alliance alliance.name race|default:"all" "xp" page|default:1 %}">XP</a></th>
+        {% endif %}
         
         <th>X</th>
         <th>Y</th>
         <th>Z</th>
         <th>Ruler</th>
         <th>Planet</th>
+        {% if not alliance and not galaxy %}
+        <th><a href="{% url planets race|default:"all" "race" page|default:1 %}">Race</a></th>
+        {% endif %}
+        {% if galaxy %}
         <th>Race</th>
+        {% endif %}
+        {% if alliance %}
+        <th><a href="{% url alliance alliance.name race|default:"all" "race" page|default:1 %}">Race</a></th>
+        {% endif %}
         <th>Size</th>
         <th>Value</th>
         <th>Score</th>
@@ -43,7 +65,7 @@
     </tr>
     {% for planet, ph, nick, alliance in planets %}
     <tr class="{% cycle 'odd' 'even' %}">
-        <td>{% if offset %}{{ forloop.counter|add:offset }}{% endif %}</td>
+        <td>{% if page %}{{ forloop.counter|add:offset }}{% endif %}</td>
         <td align="right">{{ planet.score_rank }}{% if ph %} {{ planet.score_rank|growth_rank_image:ph.score_rank }}{% endif %}</td>
         <td align="right">{{ planet.value_rank }}{% if ph %} {{ planet.value_rank|growth_rank_image:ph.value_rank }}{% endif %}</td>
         <td align="right">{{ planet.size_rank }}{% if ph %} {{ planet.size_rank|growth_rank_image:ph.size_rank }}{% endif %}</td>
@@ -65,7 +87,7 @@
         <td align="right">{% if ph %}{{ planet.score|growth:ph.score }}{% endif %}</td>
         
         {% if intel %}
-        <td>{%if alliance %}{{ alliance }}{% endif %}</td>
+        <td>{%if alliance %}<a href="/alliance/{{ alliance }}/">{{ alliance }}</a>{% endif %}</td>
         <td>{%if nick %}{{ nick }}{% endif %}</td>
         {% endif %}
     </tr>
@@ -73,7 +95,11 @@
     
     {% if pages %}
     <tr class="datahigh">
+        {% if not alliance %}
         <td colspan="20">Pages:{% for p in pages %} {%ifnotequal p page %}<a href="{% url planets race sort p %}">{% endifnotequal %}{{ p }}{%ifnotequal p page %}</a>{% endifnotequal %}{% endfor %}</td>
+        {% else %}
+        <td colspan="20">Pages:{% for p in pages %} {%ifnotequal p page %}<a href="{% url alliance alliance.name race sort p %}">{% endifnotequal %}{{ p }}{%ifnotequal p page %}</a>{% endifnotequal %}{% endfor %}</td>
+        {% endif %}
     </tr>
     {% endif %}
     

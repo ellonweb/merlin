@@ -66,7 +66,7 @@ class authentication(object):
         return User.hasher(user.name+user.passwd+str(datetime.datetime.now())+str(random.randrange(1,1000000000)))
 
 def context(request):
-    context = {"alliance": Config.get("Alliance", "name")}
+    context = {"slogan": Config.get("Alliance", "name")}
     if request.session is not None:
         slogan, count = Slogan.search("")
         if slogan is not None:

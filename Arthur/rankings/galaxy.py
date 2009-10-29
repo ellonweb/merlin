@@ -1,7 +1,6 @@
 from datetime import datetime
 from django.http import HttpResponseRedirect
 from sqlalchemy.sql import asc, desc
-from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Galaxy, Planet, PlanetHistory, Alliance, Intel
 from Arthur.auth import render

@@ -3,7 +3,7 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <title>{{ slogan|default:alliance }}</title>
+    <title>{{ slogan }}</title>
     <link rel="stylesheet" href="/static/style.css" />
 
     {% if menu %}
