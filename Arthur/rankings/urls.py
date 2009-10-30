@@ -18,4 +18,8 @@ urlpatterns = patterns('Arthur.rankings',
     url(r'^alliance/(?P<name>\w+)/(?P<sort>\w+)/(?P<page>\d+)/$', 'alliance.alliance'),
     url(r'^alliance/(?P<name>\w+)/(?P<race>\w+)/(?P<sort>\w+)/$', 'alliance.alliance'),
     url(r'^alliance/(?P<name>\w+)/(?P<race>\w+)/(?P<sort>\w+)/(?P<page>\d+)/$', 'alliance.alliance', name="alliance"),
+    url(r'^alliances/$', 'alliances.alliances'),
+    url(r'^alliances/(?P<page>\d+)/$', 'alliances.alliances'),
+    url(r'^alliances/(?P<sort>\w+)/$', 'alliances.alliances'),
+    url(r'^alliances/(?P<sort>\w+)/(?P<page>\d+)/$', 'alliances.alliances', name="alliances"),
 )

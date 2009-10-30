@@ -7,7 +7,7 @@
         <th colspan="20">{{ title }}</th>
     </tr>
     <tr class="header">
-        <th colspan="5">Rank</th>
+        <th colspan="{% if page %}5{% else %}4{% endif %}">Rank</th>
         <th colspan="10">&nbsp;</th>
         <th colspan="3">Growth</th>
         {% if intel %}
@@ -15,7 +15,7 @@
         {% endif %}
     </tr>
     <tr class="header">
-        <th>#</th>
+        {% if page %}<th>#</th>{% endif %}
         {% if not alliance and not galaxy %}
         <th><a href="{% url planets race|default:"all" "score" page|default:1 %}">Score</a></th>
         <th><a href="{% url planets race|default:"all" "value" page|default:1 %}">Value</a></th>
@@ -65,7 +65,7 @@
     </tr>
     {% for planet, ph, nick, alliance in planets %}
     <tr class="{% cycle 'odd' 'even' %}">
-        <td>{% if page %}{{ forloop.counter|add:offset }}{% endif %}</td>
+        {% if page %}<td>{{ forloop.counter|add:offset }}</td>{% endif %}
         <td align="right">{{ planet.score_rank }}{% if ph %} {{ planet.score_rank|growth_rank_image:ph.score_rank }}{% endif %}</td>
         <td align="right">{{ planet.value_rank }}{% if ph %} {{ planet.value_rank|growth_rank_image:ph.value_rank }}{% endif %}</td>
         <td align="right">{{ planet.size_rank }}{% if ph %} {{ planet.size_rank|growth_rank_image:ph.size_rank }}{% endif %}</td>

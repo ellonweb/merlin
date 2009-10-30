@@ -75,6 +75,7 @@ def context(request):
         context["menu"] = (("Rankings", "/planets/", (
                                 ("Planets", "/planets/"),
                                 ("Galaxies", "/galaxies/"),
+                                ("Alliances", "/alliances/"),
                             ),),
                            ("Logout", "/logout/", None,),
                           )

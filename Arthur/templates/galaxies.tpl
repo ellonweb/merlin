@@ -35,7 +35,7 @@
     </tr>
     {% for galaxy, gh in galaxies %}
     <tr class="{% cycle 'odd' 'even' %}">
-        <td>{% if offset %}{{ forloop.counter|add:offset }}{% endif %}</td>
+        <td>{{ forloop.counter|add:offset }}</td>
         <td align="right">{{ galaxy.score_rank }}{% if gh %} {{ galaxy.score_rank|growth_rank_image:gh.score_rank }}{% endif %}</td>
         <td align="right">{{ galaxy.value_rank }}{% if gh %} {{ galaxy.value_rank|growth_rank_image:gh.value_rank }}{% endif %}</td>
         <td align="right">{{ galaxy.size_rank }}{% if gh %} {{ galaxy.size_rank|growth_rank_image:gh.size_rank }}{% endif %}</td>
