@@ -28,6 +28,7 @@ def planets(request, page="1", sort="score", race="all"):
     Q = Q.outerjoin(Planet.intel)
     Q = Q.outerjoin(Intel.alliance)
     Q = Q.outerjoin(Planet.history_loader)
+    Q = Q.filter(Planet.active == True)
     Q = Q.filter(PlanetHistory.tick == tick)
     
     if race.lower() in PA.options("races"):

@@ -76,6 +76,7 @@ def context(request):
                                 ("Planets", "/planets/"),
                                 ("Galaxies", "/galaxies/"),
                                 ("Alliances", "/alliances/"),
+                                ("Alliances (intel)", "/ialliances/"),
                             ),),
                            ("Logout", "/logout/", None,),
                           )

@@ -25,6 +25,7 @@ def alliances(request, page="1", sort="score"):
     
     Q = session.query(Alliance, AllianceHistory)
     Q = Q.outerjoin(Alliance.history_loader)
+    Q = Q.filter(Alliance.active == True)
     Q = Q.filter(AllianceHistory.tick == tick)
     
     count = Q.count()

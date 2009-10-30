@@ -24,6 +24,7 @@ def galaxies(request, page="1", sort="score"):
     
     Q = session.query(Galaxy, GalaxyHistory)
     Q = Q.outerjoin(Galaxy.history_loader)
+    Q = Q.filter(Galaxy.active == True)
     Q = Q.filter(GalaxyHistory.tick == tick)
     
     count = Q.count()
