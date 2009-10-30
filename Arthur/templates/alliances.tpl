@@ -21,7 +21,7 @@
         <th><a href="{% url alliances "size_avg" page|default:1 %}">Av Size</a></th>
         
         <th>Name</th>
-        <th><a href="{% url alliances "members" page|default:1 %}">Av Size</a></th>
+        <th><a href="{% url alliances "members" page|default:1 %}">Members</a></th>
         <th>Av Size</th>
         <th>Av Score</th>
         <th>Size</th>
