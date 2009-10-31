@@ -73,7 +73,7 @@ class status(loadable):
                 else:
                     prev=[]
                     for user, land in result:
-                        prev.append("(%s user:%s)" % (land,owner))
+                        prev.append("(%s user:%s)" % (land,user))
                     reply+=", ".join(prev)
                 message.reply(reply)
                 return
