@@ -28,7 +28,7 @@ from sqlalchemy import *
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates, relation, backref, dynamic_loader
 from sqlalchemy.sql import desc
-from sqlalchemy.sql.functions import current_timestamp, max, random
+from sqlalchemy.sql.functions import current_timestamp, max as max_sql, random
 
 from Core.exceptions_ import LoadableError
 from Core.config import Config
@@ -49,7 +49,7 @@ class Updates(Base):
     
     @staticmethod
     def current_tick():
-        tick = session.query(max(Updates.id)).scalar() or 0
+        tick = session.query(max_sql(Updates.id)).scalar() or 0
         return tick
 
 class Galaxy(Base):
