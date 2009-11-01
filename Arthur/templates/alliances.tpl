@@ -6,7 +6,7 @@
 <td>
 <table cellspacing="1" cellpadding="3" width="100%">
     <tr class="datahigh">
-        <th colspan="20">{{ title }}</th>
+        <th colspan="15">{{ title }}</th>
     </tr>
     <tr class="header">
         <th colspan="5">Rank</th>
@@ -17,8 +17,8 @@
         <th>#</th>
         <th><a href="{% url alliances "score" page|default:1 %}">Score</a></th>
         <th><a href="{% url alliances "size" page|default:1 %}">Size</a></th>
-        <th><a href="{% url alliances "score_avg" page|default:1 %}">Av Score</a></th>
-        <th><a href="{% url alliances "size_avg" page|default:1 %}">Av Size</a></th>
+        <th><a href="{% url alliances "avg_score" page|default:1 %}">Av Score</a></th>
+        <th><a href="{% url alliances "avg_size" page|default:1 %}">Av Size</a></th>
         
         <th>Name</th>
         <th><a href="{% url alliances "members" page|default:1 %}">Members</a></th>
@@ -58,7 +58,7 @@
     
     {% if pages %}
     <tr class="datahigh">
-        <td colspan="20">Pages:{% for p in pages %} {%ifnotequal p page %}<a href="{% url alliances sort p %}">{% endifnotequal %}{{ p }}{%ifnotequal p page %}</a>{% endifnotequal %}{% endfor %}</td>
+        <td colspan="15">Pages:{% for p in pages %} {%ifnotequal p page %}<a href="{% url alliances sort p %}">{% endifnotequal %}{{ p }}{%ifnotequal p page %}</a>{% endifnotequal %}{% endfor %}</td>
     </tr>
     {% endif %}
     

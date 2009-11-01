@@ -4,7 +4,9 @@
 <td>
 <table cellspacing="1" cellpadding="3" width="100%">
     <tr class="datahigh">
-        <th colspan="20">{{ title }}</th>
+        <th colspan="{% if page and intel %}20{% else %}{% if intel %}19{% else %}18{% endif %}{% endif %}">
+            {{ title }}
+        </th>
     </tr>
     <tr class="header">
         <th colspan="{% if page %}5{% else %}4{% endif %}">Rank</th>
@@ -105,10 +107,9 @@
     
     {% if galaxy %}
     <tr class="header">
-        <td colspan="20" height="6"/>
+        <td colspan="19" height="6"/>
     </tr>
     <tr class="datahigh">
-        <td></td>
         <td align="right">{{ galaxy.score_rank }}{% if gh %} {{ galaxy.score_rank|growth_rank_image:gh.score_rank }}{% endif %}</td>
         <td align="right">{{ galaxy.value_rank }}{% if gh %} {{ galaxy.value_rank|growth_rank_image:gh.value_rank }}{% endif %}</td>
         <td align="right">{{ galaxy.size_rank }}{% if gh %} {{ galaxy.size_rank|growth_rank_image:gh.size_rank }}{% endif %}</td>

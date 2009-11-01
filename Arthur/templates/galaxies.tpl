@@ -6,7 +6,7 @@
 <td>
 <table cellspacing="1" cellpadding="3" width="100%">
     <tr class="datahigh">
-        <th colspan="20">{{ title }}</th>
+        <th colspan="15">{{ title }}</th>
     </tr>
     <tr class="header">
         <th colspan="5">Rank</th>
@@ -58,7 +58,7 @@
     
     {% if pages %}
     <tr class="datahigh">
-        <td colspan="20">Pages:{% for p in pages %} {%ifnotequal p page %}<a href="{% url galaxies sort p %}">{% endifnotequal %}{{ p }}{%ifnotequal p page %}</a>{% endifnotequal %}{% endfor %}</td>
+        <td colspan="15">Pages:{% for p in pages %} {%ifnotequal p page %}<a href="{% url galaxies sort p %}">{% endifnotequal %}{{ p }}{%ifnotequal p page %}</a>{% endifnotequal %}{% endfor %}</td>
     </tr>
     {% endif %}
     

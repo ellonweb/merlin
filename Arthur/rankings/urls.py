@@ -22,4 +22,8 @@ urlpatterns = patterns('Arthur.rankings',
     url(r'^alliances/(?P<page>\d+)/$', 'alliances.alliances'),
     url(r'^alliances/(?P<sort>\w+)/$', 'alliances.alliances'),
     url(r'^alliances/(?P<sort>\w+)/(?P<page>\d+)/$', 'alliances.alliances', name="alliances"),
+    url(r'^ialliances/$', 'ialliances.ialliances'),
+    url(r'^ialliances/(?P<page>\d+)/$', 'ialliances.ialliances'),
+    url(r'^ialliances/(?P<sort>\w+)/$', 'ialliances.ialliances'),
+    url(r'^ialliances/(?P<sort>\w+)/(?P<page>\d+)/$', 'ialliances.ialliances', name="ialliances"),
 )
