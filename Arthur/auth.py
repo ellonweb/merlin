@@ -31,7 +31,7 @@ class authentication(object):
             request.session = auth
             return
         elif (request.REQUEST.get(USER) is not None and request.REQUEST.get(PASS) is not None):
-            user = User.load(name=request.REQUEST.get(USER), passwd=request.REQUEST.get(PASS))
+            user = User.load(name=request.REQUEST.get(USER), passwd=request.REQUEST.get(PASS), access="member")
             if user is None:
                 request._COOKIE = None
                 return self.login_page(request, "Invalid user.")
