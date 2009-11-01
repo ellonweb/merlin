@@ -41,7 +41,7 @@ class gangbang(loadable):
         tick = Updates.current_tick()
         
         when = int(params.group(2) or 0)
-        if when and when < 80:
+        if when and when < 32:
             when += tick
         elif when and when <= tick:
             message.alert("Can not check status on the past. You wanted tick %s, but current tick is %s." % (when, tick,))

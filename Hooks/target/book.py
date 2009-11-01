@@ -42,7 +42,7 @@ class book(loadable):
         
         tick = Updates.current_tick()
         when = int(params.group(4))
-        if when < 80:
+        if when < 32:
             eta = when
             when += tick
         elif when <= tick:

@@ -39,7 +39,7 @@ class status(loadable):
         # Planet or Galaxy
         if params.group(1) is not None and params.group(1).isdigit():
             when = int(params.group(4) or 0)
-            if when and when < 80:
+            if when and when < 32:
                 when += tick
             elif when and when <= tick:
                 message.alert("Can not check status on the past. You wanted tick %s, but current tick is %s." % (when, tick,))

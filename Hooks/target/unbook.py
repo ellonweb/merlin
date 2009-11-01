@@ -40,7 +40,7 @@ class unbook(loadable):
         
         tick = Updates.current_tick()
         when = int(params.group(4) or 0)
-        if 0 < when < 80:
+        if 0 < when < 32:
             eta = when
             when += tick
         elif 0 < when <= tick:
