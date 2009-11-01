@@ -20,7 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from sqlalchemy import or_
+from sqlalchemy.sql import asc
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
 from Core.loadable import loadable
@@ -42,6 +42,7 @@ class spam(loadable):
         Q = Q.join(Planet.intel)
         Q = Q.filter(Planet.active == True)
         Q = Q.filter(Intel.alliance==alliance)
+        Q = Q.order_by(asc(Planet.x), asc(Planet.y), asc(Planet.x))
         result = Q.all()
         if len(result) < 1:
             message.reply("No planets in intel match alliance %s"%(alliance.name,))
