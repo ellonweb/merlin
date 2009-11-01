@@ -20,8 +20,15 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import sys
+import sqlalchemy
+
 if len(sys.argv) > 2 and sys.argv[1] == "--migrate":
     round = sys.argv[2]
+    if sqlalchemy.__version__ != "0.5.7":
+        print "Migration requires SQLA 0.5.7 which isn't available yet."
+        print "You can get the neccessary changes from ticket #1576 (see TODO) or downloading the trunk."
+        print "Once you've done that, delete this code to proceed."
+        sys.exit()
 else:
     round = None
     print "To migrate from an old round use: createdb.py --migrate <previous_round>"
@@ -60,7 +67,7 @@ if round:
     print "Migrating props/votes/cookies"
     session.execute(text("INSERT INTO invite_proposal (id,active,proposer_id,person,created,closed,vote_result,comment_text) SELECT id,active,proposer_id,person,created,closed,vote_result,comment_text FROM %s.invite_proposal;" % (round,)))
     session.execute(text("INSERT INTO kick_proposal (id,active,proposer_id,person_id,created,closed,vote_result,comment_text) SELECT id,active,proposer_id,person_id,created,closed,vote_result,comment_text FROM %s.kick_proposal;" % (round,)))
-    session.execute(text("SELECT setval('proposal_id_seq',(SELECT max(id) FROM (SELECT id FROM invite_proposal UNION SELECT id FROM kick_proposal)));"))
+    session.execute(text("SELECT setval('proposal_id_seq',(SELECT max(id) FROM (SELECT id FROM invite_proposal UNION SELECT id FROM kick_proposal) AS proposals));"))
     session.execute(text("INSERT INTO prop_vote (vote,carebears,prop_id,voter_id) SELECT vote,carebears,prop_id,voter_id FROM %s.prop_vote;" % (round,)))
     session.execute(text("INSERT INTO cookie_log (log_time,year,week,howmany,giver_id,receiver_id) SELECT log_time,year,week,howmany,giver_id,receiver_id FROM %s.cookie_log;" % (round,)))
     print "Migrating smslog"
