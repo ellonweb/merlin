@@ -41,7 +41,7 @@ class bigdicks(loadable):
         result = Q[:5]
         
         if len(result) < 1:
-            msg.alert("There is no penis")
+            message.alert("There is no penis")
             return
         
         prev = []
