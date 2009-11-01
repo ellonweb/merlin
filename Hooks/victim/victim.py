@@ -82,9 +82,10 @@ class victim(loadable):
                     return
                 continue
 
-        caprate = PA.getfloat("roids","maxcap")
+        maxcap = PA.getfloat("roids","maxcap")
+        mincap = PA.getfloat("roids","mincap")
         modifier = (cast(Planet.value,Float).op("/")(float(attacker.value))).op("^")(0.5)
-        caprate = func.float8smaller(modifier.op("*")(caprate),caprate)
+        caprate = func.float8larger(mincap,func.float8smaller(modifier.op("*")(maxcap),maxcap))
         maxcap = cast(func.floor(cast(Planet.size,Float).op("*")(caprate)),Integer)
         
         Q = session.query(Planet, Intel, maxcap.label("maxcap"))

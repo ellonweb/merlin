@@ -167,10 +167,11 @@ class Planet(Base):
     
     def caprate(self, attacker=None):
         maxcap = PA.getfloat("roids","maxcap")
+        mincap = PA.getfloat("roids","mincap")
         if not attacker or not self.value:
             return maxcap
         modifier=(float(self.value)/float(attacker.value))**0.5
-        return min(maxcap*modifier, maxcap)
+        return max(mincap,min(maxcap*modifier, maxcap))
     
     def maxcap(self, attacker=None):
         return int(self.size * self.caprate(attacker))
