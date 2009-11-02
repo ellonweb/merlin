@@ -102,6 +102,8 @@ class merlin(object):
                                     raise
                                 except Exception:
                                     # Error while executing a callback/mod/hook
+                                    open("errorlog.txt", "a").write(time.asctime()+" Error:\n%s" % format_exc())
+                                    open("errorlog.txt", "a").write("\nArguments that caused error: %s" % self.Message)
                                     print "%s ERROR RIGHT HERE!!" % (time.asctime(),)
                                     print format_exc()
                                     self.Message.alert("An exception occured and has been logged.")
