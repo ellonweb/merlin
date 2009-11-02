@@ -28,7 +28,7 @@ from Core.loadable import loadable
 @loadable.module()
 class prod(loadable):
     """Calculate ticks it takes to produce <number> <ships> with <factories>. Specify race and/or government for bonuses."""
-    usage = " <number> <ship> <factories> [race] [government]"
+    usage = " <number> <ship> <factories> [population] [race] [government]"
     paramre = re.compile(r"\s+(\d+(?:\.\d+)?[km]?)\s+(\S+)\s+(\d+)(?:\s+(.*))?")
     
     def execute(self, message, user, params):
@@ -43,6 +43,7 @@ class prod(loadable):
         factories = int(factories)
 
         race = gov = None
+        pop = 0
         for p in (params.group(4) or "").split():
             m=self.racere.match(p)
             if m and not race:
@@ -52,9 +53,12 @@ class prod(loadable):
             if m and not gov:
                 gov=m.group(1).lower()
                 continue
+            if p.isdigit() and not pop:
+                pop = int(p)
+                continue
 
         cost = ship.total_cost
-        bonus = 1
+        bonus = 1 + pop/100.0
         if gov:
             cost *= (1+PA.getfloat(gov,"prodcost"))
             bonus += PA.getfloat(gov,"prodtime")
@@ -68,6 +72,7 @@ class prod(loadable):
         reply += " %s"%(PA.get(gov,"name"),) if gov else ""
         reply += " %s"%(PA.get(race,"name"),) if race else ""
         reply += " planet" if race or gov else ""
+        reply += " with %s%% population"%(pop,) if pop else ""
         message.reply(reply)
 
     def calc_ticks(self, cost, num, bonus, factories):

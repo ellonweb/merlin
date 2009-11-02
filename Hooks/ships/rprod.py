@@ -28,7 +28,7 @@ from Core.loadable import loadable
 @loadable.module()
 class rprod(loadable):
     """Calculate how many <ship> you can build in <ticks> with <factories>. Specify race and/or government for bonuses."""
-    usage = " <ship> <ticks> <factories> [race] [government]"
+    usage = " <ship> <ticks> <factories> [population] [race] [government]"
     paramre = re.compile(r"\s+(\S+)\s+(\d+)\s+(\d+)(?:\s+(.*))?")
     dx = tolerance = 0.00001
     
@@ -44,6 +44,7 @@ class rprod(loadable):
         factories = int(factories)
 
         race = gov = None
+        pop = 0
         for p in (params.group(4) or "").split():
             m=self.racere.match(p)
             if m and not race:
@@ -53,9 +54,12 @@ class rprod(loadable):
             if m and not gov:
                 gov=m.group(1).lower()
                 continue
+            if p.isdigit() and not pop:
+                pop = int(p)
+                continue
 
         cost = ship.total_cost
-        bonus = 1
+        bonus = 1 + pop/100.0
         if gov:
             cost *= (1+PA.getfloat(gov,"prodcost"))
             bonus += PA.getfloat(gov,"prodtime")
@@ -70,6 +74,7 @@ class rprod(loadable):
         reply += " %s"%(PA.get(gov,"name"),) if gov else ""
         reply += " %s"%(PA.get(race,"name"),) if race else ""
         reply += " planet" if race or gov else ""
+        reply += " with %s%% population"%(pop,) if pop else ""
         message.reply(reply)
 
     def derive(self, f):
