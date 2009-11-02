@@ -101,7 +101,7 @@ class callbacks(object):
                 # and call each one, passing in the message
                 callback(message)
         else:
-            open("unknown_irc.log","a").write(asctime()+" "+event+"\n")
+            open("unknown_irc.log","a").write(asctime()+" "+event+" | : "+message.line+"\n")
 
 Callbacks = callbacks()
 Callbacks.init()
