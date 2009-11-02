@@ -143,14 +143,11 @@ def get_user(name, pnick=None, pnickf=None):
         return None
     
     nick = Nicks.get(name)
-    if nick is None:
-        # Unknown nick
-        return None
     
-    if nick.user is not None:
+    if (nick and nick.user) is not None:
         # They already have a user associated
         pnick = nick.user.name
-    if pnickf is not None:
+    elif pnickf is not None:
         # Call the pnick function, might raise PNickParseError
         try:
             pnick = pnickf()
@@ -161,7 +158,7 @@ def get_user(name, pnick=None, pnickf=None):
     if user is None:
         return None
     
-    if Config.get("Misc","usercache") in ("join", "command",):
+    if (nick is not None) and (Config.get("Misc","usercache") in ("join", "command",)):
         if Users.get(user.name) is None:
             # Add the user to the tracker
             Users[user.name] = User(user.name)

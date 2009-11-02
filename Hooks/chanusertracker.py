@@ -22,7 +22,7 @@
 # This module interfaces with and updates the Core's tracker
 
 from merlin import Merlin
-from Core.exceptions_ import PNickParseError, UserError
+from Core.exceptions_ import Reload, PNickParseError, UserError
 from Core.config import Config
 from Core.chanusertracker import Channels, Channel, Nicks, get_user, auth_user
 from Core.loadable import loadable
@@ -88,12 +88,18 @@ def quit(message):
     # Someone is quitting
     if message.get_nick() != Merlin.nick:
         # It's not the bot that's quitting
+        if message.get_nick() not in Nicks:
+            message.privmsg("Hi there, a nick lookup error has just occurred, the old nick was %s and the new nick is %s!"%(message.get_nick(),message.get_msg(),),Config.options("Admins")[0])
+            raise Reload
         Nicks[message.get_nick()].quit()
 
 @loadable.system('NICK')
 def nick(message):
     # Someone is changing their nick
     if message.get_nick() != Merlin.nick:
+        if message.get_nick() not in Nicks:
+            message.privmsg("Hi there, a nick lookup error has just occurred, the old nick was %s and the new nick is %s!"%(message.get_nick(),message.get_msg(),),Config.options("Admins")[0])
+            raise Reload
         Nicks[message.get_nick()].nick(message.get_msg())
 
 @loadable.system('330')

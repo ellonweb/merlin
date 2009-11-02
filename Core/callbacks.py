@@ -23,6 +23,7 @@
 
 import os
 import sys
+from Core.config import Config
 from Core.loader import Loader
 from Core.loadable import loadable
 
@@ -99,6 +100,8 @@ class callbacks(object):
             for callback in self.callbacks[event]:
                 # and call each one, passing in the message
                 callback(message)
+        else:
+            message.privmsg("Hi there, an unknown IRC event just occurred which might be causing errors, the event was %s."%(event,),Config.options("Admins")[0])
 
 Callbacks = callbacks()
 Callbacks.init()
