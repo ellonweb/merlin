@@ -42,7 +42,7 @@ class spam(loadable):
         Q = Q.join(Planet.intel)
         Q = Q.filter(Planet.active == True)
         Q = Q.filter(Intel.alliance==alliance)
-        Q = Q.order_by(asc(Planet.x), asc(Planet.y), asc(Planet.x))
+        Q = Q.order_by(asc(Planet.x), asc(Planet.y), asc(Planet.z))
         result = Q.all()
         if len(result) < 1:
             message.reply("No planets in intel match alliance %s"%(alliance.name,))
