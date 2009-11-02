@@ -37,6 +37,7 @@ class Channel(object):
         self.nicks = set()
         self.topic = ""
         self.opped = False
+        print "New channel %s"%(chan,)
     
     def addnick(self, name):
         # Add a new nick to the channel
@@ -44,6 +45,8 @@ class Channel(object):
         if nick is None:
             nick = Nick(name)
             Nicks[name] = nick
+            print "New nick %s chan %s"%(name,self.chan,)
+        print "Joined chan %s nick %s"%(self.chan,name,)
         self.nicks.add(nick)
         nick.channels.add(self.chan)
     
@@ -53,14 +56,17 @@ class Channel(object):
         self.nicks.remove(nick)
         nick.channels.remove(self.chan)
         if len(nick.channels) == 0:
+            print "Nick %s has 0 chans"%(name,)
             del Nicks[nick.name]
     
     def __del__(self):
         # We've parted or been kicked, update nicks
+        print "Leaving chan %s"%(self.chan,)
         for nick in self.nicks:
             nick.channels.remove(self.chan)
             if len(nick.channels) == 0:
                 try:
+                    print "Nick %s has 0 chans"%(name,)
                     del Nicks[nick.name]
                 # Might occur when the bot is quitting
                 except (AttributeError, KeyError, TypeError):
@@ -73,19 +79,23 @@ class Nick(object):
         self.name = nick
         self.channels = set()
         self.user = None
+        print "New nick %s"%(nick,)
     
     def nick(self, name):
         # Update the nicks list
+        print "Changing nick from %s to %s"%(self.name,name,)
         del Nicks[self.name]
         Nicks[name] = self
         self.name = name
     
     def quit(self):
         # Quitting
+        print "Nick %s quitting"%(self.name,)
         for channel in self.channels.copy():
             Channels[channel].remnick(self.name)
     
     def __del__(self):
+        print "Deleting nick %s"%(self.name,)
         if self.user is not None:
             try:
                 self.user.nicks.remove(self)
