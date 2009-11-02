@@ -106,7 +106,7 @@ class merlin(object):
                                     open("errorlog.txt", "a").write("\nArguments that caused error: %s" % self.Message)
                                     print "%s ERROR RIGHT HERE!!" % (time.asctime(),)
                                     print format_exc()
-                                    self.Message.alert("An exception occured and has been logged.")
+                                    self.Message.alert("An exception occured. Please report the command you used to the bot owner as soon as possible.")
                                     continue
                                 finally:
                                     # Remove any uncommitted or unrolled-back state
