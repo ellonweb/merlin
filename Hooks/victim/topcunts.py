@@ -81,7 +81,7 @@ class topcunts(loadable):
         owner = aliased(Planet)
         owner_intel = aliased(Intel)
         
-        Q = session.query(owner.x, owner.y, owner.z, count())
+        Q = session.query(owner.x, owner.y, owner.z)
         Q = Q.join((FleetScan.owner, owner))
         Q = Q.join((FleetScan.target, target))
         Q = Q.filter(FleetScan.mission == "Attack")
@@ -92,7 +92,7 @@ class topcunts(loadable):
         if alliance:
             Q = Q.join((target.intel, target_intel))
             Q = Q.filter(target_intel.alliance == alliance)
-        Q = Q.group_by(owner.x, owner.y, owner.z)
+        Q = Q.group_by(owner.x, owner.y, owner.z).add_column(count())
         Q = Q.order_by(desc(count()))
         result = Q.all()
         
