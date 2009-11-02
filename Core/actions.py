@@ -49,8 +49,6 @@ class Action(Message):
     def notice(self, text, target=None):
         # If we're opped in a channel in common with the user, we can reply with
         #  CNOTICE instead of NOTICE which doesn't count towards the flood limit.
-        print self.get_chan(), self.get_chan() in Channels, self.get_nick(), self.get_nick() in Nicks, target, target in Nicks
-        print Channels.keys(), Nicks.keys()
         if (self.get_chan() in Channels.keys()
             and Channels[self.get_chan()].opped is True
             and (target or self.get_nick()) in Nicks.keys()

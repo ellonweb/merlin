@@ -89,7 +89,8 @@ def quit(message):
     if message.get_nick() != Merlin.nick:
         # It's not the bot that's quitting
         if message.get_nick() not in Nicks:
-            message.privmsg("Hi there, a nick lookup error has just occurred, the old nick was %s and the new nick is %s!"%(message.get_nick(),message.get_msg(),),Config.options("Admins")[0])
+            message.privmsg("Hi there, a nick lookup error has just occurred, the old nick was %s and they've now quit!"%(message.get_nick(),),Config.options("Admins")[0])
+            message.privmsg(", ".join(Nicks.keys()),Config.options("Admins")[0])
             raise Reload
         Nicks[message.get_nick()].quit()
 
@@ -99,6 +100,7 @@ def nick(message):
     if message.get_nick() != Merlin.nick:
         if message.get_nick() not in Nicks:
             message.privmsg("Hi there, a nick lookup error has just occurred, the old nick was %s and the new nick is %s!"%(message.get_nick(),message.get_msg(),),Config.options("Admins")[0])
+            message.privmsg(", ".join(Nicks.keys()),Config.options("Admins")[0])
             raise Reload
         Nicks[message.get_nick()].nick(message.get_msg())
 
