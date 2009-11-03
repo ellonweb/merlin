@@ -303,8 +303,7 @@ class parse(Thread):
                 session.commit()
             except IntegrityError, e:
                 session.rollback()
-                print "Caught exception in jgp: "+e.__str__()
-                traceback.print_exc()
+                print "Caught integrity exception in jgp: "+e.__str__()
                 print "Trying to update instead"
                 query = session.query(FleetScan).filter_by(owner=attacker, target=scan.planet, fleet_size=fleetsize, fleet_name=fleet, landing_tick=eta+scan.tick, mission=mission)
                 try:
