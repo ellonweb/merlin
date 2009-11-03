@@ -33,7 +33,7 @@ class spam(loadable):
     
     def execute(self, message, user, params):
         
-        alliance = Alliance.load(params.group(1))
+        alliance = Alliance.load(params.group(1), active=False)
         if alliance is None:
             message.reply("No alliance matching '%s' found"%(params.group(1),))
             return

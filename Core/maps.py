@@ -237,12 +237,15 @@ class Alliance(Base):
     
     @staticmethod
     def load(name, active=True):
-        Q = session.query(Alliance)
-        if active is True:
-            Q = Q.filter_by(active=True)
+        Q = session.query(Alliance).filter_by(active=True)
         alliance = Q.filter(Alliance.name.ilike(name)).first()
         if alliance is None:
             alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
+        if alliance is None and active == False:
+            Q = session.query(Alliance)
+            alliance = Q.filter(Alliance.name.ilike(name)).first()
+            if alliance is None:
+                alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
         return alliance
     
     def __str__(self):
