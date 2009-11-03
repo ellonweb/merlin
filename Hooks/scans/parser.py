@@ -301,7 +301,7 @@ class parse(Thread):
             try:
                 scan.fleets.append(fleetscan)
                 session.commit()
-            except IntegrityError:
+            except IntegrityError, e:
                 session.rollback()
                 print "Caught exception in jgp: "+e.__str__()
                 traceback.print_exc()
