@@ -22,7 +22,7 @@
 import socket
 import sys
 import time
-from traceback import format_exc
+import traceback
 
 if not 2.6 <= float(sys.version[:3]) < 3.0:
     sys.exit("Python 2.6.x Required")
@@ -102,11 +102,8 @@ class merlin(object):
                                     raise
                                 except Exception:
                                     # Error while executing a callback/mod/hook
-                                    open("errorlog.txt", "a").write(time.asctime()+" Error:\n%s" % format_exc())
-                                    open("errorlog.txt", "a").write("\nArguments that caused error: %s" % self.Message)
-                                    print "%s ERROR RIGHT HERE!!" % (time.asctime(),)
-                                    print format_exc()
-                                    self.Message.alert("An exception occured. Please report the command you used to the bot owner as soon as possible.")
+                                    self.Message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")
+                                    traceback.print_exc()
                                     continue
                                 finally:
                                     # Remove any uncommitted or unrolled-back state

@@ -23,7 +23,9 @@
 
 import os
 import sys
-from time import asctime
+import time
+import traceback
+from Core.config import Config
 from Core.loader import Loader
 from Core.loadable import loadable
 
@@ -99,9 +101,15 @@ class callbacks(object):
             # cycle through them
             for callback in self.callbacks[event]:
                 # and call each one, passing in the message
-                callback(message)
+                try:
+                    callback(message)
+                except Exception, e:
+                    # Error while executing a callback/mod/hook
+                    message.alert("Error in module '%s'. Please report the command you used to the bot owner as soon as possible." % (callback.name,))
+                    open(Config.get("Misc","errorlog"), "a").write("\n\n\n%s - Error: %s\nArguments that caused error: %s\n" % (time.asctime(),e.__str__(),message,))
+                    open(Config.get("Misc","errorlog"), "a").write(traceback.format_exc())
         else:
-            open("unknown_irc.log","a").write(asctime()+" "+event+" | : "+message.line+"\n")
+            open("unknown_irc.log","a").write(time.asctime()+" "+event+" | : "+message.line+"\n")
 
 Callbacks = callbacks()
 Callbacks.init()
