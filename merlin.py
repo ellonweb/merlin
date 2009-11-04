@@ -36,6 +36,7 @@ class merlin(object):
     # Main bot container
     
     def run(self):
+        Connection = None
         try: # break out with Quit exceptions
             
             # Connection loop
@@ -125,6 +126,8 @@ class merlin(object):
                     continue
             
         except (Quit, KeyboardInterrupt, SystemExit) as exc:
+            if Connection is None:
+                sys.exit(exc)
             Connection.disconnect(str(exc) or "Bye!")
             sys.exit("Bye!")
 

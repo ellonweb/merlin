@@ -22,9 +22,11 @@
 # This module handles callbacks
 
 import os
+import socket
 import sys
 import time
 import traceback
+from Core.exceptions_ import Quit, Reboot, Reload
 from Core.config import Config
 from Core.loader import Loader
 from Core.loadable import loadable
@@ -103,6 +105,8 @@ class callbacks(object):
                 # and call each one, passing in the message
                 try:
                     callback(message)
+                except (Reload, Reboot, socket.error, Quit):
+                    raise
                 except Exception, e:
                     # Error while executing a callback/mod/hook
                     message.alert("Error in module '%s'. Please report the command you used to the bot owner as soon as possible." % (callback.name,))
