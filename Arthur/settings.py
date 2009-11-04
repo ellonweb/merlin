@@ -1,8 +1,5 @@
 # Django settings for Arthur project.
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -30,7 +27,7 @@ MIDDLEWARE_CLASSES = (
 
 APPEND_SLASH = True
 
-ROOT_URLCONF = 'Arthur.urls'
+ROOT_URLCONF = 'Arthur'
 
 INSTALLED_APPS = (
     'Arthur',

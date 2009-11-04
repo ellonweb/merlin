@@ -19,10 +19,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import sys
-from Core.config import Config
-from Core.db import session
-import Arthur.manage as django
-if len(sys.argv) == 1:
-    sys.argv.append("runserver")
-django.execute_manager(django.settings)
+import os
+os.environ['DJANGO_SETTINGS_MODULE'] = 'Arthur.settings'
+
+import Arthur
+
+import django.core.management.commands.runserver
+application = django.core.management.commands.runserver.Command().handle()
