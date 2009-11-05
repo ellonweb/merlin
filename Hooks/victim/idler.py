@@ -92,6 +92,7 @@ class idler(loadable):
             if alliance.name:
                 Q = Q.filter(Intel.alliance == None)
         Q = Q.filter(Planet.active == True)
+        Q = Q.filter(Planet.x < 200)
         if race:
             Q = Q.filter(Planet.race.ilike(race))
         if size:
