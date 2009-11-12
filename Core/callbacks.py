@@ -112,6 +112,9 @@ class callbacks(object):
                     message.alert("Error in module '%s'. Please report the command you used to the bot owner as soon as possible." % (callback.name,))
                     open(Config.get("Misc","errorlog"), "a").write("\n\n\n%s - Error: %s\nArguments that caused error: %s\n" % (time.asctime(),e.__str__(),message,))
                     open(Config.get("Misc","errorlog"), "a").write(traceback.format_exc())
+                finally:
+                    # Remove any uncommitted or unrolled-back state
+                    session.remove()
         else:
             open("unknown_irc.log","a").write(time.asctime()+" "+event+" | : "+message.line+"\n")
 
