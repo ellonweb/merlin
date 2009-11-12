@@ -37,7 +37,7 @@ class details(loadable):
             return
         replies = [str(target)]
         
-        if self.is_user(user) and user.planet is not None:
+        if self.user_has_planet(user):
             attacker = user.planet
             reply="Target "
             target_val = target.value

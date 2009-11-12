@@ -38,7 +38,7 @@ class maxcap(loadable):
             if target is None:
                 message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
                 return
-            if self.is_user(user) and user.planet:
+            if self.user_has_planet(user):
                 attacker = user.planet
             else:
                 attacker = None

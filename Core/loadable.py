@@ -147,10 +147,17 @@ class loadable(object):
             return True
         return False
     
+    def user_has_planet(self, user):
+        if not self.is_user(user):
+            return False
+        if user.planet is None:
+            return False
+        return user.planet.active
+    
     def get_user_planet(self, user):
         if not self.is_user(user):
             raise PNickParseError
-        if user.planet is None:
+        if not self.user_has_planet(user):
             raise PrefError
         return user.planet
     
