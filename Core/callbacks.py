@@ -29,6 +29,7 @@ import traceback
 from Core.exceptions_ import Quit, Reboot, Reload
 from Core.config import Config
 from Core.loader import Loader
+from Core.db import session
 from Core.loadable import loadable
 
 use_init_all = True

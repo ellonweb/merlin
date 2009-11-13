@@ -66,7 +66,7 @@ class Channel(object):
             nick.channels.remove(self.chan)
             if len(nick.channels) == 0:
                 try:
-                    print "Nick %s has 0 chans"%(name,)
+                    print "Nick %s has 0 chans"%(nick.name,)
                     del Nicks[nick.name]
                 # Might occur when the bot is quitting
                 except (AttributeError, KeyError, TypeError):
