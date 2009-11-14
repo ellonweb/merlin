@@ -85,6 +85,7 @@ class parse(Thread):
     
     def scan(self, uid, pa_id, gid=None):
         page = urlopen(Config.get("URL","viewscan")%(pa_id,)).read()
+        page = unicode(page, encoding='latin-1') # Encode the page
         
         m = re.search('>([^>]+) on (\d+)\:(\d+)\:(\d+) in tick (\d+)', page)
         if not m:
