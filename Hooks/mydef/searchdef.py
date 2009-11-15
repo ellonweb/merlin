@@ -48,6 +48,8 @@ class searchdef(loadable):
         
         Q = session.query(User, UserFleet)
         Q = Q.join(User.fleets)
+        Q = Q.filter(User.active == True)
+        Q = Q.filter(User.access >= Config.getint("Access", "member"))
         Q = Q.filter(UserFleet.ship == ship_lookup)
         Q = Q.filter(UserFleet.ship_count >= count)
         Q = Q.filter(User.fleetcount > 0)
