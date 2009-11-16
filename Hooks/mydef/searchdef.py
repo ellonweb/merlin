@@ -21,6 +21,7 @@
  
 import re
 from sqlalchemy.sql import desc
+from Core.config import Config
 from Core.db import session
 from Core.maps import Updates, User, Ship, UserFleet
 from Core.loadable import loadable
