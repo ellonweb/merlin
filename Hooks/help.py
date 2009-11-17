@@ -32,7 +32,7 @@ class help(loadable):
     paramre = re.compile(r"\s*(\S*)")
     
     def execute(self, message, user, params):
-        if params.group(1) is not "":
+        if params.group(1) != "":
             return
         commands = []
         message.reply(self.doc+". For more information use: "+self.usage)
