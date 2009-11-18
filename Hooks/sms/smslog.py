@@ -25,7 +25,7 @@ from Core.db import session
 from Core.maps import SMS
 from Core.loadable import loadable
 
-@loadable.module(100)
+@loadable.module("member")
 class smslog(loadable):
     """Show the last ten SMS sent, or the text of a specific SMS sender."""
     usage = " [id]"

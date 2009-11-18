@@ -27,7 +27,7 @@ from Core.db import session
 from Core.maps import User, SMS
 from Core.loadable import loadable
 
-@loadable.module(100)
+@loadable.module("member")
 class sms(loadable):
     """Sends an SMS to the specified user. Your username will be appended to the end of each sms. The user must have their phone correctly added and you must have access to their number."""
     usage = " <nick> <message>"

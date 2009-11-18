@@ -25,7 +25,7 @@ from Core.db import session
 from Core.maps import Updates, User, Ship, FleetLog
 from Core.loadable import loadable
 
-@loadable.module(100)
+@loadable.module("member")
 class logdef(loadable):
     """"""
     usage = ""

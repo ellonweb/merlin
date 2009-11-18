@@ -24,7 +24,7 @@ from urllib2 import urlopen
 from Core.config import Config
 from Core.loadable import loadable
 
-@loadable.module(100)
+@loadable.module("member")
 class showmethemoney(loadable):
     
     def execute(self, message, user, params):

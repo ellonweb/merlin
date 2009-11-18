@@ -26,7 +26,7 @@ from Core.db import session
 from Core.maps import Updates, User, Ship, UserFleet
 from Core.loadable import loadable
 
-@loadable.module(100)
+@loadable.module("member")
 class searchdef(loadable):
     """"""
     usage = " <number> <ship>"

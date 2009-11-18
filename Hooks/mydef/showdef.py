@@ -24,7 +24,7 @@ from Core.db import session
 from Core.maps import Updates, User
 from Core.loadable import loadable
 
-@loadable.module(100)
+@loadable.module("member")
 class showdef(loadable):
     """"""
     usage = " <pnick>"
