@@ -30,6 +30,7 @@ class bcalc(loadable):
                  "http://parser.5th-element.org/",
                  "http://parser.vision-hq.com",
                  "http://game.planetarion.com/bcalc.pl",
+                 "http://www.lch-hq.org/pilkara/",
                 ]
         
         message.reply("Bcalcs: "+" | ".join(bcalc))
