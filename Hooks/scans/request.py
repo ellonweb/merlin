@@ -22,44 +22,38 @@
 # Request a scan
 
 import re
-from .variables import access, channels
-from .Core.modules import M
-loadable = M.loadable.loadable
-from Hooks.scans import scans, requesturl
+from Core.config import Config
+from Core.pafig import PA
+from Core.db import session
+from Core.maps import Planet, Request
+from Core.loadable import loadable
 
+@loadable.module("member")
 class request(loadable):
     """Request a scan"""
+    usage = " <scantype> <x.y.z> [dists]"
+    paramre = re.compile(r"\s("+"|".join(PA.options("scans"))+r")\w*\s"+self.planet_coordre.pattern+r"(?:\s(\d+))?", re.I)
+    robore = re.compile(r"\s(\d+)\s(\S+)\s("+"|".join(PA.options("scans"))+r")\s"+self.planet_coordre.pattern+r"(\d+)(\d+)", re.I)
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s("+"|".join(scans.keys())+r")\w*\s"+self.planet_coordre.pattern+r"(?:\s(\d+))?", re.I)
-        self.robore = re.compile(r"\s(\d+)\s(\S+)\s("+"|".join(scans.keys())+r")\s"+self.planet_coordre.pattern+r"(\d+)(\d+)", re.I)
-        self.usage += " scantype x.y.z [dists]"
-    
-    @loadable.run_with_access(access['member'])
+    @loadable.require_user
     def execute(self, message, user, params):
         
-        planet = M.DB.Maps.Planet.load(*params.group(2,3,4))
+        planet = Planet.load(*params.group(2,3,4))
         if planet is None:
             message.alert("No planet with coords %s:%s:%s" % params.group(2,3,4))
             return
         
         scan = params.group(1).upper()
         
-        session = M.DB.Session()
-        session.add(user)
-        
-        request = M.DB.Maps.Request(target=planet, scantype=scan)
+        request = Request(target=planet, scantype=scan)
         request.dists = int(params.group(5) or 0)
         user.requests.append(request)
         session.commit()
         
-        session.add(planet)
         dists_intel = planet.intel.dists if planet.intel else 0
         dists_request = request.dists
-        session.close()
         
-        message.reply("Requested a %s Scan of %s:%s:%s. !cancelscan %s to cancel the request." % (scans[scan]['name'], planet.x, planet.y, planet.z, request.id,))
+        message.reply("Requested a %s Scan of %s:%s:%s. !cancelscan %s to cancel the request." % (PA.get(scan, "name"), planet.x, planet.y, planet.z, request.id,))
         self.request(message, request.id, user.name, scan, planet.x, planet.y, planet.z, dists_intel, dists_request)
         return
     
@@ -73,4 +67,5 @@ class request(loadable):
         self.request(message, id, name, scan, x, y, z, dists_intel, dists_request)
     
     def request(self, message, id, name, scan, x,y,z, dists_intel, dists_request):
-        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (id, name, scans[scan]['name'], x,y,z, dists_intel, dists_request,) + requesturl % (scans[scan]['type'],x,y,z,), channels.get('scan', channels['private']))
+        scannerchan = Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")
+        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (id, name, PA.get(scan, "name"), x,y,z, dists_intel, dists_request,) + Config.get("URL", "reqscan") % (PA.get(scan, "type"),x,y,z,), scannerchan)
