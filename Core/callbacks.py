@@ -116,8 +116,6 @@ class callbacks(object):
                 finally:
                     # Remove any uncommitted or unrolled-back state
                     session.remove()
-        else:
-            open("unknown_irc.log","a").write(time.asctime()+" "+event+" | : "+message.line+"\n")
 
 Callbacks = callbacks()
 Callbacks.init()
