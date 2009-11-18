@@ -6,9 +6,6 @@ http://www.sqlalchemy.org/trac/ticket/1602
 
 rewrite CLI
 
-migrate db system for createdb.py
-    investigate schemas/namespaces as alternative to seperate DBs
-
 rewrite Connection.write and Action.write to use detached threaded system
 
 Reimplement Robocop (threaded?)
