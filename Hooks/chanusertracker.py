@@ -22,7 +22,7 @@
 # This module interfaces with and updates the Core's tracker
 
 from merlin import Merlin
-from Core.exceptions_ import Reload, PNickParseError, UserError
+from Core.exceptions_ import UserError
 from Core.config import Config
 from Core.chanusertracker import Channels, Channel, Nicks, get_user, auth_user
 from Core.loadable import loadable
@@ -33,7 +33,7 @@ def join(message):
     if message.get_nick() == Merlin.nick:
         # Bot is joining the channel, so add a new object to the dict
         Channels[message.get_chan()] = Channel(message.get_chan())
-    else:
+    elif message.get_chan() in Channels.keys():
         # Someone is joining a channel we're in
         Channels[message.get_chan()].addnick(message.get_nick())
         if Config.get("Misc","usercache") == "join":
@@ -43,16 +43,22 @@ def join(message):
 @loadable.system('332')
 def topic_join(message):
     # Topic of a channel is set
+    if message.get_chan() not in Channels.keys():
+        return
     Channels[message.get_chan()].topic = message.get_msg()
 
 @loadable.system('TOPIC')
 def topic_change(message):
     # Topic of a channel is set
+    if message.get_chan() not in Channels.keys():
+        return
     Channels[message.get_chan()].topic = message.get_msg()
 
 @loadable.system('353')
 def names(message):
     # List of users in a channel
+    if message.get_chan() not in Channels.keys():
+        return
     for nick in message.get_msg().split():
         if nick == "@"+Merlin.nick:
             Channels[message.get_chan()].opped = True
@@ -65,6 +71,8 @@ def names(message):
 @loadable.system('PART')
 def part(message):
     # Someone is leaving a channel
+    if message.get_chan() not in Channels.keys():
+        return
     if message.get_nick() == Merlin.nick:
         # Bot is leaving the channel
         del Channels[message.get_chan()]
@@ -75,6 +83,8 @@ def part(message):
 @loadable.system('KICK')
 def kick(message):
     # Someone is kicked
+    if message.get_chan() not in Channels.keys():
+        return
     kname = message.line.split()[3]
     if Merlin.nick == kname:
         # Bot is kicked from the channel
@@ -88,20 +98,16 @@ def quit(message):
     # Someone is quitting
     if message.get_nick() != Merlin.nick:
         # It's not the bot that's quitting
-        if message.get_nick() not in Nicks:
-            message.privmsg("Hi there, a nick lookup error has just occurred, the old nick was %s and they've now quit!"%(message.get_nick(),),Config.options("Admins")[0])
-            message.privmsg(", ".join(Nicks.keys()),Config.options("Admins")[0])
-            raise Reload
+        if message.get_nick() not in Nicks.keys():
+            return
         Nicks[message.get_nick()].quit()
 
 @loadable.system('NICK')
 def nick(message):
     # Someone is changing their nick
     if message.get_nick() != Merlin.nick:
-        if message.get_nick() not in Nicks:
-            message.privmsg("Hi there, a nick lookup error has just occurred, the old nick was %s and the new nick is %s!"%(message.get_nick(),message.get_msg(),),Config.options("Admins")[0])
-            message.privmsg(", ".join(Nicks.keys()),Config.options("Admins")[0])
-            raise Reload
+        if message.get_nick() not in Nicks.keys():
+            return
         Nicks[message.get_nick()].nick(message.get_msg())
 
 @loadable.system('330')
