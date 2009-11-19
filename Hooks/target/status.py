@@ -37,7 +37,7 @@ class status(loadable):
         tick = Updates.current_tick()
         
         # Planet or Galaxy
-        if params.group(1) is not None and params.group(1).isdigit():
+        if len(params.groups()) == 4:
             when = int(params.group(4) or 0)
             if when and when < 32:
                 when += tick

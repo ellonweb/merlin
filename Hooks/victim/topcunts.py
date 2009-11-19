@@ -42,7 +42,7 @@ class topcunts(loadable):
         alliance = None
         
         # Planet or Galaxy
-        if params.group(1) is not None and params.group(1).isdigit():
+        if len(params.groups()) == 3:
             # Planet
             if params.group(3) is not None:
                 planet = Planet.load(*params.group(1,2,3))
