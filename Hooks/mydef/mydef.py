@@ -28,8 +28,8 @@ from Core.loadable import loadable
 class mydef(loadable):
     """Add your fleets for defense listing. Ship can be a shipclass. For example: 2x 20k Barghest 30k Harpy 20k BS Call me any time for hot shipsex."""
     usage = " [fleets] x <[ship count] [ship name]> [comment]"
-    paramre = re.compile(r"\s+(\d)\s*x\s*(.*)")
-    countre = re.compile(r"^(\d+(?:\.\d+)?[mk]?)$")
+    paramre = re.compile(r"\s+(\d)\s*x\s*(.*)",re.I)
+    countre = re.compile(r"^(\d+(?:\.\d+)?[mk]?)$",re.I)
     shipre = re.compile(r"^(\w+),?$")
     ship_classes = ['fi','co','fr','de','cr','bs']
     
