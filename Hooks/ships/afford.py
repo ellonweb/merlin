@@ -35,7 +35,7 @@ class afford(loadable):
         
         p = Planet.load(*params.group(1,2,3))
         if p is None:
-            message.reply("No planet with coords %s:%s:%s found" % (p.x,p.y,p.z,))
+            message.reply("No planet with coords %s:%s:%s found" % params.group(1,2,3))
             return
         ship = Ship.load(name=params.group(4))
         if ship is None:
