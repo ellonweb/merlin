@@ -958,7 +958,7 @@ class Command(Base):
     command_parameters = Column(String(512))
     nick = Column(String(15))
     username = Column(String(15))
-    hostname = Column(String(64))
+    hostname = Column(String(100))
     target = Column(String(150))
     command_time = Column(DateTime, default=current_timestamp())
 
