@@ -32,9 +32,9 @@ from Core.loader import Loader
 from Core.db import session
 from Core.loadable import loadable
 
-use_init_all = True
 
 class callbacks(object):
+    use_init_all = True
     # Modules/Callbacks/Hooks controller
     callbacks = {}
     modules = []
@@ -48,7 +48,7 @@ class callbacks(object):
         #Loader.backup(*self.modules)
     
     def load_package(self, path):
-        if use_init_all:
+        if self.use_init_all:
         # Using __init__'s __all__ to detect module list
             # Load the current module/package
             package = self.load_module(path)

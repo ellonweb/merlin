@@ -4,6 +4,8 @@ http://www.sqlalchemy.org/trac/ticket/1565
 http://www.sqlalchemy.org/trac/ticket/1576
 http://www.sqlalchemy.org/trac/ticket/1602
 
+CUT/IAL platform refactor
+
 rewrite CLI
 
 rewrite Connection.write and Action.write to use detached threaded system

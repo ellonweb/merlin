@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+import gc
 import socket
 import sys
 import time
@@ -54,6 +55,10 @@ class merlin(object):
                     # Later the import is done by a call to .reboot(),
                     #  but we need to import each time to get the new Loader
                     from Core.loader import Loader
+                    
+                    # Collect any garbage remnants that might have been left
+                    #  behind from the old loader that weren't dereferenced
+                    gc.collect()
                     
                     # Connect
                     from Core.connection import Connection
