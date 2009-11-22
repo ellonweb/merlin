@@ -24,7 +24,7 @@
 from merlin import Merlin
 from Core.exceptions_ import UserError
 from Core.config import Config
-from Core.chanusertracker import Channels, Channel, Nicks, get_user, auth_user
+from Core.chanusertracker import CUT, Channels, Channel, Nicks
 from Core.loadable import loadable
 
 @loadable.system('JOIN')
@@ -38,7 +38,7 @@ def join(message):
         Channels[message.get_chan()].addnick(message.get_nick())
         if Config.get("Misc","usercache") == "join":
             # Set the user's pnick
-            get_user(message.get_nick(), pnickf=message.get_pnick)
+            CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
 
 @loadable.system('332')
 def topic_join(message):
@@ -117,7 +117,7 @@ def pnick(message):
         nick = message.line.split()[3]
         pnick = message.line.split()[4]
         # Set the user's pnick
-        get_user(nick, pnick=pnick)
+        CUT.get_user(nick, pnick=pnick)
 
 @loadable.system('319')
 def channels(message):
@@ -177,7 +177,7 @@ def auth(message):
         message.alert("!auth user pass")
         return
     try:
-        user = auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
+        user = CUT.auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
         if user is not None:
             message.reply("You have been authenticated as %s" % (user.name,))
     except UserError:
@@ -192,7 +192,7 @@ def letmein(message):
         message.alert("!letmein user pass")
         return
     try:
-        user = auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
+        user = CUT.auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
         if (user is not None) and user.is_member():
             message.invite(message.get_nick(), Config.get("Channels","home"))
     except UserError:
