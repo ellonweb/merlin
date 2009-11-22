@@ -31,6 +31,14 @@ class ChanUserTracker(object):
     Nicks = {}
     Pusers = {}
     
+    def opped(self, chan):
+        if self.Channels.has_key(chan) and self.Channels[chan].opped:
+            return True
+    
+    def nick_in_chan(self, nick, chan):
+        if self.Nicks.has_key(nick) and self.Channels.has_key(chan):
+            return self.Nicks[nick] in self.Channels[chan].nicks
+    
     def untrack_user(self, pnick):
         if self.Pusers.has_key(pnick):
             for nick in self.Pusers[pnick].nicks:

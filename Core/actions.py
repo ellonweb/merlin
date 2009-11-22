@@ -24,7 +24,7 @@
 from merlin import Merlin
 from Core.exceptions_ import ParseError
 from Core.connection import Connection
-from Core.chanusertracker import Channels, Nicks
+from Core.chanusertracker import CUT
 from Core.messages import Message, PUBLIC_REPLY, PRIVATE_REPLY, NOTICE_REPLY
 
 class Action(Message):
@@ -49,10 +49,7 @@ class Action(Message):
     def notice(self, text, target=None):
         # If we're opped in a channel in common with the user, we can reply with
         #  CNOTICE instead of NOTICE which doesn't count towards the flood limit.
-        if (self.get_chan() in Channels.keys()
-            and Channels[self.get_chan()].opped is True
-            and (target or self.get_nick()) in Nicks.keys()
-            and Nicks[target or self.get_nick()] in Channels[self.get_chan()].nicks):
+        if CUT.opped(self.get_chan()) and CUT.nick_in_chan(target or self.get_nick(), self.get_chan()):
             self.write("CNOTICE %s %s :%s" % (target or self.get_nick(), self.get_chan(), text))
         else:
             self.write("NOTICE %s :%s" % (target or self.get_nick(), text))
