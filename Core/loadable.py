@@ -27,7 +27,7 @@ from Core.config import Config
 from Core.paconf import PA
 from Core.db import Session
 from Core.maps import User, Channel, Command
-from Core.chanusertracker import get_user
+from Core.chanusertracker import CUT
 from Core.messages import PUBLIC_REPLY
 
 # ########################################################################### #
@@ -227,7 +227,7 @@ class loadable(object):
                 raise UserError
         else:
             channel = Channel(userlevel=0)
-        user = user or get_user(message.get_nick(), pnickf=message.get_pnick)
+        user = user or CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
         if self.is_user(user):
             if max(user.access, channel.userlevel) >= self.access:
                 return user
