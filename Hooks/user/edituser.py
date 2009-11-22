@@ -23,7 +23,7 @@ import re
 from Core.config import Config
 from Core.db import session
 from Core.maps import User
-from Core.chanusertracker import Users
+from Core.chanusertracker import CUT
 from Core.loadable import loadable
 
 @loadable.module("admin")
@@ -65,7 +65,5 @@ class edituser(loadable):
             member.active = access
         session.commit()
         message.reply("Editted user %s access: %s" % (member.name, access,))
-        if (not member.active) and Users.has_key(member.name):
-            for nick in Users[member.name].nicks:
-                nick.user = None
-            del Users[member.name]
+        if not member.active:
+            CUT.untrack_user(member.name)

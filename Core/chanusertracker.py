@@ -31,6 +31,12 @@ class ChanUserTracker(object):
     Nicks = {}
     Pusers = {}
     
+    def untrack_user(self, pnick):
+        if self.Pusers.has_key(pnick):
+            for nick in self.Pusers[pnick].nicks:
+                nick.user = None
+            del self.Pusers[pnick]
+    
     def auth_user(self, name, pnickf, username, password):
         # Trying to authenticate with !letmein or !auth
         nick = self.Nicks.get(name)
