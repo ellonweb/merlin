@@ -53,13 +53,11 @@ def topic_change(message):
 @loadable.system('353')
 def names(message):
     # List of users in a channel
-    if message.get_chan() not in Channels.keys():
-        return
     for nick in message.get_msg().split():
         if nick == "@"+Merlin.nick:
-            Channels[message.get_chan()].opped = True
+            CUT.opped(message.get_chan(), True)
         if nick[0] in ("@","+"): nick = nick[1:]
-        Channels[message.get_chan()].addnick(nick)
+        CUT.join(message.get_chan(), nick)
         if Config.get("Misc","usercache") == "join":
             # Use whois to get the user's pnick
             message.write("WHOIS %s" % (nick,))
@@ -67,44 +65,36 @@ def names(message):
 @loadable.system('PART')
 def part(message):
     # Someone is leaving a channel
-    if message.get_chan() not in Channels.keys():
-        return
     if message.get_nick() == Merlin.nick:
         # Bot is leaving the channel
-        del Channels[message.get_chan()]
+        CUT.del_chan(message.get_chan())
     else:
         # Someone is leaving a channel we're in
-        Channels[message.get_chan()].remnick(message.get_nick())
+        CUT.part(message.get_chan(), message.get_nick())
 
 @loadable.system('KICK')
 def kick(message):
     # Someone is kicked
-    if message.get_chan() not in Channels.keys():
-        return
     kname = message.line.split()[3]
     if Merlin.nick == kname:
         # Bot is kicked from the channel
-        del Channels[message.get_chan()]
+        CUT.del_chan(message.get_chan())
     else:
         # Someone is kicked from a channel we're in
-        Channels[message.get_chan()].remnick(kname)
+        CUT.part(message.get_chan(), kname)
 
 @loadable.system('QUIT')
 def quit(message):
     # Someone is quitting
     if message.get_nick() != Merlin.nick:
         # It's not the bot that's quitting
-        if message.get_nick() not in Nicks.keys():
-            return
-        Nicks[message.get_nick()].quit()
+        CUT.del_nick(message.get_nick())
 
 @loadable.system('NICK')
 def nick(message):
     # Someone is changing their nick
     if message.get_nick() != Merlin.nick:
-        if message.get_nick() not in Nicks.keys():
-            return
-        Nicks[message.get_nick()].nick(message.get_msg())
+        CUT.nick_change(message.get_nick(), message.get_msg())
 
 @loadable.system('330')
 def pnick(message):

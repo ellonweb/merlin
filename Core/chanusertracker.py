@@ -40,23 +40,52 @@ class ChanUserTracker(object):
                 return f(self, chan, *args)
         return validate
     
+    def valid_nick(f):
+        def validate(self, nick, *args):
+            if self.Nicks.has_key(nick):
+                return f(self, nick, *args)
+        return validate
+    
+    def valid_nick_chan(f):
+        def validate(self, nick, chan, *args):
+            if self.Nicks.has_key(nick) and self.Channels.has_key(chan):
+                return f(self, nick, chan, *args)
+        return validate
+    
+    @valid_chan
+    def del_chan(self, chan):
+        del self.Channels[chan]
+    
+    @valid_nick
+    def del_nick(self, nick):
+        del self.Nicks[chan]
+    
+    @valid_nick
+    def nick_change(self, nick, new):
+        self.Nicks[nick].nick(new)
+    
     @valid_chan
     def join(self, chan, nick):
         self.Channels[chan].addnick(nick)
+    
+    @valid_chan
+    def part(self, chan, nick):
+        self.Channels[chan].remnick(nick)
     
     @valid_chan
     def topic(self, chan, topic):
         self.Channels[chan].topic = topic
     
     @valid_chan
-    def opped(self, chan):
+    def opped(self, chan, status=None):
+        if status is not None:
+            self.Channels[chan].opped = status
         if self.Channels[chan].opped:
             return True
     
-    @valid_chan
+    @valid_nick_chan
     def nick_in_chan(self, nick, chan):
-        if self.Nicks.has_key(nick):
-            return self.Nicks[nick] in self.Channels[chan].nicks
+        return self.Nicks[nick] in self.Channels[chan].nicks
     
     def untrack_user(self, pnick):
         if self.Pusers.has_key(pnick):
