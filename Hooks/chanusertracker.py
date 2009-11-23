@@ -33,7 +33,7 @@ def join(message):
     if message.get_nick() == Merlin.nick:
         # Bot is joining the channel, so add a new object to the dict
         CUT.new_chan(message.get_chan())
-    elif message.get_chan() in Channels.keys():
+    else:
         # Someone is joining a channel we're in
         CUT.join(message.get_chan(), message.get_nick())
         if Config.get("Misc","usercache") == "join":
