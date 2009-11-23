@@ -32,10 +32,10 @@ def join(message):
     # Someone is joining a channel
     if message.get_nick() == Merlin.nick:
         # Bot is joining the channel, so add a new object to the dict
-        Channels[message.get_chan()] = Channel(message.get_chan())
+        CUT.new_chan(message.get_chan())
     elif message.get_chan() in Channels.keys():
         # Someone is joining a channel we're in
-        Channels[message.get_chan()].addnick(message.get_nick())
+        CUT.join(message.get_chan(), message.get_nick())
         if Config.get("Misc","usercache") == "join":
             # Set the user's pnick
             CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
@@ -43,16 +43,12 @@ def join(message):
 @loadable.system('332')
 def topic_join(message):
     # Topic of a channel is set
-    if message.get_chan() not in Channels.keys():
-        return
-    Channels[message.get_chan()].topic = message.get_msg()
+    CUT.topic(message.get_chan(), message.get_msg())
 
 @loadable.system('TOPIC')
 def topic_change(message):
     # Topic of a channel is set
-    if message.get_chan() not in Channels.keys():
-        return
-    Channels[message.get_chan()].topic = message.get_msg()
+    CUT.topic(message.get_chan(), message.get_msg())
 
 @loadable.system('353')
 def names(message):

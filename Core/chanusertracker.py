@@ -31,12 +31,31 @@ class ChanUserTracker(object):
     Nicks = {}
     Pusers = {}
     
+    def new_chan(self, chan):
+        self.Channels[chan] = Channel(chan)
+    
+    def valid_chan(f):
+        def validate(self, chan, *args):
+            if self.Channels.has_key(chan):
+                return f(self, chan, *args)
+        return validate
+    
+    @valid_chan
+    def join(self, chan, nick):
+        self.Channels[chan].addnick(nick)
+    
+    @valid_chan
+    def topic(self, chan, topic):
+        self.Channels[chan].topic = topic
+    
+    @valid_chan
     def opped(self, chan):
-        if self.Channels.has_key(chan) and self.Channels[chan].opped:
+        if self.Channels[chan].opped:
             return True
     
+    @valid_chan
     def nick_in_chan(self, nick, chan):
-        if self.Nicks.has_key(nick) and self.Channels.has_key(chan):
+        if self.Nicks.has_key(nick):
             return self.Nicks[nick] in self.Channels[chan].nicks
     
     def untrack_user(self, pnick):
