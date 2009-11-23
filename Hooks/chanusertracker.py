@@ -24,7 +24,7 @@
 from merlin import Merlin
 from Core.exceptions_ import UserError
 from Core.config import Config
-from Core.chanusertracker import CUT, Channels, Channel, Nicks
+from Core.chanusertracker import CUT
 from Core.loadable import loadable
 
 @loadable.system('JOIN')
@@ -113,13 +113,13 @@ def channels(message):
         for chan in message.get_msg().split():
             if chan[0] in ("@","+"): chan = chan[1:]
             # Reset the channel and get a list of nicks
-            Channels[chan] = Channel(chan)
+            CUT.new_chan(chan)
             message.write("NAMES %s\nTOPIC %s" % (chan,chan,))
 
 @loadable.system('MODE')
 def op(message):
     # Used for tracking whether or not we're opped in channels
-    if message.get_chan() not in Channels.keys():
+    if not CUT.Channels.has_key(message.get_chan()):
         # Probably a user mode change, not a channel
         return
     modes = message.line.split(None,4)[3:]
@@ -149,7 +149,7 @@ def op(message):
                     target = args.pop(0)
                     if target == Merlin.nick:
                         # update our op status
-                        Channels[message.get_chan()].opped = set
+                        CUT.opped(message.get_chan(), set)
                 elif require_args.get(mode, (False, False))[set] is True:
                     # some other mode that requires an argument
                     target = args.pop(0)
