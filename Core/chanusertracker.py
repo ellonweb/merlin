@@ -90,7 +90,7 @@ class ChanUserTracker(object):
     def untrack_user(self, pnick):
         if self.Pusers.has_key(pnick):
             for nick in self.Pusers[pnick].nicks:
-                nick.user = None
+                nick.puser = None
             del self.Pusers[pnick]
     
     def auth_user(self, name, pnickf, username, password):
@@ -221,7 +221,7 @@ class Nick(object):
             self.CUT.Channels[channel].remnick(self.name)
     
     def __del__(self):
-        if self.user is not None:
+        if self.puser is not None:
             try:
                 self.puser.nicks.remove(self)
                 if len(self.puser.nicks) == 0:
