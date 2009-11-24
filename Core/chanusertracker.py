@@ -32,7 +32,7 @@ class ChanUserTracker(object):
     Pusers = {}
     
     def new_chan(self, chan):
-        self.Channels[chan] = Channel(chan)
+        self.Channels[chan] = Channel(self, chan)
     
     def valid_chan(f):
         def validate(self, chan, *args):
@@ -114,7 +114,7 @@ class ChanUserTracker(object):
         if (nick is not None) and (Config.get("Misc","usercache") in ("join", "command",)):
             if self.Pusers.get(user.name) is None:
                 # Add the user to the tracker
-                self.Pusers[user.name] = Puser(user.name)
+                self.Pusers[user.name] = Puser(self, user.name)
             
             if nick.puser is None:
                 # Associate the user and nick
@@ -149,7 +149,7 @@ class ChanUserTracker(object):
         if (nick is not None) and (Config.get("Misc","usercache") in ("join", "command",)):
             if self.Pusers.get(user.name) is None:
                 # Add the user to the tracker
-                self.Pusers[user.name] = Puser(user.name)
+                self.Pusers[user.name] = Puser(self, user.name)
             
             if nick.puser is None:
                 # Associate the user and nick
@@ -174,7 +174,7 @@ class Channel(object):
         # Add a new nick to the channel
         nick = self.CUT.Nicks.get(name)
         if nick is None:
-            nick = Nick(name)
+            nick = Nick(self.CUT, name)
             self.CUT.Nicks[name] = nick
         self.nicks.add(nick)
         nick.channels.add(self.chan)
