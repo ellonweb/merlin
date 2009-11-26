@@ -56,10 +56,6 @@ class merlin(object):
                     #  but we need to import each time to get the new Loader
                     from Core.loader import Loader
                     
-                    # Collect any garbage remnants that might have been left
-                    #  behind from the old loader that weren't dereferenced
-                    gc.collect()
-                    
                     # Connect
                     from Core.connection import Connection
                     print "%s Connecting..." % (time.asctime(),)
@@ -72,6 +68,10 @@ class merlin(object):
                     while True:
                         
                         try: # break out with Reload exceptions
+                            
+                            # Collect any garbage remnants that might have been left behind
+                            #  from an old loader or backup that wasn't properly dereferenced
+                            gc.collect()
                             
                             # Import elements of Core we need
                             # These will have been refreshed by a call to
