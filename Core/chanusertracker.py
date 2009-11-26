@@ -22,7 +22,6 @@
 # System to implement channel, nick and user tracking
 # There are circular references used very carefully here, be wary when editting
 
-import weakref
 from Core.exceptions_ import PNickParseError, UserError
 from Core.config import Config
 from Core.maps import User
@@ -33,7 +32,7 @@ class ChanUserTracker(object):
     Pusers = {}
     
     def new_chan(self, chan):
-        self.Channels[chan] = Channel(self, chan)
+        self.Channels[chan] = Channel(chan)
     
     def valid_chan(f):
         def validate(self, chan, *args):
@@ -115,7 +114,7 @@ class ChanUserTracker(object):
         if (nick is not None) and (Config.get("Misc","usercache") in ("join", "command",)):
             if self.Pusers.get(user.name) is None:
                 # Add the user to the tracker
-                self.Pusers[user.name] = Puser(self, user.name)
+                self.Pusers[user.name] = Puser(user.name)
             
             if nick.puser is None:
                 # Associate the user and nick
@@ -150,7 +149,7 @@ class ChanUserTracker(object):
         if (nick is not None) and (Config.get("Misc","usercache") in ("join", "command",)):
             if self.Pusers.get(user.name) is None:
                 # Add the user to the tracker
-                self.Pusers[user.name] = Puser(self, user.name)
+                self.Pusers[user.name] = Puser(user.name)
             
             if nick.puser is None:
                 # Associate the user and nick
@@ -164,8 +163,7 @@ CUT = ChanUserTracker()
 
 class Channel(object):
     # The channel object provides a means for keeping track of a channel
-    def __init__(self, CUT, chan):
-        self.CUT = weakref.ref(CUT)
+    def __init__(self, chan):
         self.chan = chan
         self.nicks = set()
         self.topic = ""
@@ -173,22 +171,22 @@ class Channel(object):
     
     def addnick(self, name):
         # Add a new nick to the channel
-        nick = self.CUT().Nicks.get(name)
+        nick = CUT.Nicks.get(name)
         if nick is None:
-            nick = Nick(self.CUT(), name)
-            self.CUT().Nicks[name] = nick
+            nick = Nick(name)
+            CUT.Nicks[name] = nick
         self.nicks.add(nick)
         nick.channels.add(self.chan)
     
     def remnick(self, name):
         # Remove a nick from the list
-        if name not in self.CUT().Nicks.keys():
+        if name not in CUT.Nicks.keys():
             return
-        nick = self.CUT().Nicks[name]
+        nick = CUT.Nicks[name]
         self.nicks.remove(nick)
         nick.channels.remove(self.chan)
         if len(nick.channels) == 0:
-            del self.CUT().Nicks[nick.name]
+            del CUT.Nicks[nick.name]
     
     def __del__(self):
         # We've parted or been kicked, update nicks
@@ -196,7 +194,7 @@ class Channel(object):
             nick.channels.remove(self.chan)
             if len(nick.channels) == 0:
                 try:
-                    del self.CUT().Nicks[nick.name]
+                    del CUT.Nicks[nick.name]
                 # Might occur when the bot is quitting
                 except (AttributeError, KeyError, TypeError):
                     pass
@@ -204,29 +202,28 @@ class Channel(object):
 
 class Nick(object):
     # Class used for storing nicks
-    def __init__(self, CUT, nick):
-        self.CUT = weakref.ref(CUT)
+    def __init__(self, nick):
         self.name = nick
         self.channels = set()
         self.puser = None
     
     def nick(self, name):
         # Update the nicks list
-        del self.CUT().Nicks[self.name]
-        self.CUT().Nicks[name] = self
+        del CUT.Nicks[self.name]
+        CUT.Nicks[name] = self
         self.name = name
     
     def quit(self):
         # Quitting
         for channel in self.channels.copy():
-            self.CUT().Channels[channel].remnick(self.name)
+            CUT.Channels[channel].remnick(self.name)
     
     def __del__(self):
         if self.puser is not None:
             try:
                 self.puser.nicks.remove(self)
                 if len(self.puser.nicks) == 0:
-                    del self.CUT().Pusers[self.puser.name]
+                    del CUT.Pusers[self.puser.name]
             # Might occur when the bot is quitting
             except (AttributeError, KeyError, TypeError):
                 pass
@@ -235,8 +232,7 @@ class Nick(object):
 class Puser(object):
     # Class for storing user information for the tracker
     # Not to be confused with the SQLA class!
-    def __init__(self, CUT, name):
-        self.CUT = weakref.ref(CUT)
+    def __init__(self, name):
         self.name = name
         self.nicks = set()
     
