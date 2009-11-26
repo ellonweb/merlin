@@ -31,6 +31,11 @@ class ChanUserTracker(object):
     Nicks = {}
     Pusers = {}
     
+    def __del__(self):
+        self.Channels.clear()
+        self.Nicks.clear()
+        self.Pusers.clear()
+    
     def new_chan(self, chan):
         self.Channels[chan] = Channel(chan)
     
