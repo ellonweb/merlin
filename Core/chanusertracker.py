@@ -63,7 +63,7 @@ class ChanUserTracker(object):
     
     @valid_nick
     def del_nick(self, nick):
-        del self.Nicks[chan]
+        del self.Nicks[nick]
     
     @valid_nick
     def nick_change(self, nick, new):
