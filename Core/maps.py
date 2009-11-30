@@ -589,15 +589,15 @@ class Scan(Base):
             id_age_value = "(id: %s, age: %s, value diff: %s)" % (self.pa_id,Updates.current_tick()-self.tick,vdiff)
         
         if self.scantype in ("P",):
-            return head + id_tick + str(self.planetscan)
+            return unicode(head + id_tick + str(self.planetscan), encoding='latin-1')
         if self.scantype in ("D",):
-            return head + id_tick + str(self.devscan)
+            return unicode(head + id_tick + str(self.devscan), encoding='latin-1')
         if self.scantype in ("U","A",):
-            return head + id_age_value + " " + " | ".join(map(str,self.units))
+            return unicode(head + id_age_value + " " + " | ".join(map(str,self.units)), encoding='latin-1')
         if self.scantype == "J":
-            return head + id_tick + " " + " | ".join(map(str,self.fleets))
+            return unicode(head + id_tick + " " + " | ".join(map(str,self.fleets)), encoding='latin-1')
         if self.scantype == "N":
-            return head + Config.get("URL","viewscan") % (self.pa_id,)
+            return unicode(head + Config.get("URL","viewscan") % (self.pa_id,), encoding='latin-1')
 Planet.scans = dynamic_loader(Scan, backref="planet")
 Scan.scanner = relation(User, backref="scans")
 
