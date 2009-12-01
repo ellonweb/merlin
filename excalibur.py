@@ -156,8 +156,8 @@ while True:
 
         # For galaxies that are no longer present in the new dump, we will
         #  NULL all the data, leaving only the coords and id for FKs
+#                                  active = :false,
         session.execute(text("""UPDATE galaxy SET
-                                  active = :false,
                                   name = NULL, size = NULL, score = NULL, value = NULL, xp = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
                                 WHERE id NOT IN (SELECT id FROM galaxy_temp WHERE id IS NOT NULL)

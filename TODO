@@ -3,6 +3,7 @@ http://www.sqlalchemy.org/trac/ticket/1537
 http://www.sqlalchemy.org/trac/ticket/1565
 http://www.sqlalchemy.org/trac/ticket/1576
 http://www.sqlalchemy.org/trac/ticket/1602
+revert commit [] regarding PA dump excluding zero'd galaxies when fixed
 
 rewrite CLI
 
