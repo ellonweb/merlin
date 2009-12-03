@@ -3,6 +3,17 @@ http://www.sqlalchemy.org/trac/ticket/1537
 http://www.sqlalchemy.org/trac/ticket/1565
 http://www.sqlalchemy.org/trac/ticket/1576
 http://www.sqlalchemy.org/trac/ticket/1602
+
+fix unicode support
+    http://docs.python.org/howto/unicode.html
+    use utf8 for parsing
+    mapped classes should return a unicode object for str()
+    OR: remove all unicode from everything?
+    
+sms and non-ascii chars? (perhaps covered by unicode fix)
+
+intel.galaxy bug
+
 revert commit [] regarding PA dump excluding zero'd galaxies when fixed
 
 rewrite CLI
