@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from sqlalchemy.sql import asc
 from Core.db import session
 from Core.maps import Galaxy, Planet, Alliance, Intel
 from Core.loadable import loadable
@@ -39,8 +40,13 @@ class intel(loadable):
             if galaxy is None:
                 message.alert("No galaxy with coords %s:%s" % params.group(1,2))
                 return
+            
+            Q = session.query(Planet)
+            Q = Q.filter(Planet.active == True)
+            Q = Q.filter(Planet.galaxy == galaxy)
+            Q = Q.order_by(asc(Planet.z))
             prev = []
-            for planet in galaxy.planets:
+            for planet in Q:
                 if planet.intel is not None:
                     reply = "#%s"%(planet.z,)
                     if planet.intel.nick:
