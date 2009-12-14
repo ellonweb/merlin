@@ -154,7 +154,6 @@ while True:
         #  some might have been deactivated previously
         session.execute(text("""UPDATE galaxy SET
                                   active = :true
-                                WHERE id IN (SELECT id FROM galaxy_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[true]))
 
         t2=time.time()-t1
@@ -335,7 +334,6 @@ while True:
         #  some might have been deactivated previously
         session.execute(text("""UPDATE alliance SET
                                   active = :true
-                                WHERE id IN (SELECT id FROM alliance_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[true]))
 
         t2=time.time()-t1
