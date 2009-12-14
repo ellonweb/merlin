@@ -4,8 +4,6 @@ http://www.sqlalchemy.org/trac/ticket/1565
 http://www.sqlalchemy.org/trac/ticket/1576
 http://www.sqlalchemy.org/trac/ticket/1602
 
-!getanewdaddy auto removes alliance from intel
-
 fix unicode support
     http://docs.python.org/howto/unicode.html
     use utf8 for parsing

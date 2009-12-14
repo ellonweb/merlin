@@ -47,7 +47,15 @@ class getanewdaddy(loadable):
             idiot.access = Config.getint("Access","galmate")
         else:
             idiot.access = 0
+        
+        if user.planet is not None and user.planet.intel is not None:
+            intel = user.planet.intel
+            alliance = Alliance.load(Config.get("Alliance","name"))
+            if intel.alliance == alliance:
+                intel.alliance = None
+        
         session.commit()
+        
         message.privmsg("remuser %s %s"%(Config.get("Channels","home"), idiot.name,),'p')
         message.privmsg("ban %s *!*@%s.users.netgamers.org Your sponsor doesn't like you anymore"%(Config.get("Channels","home"), idiot.name,),'p')
         if idiot.sponsor != user.name:
