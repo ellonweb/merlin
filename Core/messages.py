@@ -40,7 +40,6 @@ class Message(object):
     
     def __init__(self, line):
         # A raw irc line
-        line = unicode(line, encoding='latin-1') # Encode the line
         self.line = line
         self._chanerror = False # Will be set to True on failure to parse.
         self._msgerror = False # Will be set to True on failure to parse.
