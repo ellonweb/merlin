@@ -17,8 +17,6 @@ alliances should be reactivated if possible, don't always create new ones
 
 loadable paramre platform update: multiple execute methods
 
-munin: store cancelled props instead of deleting them
-
 rewrite CLI
 
 rewrite Connection.write and Action.write to use detached threaded system

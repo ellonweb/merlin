@@ -82,7 +82,7 @@ class prop(loadable):
                 message.alert(reply)
             
             if not prop.active:
-                reply = self.text_result(*self.sum_votes(prop))
+                reply = self.text_result(prop.vote_result.lower(), *self.sum_votes(prop))
                 reply+= self.text_summary(prop)
                 message.reply(reply)
         
@@ -212,8 +212,9 @@ class prop(loadable):
             
             yes, no, veto = self.sum_votes(prop)
             passed = yes > no and veto <= 0
+            vote_result = ['no','yes'][passed]
             
-            reply = self.text_result(yes, no, veto)
+            reply = self.text_result(vote_result, yes, no, veto)
             reply+= self.text_summary(prop)
             message.reply(reply)
         
@@ -247,7 +248,7 @@ class prop(loadable):
             
             prop.active = False
             prop.closed = current_timestamp()
-            prop.vote_result = ['no','yes'][passed]
+            prop.vote_result = vote_result
             session.commit()
         
         elif mode == "cancel":
@@ -260,11 +261,16 @@ class prop(loadable):
                 message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
                 return
             
-            reply = "Cancelled proposal %s to %s %s" %(prop.id,prop.type,prop.person,)
-            reply+= self.text_summary(prop)
+            vote_result = "cancel"
             
-            self.delete_prop(prop)
+            reply = self.text_result(vote_result, yes, no, veto)
+            reply+= self.text_summary(prop)
             message.reply(reply)
+            
+            prop.active = False
+            prop.closed = current_timestamp()
+            prop.vote_result = vote_result
+            session.commit()
     
     def member_count_below_limit(self):
         Q = session.query(User).filter(User.active == True).filter(User.access >= Config.getint("Access", "member"))
@@ -294,11 +300,13 @@ class prop(loadable):
         veto = session.query(Vote).filter_by(prop_id=prop.id, vote="veto").count()
         return yes, no, veto
     
-    def text_result(self, yes, no, veto):
+    def text_result(self, vote_result, yes, no, veto):
         reply = "The prop"
-        if veto > 0:
+        if vote_result == "cancel":
+            reply+= " was cancelled with %s votes for, %s against and %s vetos"%(yes,no,veto)
+        elif veto > 0:
             reply+= " failed because of %s vetos"%(veto)
-        elif yes > no:
+        elif vote_result == "yes":
             reply+= " passed by a vote of %s to %s"%(yes,no)
         else:
             reply+= " failed by a vote of %s to %s"%(no,yes)
