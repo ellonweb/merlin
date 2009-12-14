@@ -16,8 +16,6 @@ sms and non-ascii chars? (perhaps covered by unicode fix)
 
 intel.galaxy bug
 
-alliances and galaxies should be reactivated if possible, don't always create new ones
-
 loadable paramre platform update: multiple execute methods
 
 munin: store cancelled props instead of deleting them
