@@ -609,6 +609,12 @@ class Request(Base):
     scantype = Column(String(1))
     dists = Column(Integer)
     scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='set null'))
+    
+    @staticmethod
+    def load(id):
+        Q = session.query(Request)
+        request = Q.filter(Request.id == id).first()
+        return request
 Request.user = relation(User, backref="requests")
 Request.target = relation(Planet)
 Request.scan = relation(Scan)

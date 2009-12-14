@@ -31,12 +31,18 @@ from Core.loadable import loadable
 @loadable.module("member")
 class request(loadable):
     """Request a scan"""
-    usage = " <scantype> <x.y.z> [dists]"
-    paramre = re.compile(r"\s("+"|".join(PA.options("scans"))+r")\w*\s"+self.planet_coordre.pattern+r"(?:\s(\d+))?", re.I)
-    robore = re.compile(r"\s(\d+)\s(\S+)\s("+"|".join(PA.options("scans"))+r")\s"+self.planet_coordre.pattern+r"(\d+)(\d+)", re.I)
+    usage = " <scantype> <x.y.z> [dists] | cancel <id>"
+    paramre = (re.compile(r"\s+(cancel)\s+(\d+)", re.I),
+               re.compile(r"\s+("+"|".join(PA.options("scans"))+r")\w*\s+"+self.planet_coordre.pattern+r"(?:\s+(\d+))?", re.I),
+               )
+    # robore = re.compile(r"\s(\d+)\s(\S+)\s("+"|".join(PA.options("scans"))+r")\s"+self.planet_coordre.pattern+r"(\d+)(\d+)", re.I)
     
     @loadable.require_user
     def execute(self, message, user, params):
+        
+        if params.group(1).lower() == "cancel":
+            request = Request.load(params.group(2))
+            return
         
         planet = Planet.load(*params.group(2,3,4))
         if planet is None:
@@ -53,18 +59,18 @@ class request(loadable):
         dists_intel = planet.intel.dists if planet.intel else 0
         dists_request = request.dists
         
-        message.reply("Requested a %s Scan of %s:%s:%s. !cancelscan %s to cancel the request." % (PA.get(scan, "name"), planet.x, planet.y, planet.z, request.id,))
+        message.reply("Requested a %s Scan of %s:%s:%s. !request cancel %s to cancel the request." % (PA.get(scan, "name"), planet.x, planet.y, planet.z, request.id,))
         self.request(message, request.id, user.name, scan, planet.x, planet.y, planet.z, dists_intel, dists_request)
         return
     
-    @loadable.runcop
-    def robocop(self, message, params):
-        id = int(params.group(1))
-        name = params.group(2)
-        scan = params.group(3).upper()
-        x,y,z = params.group(4,5,6)
-        dists_intel, dists_request = params.group(7,8)
-        self.request(message, id, name, scan, x, y, z, dists_intel, dists_request)
+    # @loadable.runcop
+    # def robocop(self, message, params):
+        # id = int(params.group(1))
+        # name = params.group(2)
+        # scan = params.group(3).upper()
+        # x,y,z = params.group(4,5,6)
+        # dists_intel, dists_request = params.group(7,8)
+        # self.request(message, id, name, scan, x, y, z, dists_intel, dists_request)
     
     def request(self, message, id, name, scan, x,y,z, dists_intel, dists_request):
         scannerchan = Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")

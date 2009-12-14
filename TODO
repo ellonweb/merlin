@@ -26,6 +26,8 @@ Reimplement Robocop (threaded?)
     scans parsed (!scans)
 
 Hooks.scans.request
+    this can not be finished until robocop is reimplemented
+    also would be nice to have platform update done
     !request cancel id
     request.dists
         fill in from scan requests ("ellonweb informs that atleast n dists are needed")
