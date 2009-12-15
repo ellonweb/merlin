@@ -44,9 +44,9 @@ scangrpre=re.compile("http://[^/]+/showscan.pl\?scan_grp=([0-9a-zA-Z]+)")
 def catcher(message):
     try:
         user = User.load(name=message.get_pnick())
-        uid = user.id if user else 0
+        uid = user.id if user else None
     except PNickParseError:
-        uid = 0
+        uid = None
     for m in scanre.finditer(message.get_msg()):
         parse(uid, "scan", m.group(1)).start()
     for m in scangrpre.finditer(message.get_msg()):
