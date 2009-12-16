@@ -22,7 +22,6 @@
 # This determines what the bot can send to the server, and is basically the IRC-API for plugin writers
 
 from merlin import Merlin
-from Core.exceptions_ import ParseError
 from Core.connection import Connection
 from Core.chanusertracker import CUT
 from Core.messages import Message, PUBLIC_REPLY, PRIVATE_REPLY, NOTICE_REPLY
@@ -105,11 +104,4 @@ class Action(Message):
             self.write("KICK %s %s :%s" % (channel, target, message))
         else:
             self.write("KICK %s %s" % (channel, target))
-    
-    def __str__(self):
-        # String representation of the Action object (Namely for debugging purposes)
-        try:
-            return "[%s] <%s> %s" % (self.get_chan(), self.get_nick(), self.get_msg())
-        except ParseError:
-            return ""
     

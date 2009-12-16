@@ -24,7 +24,7 @@
 import re, time
 
 from merlin import Merlin
-from Core.exceptions_ import ChanParseError, MsgParseError, PNickParseError
+from Core.exceptions_ import ParseError, ChanParseError, MsgParseError, PNickParseError
 
 PUBLIC_PREFIX  = ("!",)
 PRIVATE_PREFIX = ("@",)
@@ -67,6 +67,13 @@ class Message(object):
             self._msgerror = True
         else:
             self._msg = unicode(self._msg, encoding='latin-1')
+    
+    def __str__(self):
+        # String representation of the Message object (Namely for debugging purposes)
+        try:
+            return "[%s] <%s> %s" % (self.get_chan(), self.get_nick(), self.get_msg().encode('latin-1'))
+        except ParseError:
+            return ""
     
     def get_nick(self):
         # Return a parsed nick
