@@ -21,9 +21,16 @@
  
 import sys
 import sqlalchemy
+from sqlalchemy.exc import IntegrityError, ProgrammingError
+from sqlalchemy.sql import text, bindparam
+from Core.config import Config
+from Core.db import Base, session
+import shipstats
 
 if len(sys.argv) > 2 and sys.argv[1] == "--migrate":
     round = sys.argv[2]
+    if round.isdigit():
+        round = "r"+round
     if sqlalchemy.__version__ != "0.5.7":
         print "Migration requires SQLA 0.5.7 which isn't available yet."
         print "You can get the neccessary changes from ticket #1576 (see TODO) or downloading the trunk."
@@ -33,27 +40,48 @@ else:
     round = None
     print "To migrate from an old round use: createdb.py --migrate <previous_round>"
 
-from sqlalchemy.sql import text, bindparam
-from Core.db import session
 if round:
     print "Moving tables to '%s' schema"%(round,)
-    session.execute(text("ALTER SCHEMA public RENAME TO %s;" % (round,)))
-    session.execute(text("CREATE SCHEMA public;"))
-    session.commit()
-    session.close()
+    try:
+        session.execute(text("ALTER SCHEMA public RENAME TO %s;" % (round,)))
+    except ProgrammingError:
+        print "Oops! It looks like you already have a backup called '%s'" % (round,)
+        session.rollback()
+        sys.exit()
+    else:
+        session.commit()
+    finally:
+        session.close()
 
-from Core.db import Base
 print "Importing database models"
 from Core.maps import Channel
 
-print "Creating tables"
+print "Creating schema and tables"
+try:
+    session.execute(text("CREATE SCHEMA public;"))
+except ProgrammingError:
+    print "A public schema already exists, but this is completely normal"
+    session.rollback()
+else:
+    session.commit()
+finally:
+    session.close()
+
 Base.metadata.create_all()
 
 print "Setting up default channels"
-from Core.config import Config
+userlevel = Config.get("Access", "member")
+maxlevel = Config.get("Access", "admin")
 for chan, name in Config.items("Channels"):
-    session.add(Channel(name=name,userlevel=100,maxlevel=1000))
-session.commit()
+    try:
+        session.add(Channel(name=name,userlevel=userlevel,maxlevel=maxlevel))
+        session.flush()
+    except IntegrityError:
+        print "Channel '%s' already exists" % (name,)
+        session.rollback()
+    else:
+        print "Created '%s' with access (%s|%s)" % (name, userlevel, maxlevel,)
+        session.commit()
 session.close()
 
 if round:
@@ -76,5 +104,4 @@ if round:
     session.close()
 
 print "Inserting ship stats"
-import shipstats
 shipstats.main()
