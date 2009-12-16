@@ -68,6 +68,8 @@ class Message(object):
             self._msg = line[line.index(":",1)+1:]
         except ValueError:
             self._msgerror = True
+        else:
+            self._msg = unicode(self._msg, encoding='latin-1')
     
     def get_nick(self):
         # Return a parsed nick
