@@ -26,6 +26,7 @@ from sqlalchemy.sql.functions import current_timestamp, sum
 from Core.config import Config
 from Core.db import session
 from Core.maps import User, Invite, Kick, Vote
+from Core.messages import PUBLIC_REPLY
 from Core.loadable import loadable
 
 @loadable.module("member")
@@ -123,7 +124,11 @@ class prop(loadable):
         elif mode == "list":
             prev = []
             for id, person, result, type in self.get_open_props():
-                prev.append("%s: %s %s"%(id,type,person))
+                prop_info = "%s: %s %s"%(id,type,person)
+                vote = user.votes.filter_by(prop_id=id).first()
+                if vote is not None and message.reply_type() is not PUBLIC_REPLY:
+                    prop_info += " (%s,%s)"%(vote.vote[0].upper(),vote.carebears)
+                prev.append(prop_info)
             message.reply("Propositions currently being voted on: %s"%(", ".join(prev),))
         
         elif mode == "recent":

@@ -948,7 +948,7 @@ class Vote(Base):
     carebears = Column(Integer)
     prop_id = Column(Integer)
     voter_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
-Vote.voter = relation(User)
+User.votes = dynamic_loader(Vote, backref="voter")
 Invite.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Invite.id==Vote.prop_id)
 Kick.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Kick.id==Vote.prop_id)
 
