@@ -24,7 +24,7 @@
 import re, time
 
 from merlin import Merlin
-from Core.exceptions_ import ChanParseError, MsgParseError, PNickParseError
+from Core.exceptions_ import ParseError, ChanParseError, MsgParseError, PNickParseError
 
 PUBLIC_PREFIX  = ("!",)
 PRIVATE_PREFIX = ("@",)
@@ -38,16 +38,12 @@ pnickre = re.compile(r"^:.+!.+@(.+)\.users\.netgamers\.org")
 class Message(object):
     # The message object will be passed around to callbacks for inspection and ability to write to the server
     
-    def __init__(self, line):
-        # A raw irc line
-        line = unicode(line, encoding='latin-1') # Encode the line
-        self.line = line
-        self._chanerror = False # Will be set to True on failure to parse.
-        self._msgerror = False # Will be set to True on failure to parse.
-        self.parse(line)
+    _chanerror = False # Will be set to True on failure to parse.
+    _msgerror = False # Will be set to True on failure to parse.
     
     def parse(self, line):
         # Parse the irc line
+        self.line = line
         self._nick = line.split("!")[0][1:]
         self._hostmask = line.split()[0][1:]
         self._command = line.split()[1]
@@ -69,6 +65,15 @@ class Message(object):
             self._msg = line[line.index(":",1)+1:]
         except ValueError:
             self._msgerror = True
+        else:
+            self._msg = unicode(self._msg, encoding='latin-1')
+    
+    def __str__(self):
+        # String representation of the Message object (Namely for debugging purposes)
+        try:
+            return "[%s] <%s> %s" % (self.get_chan(), self.get_nick(), self.get_msg().encode('latin-1'))
+        except ParseError:
+            return ""
     
     def get_nick(self):
         # Return a parsed nick

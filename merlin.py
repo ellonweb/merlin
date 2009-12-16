@@ -58,7 +58,7 @@ class merlin(object):
                     
                     # Connect
                     from Core.connection import Connection
-                    print "%s Connecting..." % (time.asctime(),)
+                    print "%s Connecting... (%s)" % (time.asctime(), Config.get("Connection", "server"),)
                     Connection.connect()
                     self.sock, self.file = Connection.detach()
                     self.Message = None
@@ -99,9 +99,11 @@ class merlin(object):
                                 if not line:
                                     raise Reboot
                                 
-                                # Parse the line
-                                self.Message = Action(line)
                                 try:
+                                    # Create a new message object
+                                    self.Message = Action()
+                                    # Parse the line
+                                    self.Message.parse(line)
                                     # Callbacks
                                     Callbacks.callback(self.Message)
                                 except (Reload, Reboot, socket.error, Quit):
@@ -125,7 +127,7 @@ class merlin(object):
                 except (Reboot, socket.error) as exc:
                     # Reset the connection first
                     Connection.disconnect(str(exc) or "Rebooting")
-                    print "%s Rebooting..." % (time.asctime(),)
+                    print "%s Rebooting... (%s)" % (time.asctime(), exc,)
                     # Reboot the Loader and reimport all the modules
                     Loader.reboot()
                     continue
