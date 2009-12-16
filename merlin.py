@@ -99,9 +99,11 @@ class merlin(object):
                                 if not line:
                                     raise Reboot
                                 
-                                # Parse the line
-                                self.Message = Action(line)
                                 try:
+                                    # Create a new message object
+                                    self.Message = Action()
+                                    # Parse the line
+                                    self.Message.parse(line)
                                     # Callbacks
                                     Callbacks.callback(self.Message)
                                 except (Reload, Reboot, socket.error, Quit):
