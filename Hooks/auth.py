@@ -83,7 +83,7 @@ def loggedin(message):
 @loadable.system('INVITE')
 def pinvite(message):
     # P invites us to a channel
-    if message.get_hostmask() == "P!cservice@netgamers.org":
+    if message.get_hostmask() == "P!cservice@netgamers.org" and Channel.load(message.get_msg()) is not None:
         message.join(message.get_msg())
 
 @loadable.system('PRIVMSG', admin=True)
