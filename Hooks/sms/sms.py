@@ -38,7 +38,7 @@ class sms(loadable):
         
         rec = params.group(1)
         public_text = params.group(2) + ' - %s' % (user.name,)
-        text = public_text + '/%s' %(user.phone,)
+        text = public_text.encode('latin-1') + '/%s' %(user.phone,)
         receiver=User.load(name=rec,exact=False)
         if not receiver:
             message.reply("Who exactly is %s?" % (rec,))
