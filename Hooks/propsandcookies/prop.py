@@ -246,6 +246,13 @@ class prop(loadable):
                     idiot.access = Config.getint("Access","galmate")
                 else:
                     idiot.access = 0
+                
+                if idiot.planet is not None and idiot.planet.intel is not None:
+                    intel = idiot.planet.intel
+                    alliance = Alliance.load(Config.get("Alliance","name"))
+                    if intel.alliance == alliance:
+                        intel.alliance = None
+                
                 message.privmsg("remuser %s %s"%(Config.get("Channels","home"), idiot.name,),'p')
                 message.privmsg("ban %s *!*@%s.users.netgamers.org Your sponsor doesn't like you anymore"%(Config.get("Channels","home"), idiot.name,),'p')
                 message.privmsg("note send %s A proposition to kick you from %s has been raised by %s with reason '%s' and passed by a vote of %s to %s."%(idiot.name,Config.get("Alliance","name"),prop.proposer.name,prop.comment_text,yes,no),'p')
