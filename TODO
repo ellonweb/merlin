@@ -12,9 +12,6 @@ fix unicode support
     
 sms and non-ascii chars? (perhaps covered by unicode fix)
 
-revert commit [] regarding PA dump excluding zero'd galaxies when fixed
-alliances should be reactivated if possible, don't always create new ones
-
 loadable paramre platform update: multiple execute methods
 
 rewrite CLI

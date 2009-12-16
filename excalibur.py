@@ -146,18 +146,24 @@ while True:
         #  based on an x,y match in the two tables (and active=True)
         session.execute(text("""UPDATE galaxy_temp AS t SET
                                   id = g.id
-                                FROM (SELECT id, x, y FROM galaxy WHERE active = :true) AS g
+                                FROM (SELECT id, x, y FROM galaxy) AS g
                                   WHERE t.x = g.x AND t.y = g.y
+                            ;"""))
+
+        # Make sure all the galaxies are active,
+        #  some might have been deactivated previously
+        session.execute(text("""UPDATE galaxy SET
+                                  active = :true
                             ;""", bindparams=[true]))
 
         t2=time.time()-t1
-        print "Copy galaxy ids to temp in %.3f seconds" % (t2,)
+        print "Copy galaxy ids to temp and activate in %.3f seconds" % (t2,)
         t1=time.time()
 
         # For galaxies that are no longer present in the new dump, we will
         #  NULL all the data, leaving only the coords and id for FKs
-#                                  active = :false,
         session.execute(text("""UPDATE galaxy SET
+                                  active = :false,
                                   name = NULL, size = NULL, score = NULL, value = NULL, xp = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
                                 WHERE id NOT IN (SELECT id FROM galaxy_temp WHERE id IS NOT NULL)
@@ -320,12 +326,18 @@ while True:
         #  based on a name match in the two tables (and active=True)
         session.execute(text("""UPDATE alliance_temp AS t SET
                                   id = a.id
-                                FROM (SELECT id, name FROM alliance WHERE active = :true) AS a
+                                FROM (SELECT id, name FROM alliance) AS a
                                   WHERE t.name = a.name
+                            ;"""))
+
+        # Make sure all the alliances are active,
+        #  some might have been deactivated previously
+        session.execute(text("""UPDATE alliance SET
+                                  active = :true
                             ;""", bindparams=[true]))
 
         t2=time.time()-t1
-        print "Copy alliance ids to temp in %.3f seconds" % (t2,)
+        print "Copy alliance ids to temp and activate in %.3f seconds" % (t2,)
         t1=time.time()
 
         # For alliances that are no longer present in the new dump, we will
