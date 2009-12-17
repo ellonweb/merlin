@@ -40,7 +40,7 @@ class connection(object):
     def connect(self):
         # Configure socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(300)
+        self.sock.settimeout(330)
         self.sock.connect((Config.get("Connection", "server"), Config.getint("Connection", "port"),))
         self.write("NICK %s" % (Config.get("Connection", "nick"),))
         self.write("USER %s 0 * : %s" % (Config.get("Connection", "nick"), Config.get("Connection", "nick"),))
