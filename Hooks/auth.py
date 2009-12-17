@@ -27,9 +27,9 @@ from Core.exceptions_ import PNickParseError
 from Core.db import session
 from Core.maps import Channel
 from Core.config import Config
-from Core.loadable import loadable
+from Core.loadable import system
 
-@loadable.system('433')
+@system('433')
 def altnick(message):
     # Need to register with an alternate nick
     if Merlin.nick == Config.get("Connection", "nick"):
@@ -37,13 +37,13 @@ def altnick(message):
     else:
         message.nick(Config.get("Connection", "nick"))
 
-@loadable.system('NICK')
+@system('NICK')
 def nick(message):
     # Changing nick
     if message.get_nick() == Merlin.nick:
         Merlin.nick = message.get_msg()
 
-@loadable.system('001')
+@system('001')
 def connected(message):
     # Successfully registered on the IRC server, check what nick
     Merlin.nick = message.get_chan()
@@ -55,7 +55,7 @@ def connected(message):
         message.privmsg("RECOVER %s %s %s" % (nick, nick, Config.get("Connection", "passwd")), "P@cservice.netgamers.org")
     else: login(message)
 
-@loadable.system('NOTICE')
+@system('NOTICE')
 def PNS(message):
     # Message from P or NickServ
     if message.get_hostmask() in ("P!cservice@netgamers.org","NS!NickServ@netgamers.org"):
@@ -71,7 +71,7 @@ def login(message):
     # Login
     message.privmsg("LOGIN %s %s" % (Config.get("Connection", "nick"), Config.get("Connection", "passwd")), "P@cservice.netgamers.org")
 
-@loadable.system('396')
+@system('396')
 def loggedin(message):
     # Authentication complete
     if "is now your hidden host" == message.get_msg():
@@ -80,13 +80,13 @@ def loggedin(message):
         for channel in session.query(Channel):
             message.privmsg("INVITE %s" % (channel.name,), "P")
 
-@loadable.system('INVITE')
+@system('INVITE')
 def pinvite(message):
     # P invites us to a channel
     if message.get_hostmask() == "P!cservice@netgamers.org" and Channel.load(message.get_msg()) is not None:
         message.join(message.get_msg())
 
-@loadable.system('PRIVMSG', admin=True)
+@system('PRIVMSG', admin=True)
 def secure(message):
     """Secures the PNick of the bot."""
     message.privmsg("SET MAXLOGINS 2\nSET INVISIBLE ON\nSET AUTOKILL ON", "P")

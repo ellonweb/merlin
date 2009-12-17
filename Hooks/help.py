@@ -22,15 +22,14 @@
 import re
 from Core.exceptions_ import PNickParseError, UserError
 from Core.maps import Channel
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 from Core.callbacks import Callbacks
 
-@loadable.module()
 class help(loadable):
     """Help"""
     usage = " [command]"
-    paramre = re.compile(r"\s*(\S*)")
     
+    @route(r"\s*(\S*)")
     def execute(self, message, user, params):
         if params.group(1) != "":
             return
@@ -42,7 +41,7 @@ class help(loadable):
             channel = None
         for callback in Callbacks.callbacks["PRIVMSG"]:
             try:
-                if callback.check_access(message, user, channel) is not None:
+                if callback.check_access(message, None, user, channel) is not None:
                     commands.append(callback.name)
             except PNickParseError:
                 continue

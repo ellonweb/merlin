@@ -25,9 +25,9 @@ from merlin import Merlin
 from Core.exceptions_ import UserError
 from Core.config import Config
 from Core.chanusertracker import CUT
-from Core.loadable import loadable
+from Core.loadable import system
 
-@loadable.system('JOIN')
+@system('JOIN')
 def join(message):
     # Someone is joining a channel
     if message.get_nick() == Merlin.nick:
@@ -40,17 +40,17 @@ def join(message):
             # Set the user's pnick
             CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
 
-@loadable.system('332')
+@system('332')
 def topic_join(message):
     # Topic of a channel is set
     CUT.topic(message.get_chan(), message.get_msg())
 
-@loadable.system('TOPIC')
+@system('TOPIC')
 def topic_change(message):
     # Topic of a channel is set
     CUT.topic(message.get_chan(), message.get_msg())
 
-@loadable.system('353')
+@system('353')
 def names(message):
     # List of users in a channel
     for nick in message.get_msg().split():
@@ -62,7 +62,7 @@ def names(message):
             # Use whois to get the user's pnick
             message.write("WHOIS %s" % (nick,))
 
-@loadable.system('PART')
+@system('PART')
 def part(message):
     # Someone is leaving a channel
     if message.get_nick() == Merlin.nick:
@@ -72,7 +72,7 @@ def part(message):
         # Someone is leaving a channel we're in
         CUT.part(message.get_chan(), message.get_nick())
 
-@loadable.system('KICK')
+@system('KICK')
 def kick(message):
     # Someone is kicked
     kname = message.line.split()[3]
@@ -83,20 +83,20 @@ def kick(message):
         # Someone is kicked from a channel we're in
         CUT.part(message.get_chan(), kname)
 
-@loadable.system('QUIT')
+@system('QUIT')
 def quit(message):
     # Someone is quitting
     if message.get_nick() != Merlin.nick:
         # It's not the bot that's quitting
         CUT.del_nick(message.get_nick())
 
-@loadable.system('NICK')
+@system('NICK')
 def nick(message):
     # Someone is changing their nick
     if message.get_nick() != Merlin.nick:
         CUT.nick_change(message.get_nick(), message.get_msg())
 
-@loadable.system('330')
+@system('330')
 def pnick(message):
     # Part of a WHOIS result
     if message.get_msg() == "is logged in as":
@@ -105,7 +105,7 @@ def pnick(message):
         # Set the user's pnick
         CUT.get_user(nick, pnick=pnick)
 
-@loadable.system('319')
+@system('319')
 def channels(message):
     # Part of a WHOIS result
     if message.get_chan() == Merlin.nick:
@@ -116,7 +116,7 @@ def channels(message):
             CUT.new_chan(chan)
             message.write("NAMES %s\nTOPIC %s" % (chan,chan,))
 
-@loadable.system('MODE')
+@system('MODE')
 def op(message):
     # Used for tracking whether or not we're opped in channels
     if not CUT.Channels.has_key(message.get_chan()):
@@ -154,7 +154,7 @@ def op(message):
                     # some other mode that requires an argument
                     target = args.pop(0)
 
-@loadable.system('PRIVMSG', command=True)
+@system('PRIVMSG', command=True)
 def auth(message):
     """Authenticates the user, if they provide their username and password"""
     # P redundancy
@@ -169,7 +169,7 @@ def auth(message):
     except UserError:
         message.alert("You don't have access to this command")
 
-@loadable.system('PRIVMSG', command=True)
+@system('PRIVMSG', command=True)
 def letmein(message):
     """Invites the user to the private channel, if they provide their username and password"""
     # P redundancy

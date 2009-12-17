@@ -973,6 +973,7 @@ class Command(Base):
     id = Column(Integer, primary_key=True)
     command_prefix = Column(String(1))
     command = Column(String(20))
+    subcommand = Column(String(20))
     command_parameters = Column(String(512))
     nick = Column(String(15))
     username = Column(String(15))
