@@ -23,6 +23,7 @@
 __all__ = [
            "prop",
            "adopt",
+           "orphans",
            "cookie",
            "gac",
            "yourmum",
