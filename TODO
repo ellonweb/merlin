@@ -10,7 +10,15 @@ rewrite CLI
 
 rewrite Connection.write and Action.write to use detached threaded system
 
-Reimplement Robocop (threaded?)
+Reimplement Robocop
+    server.bind(("127.0.0.1",port))
+    select.select([sock.file.fileno(), server.fileno()],[],[],330)
+    check returned fileno to match, then .readline() or .accept()
+    retain server on reboot
+    use the same parser or sub class Action?
+    base64 messages?
+    seperate callback system or integrated?
+    
     scan requests (!request)
     scans parsed (!scans)
 
