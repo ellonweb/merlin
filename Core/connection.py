@@ -24,6 +24,7 @@
 import re
 import socket
 import time
+from Core.exceptions_ import Reboot
 from Core.config import Config
 
 CRLF = "\r\n"
@@ -61,8 +62,7 @@ class connection(object):
         except socket.error:
             pass
         else:
-            self.sock.close()
-            self.file.close()
+            self.close()
     
     def write(self, line):
         # Write to socket/server
@@ -91,14 +91,12 @@ class connection(object):
             else:
                 print "%s <<< %s" % (time.asctime(),line,)
             return line
+        else:
+            raise Reboot
     
     def fileno(self):
         # Return act like a file
         return self.sock.fileno()
-    
-    def isatty(self):
-        # Same as above
-        return self.sock.isatty()
     
     def close(self):
         # And again...

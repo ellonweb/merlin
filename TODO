@@ -19,6 +19,10 @@ Reimplement Robocop
     base64 messages?
     seperate callback system or integrated?
     
+    after accepting a socket request, add it to the list of sockets
+    select on all sockets: read appropriate socket
+    if read == "", socket class handles Reboot or removing from list?
+    
     scan requests (!request)
     scans parsed (!scans)
 

@@ -96,8 +96,6 @@ class merlin(object):
                             #   Loop to parse every line received over connection
                             while True:
                                 line = Connection.read()
-                                if not line:
-                                    raise Reboot
                                 
                                 try:
                                     # Create a new message object
