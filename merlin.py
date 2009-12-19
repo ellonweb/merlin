@@ -23,7 +23,6 @@ import gc
 import socket
 import sys
 import time
-import traceback
 
 if not 2.6 <= float(sys.version[:3]) < 3.0:
     sys.exit("Python 2.6.x Required")
@@ -80,6 +79,7 @@ class merlin(object):
                             from Core.connection import Connection
                             from Core.actions import Action
                             from Core.callbacks import Callbacks
+                            from Core.router import Router
                             
                             # Attach the socket to the connection handler
                             Connection.attach(self.sock, self.file)
@@ -94,27 +94,7 @@ class merlin(object):
                             
                             # Operation loop
                             #   Loop to parse every line received over connection
-                            while True:
-                                line = Connection.read()
-                                
-                                try:
-                                    # Create a new message object
-                                    self.Message = Action()
-                                    # Parse the line
-                                    self.Message.parse(line)
-                                    # Callbacks
-                                    Callbacks.callback(self.Message)
-                                except (Reload, Reboot, socket.error, Quit):
-                                    raise
-                                except Exception:
-                                    # Error while executing a callback/mod/hook
-                                    self.Message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")
-                                    traceback.print_exc()
-                                    continue
-                                finally:
-                                    # Remove any uncommitted or unrolled-back state
-                                    session.remove()
-                                
+                            Router.run()
                             
                         except Reload:
                             print "%s Reloading..." % (time.asctime(),)
