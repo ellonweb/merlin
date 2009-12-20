@@ -22,7 +22,7 @@
 import re
 from Core.config import Config
 from Core.db import session
-from Core.maps import User
+from Core.maps import Alliance, User
 from Core.loadable import loadable
 
 @loadable.module("member")

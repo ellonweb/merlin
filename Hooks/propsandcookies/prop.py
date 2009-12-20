@@ -25,7 +25,7 @@ from sqlalchemy.sql import asc, desc, literal, union
 from sqlalchemy.sql.functions import current_timestamp, sum
 from Core.config import Config
 from Core.db import session
-from Core.maps import User, Invite, Kick, Vote
+from Core.maps import Alliance, User, Invite, Kick, Vote
 from Core.messages import PUBLIC_REPLY
 from Core.loadable import loadable
 
