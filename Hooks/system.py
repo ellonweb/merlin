@@ -51,6 +51,7 @@ def reboot(message):
 def reload(message):
     """Dynamically reload the Core and Hooks"""
     msg = message.get_msg().split(None,1)
+    message.reply("It's Morphin' Time!")
     if len(msg) > 1:
         raise Reload(msg[1])
     else:

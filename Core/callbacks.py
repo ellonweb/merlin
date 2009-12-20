@@ -32,7 +32,6 @@ from Core.loader import Loader
 from Core.db import session
 from Core.loadable import loadable
 
-
 class callbacks(object):
     use_init_all = True
     # Modules/Callbacks/Hooks controller

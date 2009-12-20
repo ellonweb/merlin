@@ -57,10 +57,9 @@ class merlin(object):
                     
                     # Connect
                     from Core.connection import Connection
-                    print "%s Connecting... (%s)" % (time.asctime(), Config.get("Connection", "server"),)
+                    print "%s Connecting... (%s %s)" % (time.asctime(), Config.get("Connection", "server"), Config.get("Connection", "port"),)
                     Connection.connect()
                     self.sock, self.file = Connection.detach()
-                    self.Message = None
                     
                     # System loop
                     #   Loop back to reload modules
@@ -77,23 +76,15 @@ class merlin(object):
                             #  either Loader.reboot() or Loader.reload()
                             from Core.db import session
                             from Core.connection import Connection
-                            from Core.actions import Action
-                            from Core.callbacks import Callbacks
                             from Core.router import Router
                             
                             # Attach the socket to the connection handler
                             Connection.attach(self.sock, self.file)
                             
-                            # If we've been asked to reload, report if it worked
-                            if self.Message is not None:
-                                if Loader.success: self.Message.reply("Core reloaded successfully.")
-                                else: self.Message.reply("Error reloading the core.")
-                            
                             # Configure Core
                             Connection.write("WHOIS %s" % self.nick)
                             
                             # Operation loop
-                            #   Loop to parse every line received over connection
                             Router.run()
                             
                         except Reload:

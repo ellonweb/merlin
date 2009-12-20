@@ -22,15 +22,23 @@
 import socket
 import traceback
 
-from merlin import Merlin
 from Core.exceptions_ import Quit, Reboot, Reload
-from Core.db import session
-from Core.connection import Connection
-from Core.actions import Action
-from Core.callbacks import Callbacks
 
 class router(object):
+    message = None
+    
     def run(self):
+        # Import elements of the Core we need after run is called
+        #  so they can be reloaded by the loader after this module
+        from Core.db import session
+        from Core.connection import Connection
+        from Core.actions import Action
+        from Core.callbacks import Callbacks
+        
+        # If we've been asked to reload, report if it didn't work
+        if self.message is not None:
+            self.message.alert("I detect a sudden weakness in the Morphing Grid.")
+        
         # Operation loop
         #   Loop to parse every line received over connection
         while True:
@@ -38,16 +46,16 @@ class router(object):
             
             try:
                 # Create a new message object
-                Merlin.Message = Action()
+                self.message = Action()
                 # Parse the line
-                Merlin.Message.parse(line)
+                self.message.parse(line)
                 # Callbacks
-                Callbacks.callback(Merlin.Message)
+                Callbacks.callback(self.message)
             except (Reload, Reboot, socket.error, Quit):
                 raise
             except Exception:
                 # Error while executing a callback/mod/hook
-                Merlin.Message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")
+                self.message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")
                 traceback.print_exc()
                 continue
             finally:
