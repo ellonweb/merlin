@@ -43,12 +43,12 @@ class edituser(loadable):
             except Exception:
                 message.reply("Invalid access level '%s'" % (access,))
                 return
+        elif access.isdigit()
+            access = int(access)
         elif access in self.true:
             access = True
         elif access in self.false:
             access = False
-        else:
-            access = int(access)
         
         member = User.load(name=username, exact=False, active=False)
         if member is None:
@@ -59,9 +59,24 @@ class edituser(loadable):
             message.reply("You may not change access higher than your own")
             return
         
+        mbraxx = Config.getint("Access","member")
+        home = Config.get("Channels","home")
+        
         if type(access) == int:
+            if member.active = True and member.access < mbraxx and access >= mbraxx:
+                message.privmsg("adduser %s %s 399" %(home, member.name,), "P")
+                message.reply("%s has been added to %s"%(member.name, home,))
+            if member.active = True and member.access >= mbraxx and access < mbraxx:
+                message.privmsg("remuser %s %s"%(home, member.name,), "P")
+                message.privmsg("ban %s *!*@%s.users.netgamers.org GTFO, EAAD"%(home, member.name,), "P")
             member.access = access
         else:
+            if member.active != access and access = True and member.access >= mbraxx:
+                message.privmsg("adduser %s %s 399" %(home, member.name,), "P")
+                message.reply("%s has been added to %s"%(member.name, home,))
+            if member.active != access and access = False and member.access >= mbraxx:
+                message.privmsg("remuser %s %s"%(home, member.name,), "P")
+                message.privmsg("ban %s *!*@%s.users.netgamers.org GTFO, EAAD"%(home, member.name,), "P")
             member.active = access
         session.commit()
         message.reply("Editted user %s access: %s" % (member.name, access,))
