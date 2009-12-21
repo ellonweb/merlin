@@ -24,6 +24,7 @@
 import re
 import socket
 import time
+
 from Core.exceptions_ import Reboot
 from Core.config import Config
 
@@ -45,15 +46,12 @@ class connection(object):
         self.sock.connect((Config.get("Connection", "server"), Config.getint("Connection", "port"),))
         self.write("NICK %s" % (Config.get("Connection", "nick"),))
         self.write("USER %s 0 * : %s" % (Config.get("Connection", "nick"), Config.get("Connection", "nick"),))
-        self.file = self.sock.makefile('rb',0)
+        return self.sock
     
-    def attach(self, sock, file):
+    def attach(self, sock):
         # Attach the socket
         self.sock = sock
-        self.file = file
-    
-    def detach(self):
-        return self.sock, self.file
+        self.file = sock.makefile('rb', 0)
     
     def disconnect(self, line):
         # Cleanly close sockets
@@ -61,7 +59,7 @@ class connection(object):
             self.write("QUIT :%s" % (line,))
         except socket.error:
             pass
-        else:
+        finally:
             self.close()
     
     def write(self, line):

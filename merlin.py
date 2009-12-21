@@ -58,8 +58,7 @@ class merlin(object):
                     # Connect
                     from Core.connection import Connection
                     print "%s Connecting... (%s %s)" % (time.asctime(), Config.get("Connection", "server"), Config.get("Connection", "port"),)
-                    Connection.connect()
-                    self.sock, self.file = Connection.detach()
+                    self.irc = Connection.connect()
                     
                     # System loop
                     #   Loop back to reload modules
@@ -79,7 +78,7 @@ class merlin(object):
                             from Core.router import Router
                             
                             # Attach the socket to the connection handler
-                            Connection.attach(self.sock, self.file)
+                            Connection.attach(self.irc)
                             
                             # Configure Core
                             Connection.write("WHOIS %s" % self.nick)
