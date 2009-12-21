@@ -58,7 +58,7 @@ class connection(object):
     def disconnect(self, line):
         # Cleanly close sockets
         try:
-            self.write("QUIT %s" % (line,))
+            self.write("QUIT :%s" % (line,))
         except socket.error:
             pass
         else:
