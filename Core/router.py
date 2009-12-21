@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+import select
 import socket
 import traceback
 
@@ -27,11 +28,10 @@ from Core.exceptions_ import Quit, Reboot, Reload
 class router(object):
     message = None
     
-    def run(self):
+    def run(self, *connections):
         # Import elements of the Core we need after run is called
         #  so they can be reloaded by the loader after this module
         from Core.db import session
-        from Core.connection import Connection
         from Core.actions import Action
         from Core.callbacks import Callbacks
         
@@ -40,26 +40,41 @@ class router(object):
             self.message.alert("I detect a sudden weakness in the Morphing Grid.")
         
         # Operation loop
-        #   Loop to parse every line received over connection
+        #   Loop to parse every line received over the connections
         while True:
-            line = Connection.read()
             
-            try:
-                # Create a new message object
-                self.message = Action()
-                # Parse the line
-                self.message.parse(line)
-                # Callbacks
-                Callbacks.callback(self.message)
-            except (Reload, Reboot, socket.error, Quit):
-                raise
-            except Exception:
-                # Error while executing a callback/mod/hook
-                self.message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")
-                traceback.print_exc()
-                continue
-            finally:
-                # Remove any uncommitted or unrolled-back state
-                session.remove()
+            # Generate a list of connections ready to read
+            inputs = select.select(connections, [], [], 330)[0]
+            
+            # None of the inputs are ready to read, the IRC
+            #  socket has timed out, so reboot and reconnect
+            if len(inputs) == 0:
+                raise Reboot("Timed out.")
+            
+            # Loop over the connections that are ready to read
+            for connection in inputs:
+                
+                # Finally we are ready to read from the connection
+                line = connection.read()
+                if line is None:
+                    continue
+                
+                try:
+                    # Create a new message object
+                    self.message = Action()
+                    # Parse the line
+                    self.message.parse(line)
+                    # Callbacks
+                    Callbacks.callback(self.message)
+                except (Reload, Reboot, socket.error, Quit):
+                    raise
+                except Exception:
+                    # Error while executing a callback/mod/hook
+                    self.message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")
+                    traceback.print_exc()
+                    continue
+                finally:
+                    # Remove any uncommitted or unrolled-back state
+                    session.remove()
 
 Router = router()

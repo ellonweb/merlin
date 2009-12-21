@@ -85,7 +85,7 @@ class merlin(object):
                             Connection.write("WHOIS %s" % self.nick)
                             
                             # Operation loop
-                            Router.run()
+                            Router.run(Connection, *[])
                             
                         except Reload:
                             print "%s Reloading..." % (time.asctime(),)
