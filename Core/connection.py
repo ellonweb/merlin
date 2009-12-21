@@ -45,7 +45,7 @@ class connection(object):
         self.sock.connect((Config.get("Connection", "server"), Config.getint("Connection", "port"),))
         self.write("NICK %s" % (Config.get("Connection", "nick"),))
         self.write("USER %s 0 * : %s" % (Config.get("Connection", "nick"), Config.get("Connection", "nick"),))
-        self.file = self.sock.makefile('rb')
+        self.file = self.sock.makefile('rb',0)
     
     def attach(self, sock, file):
         # Attach the socket
