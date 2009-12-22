@@ -31,9 +31,13 @@ class server(object):
     clients = []
     
     def connect(self):
+        # Configure socket
+        port = Config.getint("Misc", "robocop")
+        print "%s RoboCop... (%s)" % (time.asctime(), port,)
+        
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(330)
-        self.sock.bind(("127.0.0.1", Config.getint("Misc", "robocop"),))
+        self.sock.settimeout(30)
+        self.sock.bind(("127.0.0.1", port,))
         self.sock.listen(5)
         return self.sock
     
@@ -48,6 +52,13 @@ class server(object):
         self.socks.append(sock)
         self.clients.append(client(sock))
     
+    def disconnect(self, line):
+        # Cleanly close sockets
+        print "%s Resetting RoboCop... (%s)" % (time.asctime(),line,)
+        self.close()
+        self.sock = None
+        return self.sock, self.socks
+    
     def read(self):
         # Read from socket
         sock, addr = self.sock.accept()
@@ -57,6 +68,10 @@ class server(object):
     def fileno(self):
         # Return act like a file
         return self.sock.fileno()
+    
+    def close(self):
+        # And again...
+        return self.sock.close()
     
 RoboCop = server()
 

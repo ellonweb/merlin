@@ -30,6 +30,9 @@ class Reboot(Exception):
 class Reload(Exception):
     pass
 
+class Call999(Exception):
+    pass
+
 class LoadableError(Exception):
     pass
 

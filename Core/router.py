@@ -23,7 +23,7 @@ import select
 import socket
 import traceback
 
-from Core.exceptions_ import Quit, Reboot, Reload
+from Core.exceptions_ import Quit, Reboot, Reload, Call999
 
 class router(object):
     message = None
@@ -68,8 +68,17 @@ class router(object):
                     self.message.parse(line)
                     # Callbacks
                     Callbacks.callback(self.message)
-                except (Reload, Reboot, socket.error, Quit):
+                except (Reload, Reboot, Quit):
                     raise
+                except socket.error as exc:
+                    # Deal with the socket error differently
+                    #  depending on which connection it came from
+                    if connection == Connection:
+                        raise Reboot(exc)
+                    if connection == RoboCop:
+                        raise Call999(exc)
+                    if connection in RoboCop.clients:
+                        pass
                 except Exception:
                     # Error while executing a callback/mod/hook
                     self.message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")

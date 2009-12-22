@@ -39,22 +39,31 @@ class connection(object):
         self.pong = re.compile(r"PONG\s*:", re.I)
         self.last = time.time()
     
-    def connect(self):
+    def connect(self, nick):
         # Configure socket
+        server = Config.get("Connection", "server")
+        port = Config.getint("Connection", "port")
+        print "%s Connecting... (%s %s)" % (time.asctime(), server, port,)
+        
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(330)
-        self.sock.connect((Config.get("Connection", "server"), Config.getint("Connection", "port"),))
-        self.write("NICK %s" % (Config.get("Connection", "nick"),))
-        self.write("USER %s 0 * : %s" % (Config.get("Connection", "nick"), Config.get("Connection", "nick"),))
+        self.sock.connect((server, port,))
+        self.write("NICK %s" % (nick,))
+        self.write("USER %s 0 * : %s" % (nick, nick,))
         return self.sock
     
-    def attach(self, sock):
+    def attach(self, sock, nick):
         # Attach the socket
-        self.sock = sock
-        self.file = sock.makefile('rb', 0)
+        self.sock = sock or self.connect(nick)
+        self.file = self.sock.makefile('rb', 0)
+
+        # WHOIS ourselves in order to setup the CUT
+        self.write("WHOIS %s" % nick)
+        return self.sock
     
     def disconnect(self, line):
         # Cleanly close sockets
+        print "%s Resetting IRC... (%s)" % (time.asctime(),line,)
         try:
             self.write("QUIT :%s" % (line,))
         except socket.error:
