@@ -56,12 +56,12 @@ class router(object):
             # Loop over the connections that are ready to read
             for connection in inputs:
                 
-                # Finally we are ready to read from the connection
-                line = connection.read()
-                if line is None:
-                    continue
-                
                 try:
+                    # Finally we are ready to read from the connection
+                    line = connection.read()
+                    if line is None:
+                        continue
+                    
                     # Create a new message object
                     self.message = Action()
                     # Parse the line
@@ -78,7 +78,7 @@ class router(object):
                     if connection == RoboCop:
                         raise Call999(exc)
                     if connection in RoboCop.clients:
-                        pass
+                        connection.disconnect()
                 except Exception:
                     # Error while executing a callback/mod/hook
                     self.message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")

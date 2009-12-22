@@ -49,8 +49,14 @@ class server(object):
         return self.sock, self.socks
     
     def extend(self, sock):
+        # Attach the new client
         self.socks.append(sock)
         self.clients.append(client(sock))
+    
+    def remove(self, client):
+        # Remove the new client
+        self.socks.remove(client.sock)
+        self.clients.remove(client)
     
     def disconnect(self, line):
         # Cleanly close sockets
@@ -63,7 +69,7 @@ class server(object):
         # Read from socket
         sock, addr = self.sock.accept()
         self.extend(sock)
-        print "%s <<< ROBOCOP CONNECT %s" % (time.asctime(),addr,)
+        print "%s RoboCop CONNECT (%s)" % (time.asctime(),self.clients[-1].id(),)
     
     def fileno(self):
         # Return act like a file
@@ -75,15 +81,40 @@ class server(object):
     
 RoboCop = server()
 
+CRLF = "\r\n"
+
 class client(object):
     # Robocop client
     def __init__(self, sock):
+        # Basic attach
         self.sock = sock
+        self.file = self.sock.makefile('rb', 0)
+    
+    def id(self):
+        return "%s/%s"%(self.sock.getpeername()[1],self.fileno(),)
+    
+    def disconnect(self):
+        # Cleanly close sockets
+        print "%s RoboCop DISCONNECT (%s)" % (time.asctime(),self.id(),)
+        self.close()
+        RoboCop.remove(self)
     
     def read(self):
         # Read from socket
-        pass
+        line = self.file.readline()
+        if line:
+            if line[-2:] == CRLF:
+                line = line[:-2]
+            if line[-1] in CRLF:
+                line = line[:-1]
+            print "%s RoboCop (%s) <<< %s" % (time.asctime(),self.id(),line,)
+        else:
+            self.disconnect()
     
     def fileno(self):
         # Return act like a file
         return self.sock.fileno()
+    
+    def close(self):
+        # And again...
+        return self.sock.close()
