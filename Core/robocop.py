@@ -24,6 +24,8 @@ import time
 
 from Core.config import Config
 
+CRLF = "\r\n"
+
 class server(object):
     # Robocop server
     sock = None
@@ -81,8 +83,6 @@ class server(object):
     
 RoboCop = server()
 
-CRLF = "\r\n"
-
 class client(object):
     # Robocop client
     def __init__(self, sock):
@@ -118,3 +118,13 @@ class client(object):
     def close(self):
         # And again...
         return self.sock.close()
+
+class push(object):
+    # Robocop message pusher
+    def __init__(self, line):
+        port = Config.getint("Misc", "robocop")
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(30)
+        sock.connect(("127.0.0.1", port,))
+        sock.send(line + CRLF)
+    
