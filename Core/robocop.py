@@ -19,16 +19,56 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-
-# RoBoCoP core placeholder
-
 import socket
-from .variables import robocop as addr
-def push(msg):
-    try:
-        s=socket.socket(socket.AF_UNIX)
-        s.connect((addr))
-        s.send(msg+"\n")
-        s.close()
-    except socket.error:
+import time
+
+from Core.config import Config
+
+class server(object):
+    # Robocop server
+    sock = None
+    socks = []
+    clients = []
+    
+    def connect(self):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.settimeout(330)
+        self.sock.bind(("127.0.0.1", Config.getint("Misc", "robocop"),))
+        self.sock.listen(5)
+        return self.sock
+    
+    def attach(self, sock=None, socks=[]):
+        # Attach the sockets
+        self.sock = sock or self.connect()
+        self.socks = socks
+        self.clients = map(client, socks)
+        return self.sock, self.socks
+    
+    def extend(self, sock):
+        self.socks.append(sock)
+        self.clients.append(client(sock))
+    
+    def read(self):
+        # Read from socket
+        sock, addr = self.sock.accept()
+        self.extend(sock)
+        print "%s <<< ROBOCOP CONNECT %s" % (time.asctime(),addr,)
+    
+    def fileno(self):
+        # Return act like a file
+        return self.sock.fileno()
+    
+RoboCop = server()
+
+class client(object):
+    # Robocop client
+    def __init__(self, sock):
+        self.sock = sock
+    
+    def read(self):
+        # Read from socket
         pass
+    
+    def fileno(self):
+        # Return act like a file
+        return self.sock.fileno()

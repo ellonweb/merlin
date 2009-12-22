@@ -34,6 +34,8 @@ sys.stderr = sys.stdout
 
 class merlin(object):
     # Main bot container
+    irc = None
+    robocop = ()
     
     def run(self):
         Connection = None
@@ -76,15 +78,17 @@ class merlin(object):
                             from Core.db import session
                             from Core.connection import Connection
                             from Core.router import Router
+                            from Core.robocop import RoboCop
                             
                             # Attach the socket to the connection handler
                             Connection.attach(self.irc)
+                            self.robocop = RoboCop.attach(*self.robocop)
                             
                             # Configure Core
                             Connection.write("WHOIS %s" % self.nick)
                             
                             # Operation loop
-                            Router.run(Connection, *[])
+                            Router.run()
                             
                         except Reload:
                             print "%s Reloading..." % (time.asctime(),)

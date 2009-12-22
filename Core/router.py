@@ -28,12 +28,14 @@ from Core.exceptions_ import Quit, Reboot, Reload
 class router(object):
     message = None
     
-    def run(self, *connections):
+    def run(self):
         # Import elements of the Core we need after run is called
         #  so they can be reloaded by the loader after this module
+        from Core.connection import Connection
         from Core.db import session
         from Core.actions import Action
         from Core.callbacks import Callbacks
+        from Core.robocop import RoboCop
         
         # If we've been asked to reload, report if it didn't work
         if self.message is not None:
@@ -44,7 +46,7 @@ class router(object):
         while True:
             
             # Generate a list of connections ready to read
-            inputs = select.select(connections, [], [], 330)[0]
+            inputs = select.select([Connection, RoboCop]+RoboCop.clients, [], [], 330)[0]
             
             # None of the inputs are ready to read, the IRC
             #  socket has timed out, so reboot and reconnect
@@ -71,8 +73,12 @@ class router(object):
                 except Exception:
                     # Error while executing a callback/mod/hook
                     self.message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")
+                    self.message = None
                     traceback.print_exc()
                     continue
+                else:
+                    # Remove the old message
+                    self.message = None
                 finally:
                     # Remove any uncommitted or unrolled-back state
                     session.remove()
