@@ -27,7 +27,6 @@ import traceback
 from Core.exceptions_ import MerlinSystemCall, Reboot, Call999
 from Core.config import Config
 from Core.connection import Connection
-from Core.db import session
 from Core.actions import Action
 from Core.callbacks import Callbacks
 from Core.robocop import RoboCop, EmergencyCall
@@ -69,9 +68,6 @@ class router(object):
                     with open(Config.get("Misc","errorlog"), "a") as errorlog:
                         errorlog.write("\n\n\n%s - Error: %s\nUNKNOWN ERROR\n" % (time.asctime(),e.__str__(),))
                         errorlog.write(traceback.format_exc())
-                finally:
-                    # Remove any uncommitted or unrolled-back state
-                    session.remove()
     
     def irc(self):
         # Read, parse and evaluate an IRC line

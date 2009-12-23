@@ -115,6 +115,7 @@ class client(object):
             # All this just to print a pretty log message...
             print "%s <<< :%s %s%s" % (time.asctime(), self.host(), line.split(None,1)[0].upper(),
                                        " :"+" ".join(line.split(None,1)[1:]) if len(line.split())-1 else "",)
+            return line
         else:
             self.disconnect()
     

@@ -12,9 +12,7 @@ rewrite CLI
 
 rewrite Connection.write and Action.write to use detached threaded system
 
-Reimplement Robocop
-    seperate callback system or integrated?
-    
+Robocop
     scan requests (!request)
     scans parsed (!scans)
 

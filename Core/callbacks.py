@@ -122,6 +122,27 @@ class callbacks(object):
                 finally:
                     # Remove any uncommitted or unrolled-back state
                     session.remove()
+    
+    def robocop(self, message):
+        # Call back a hooked robocop module
+        command = message.get_command()
+        # Check we have a callback stored for this command,
+        if self.robocops.has_key(command):
+            callback = self.robocops[command]
+            # and call it, passing in the message
+            try:
+                callback.robocop(message)
+            except (MerlinSystemCall, socket.error):
+                raise
+            except Exception, e:
+                # Error while executing a callback/mod/hook
+                message.alert()
+                with open(Config.get("Misc","errorlog"), "a") as errorlog:
+                    errorlog.write("\n\n\n%s - Error: %s\nArguments that caused error: %s\n" % (time.asctime(),e.__str__(),message,))
+                    errorlog.write(traceback.format_exc())
+            finally:
+                # Remove any uncommitted or unrolled-back state
+                session.remove()
 
 Callbacks = callbacks()
 Callbacks.init()
