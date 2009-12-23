@@ -132,10 +132,10 @@ class EmergencyCall(Action):
     def __init__(self, client):
         self.client = client
     
-    def parse(line):
+    def parse(self, line):
         # RoboCop uses a much simpler protocol than IRC!
         self.line = line
-        self._hostmask = client.host()
+        self._hostmask = self.client.host()
         self._command = line.split(None, 1)[0]
         self._msg = " ".join(line.split(None, 1)[1:])
     
@@ -147,7 +147,7 @@ class EmergencyCall(Action):
         # Reply here will be used to reply to the client, not IRC!
         self.client.write(text)
     
-    def alert(self, text):
+    def alert(self):
         # This will be called if an error occurs while executing a callback
         # The error will be logged, so we don't need to deal with it here
         self.reply("ERROR %s" % (self.line,))
