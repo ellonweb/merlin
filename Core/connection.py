@@ -24,6 +24,8 @@
 import re
 import socket
 import time
+
+from Core.exceptions_ import Reboot
 from Core.config import Config
 
 CRLF = "\r\n"
@@ -37,32 +39,37 @@ class connection(object):
         self.pong = re.compile(r"PONG\s*:", re.I)
         self.last = time.time()
     
-    def connect(self):
+    def connect(self, nick):
         # Configure socket
+        server = Config.get("Connection", "server")
+        port = Config.getint("Connection", "port")
+        print "%s Connecting... (%s %s)" % (time.asctime(), server, port,)
+        
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(330)
-        self.sock.connect((Config.get("Connection", "server"), Config.getint("Connection", "port"),))
-        self.write("NICK %s" % (Config.get("Connection", "nick"),))
-        self.write("USER %s 0 * : %s" % (Config.get("Connection", "nick"), Config.get("Connection", "nick"),))
-        self.file = self.sock.makefile('rb')
+        self.sock.connect((server, port,))
+        self.write("NICK %s" % (nick,))
+        self.write("USER %s 0 * : %s" % (nick, nick,))
+        return self.sock
     
-    def attach(self, sock, file):
+    def attach(self, sock, nick):
         # Attach the socket
-        self.sock = sock
-        self.file = file
-    
-    def detach(self):
-        return self.sock, self.file
+        self.sock = sock or self.connect(nick)
+        self.file = self.sock.makefile('rb', 0)
+
+        # WHOIS ourselves in order to setup the CUT
+        self.write("WHOIS %s" % nick)
+        return self.sock
     
     def disconnect(self, line):
         # Cleanly close sockets
+        print "%s Disconnecting IRC... (%s)" % (time.asctime(),line,)
         try:
-            self.write("QUIT %s" % (line,))
+            self.write("QUIT :%s" % (line,))
         except socket.error:
             pass
-        else:
-            self.sock.close()
-            self.file.close()
+        finally:
+            self.close()
     
     def write(self, line):
         # Write to socket/server
@@ -91,14 +98,12 @@ class connection(object):
             else:
                 print "%s <<< %s" % (time.asctime(),line,)
             return line
+        else:
+            raise Reboot
     
     def fileno(self):
         # Return act like a file
         return self.sock.fileno()
-    
-    def isatty(self):
-        # Same as above
-        return self.sock.isatty()
     
     def close(self):
         # And again...

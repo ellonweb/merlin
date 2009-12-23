@@ -20,21 +20,22 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import gc
-import socket
 import sys
 import time
-import traceback
 
 if not 2.6 <= float(sys.version[:3]) < 3.0:
     sys.exit("Python 2.6.x Required")
 
-from Core.exceptions_ import Quit, Reboot, Reload
+from Core.exceptions_ import Quit, Reboot, Reload, Call999
 
 # Redirect stderr to stdout
 sys.stderr = sys.stdout
 
 class merlin(object):
     # Main bot container
+    nick = None
+    irc = None
+    robocop = ()
     
     def run(self):
         Connection = None
@@ -56,13 +57,6 @@ class merlin(object):
                     #  but we need to import each time to get the new Loader
                     from Core.loader import Loader
                     
-                    # Connect
-                    from Core.connection import Connection
-                    print "%s Connecting... (%s)" % (time.asctime(), Config.get("Connection", "server"),)
-                    Connection.connect()
-                    self.sock, self.file = Connection.detach()
-                    self.Message = None
-                    
                     # System loop
                     #   Loop back to reload modules
                     while True:
@@ -78,56 +72,33 @@ class merlin(object):
                             #  either Loader.reboot() or Loader.reload()
                             from Core.db import session
                             from Core.connection import Connection
-                            from Core.actions import Action
-                            from Core.callbacks import Callbacks
+                            from Core.router import Router
+                            from Core.robocop import RoboCop
                             
-                            # Attach the socket to the connection handler
-                            Connection.attach(self.sock, self.file)
-                            
-                            # If we've been asked to reload, report if it worked
-                            if self.Message is not None:
-                                if Loader.success: self.Message.reply("Core reloaded successfully.")
-                                else: self.Message.reply("Error reloading the core.")
-                            
-                            # Configure Core
-                            Connection.write("WHOIS %s" % self.nick)
+                            # Attach the IRC connection and configure
+                            self.irc = Connection.attach(self.irc, self.nick)
+                            # Attach the RoboCop/clients sockets and configure
+                            self.robocop = RoboCop.attach(*self.robocop)
                             
                             # Operation loop
-                            #   Loop to parse every line received over connection
-                            while True:
-                                line = Connection.read()
-                                if not line:
-                                    raise Reboot
-                                
-                                try:
-                                    # Create a new message object
-                                    self.Message = Action()
-                                    # Parse the line
-                                    self.Message.parse(line)
-                                    # Callbacks
-                                    Callbacks.callback(self.Message)
-                                except (Reload, Reboot, socket.error, Quit):
-                                    raise
-                                except Exception:
-                                    # Error while executing a callback/mod/hook
-                                    self.Message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")
-                                    traceback.print_exc()
-                                    continue
-                                finally:
-                                    # Remove any uncommitted or unrolled-back state
-                                    session.remove()
-                                
+                            Router.run()
                             
+                        except Call999 as exc:
+                            # RoboCop server failed, restart it
+                            self.robocop = RoboCop.disconnect(str(exc))
+                            continue
+                        
                         except Reload:
                             print "%s Reloading..." % (time.asctime(),)
                             # Reimport all the modules
                             Loader.reload()
                             continue
                     
-                except (Reboot, socket.error) as exc:
+                except Reboot as exc:
                     # Reset the connection first
-                    Connection.disconnect(str(exc) or "Rebooting")
-                    print "%s Rebooting... (%s)" % (time.asctime(), exc,)
+                    self.irc = Connection.disconnect(str(exc) or "Rebooting")
+                    
+                    print "%s Rebooting..." % (time.asctime(),)
                     # Reboot the Loader and reimport all the modules
                     Loader.reboot()
                     continue

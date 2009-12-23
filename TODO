@@ -4,13 +4,15 @@ http://www.sqlalchemy.org/trac/ticket/1565
 http://www.sqlalchemy.org/trac/ticket/1576
 http://www.sqlalchemy.org/trac/ticket/1602
 
+exception model refactor
+
 loadable paramre platform update: multiple execute methods
 
 rewrite CLI
 
 rewrite Connection.write and Action.write to use detached threaded system
 
-Reimplement Robocop (threaded?)
+Robocop
     scan requests (!request)
     scans parsed (!scans)
 
