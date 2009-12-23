@@ -39,6 +39,7 @@ class loadable(object):
     ""
     usage = ""
     paramre = re.compile("")
+    robocop = None
     PParseError = "You need to login and set mode +x to use this command"
     AccessError = "You don't have access to this command"
     PrefError = "You must set your planet with !pref to use this command"

@@ -35,8 +35,9 @@ from Core.loadable import loadable
 class callbacks(object):
     use_init_all = True
     # Modules/Callbacks/Hooks controller
-    callbacks = {}
     modules = []
+    callbacks = {}
+    robocops = {}
     
     def init(self):
         # Load in everything in /Hooks/
@@ -94,6 +95,11 @@ class callbacks(object):
             self.callbacks[event]+= [callback,]
         else:
             self.callbacks[event] = [callback,]
+        
+        # Store the callback again for RoboCop if
+        #  it has an executable robocop method
+        if callable(callback.robocop):
+            self.robocops[callback.name] = callback
     
     def callback(self, message):
         # Call back a hooked module
