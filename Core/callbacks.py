@@ -26,7 +26,7 @@ import socket
 import sys
 import time
 import traceback
-from Core.exceptions_ import Quit, Reboot, Reload
+from Core.exceptions_ import MerlinSystemCall
 from Core.config import Config
 from Core.loader import Loader
 from Core.db import session
@@ -111,13 +111,14 @@ class callbacks(object):
                 # and call each one, passing in the message
                 try:
                     callback(message)
-                except (Reload, Reboot, socket.error, Quit):
+                except (MerlinSystemCall, socket.error):
                     raise
                 except Exception, e:
                     # Error while executing a callback/mod/hook
                     message.alert("Error in module '%s'. Please report the command you used to the bot owner as soon as possible." % (callback.name,))
-                    open(Config.get("Misc","errorlog"), "a").write("\n\n\n%s - Error: %s\nArguments that caused error: %s\n" % (time.asctime(),e.__str__(),message,))
-                    open(Config.get("Misc","errorlog"), "a").write(traceback.format_exc())
+                    with open(Config.get("Misc","errorlog"), "a") as errorlog:
+                        errorlog.write("\n\n\n%s - Error: %s\nArguments that caused error: %s\n" % (time.asctime(),e.__str__(),message,))
+                        errorlog.write(traceback.format_exc())
                 finally:
                     # Remove any uncommitted or unrolled-back state
                     session.remove()

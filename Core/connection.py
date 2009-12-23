@@ -63,7 +63,7 @@ class connection(object):
     
     def disconnect(self, line):
         # Cleanly close sockets
-        print "%s Resetting IRC... (%s)" % (time.asctime(),line,)
+        print "%s Disconnecting IRC... (%s)" % (time.asctime(),line,)
         try:
             self.write("QUIT :%s" % (line,))
         except socket.error:

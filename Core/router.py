@@ -24,7 +24,7 @@ import socket
 import time
 import traceback
 
-from Core.exceptions_ import Quit, Reboot, Reload, Call999
+from Core.exceptions_ import MerlinSystemCall, Reboot, Call999
 from Core.config import Config
 from Core.connection import Connection
 from Core.db import session
@@ -63,15 +63,12 @@ class router(object):
                         self.robocop()
                     if connection in RoboCop.clients:
                         self.client(connection)
-                except (Reload, Reboot, Quit):
+                except MerlinSystemCall:
                     raise
                 except Exception, e:
-                    open(Config.get("Misc","errorlog"), "a").write("\n\n\n%s - Error: %s\nUNKNOWN ERROR\n" % (time.asctime(),e.__str__(),))
-                    open(Config.get("Misc","errorlog"), "a").write(traceback.format_exc())
-                    self.message = None
-                else:
-                    # Remove the old message
-                    self.message = None
+                    with open(Config.get("Misc","errorlog"), "a") as errorlog:
+                        errorlog.write("\n\n\n%s - Error: %s\nUNKNOWN ERROR\n" % (time.asctime(),e.__str__(),))
+                        errorlog.write(traceback.format_exc())
                 finally:
                     # Remove any uncommitted or unrolled-back state
                     session.remove()
@@ -89,7 +86,7 @@ class router(object):
         
         except socket.error as exc:
             raise Reboot(exc)
-        except (Reload, Reboot, Quit):
+        except MerlinSystemCall:
             raise
         except Exception:
             # Error while executing a callback/mod/hook
@@ -99,6 +96,7 @@ class router(object):
     def robocop(self):
         # Accept a new RoboCop client
         try:
+            self.message = None
             RoboCop.read()
         except socket.error as exc:
             raise Call999(exc)

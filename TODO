@@ -4,6 +4,8 @@ http://www.sqlalchemy.org/trac/ticket/1565
 http://www.sqlalchemy.org/trac/ticket/1576
 http://www.sqlalchemy.org/trac/ticket/1602
 
+exception model refactor
+
 loadable paramre platform update: multiple execute methods
 
 rewrite CLI
@@ -11,8 +13,6 @@ rewrite CLI
 rewrite Connection.write and Action.write to use detached threaded system
 
 Reimplement Robocop
-    use the same parser or sub class Action?
-    base64 messages?
     seperate callback system or integrated?
     
     scan requests (!request)
