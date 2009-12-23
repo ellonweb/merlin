@@ -4,6 +4,10 @@ http://www.sqlalchemy.org/trac/ticket/1565
 http://www.sqlalchemy.org/trac/ticket/1576
 http://www.sqlalchemy.org/trac/ticket/1602
 
+|       Known Bugs       |   Occurrence   |     Effect     |
+| SQLA reloading (1529)  | ext. rare      | recoverable    |
+| Merlin.nick            | unlikely       | unknown/low    |
+
 exception model refactor
 
 loadable paramre platform update: multiple execute methods
