@@ -23,8 +23,8 @@ import socket
 import time
 
 from Core.config import Config
-
-CRLF = "\r\n"
+from Core.connection import CRLF
+from Core.actions import Action
 
 class server(object):
     # Robocop server
@@ -99,6 +99,11 @@ class client(object):
         self.close()
         RoboCop.remove(self)
     
+    def write(self, line):
+        # Write to socket/server
+        self.sock.send(line + CRLF)
+        print "%s >>> %s :%s" % (time.asctime(),self.host(),line,)
+    
     def read(self):
         # Read from socket
         line = self.file.readline()
@@ -120,6 +125,32 @@ class client(object):
     def close(self):
         # And again...
         return self.sock.close()
+
+class EmergencyCall(Action):
+    # A modified Message/Action object for dealing with RoboCop
+    
+    def __init__(self, client):
+        self.client = client
+    
+    def parse(line):
+        # RoboCop uses a much simpler protocol than IRC!
+        self.line = line
+        self._hostmask = client.host()
+        self._command = line.split(None, 1)[0]
+        self._msg = " ".join(line.split(None, 1)[1:])
+    
+    def __str__(self):
+        # String representation of the Message object (Namely for debugging purposes)
+        return "[%s] <%s> %s" % (self.get_host(), self.get_command(), self.get_msg())
+    
+    def reply(self, text):
+        # Reply here will be used to reply to the client, not IRC!
+        self.client.write(text)
+    
+    def alert(self, text):
+        # This will be called if an error occurs while executing a callback
+        # The error will be logged, so we don't need to deal with it here
+        self.reply("ERROR %s" % (self.line,))
 
 class push(object):
     # Robocop message pusher
