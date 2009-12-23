@@ -21,21 +21,21 @@
  
 import select
 import socket
+import time
 import traceback
 
 from Core.exceptions_ import Quit, Reboot, Reload, Call999
+from Core.config import Config
+from Core.connection import Connection
+from Core.db import session
+from Core.actions import Action
+from Core.callbacks import Callbacks
+from Core.robocop import RoboCop, EmergencyCall
 
 class router(object):
     message = None
     
     def run(self):
-        # Import elements of the Core we need after run is called
-        #  so they can be reloaded by the loader after this module
-        from Core.connection import Connection
-        from Core.db import session
-        from Core.actions import Action
-        from Core.callbacks import Callbacks
-        from Core.robocop import RoboCop
         
         # If we've been asked to reload, report if it didn't work
         if self.message is not None:
@@ -57,39 +57,70 @@ class router(object):
             for connection in inputs:
                 
                 try:
-                    # Finally we are ready to read from the connection
-                    line = connection.read()
-                    if line is None:
-                        continue
-                    
-                    # Create a new message object
-                    self.message = Action()
-                    # Parse the line
-                    self.message.parse(line)
-                    # Callbacks
-                    Callbacks.callback(self.message)
+                    if connection == Connection:
+                        self.irc()
+                    if connection == RoboCop:
+                        self.robocop()
+                    if connection in RoboCop.clients:
+                        self.client(connection)
                 except (Reload, Reboot, Quit):
                     raise
-                except socket.error as exc:
-                    # Deal with the socket error differently
-                    #  depending on which connection it came from
-                    if connection == Connection:
-                        raise Reboot(exc)
-                    if connection == RoboCop:
-                        raise Call999(exc)
-                    if connection in RoboCop.clients:
-                        connection.disconnect()
-                except Exception:
-                    # Error while executing a callback/mod/hook
-                    self.message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")
+                except Exception, e:
+                    open(Config.get("Misc","errorlog"), "a").write("\n\n\n%s - Error: %s\nUNKNOWN ERROR\n" % (time.asctime(),e.__str__(),))
+                    open(Config.get("Misc","errorlog"), "a").write(traceback.format_exc())
                     self.message = None
-                    traceback.print_exc()
-                    continue
                 else:
                     # Remove the old message
                     self.message = None
                 finally:
                     # Remove any uncommitted or unrolled-back state
                     session.remove()
+    
+    def irc(self):
+        # Read, parse and evaluate an IRC line
+        try:
+            # Create a new message object
+            self.message = Action()
+            # Parse the line
+            line = Connection.read()
+            self.message.parse(line)
+            # Callbacks
+            Callbacks.callback(self.message)
+        
+        except socket.error as exc:
+            raise Reboot(exc)
+        except (Reload, Reboot, Quit):
+            raise
+        except Exception:
+            # Error while executing a callback/mod/hook
+            self.message.alert("An exception occured whilst processing your request. Please report the command you used to the bot owner as soon as possible.")
+            raise
+    
+    def robocop(self):
+        # Accept a new RoboCop client
+        try:
+            RoboCop.read()
+        except socket.error as exc:
+            raise Call999(exc)
+    
+    def client(self, connection):
+        # Read, parse and evaluate a line from a RoboCop client
+        try:
+            # Create a new message object
+            self.message = EmergencyCall(connection)
+            # Parse the line
+            line = connection.read()
+            if line is None:
+                return
+            self.message.parse(line)
+            # Callbacks
+            Callbacks.robocop(self.message)
+        
+        except socket.error as exc:
+            connection.disconnect()
+        except Exception:
+            # Error while executing a callback/mod/hook
+            self.message.alert()
+            raise
 
 Router = router()
