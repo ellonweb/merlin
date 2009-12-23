@@ -71,7 +71,7 @@ class server(object):
         # Read from socket
         sock, addr = self.sock.accept()
         self.extend(sock)
-        print "%s RoboCop CONNECT (%s)" % (time.asctime(),self.clients[-1].id(),)
+        print "%s <<< :%s CONNECT" % (time.asctime(),self.clients[-1].host(),)
     
     def fileno(self):
         # Return act like a file
@@ -90,12 +90,12 @@ class client(object):
         self.sock = sock
         self.file = self.sock.makefile('rb', 0)
     
-    def id(self):
-        return "%s/%s"%(self.sock.getpeername()[1],self.fileno(),)
+    def host(self):
+        return "RoboCop!%s/%s"%(self.sock.getpeername()[1],self.fileno(),)
     
     def disconnect(self):
         # Cleanly close sockets
-        print "%s RoboCop DISCONNECT (%s)" % (time.asctime(),self.id(),)
+        print "%s <<< :%s DISCONNECT" % (time.asctime(),self.host(),)
         self.close()
         RoboCop.remove(self)
     
@@ -107,7 +107,9 @@ class client(object):
                 line = line[:-2]
             if line[-1] in CRLF:
                 line = line[:-1]
-            print "%s RoboCop (%s) <<< %s" % (time.asctime(),self.id(),line,)
+            # All this just to print a pretty log message...
+            print "%s <<< :%s %s%s" % (time.asctime(), self.host(), line.split(None,1)[0].upper(),
+                                       " :"+" ".join(line.split(None,1)[1:]) if len(line.split())-1 else "",)
         else:
             self.disconnect()
     
