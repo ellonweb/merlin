@@ -221,6 +221,12 @@ class loadable(object):
             return callback
         return wrapper
     
+    @staticmethod
+    def robohci(hook):
+        def robocop(self, message):
+            hook(message, **self.split_opts(message.get_msg()))
+        return robocop
+    
     def check_access(self, message, user=None, channel=None):
         if message.in_chan():
             channel = channel or Channel.load(message.get_chan()) or Channel(maxlevel=0, userlevel=0)

@@ -155,7 +155,8 @@ class EmergencyCall(Action):
 
 class push(object):
     # Robocop message pusher
-    def __init__(self, line):
+    def __init__(self, line, **kwargs):
+        line = " ".join([line] + map(lambda i: "%s=%s"%i, kwargs.items()))
         port = Config.getint("Misc", "robocop")
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(30)
