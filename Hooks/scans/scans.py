@@ -20,8 +20,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from sqlalchemy.sql.functions import count, max
+from Core.config import Config
+from Core.paconf import PA
 from Core.db import session
 from Core.maps import Planet, Scan
+from Core.chanusertracker import CUT
 from Core.loadable import loadable
 
 @loadable.module("half")
@@ -52,3 +55,11 @@ class scans(loadable):
         
         reply="scans for %s:%s:%s - " % (planet.x,planet.y,planet.z) + ", ".join(prev)
         message.reply(reply)
+    
+    @loadable.robohci
+    def robocop(self, message, scantype, pa_id, x, y, z, names):
+        reply = "%s on %s:%s:%s " % (PA.get(scantype,"name"),x,y,z,)
+        reply+= Config.get("URL","viewscan") % (pa_id,)
+        for name in names.split(","):
+            for nick in CUT.list_user_nicks(name):
+                message.privmsg(reply, nick)

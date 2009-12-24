@@ -18,7 +18,6 @@ rewrite Connection.write and Action.write to use detached threaded system
 
 Robocop
     scan requests (!request)
-    scans parsed (!scans)
 
 Hooks.scans.request
     this can not be finished until robocop is reimplemented

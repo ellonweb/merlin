@@ -23,7 +23,7 @@
 
 import re
 from Core.config import Config
-from Core.pafig import PA
+from Core.paconf import PA
 from Core.db import session
 from Core.maps import Planet, Request
 from Core.loadable import loadable
@@ -33,7 +33,7 @@ class request(loadable):
     """Request a scan"""
     usage = " <scantype> <x.y.z> [dists] | cancel <id>"
     paramre = (re.compile(r"\s+(cancel)\s+(\d+)", re.I),
-               re.compile(r"\s+("+"|".join(PA.options("scans"))+r")\w*\s+"+self.planet_coordre.pattern+r"(?:\s+(\d+))?", re.I),
+               re.compile(r"\s+("+"|".join(PA.options("scans"))+r")\w*\s+"+loadable.planet_coordre.pattern+r"(?:\s+(\d+))?", re.I),
                )
     # robore = re.compile(r"\s(\d+)\s(\S+)\s("+"|".join(PA.options("scans"))+r")\s"+self.planet_coordre.pattern+r"(\d+)(\d+)", re.I)
     
