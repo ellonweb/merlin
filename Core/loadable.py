@@ -224,7 +224,7 @@ class loadable(object):
     @staticmethod
     def robohci(hook):
         def robocop(self, message):
-            hook(message, **self.split_opts(message.get_msg()))
+            hook(self, message, **self.split_opts(message.get_msg()))
             message.alert(True)
         return robocop
     

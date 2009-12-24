@@ -101,7 +101,7 @@ class ChanUserTracker(object):
     def list_user_nicks(self, pnick):
         # Return a list of nicks that are currently logged in with the pnick
         if self.Pusers.has_key(pnick):
-            return map(lambda nick: nick.name, self.Pusers.nicks)
+            return map(lambda nick: nick.name, self.Pusers[pnick].nicks)
         else:
             return []
     

@@ -142,7 +142,7 @@ class EmergencyCall(Action):
     
     def __str__(self):
         # String representation of the Message object (Namely for debugging purposes)
-        return "[%s] <%s> %s" % (self.get_host(), self.get_command(), self.get_msg())
+        return "[%s] <%s> %s" % (self.get_hostmask(), self.get_command(), self.get_msg())
     
     def reply(self, text):
         # Reply here will be used to reply to the client, not IRC!
