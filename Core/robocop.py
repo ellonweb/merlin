@@ -148,10 +148,10 @@ class EmergencyCall(Action):
         # Reply here will be used to reply to the client, not IRC!
         self.client.write(text)
     
-    def alert(self):
-        # This will be called if an error occurs while executing a callback
-        # The error will be logged, so we don't need to deal with it here
-        self.reply("ERROR %s" % (self.line,))
+    def alert(self, success):
+        # This should be called if an error occurs while
+        #  executing a callback or if it completes successfully
+        self.reply(("OK %s" if success else "ERROR %s") % (self.line,))
 
 class push(object):
     # Robocop message pusher

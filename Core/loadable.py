@@ -225,6 +225,7 @@ class loadable(object):
     def robohci(hook):
         def robocop(self, message):
             hook(message, **self.split_opts(message.get_msg()))
+            message.alert(True)
         return robocop
     
     def check_access(self, message, user=None, channel=None):

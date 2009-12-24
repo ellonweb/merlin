@@ -28,8 +28,8 @@ from Core.exceptions_ import MerlinSystemCall, Reboot, Call999
 from Core.config import Config
 from Core.connection import Connection
 from Core.actions import Action
-from Core.callbacks import Callbacks
 from Core.robocop import RoboCop, EmergencyCall
+from Core.callbacks import Callbacks
 
 class router(object):
     message = None
@@ -114,7 +114,7 @@ class router(object):
             connection.disconnect()
         except Exception:
             # Error while executing a callback/mod/hook
-            self.message.alert()
+            self.message.alert(False)
             raise
 
 Router = router()

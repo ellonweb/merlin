@@ -136,7 +136,7 @@ class callbacks(object):
                 raise
             except Exception, e:
                 # Error while executing a callback/mod/hook
-                message.alert()
+                message.alert(False)
                 with open(Config.get("Misc","errorlog"), "a") as errorlog:
                     errorlog.write("\n\n\n%s - Error: %s\nArguments that caused error: %s\n" % (time.asctime(),e.__str__(),message,))
                     errorlog.write(traceback.format_exc())
