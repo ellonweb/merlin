@@ -98,6 +98,13 @@ class ChanUserTracker(object):
                 nick.puser = None
             del self.Pusers[pnick]
     
+    def list_user_nicks(self, pnick):
+        # Return a list of nicks that are currently logged in with the pnick
+        if self.Pusers.has_key(pnick):
+            return map(lambda nick: nick.name, self.Pusers.nicks)
+        else:
+            return []
+    
     def auth_user(self, name, pnickf, username, password):
         # Trying to authenticate with !letmein or !auth
         nick = self.Nicks.get(name)
