@@ -1,27 +1,24 @@
-http://www.sqlalchemy.org/trac/ticket/1529
-http://www.sqlalchemy.org/trac/ticket/1537
-http://www.sqlalchemy.org/trac/ticket/1565
-http://www.sqlalchemy.org/trac/ticket/1576
-http://www.sqlalchemy.org/trac/ticket/1602
+http://www.sqlalchemy.org/trac/ticket/1529 (reloading/err)
+http://www.sqlalchemy.org/trac/ticket/1537 (alias/join0.6)
+http://www.sqlalchemy.org/trac/ticket/1565 (sequences 0.6)
+http://www.sqlalchemy.org/trac/ticket/1576 (schemas 0.5.7)
+http://www.sqlalchemy.org/trac/ticket/1602 (count() 0.5.7)
+http://www.sqlalchemy.org/trac/ticket/1638 (unicode/noerr)
 
 |       Known Bugs       |   Occurrence   |     Effect     |
-| SQLA reloading (1529)  | ext. rare      | recoverable    |
+| SQLA map reload (1529) | ext. rare      | recoverable    |
 | Merlin.nick            | unlikely       | unknown/low    |
 
 exception model refactor
-
-loadable paramre platform update: multiple execute methods
-
-rewrite CLI
-
+loadable platform update: multiple execute routes
+rewrite CLI or integrate as an extra IO stream
 rewrite Connection.write and Action.write to use detached threaded system
 
 Robocop
     scan requests (!request)
 
 Hooks.scans.request
-    this can not be finished until robocop is reimplemented
-    also would be nice to have platform update done
+    would be nice to have platform update done
     !request cancel id
     request.dists
         fill in from scan requests ("ellonweb informs that atleast n dists are needed")
