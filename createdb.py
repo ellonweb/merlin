@@ -31,11 +31,6 @@ if len(sys.argv) > 2 and sys.argv[1] == "--migrate":
     round = sys.argv[2]
     if round.isdigit():
         round = "r"+round
-    if sqlalchemy.__version__ != "0.5.7":
-        print "Migration requires SQLA 0.5.7 which isn't available yet."
-        print "You can get the neccessary changes from ticket #1576 (see TODO) or downloading the trunk."
-        print "Once you've done that, delete this code to proceed."
-        sys.exit()
 else:
     round = None
     print "To migrate from an old round use: createdb.py --migrate <previous_round>"
