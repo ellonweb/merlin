@@ -68,15 +68,17 @@ class afford(loadable):
         overflow=res_m+res_c+res_e-(capped_number*(cost_m+cost_c+cost_e))
         buildable = capped_number + ((overflow*.95)/total_cost)
         
+        demo = 1/(1+PA.getfloat("demo","prodcost"))
+        total = 1/(1+PA.getfloat("total","prodcost"))
         feud_modifier=1/(1+PA.getfloat("feud","prodcost"))
         reply="Newest planet scan on %s:%s:%s (id: %s, pt: %s)" % (p.x,p.y,p.z,rand_id,tick)
-        reply+=" can purchase %s: %s | Feudalism: %s"%(ship.name,int(buildable),int(buildable*feud_modifier))
+        reply+=" can purchase %s: %s | Demo: %s | Total: %s"%(ship.name,int(buildable),int(buildable*demo),int(buildable*total))
         
         if prod_res > 0:
             factory_usage=getattr(planetscan,class_factory_table[ship.class_])
             max_prod_modifier=prod_modifier_table[factory_usage]
             buildable_from_prod = buildable + max_prod_modifier*(prod_res)/100/total_cost
             reply+=" Counting %d res in prod at %s usage:" % (prod_res,factory_usage)
-            reply+=" %s | Feudalism: %s "%(int(buildable_from_prod), int(buildable_from_prod*feud_modifier))
+            reply+=" %s | Demo: %s | Total: %s "%(int(buildable_from_prod), int(buildable_from_prod*demo),int(buildable*total))
         
         message.reply(reply)
