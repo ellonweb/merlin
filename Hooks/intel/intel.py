@@ -101,4 +101,7 @@ class intel(loadable):
             if opt == "comment":
                 planet.intel.comment = message.get_msg().split("comment=")[1]
         session.commit()
-        message.reply(("Information stored for %s:%s:%s -"+str(planet.intel) if str(planet.intel) else "No information stored for %s:%s:%s") % (planet.x, planet.y, planet.z,))
+        if planet.intel:
+            message.reply("Information stored for %s:%s:%s -%s"% (planet.x, planet.y, planet.z, str(planet.intel),))
+        else:
+            message.reply("No information stored for %s:%s:%s"% (planet.x, planet.y, planet.z,))
