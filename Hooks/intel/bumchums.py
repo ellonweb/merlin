@@ -42,6 +42,7 @@ class bumchums(loadable):
         Q = Q.join(Galaxy.planets)
         Q = Q.join(Planet.intel)
         Q = Q.filter(Galaxy.active == True)
+        Q = Q.filter(Planet.active == True)
         Q = Q.filter(Intel.alliance==alliance)
         Q = Q.group_by(Galaxy.x, Galaxy.y)
         Q = Q.having(count() >= bums)
