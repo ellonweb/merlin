@@ -27,7 +27,6 @@ from time import time
 from sqlalchemy import *
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates, relation, backref, dynamic_loader
-from sqlalchemy.sql import desc
 from sqlalchemy.sql.functions import current_timestamp, max as max_sql, random
 
 from Core.exceptions_ import LoadableError
@@ -179,7 +178,7 @@ class Planet(Base):
     def resources_per_agent(self, target):
         return min(10000,(target.value * 2000)/self.value)
 Planet._idx_x_y_z = Index('planet_x_y_z', Planet.x, Planet.y, Planet.z)
-Galaxy.planets = relation(Planet, order_by=Planet.z, backref="galaxy")
+Galaxy.planets = relation(Planet, order_by=asc(Planet.z), backref="galaxy")
 Galaxy.planet_loader = dynamic_loader(Planet)
 class PlanetHistory(Base):
     __tablename__ = 'planet_history'
@@ -203,7 +202,7 @@ class PlanetHistory(Base):
     idle = Column(Integer)
     vdiff = Column(Integer)
 Planet.history_loader = dynamic_loader(PlanetHistory, backref="current")
-GalaxyHistory.planets = relation(PlanetHistory, order_by=PlanetHistory.z, backref="galaxy")
+GalaxyHistory.planets = relation(PlanetHistory, order_by=asc(PlanetHistory.z), backref="galaxy")
 GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory)
 class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
@@ -486,11 +485,11 @@ class Intel(Base):
             ret += " comment=%s"%(self.comment,)
         return ret
 Planet.intel = relation(Intel, uselist=False, backref="planet")
-Galaxy.intel = relation(Intel, Planet.__table__, order_by=Planet.z)
+Galaxy.intel = relation(Intel, Planet.__table__, order_by=asc(Planet.z))
 Intel.alliance = relation(Alliance)
 #Planet.alliance = relation(Alliance, Intel.__table__, uselist=False, viewonly=True, backref="planets")
 Planet.alliance = association_proxy("intel", "alliance")
-Alliance.planets = relation(Planet, Intel.__table__, order_by=(Planet.x, Planet.y, Planet.z), viewonly=True)
+Alliance.planets = relation(Planet, Intel.__table__, order_by=(asc(Planet.x), asc(Planet.y), asc(Planet.z)), viewonly=True)
 
 # ########################################################################### #
 # #############################    BOOKINGS    ############################## #
@@ -804,7 +803,7 @@ class FleetScan(Base):
     def __str__(self):
         p = self.owner
         return "(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.landing_tick-self.scan.tick,)
-Scan.fleets = relation(FleetScan, backref="scan")
+Scan.fleets = relation(FleetScan, backref="scan", order_by=asc(FleetScan.landing_tick))
 FleetScan.owner = relation(Planet, primaryjoin=FleetScan.owner_id==Planet.id)
 FleetScan.target = relation(Planet, primaryjoin=FleetScan.target_id==Planet.id)
 
