@@ -76,7 +76,7 @@ class prod(loadable):
         message.reply(reply)
 
     def calc_ticks(self, cost, num, bonus, factories):
-        """Calculate the cost in ticks. Return (ticks, ticks_with_feudalism)."""
+        """Calculate the cost in ticks."""
 
         ln = lambda x: math.log(x) / math.log(math.e)
         norm_cost = num * cost

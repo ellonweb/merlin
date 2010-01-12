@@ -70,7 +70,6 @@ class afford(loadable):
         
         demo = 1/(1+PA.getfloat("demo","prodcost"))
         total = 1/(1+PA.getfloat("total","prodcost"))
-        feud_modifier=1/(1+PA.getfloat("feud","prodcost"))
         reply="Newest planet scan on %s:%s:%s (id: %s, pt: %s)" % (p.x,p.y,p.z,rand_id,tick)
         reply+=" can purchase %s: %s | Demo: %s | Total: %s"%(ship.name,int(buildable),int(buildable*demo),int(buildable*total))
         
