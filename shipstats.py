@@ -29,7 +29,7 @@ from Core.maps import Ship
 
 regex = r'^<tr class="(Ter|Cat|Xan|Zik|Etd)">.+?>([^<]+)</td>' # race & name
 regex += r'<td>(\w+)</td>' # class
-regex += r'<td>(\w\w|\-)</td>'*3 # t1,t2,t3
+regex += r'(?:<td>(\w\w|\-)</td>)?'*3 # t1,t2,t3
 regex += r'<td>(\w+)</td>' # type
 regex += r'.+?(\d+|\-)</td>'*8 # some numbers
 regex += r'.+?</tr>$' # end of the line
@@ -65,7 +65,7 @@ def main(url = Config.get("URL", "ships"), debug=False):
                 line[index] = mapping[line[index]]
             elif line[index].isdigit():
                 line[index] = int(line[index])
-            if line[index] != '-':
+            if line[index] not in ('-', '',):
                 setattr(ship,key,line[index])
         ship.total_cost = ship.metal + ship.crystal + ship.eonium
         if debug: print "%12s%12s%12s%12s" % (ship.name, ship.class_, ship.race, ship.type,)
