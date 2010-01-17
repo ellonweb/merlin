@@ -89,9 +89,10 @@ class client(object):
         # Basic attach
         self.sock = sock
         self.file = self.sock.makefile('rb', 0)
+        self._host = (self.sock.getpeername()[1],self.fileno(),)
     
     def host(self):
-        return "RoboCop!%s/%s"%(self.sock.getpeername()[1],self.fileno(),)
+        return "RoboCop!%s/%s"%self._host
     
     def disconnect(self):
         # Cleanly close sockets
