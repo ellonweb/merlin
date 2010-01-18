@@ -33,13 +33,13 @@ class afford(loadable):
     
     def execute(self, message, user, params):
         
-        p = Planet.load(*params.group(1,2,3))
+        p = Planet.load(*params.group(1,3,5))
         if p is None:
-            message.reply("No planet with coords %s:%s:%s found" % params.group(1,2,3))
+            message.reply("No planet with coords %s:%s:%s found" % params.group(1,3,5))
             return
-        ship = Ship.load(name=params.group(4))
+        ship = Ship.load(name=params.group(6))
         if ship is None:
-            message.alert("No Ship called: %s" % (params.group(4),))
+            message.alert("No Ship called: %s" % (params.group(6),))
             return
         
         scan = p.scan("P")

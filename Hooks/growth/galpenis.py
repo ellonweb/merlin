@@ -30,14 +30,14 @@ class galpenis(loadable):
     
     def execute(self, message, user, params):
         
-        galaxy = Galaxy.load(*params.group(1,2))
+        galaxy = Galaxy.load(*params.group(1,3))
         if galaxy is None:
-            message.alert("No galaxy with coords %s:%s" % params.group(1,2))
+            message.alert("No galaxy with coords %s:%s" % params.group(1,3))
             return
         
         penis = galaxy.galpenis
         if penis is None:
-            message.alert("No galpenis stats matching %s:%s" % params.group(1,2))
+            message.alert("No galpenis stats matching %s:%s" % params.group(1,3))
             return
         
         message.reply("galpenis for '%s' is %s score long. This makes %s:%s rank: %s for galpenis in the universe!" % (

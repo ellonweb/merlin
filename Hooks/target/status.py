@@ -37,8 +37,8 @@ class status(loadable):
         tick = Updates.current_tick()
         
         # Planet or Galaxy
-        if len(params.groups()) == 4:
-            when = int(params.group(4) or 0)
+        if len(params.groups()) == 6:
+            when = int(params.group(6) or 0)
             if when and when < 32:
                 when += tick
             elif when and when <= tick:
@@ -46,10 +46,10 @@ class status(loadable):
                 return
             
             # Planet
-            if params.group(3) is not None:
-                planet = Planet.load(*params.group(1,2,3))
+            if params.group(5) is not None:
+                planet = Planet.load(*params.group(1,3,5))
                 if planet is None:
-                    message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
+                    message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
                     return
                 
                 Q = session.query(User.name, Target.tick)
@@ -80,9 +80,9 @@ class status(loadable):
             
             # Galaxy
             else:
-                galaxy = Galaxy.load(*params.group(1,2))
+                galaxy = Galaxy.load(*params.group(1,3))
                 if galaxy is None:
-                    message.alert("No galaxy with coords %s:%s" % params.group(1,2))
+                    message.alert("No galaxy with coords %s:%s" % params.group(1,3))
                     return
                 
                 Q = session.query(Planet.z, User.name, Target.tick)

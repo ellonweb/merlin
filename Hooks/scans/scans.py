@@ -35,9 +35,9 @@ class scans(loadable):
     
     def execute(self, message, user, params):
         
-        planet = Planet.load(*params.group(1,2,3))
+        planet = Planet.load(*params.group(1,3,5))
         if planet is None:
-            message.reply("No planet with coords %s:%s:%s found" % params.group(1,2,3))
+            message.reply("No planet with coords %s:%s:%s found" % params.group(1,3,5))
             return
         
         Q = session.query(Scan.scantype, max(Scan.tick), count())

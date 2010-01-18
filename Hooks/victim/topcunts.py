@@ -42,18 +42,18 @@ class topcunts(loadable):
         alliance = None
         
         # Planet or Galaxy
-        if len(params.groups()) == 3:
+        if len(params.groups()) == 5:
             # Planet
-            if params.group(3) is not None:
-                planet = Planet.load(*params.group(1,2,3))
+            if params.group(5) is not None:
+                planet = Planet.load(*params.group(1,3,5))
                 if planet is None:
-                    message.reply("No planet with coords %s:%s:%s found" % params.group(1,2,3))
+                    message.reply("No planet with coords %s:%s:%s found" % params.group(1,3,5))
                     return
             # Galaxy
             else:
-                galaxy = Galaxy.load(*params.group(1,2))
+                galaxy = Galaxy.load(*params.group(1,3))
                 if galaxy is None:
-                    message.reply("No galaxy with coords %s:%s" % params.group(1,2))
+                    message.reply("No galaxy with coords %s:%s" % params.group(1,3))
                     return
         # Alliance or User
         else:

@@ -31,9 +31,9 @@ class details(loadable):
     
     def execute(self, message, user, params):
         
-        target = Planet.load(*params.groups())
+        target = Planet.load(*params.group(1,3,5))
         if target is None:
-            message.reply("No planet matching '%s:%s:%s' found"%params.groups())
+            message.reply("No planet matching '%s:%s:%s' found"%params.group(1,3,5))
             return
         replies = [str(target)]
         

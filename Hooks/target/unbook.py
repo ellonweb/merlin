@@ -33,13 +33,13 @@ class unbook(loadable):
     
     @loadable.require_user
     def execute(self, message, user, params):
-        planet = Planet.load(*params.group(1,2,3))
+        planet = Planet.load(*params.group(1,3,5))
         if planet is None:
-            message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
+            message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
             return
         
         tick = Updates.current_tick()
-        when = int(params.group(4) or 0)
+        when = int(params.group(6) or 0)
         if 0 < when < 32:
             eta = when
             when += tick
@@ -51,7 +51,7 @@ class unbook(loadable):
         if when > 32767:
             when = 32767 
         
-        override = params.group(5)
+        override = params.group(7)
         
         Q = session.query(Target)
         Q = Q.join(Target.user)

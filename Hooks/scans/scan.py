@@ -37,13 +37,13 @@ class scan(loadable):
         
         # Planet
         if len(params.groups()) > 1:
-            planet = Planet.load(*params.group(1,2,3))
+            planet = Planet.load(*params.group(1,3,5))
             if planet is None:
-                message.reply("No planet with coords %s:%s:%s found" % params.group(1,2,3))
+                message.reply("No planet with coords %s:%s:%s found" % params.group(1,3,5))
                 return
             
             # List of last 10 scans
-            if params.group(4) == "o":
+            if params.group(6) == "o":
                 scans = planet.scans.filter_by(scantype=self.type).order_by(desc(Scan.id))[:10]
                 if len(scans) < 1:
                     message.reply("No %s Scans of %s:%s:%s found"%(PA.get(self.type,"name"),planet.x,planet.y,planet.z))
@@ -62,7 +62,7 @@ class scan(loadable):
                 return
             
             # Link to scan
-            if params.group(5) == "l":
+            if params.group(6) == "l":
                 reply = "%s on %s:%s:%s " % (PA.get(self.type,"name"),planet.x,planet.y,planet.z,)
                 reply+= Config.get("URL","viewscan") % (scan.pa_id,)
                 message.reply(reply)

@@ -40,7 +40,7 @@ class pref(loadable):
             if opt == "planet":
                 m = self.planet_coordre.match(val)
                 if m:
-                    planet = Planet.load(*m.groups())
+                    planet = Planet.load(*m.group(1,3,5))
                     if planet is None:
                         continue
                     user.planet = planet

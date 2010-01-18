@@ -35,7 +35,6 @@ class request(loadable):
     paramre = (re.compile(r"\s+(cancel)\s+(\d+)", re.I),
                re.compile(r"\s+("+"|".join(PA.options("scans"))+r")\w*\s+"+loadable.planet_coordre.pattern+r"(?:\s+(\d+))?", re.I),
                )
-    # robore = re.compile(r"\s(\d+)\s(\S+)\s("+"|".join(PA.options("scans"))+r")\s"+self.planet_coordre.pattern+r"(\d+)(\d+)", re.I)
     
     @loadable.require_user
     def execute(self, message, user, params):
@@ -44,15 +43,15 @@ class request(loadable):
             request = Request.load(params.group(2))
             return
         
-        planet = Planet.load(*params.group(2,3,4))
+        planet = Planet.load(*params.group(2,4,6))
         if planet is None:
-            message.alert("No planet with coords %s:%s:%s" % params.group(2,3,4))
+            message.alert("No planet with coords %s:%s:%s" % params.group(2,4,6))
             return
         
         scan = params.group(1).upper()
         
         request = Request(target=planet, scantype=scan)
-        request.dists = int(params.group(5) or 0)
+        request.dists = int(params.group(7) or 0)
         user.requests.append(request)
         session.commit()
         

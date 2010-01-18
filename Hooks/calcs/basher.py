@@ -33,9 +33,9 @@ class basher(loadable):
         if len(params.groups()) < 3:
             planet = self.get_user_planet(user)
         else:
-            planet = Planet.load(*params.group(1,2,3))
+            planet = Planet.load(*params.group(1,3,5))
             if planet is None:
-                message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
+                message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
                 return
         
         message.reply("%s:%s:%s can hit planets with value %d or above or score %d or above"%(planet.x,planet.y,planet.z,int(planet.value*PA.getfloat("bash","value")),int(planet.score*PA.getfloat("bash","score"))))

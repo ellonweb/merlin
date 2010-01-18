@@ -44,8 +44,8 @@ class loadable(object):
     AccessError = "You don't have access to this command"
     PrefError = "You must set your planet with !pref to use this command"
     ChanError = "This command may only be used in %s"
-    coordre = re.compile(r"\s*(\d+)[. :\-](\d+)(?:[. :\-](\d+))?")
-    planet_coordre = re.compile(r"\s*(\d+)[. :\-](\d+)[. :\-](\d+)")
+    coordre = re.compile(r"\s*(\d+)([. :\-])(\d+)(\2(\d+))?")
+    planet_coordre = re.compile(r"\s*(\d+)([. :\-])(\d+)(\2(\d+))")
     govre = re.compile(r"("+ "|".join(PA.options("govs")) +")", re.I)
     racere = re.compile(r"("+ "|".join(PA.options("races")) +")", re.I)
     scanre = re.compile(r"("+ "|".join(PA.options("scans")) +")", re.I)

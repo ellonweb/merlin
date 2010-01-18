@@ -35,11 +35,11 @@ class exp(loadable):
     
     def execute(self, message, user, params):
         
-        p = Planet.load(*params.group(1,2,3))
+        p = Planet.load(*params.group(1,3,5))
         if p is None:
-            message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
+            message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
             return
-        tick = params.group(4)
+        tick = params.group(6)
         
         p1 = aliased(PlanetHistory)
         p2 = aliased(PlanetHistory)
@@ -48,7 +48,7 @@ class exp(loadable):
         Q = Q.filter(p1.current==p)
         
         if tick:
-            Q = Q.filter(p1.tick == params.group(4))
+            Q = Q.filter(p1.tick == tick)
             result = Q.first()
             if result is None:
                 message.reply("No data for %s:%s:%s on tick %s" % (p.x,p.y,p.z,tick))

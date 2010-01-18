@@ -35,13 +35,13 @@ class book(loadable):
     
     @loadable.require_user
     def execute(self, message, user, params):
-        planet = Planet.load(*params.group(1,2,3))
+        planet = Planet.load(*params.group(1,3,5))
         if planet is None:
-            message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
+            message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
             return
         
         tick = Updates.current_tick()
-        when = int(params.group(4))
+        when = int(params.group(6))
         if when < 32:
             eta = when
             when += tick
@@ -52,6 +52,8 @@ class book(loadable):
             eta = when - tick
         if when > 32767:
             when = 32767        
+        
+        override = params.group(7)
         
         if planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name"):
             message.reply("%s:%s:%s is %s in %s. Quick, launch before they notice the highlight." % (planet.x,planet.y,planet.z, planet.intel.nick or 'someone', Config.get("Alliance","name"),))
@@ -70,7 +72,7 @@ class book(loadable):
                 message.reply("Target %s:%s:%s is already booked for landing tick %s by user %s" % (planet.x,planet.y,planet.z, land, booker,))
                 return
             
-            if params.group(5) is None:
+            if override is None:
                 reply="There are already bookings for that target after landing pt %s (eta %s). To see status on this target, do !status %s:%s:%s." % (when,eta, planet.x,planet.y,planet.z,)
                 reply+=" To force booking at your desired eta/landing tick, use !book %s:%s:%s %s yes (Bookers: " %(planet.x,planet.y,planet.z, when,)
                 prev=[]

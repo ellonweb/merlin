@@ -32,12 +32,12 @@ class seagal(loadable):
     @loadable.require_planet
     def execute(self, message, user, params):
         
-        p = Planet.load(*params.group(1,2,3))
+        p = Planet.load(*params.group(1,3,5))
         if p is None:
-            message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
+            message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
             return
         
-        sum=params.group(4)
+        sum=params.group(6)
         res=user.planet.resources_per_agent(p)
         reply="Your Seagals will ninja %s resources from %s:%s:%s - 13: %s, 35: %s."%(res,p.x,p.y,p.z,self.num2short(res*13),self.num2short(res*35))
         if sum:
