@@ -29,13 +29,12 @@ class usedef(loadable):
     """"""
     usage = " <pnick> <ship>"
     paramre=re.compile(r"\s+(\S+)\s+(.*)")
-    ship_classes = ['fi','co','fr','de','cr','bs']
     
     @loadable.require_user
     def execute(self, message, user, params):
         
         name=params.group(1)
-        ships=params.group(2).lower()
+        ships=params.group(2)
         u=User.load(name, exact=False, access="member")
         if u is None:
             message.reply("No members matching %s found"%(name,))
@@ -57,15 +56,11 @@ class usedef(loadable):
         removed={}
         tick = Updates.current_tick()
         for name in ships.split():
-            if name not in self.ship_classes:
-                ship = Ship.load(name=name)
-                if ship is None:
-                    continue
-                ship_lookup = ship.name
-            else:
-                ship_lookup = name
-            for fleet in user.fleets.filter_by(ship=ship_lookup):
-                removed[fleet.ship] = fleet.ship_count
+            ship = Ship.load(name=name)
+            if ship is None:
+                continue
+            for fleet in user.fleets.filter_by(ship=ship):
+                removed[fleet.ship.name] = fleet.ship_count
                 self.delete_ships(user,taker,fleet,tick)
         session.commit()
         return removed

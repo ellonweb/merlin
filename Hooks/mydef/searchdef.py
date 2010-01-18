@@ -31,37 +31,32 @@ class searchdef(loadable):
     """"""
     usage = " <number> <ship>"
     paramre = re.compile(r"\s+(\d+(?:\.\d+)?[mk]?)\s+(\S+)")
-    ship_classes = ['fi','co','fr','de','cr','bs']
     
     def execute(self, message, user, params):
         
         count = self.short2num(params.group(1))
-        name = params.group(2).lower()
+        name = params.group(2)
 
-        if name not in self.ship_classes:
-            ship = Ship.load(name=name)
-            if ship is None:
-                message.alert("No Ship called: %s" % (name,))
-                return
-            ship_lookup = ship.name
-        else:
-            ship_lookup = name
+        ship = Ship.load(name=name)
+        if ship is None:
+            message.alert("No Ship called: %s" % (name,))
+            return
         
         Q = session.query(User, UserFleet)
         Q = Q.join(User.fleets)
         Q = Q.filter(User.active == True)
         Q = Q.filter(User.access >= Config.getint("Access", "member"))
-        Q = Q.filter(UserFleet.ship == ship_lookup)
+        Q = Q.filter(UserFleet.ship == ship)
         Q = Q.filter(UserFleet.ship_count >= count)
         Q = Q.filter(User.fleetcount > 0)
         Q = Q.order_by(desc(UserFleet.ship_count))
         result = Q.all()
         
         if len(result) < 1:
-            message.reply("There are no planets with free fleets and at least %s ships matching '%s'"%(self.num2short(count),ship_lookup))
+            message.reply("There are no planets with free fleets and at least %s ships matching '%s'"%(self.num2short(count),ship.name))
             return
         
         tick = Updates.current_tick()
         reply = "Fleets matching query: "
-        reply+= ", ".join(map(lambda (u, x): "%s(%s) %s: %s %s"%(u.name,u.fleetupdated-tick,u.fleetcount,self.num2short(x.ship_count),x.ship),result))
+        reply+= ", ".join(map(lambda (u, x): "%s(%s) %s: %s %s"%(u.name,u.fleetupdated-tick,u.fleetcount,self.num2short(x.ship_count),ship.name),result))
         message.reply(reply)

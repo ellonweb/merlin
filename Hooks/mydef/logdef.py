@@ -30,28 +30,23 @@ class logdef(loadable):
     """"""
     usage = ""
     paramre=re.compile(r"\s*(\S*)")
-    ship_classes = ['fi','co','fr','de','cr','bs']
     
     def execute(self, message, user, params):
         
-        search=params.group(1).lower()
+        search=params.group(1)
         
         Q = session.query(FleetLog)
         
-        if search == "":
-            pass
-        elif search not in self.ship_classes:
+        if search != "":
             ship = Ship.load(name=search)
-            if ship is None:
-                u = User.load(search, exact=False, access="member")
-                if u is None:
-                    Q = Q.filter_by(id=-1)
-                else:
-                    Q = Q.filter_by(user=u)
+            if ship is not None:
+                Q = Q.filter(FleetLog.ship == ship)
             else:
-                Q = Q.filter_by(ship=ship.name)
-        else:
-            Q = Q.filter_by(ship=search)
+                u = User.load(search, exact=False, access="member")
+                if u is not None:
+                    Q = Q.filter(FleetLog.user == u)
+                else:
+                    Q = Q.filter(FleetLog.id == -1)
         Q = Q.order_by(desc(FleetLog.tick))
         
         result = Q[:10]
@@ -61,5 +56,5 @@ class logdef(loadable):
             return
         
         tick = Updates.current_tick()
-        reply = ", ".join(map(lambda x:"%s gave %s %s to %s (%s)"%(x.user.name,self.num2short(x.ship_count),x.ship,x.taker.name,x.tick-tick),result))
+        reply = ", ".join(map(lambda x:"%s gave %s %s to %s (%s)"%(x.user.name,self.num2short(x.ship_count),x.ship.name,x.taker.name,x.tick-tick),result))
         message.reply(reply)

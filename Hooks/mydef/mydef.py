@@ -26,12 +26,11 @@ from Core.loadable import loadable
 
 @loadable.module("member")
 class mydef(loadable):
-    """Add your fleets for defense listing. Ship can be a shipclass. For example: 2x 20k Barghest 30k Harpy 20k BS Call me any time for hot shipsex."""
+    """Add your fleets for defense listing. For example: 2x 20k Barghest 30k Harpy Call me any time for hot shipsex."""
     usage = " [fleets] x <[ship count] [ship name]> [comment]"
     paramre = re.compile(r"\s+(\d)\s*x\s*(.*)",re.I)
     countre = re.compile(r"^(\d+(?:\.\d+)?[mk]?)$",re.I)
     shipre = re.compile(r"^(\w+),?$")
-    ship_classes = ['fi','co','fr','de','cr','bs']
     
     @loadable.require_user
     def execute(self, message, user, params):
@@ -52,7 +51,7 @@ class mydef(loadable):
         ships = user.fleets.all()
         
         reply = "Updated your def info to: fleetcount %s, updated: pt%s ships: " %(user.fleetcount,user.fleetupdated)
-        reply+= ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship),ships))
+        reply+= ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship.name),ships))
         reply+= " and comment: %s" %(user.fleetcomment)
         message.reply(reply)
     
@@ -86,19 +85,16 @@ class mydef(loadable):
                 break
             
             count=self.short2num(mc.group(1))
-            ship=ms.group(1).lower()
+            ship=ms.group(1)
             
             s = Ship.load(name=ship)
             
-            if ship in self.ship_classes:
-                pass
-            elif s is not None:
+            if s is not None:
                 ship=s.name
             else:
                 break
             
             ships[ship]=count
-            
             
             parts.pop(0)
             parts.pop(0)

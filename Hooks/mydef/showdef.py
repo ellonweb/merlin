@@ -48,8 +48,8 @@ class showdef(loadable):
         if len(ships) < 1:
             message.reply("That lazy pile of shit %s hasn't updated their def since tick %s. (comment: %s)"%(u.name,u.fleetupdated,u.fleetcomment))
         else:
-            reply ="%s def info: fleetcount %s, updated: %s (%s), ships: " %(u.name,u.fleetcount,u.fleetupdated,u.fleetupdated-tick)
-            reply+= ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship),ships))
-            reply+=" comment: %s"%(u.fleetcomment,)
+            reply = "%s def info: fleetcount %s, updated: %s (%s), ships: " %(u.name,u.fleetcount,u.fleetupdated,u.fleetupdated-tick)
+            reply+= ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship.name),ships))
+            reply+= " comment: %s"%(u.fleetcomment,)
             message.reply(reply)
-        message.reply("%s's last 3 FleetLogs (use !logdef for more): "%(u.name,) + ", ".join(map(lambda x:"gave %s %s to %s (%s)"%(self.num2short(x.ship_count),x.ship,x.taker.name,x.tick-tick),u.fleetlogs[:3])))
+        message.reply("%s's last 3 FleetLogs (use !logdef for more): "%(u.name,) + ", ".join(map(lambda x:"gave %s %s to %s (%s)"%(self.num2short(x.ship_count),x.ship.name,x.taker.name,x.tick-tick),u.fleetlogs[:3])))
