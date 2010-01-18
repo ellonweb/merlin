@@ -87,11 +87,8 @@ class mydef(loadable):
             count=self.short2num(mc.group(1))
             ship=ms.group(1)
             
-            s = Ship.load(name=ship)
-            
-            if s is not None:
-                ship=s.name
-            else:
+            ship = Ship.load(name=ship)
+            if ship is None:
                 break
             
             ships[ship]=count
