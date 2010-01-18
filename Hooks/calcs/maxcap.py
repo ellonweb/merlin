@@ -33,7 +33,7 @@ class maxcap(loadable):
         if len(params.groups()) == 1:
             target = Planet(size=int(params.group(1)))
             attacker = None
-        elif params.group(4) is None:
+        elif params.group(6) is None:
             target = Planet.load(*params.group(1,3,5))
             if target is None:
                 message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))

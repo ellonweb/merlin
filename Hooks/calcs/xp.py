@@ -30,7 +30,7 @@ class xp(loadable):
     
     def execute(self, message, user, params):
         
-        if params.group(4) is None:
+        if params.group(6) is None:
             target = Planet.load(*params.group(1,3,5))
             if target is None:
                 message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
