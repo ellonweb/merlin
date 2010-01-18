@@ -94,6 +94,9 @@ class client(object):
     def host(self):
         return "RoboCop!%s/%s"%self._host
     
+    def __repr__(self):
+        return super(client, self).__repr__().replace("client", "client (%s)"%(self.host(),))
+    
     def disconnect(self):
         # Cleanly close sockets
         print "%s <<< :%s DISCONNECT" % (time.asctime(),self.host(),)

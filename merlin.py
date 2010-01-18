@@ -91,7 +91,7 @@ class merlin(object):
                         except Reload:
                             print "%s Reloading..." % (time.asctime(),)
                             # Reimport all the modules
-                            Loader.reload()
+                            Loader.reload(Config)
                             continue
                     
                 except Reboot as exc:
@@ -100,7 +100,7 @@ class merlin(object):
                     
                     print "%s Rebooting..." % (time.asctime(),)
                     # Reboot the Loader and reimport all the modules
-                    Loader.reboot()
+                    Loader.reboot(Config)
                     continue
             
         except (Quit, KeyboardInterrupt, SystemExit) as exc:

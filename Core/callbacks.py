@@ -117,8 +117,9 @@ class callbacks(object):
                     # Error while executing a callback/mod/hook
                     message.alert("Error in module '%s'. Please report the command you used to the bot owner as soon as possible." % (callback.name,))
                     with open(Config.get("Misc","errorlog"), "a") as errorlog:
-                        errorlog.write("\n\n\n%s - Error: %s\nArguments that caused error: %s\n" % (time.asctime(),e.__str__(),message,))
+                        errorlog.write("%s - IRC Callback Error: %s\n%s\n\n" % (time.asctime(),e.__str__(),message,))
                         errorlog.write(traceback.format_exc())
+                        errorlog.write("\n\n\n")
                 finally:
                     # Remove any uncommitted or unrolled-back state
                     session.remove()
@@ -138,8 +139,9 @@ class callbacks(object):
                 # Error while executing a callback/mod/hook
                 message.alert(False)
                 with open(Config.get("Misc","errorlog"), "a") as errorlog:
-                    errorlog.write("\n\n\n%s - Error: %s\nArguments that caused error: %s\n" % (time.asctime(),e.__str__(),message,))
+                    errorlog.write("%s - RoboCop Callback Error: %s\n%s\n\n" % (time.asctime(),e.__str__(),message,))
                     errorlog.write(traceback.format_exc())
+                    errorlog.write("\n\n\n")
             finally:
                 # Remove any uncommitted or unrolled-back state
                 session.remove()

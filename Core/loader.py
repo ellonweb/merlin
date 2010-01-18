@@ -21,7 +21,7 @@
  
 import sys
 import time
-from traceback import format_exc
+import traceback
 
 mods = ["Core.paconf",
         "Core.connection",
@@ -51,7 +51,7 @@ class loader(object):
             print "%s Error in Loader initialization." % (time.asctime(),)
             raise
     
-    def reboot(self):
+    def reboot(self, Config):
         # If the reboot succeeds, this Loader instance will be
         #  replaced, so this .success is only tested if it fails.
         self.success = False
@@ -61,22 +61,28 @@ class loader(object):
             self.load_module("Core.config", "Core.loader")
             # Check the new loader has a successful status
             if sys.modules["Core.loader"].Loader.success is not True: raise ImportError
-        except Exception:
+        except Exception, e:
             # If the new Loader fails, catch the error and restore everything
-            print format_exc()
             print "%s Reboot failed, reverting to previous." % (time.asctime(),)
+            with open(Config.get("Misc","errorlog"), "a") as errorlog:
+                errorlog.write("%s - Loader Reboot Error: %s\n\n" % (time.asctime(),e.__str__(),))
+                errorlog.write(traceback.format_exc())
+                errorlog.write("\n\n\n")
             self.restore(sys)
     
-    def reload(self):
+    def reload(self, Config):
         self.success = False
         try:
             # Load all the main modules, they will also be
             #  backed up if they're all loaded successfully.
             self._reload()
-        except Exception:
+        except Exception, e:
             # If the reload fails, catch the error and restore everything
-            print format_exc()
             print "%s Reload failed, reverting to previous." % (time.asctime(),)
+            with open(Config.get("Misc","errorlog"), "a") as errorlog:
+                errorlog.write("%s - Loader Reload Error: %s\n\n" % (time.asctime(),e.__str__(),))
+                errorlog.write(traceback.format_exc())
+                errorlog.write("\n\n\n")
             self.restore(sys)
     
     def _reload(self):
