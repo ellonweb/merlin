@@ -62,7 +62,7 @@ class scan(loadable):
                 return
             
             # Link to scan
-            if params.group(6) == "l":
+            if params.group(7) == "l":
                 reply = "%s on %s:%s:%s " % (PA.get(self.type,"name"),planet.x,planet.y,planet.z,)
                 reply+= Config.get("URL","viewscan") % (scan.pa_id,)
                 message.reply(reply)
