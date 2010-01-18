@@ -894,7 +894,7 @@ class FleetLog(Base):
     ship_count = Column(Integer)
     tick = Column(Integer)
 FleetLog.taker = relation(User, primaryjoin=FleetLog.taker_id==User.id)
-FleetLog.user = relation(User, primaryjoin=FleetLog.user_id==User.id)
+User.fleetlogs = dynamic_loader(FleetLog, backref="user", primaryjoin=User.id==FleetLog.user_id, order_by=desc(FleetLog.id))
 
 # ########################################################################### #
 # #########################    PROPS AND COOKIES    ######################### #
