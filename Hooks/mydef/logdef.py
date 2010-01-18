@@ -54,7 +54,7 @@ class logdef(loadable):
             Q = Q.filter_by(ship=search)
         Q = Q.order_by(desc(FleetLog.tick))
         
-        result = Q.all()
+        result = Q[:10]
         
         if len(result) < 1:
             message.reply("No matches found in the deflog for search '%s'"%(search,))
