@@ -23,16 +23,17 @@ from datetime import datetime
 from django.conf.urls.defaults import include, patterns, url
 from Core.config import Config
 from Core.maps import Updates
-from Arthur.auth import render
+from Arthur.auth import menu, render
 
 urlpatterns = patterns('',
-    (r'^$', 'Arthur.index'),
+    (r'^(?:home/)?$', 'Arthur.home'),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/Code/git/merlin/Arthur/static/'}),
     (r'^guide/$', 'Arthur.guide'),
     (r'', include('Arthur.rankings')),
 )
 
-def index(request):
+@menu("Home")
+def home(request):
     planet = request.session.user.planet
     now = datetime.now()
     d1 = datetime(now.year, now.month, now.day, now.hour)
@@ -42,5 +43,6 @@ def index(request):
     ph = planet.history(tick)
     return render("index.tpl", request, planets=((planet, ph, None, None),), title="Your planet")
 
+@menu("Guide to %s"%(Config.get("Connection","nick"),))
 def guide(request):
     return render("guide.tpl", request, bot=Config.get("Connection","nick"), alliance=Config.get("Alliance", "name"))

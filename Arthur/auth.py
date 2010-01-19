@@ -86,6 +86,40 @@ class authentication(object):
     def generate_key(self, user):
         return User.hasher(user.name+user.passwd+str(datetime.datetime.now())+str(random.randrange(1,1000000000)))
 
+class _menu(object):
+    heads = []
+    content = {}
+    
+    def __call__(self, head, sub=None):
+        
+        def wrapper(hook):
+            url = "/" + hook.__name__ + "/"
+            
+            if head not in self.heads:
+                self.heads.append(head)
+                self.content[head] = {"hook":hook, "url":url, "subs":[], "content":{}}
+            if sub is not None:
+                self.content[head]["subs"].append(sub)
+                self.content[head]["content"][sub] = {"hook":hook, "url":url}
+            
+            return hook
+        return wrapper
+    
+    def generate(self, user):
+        menu = []
+        for head in self.heads:
+            #if self.content[head]["hook"].has_access(user):
+                menu.append([head, self.content[head]["url"], []])
+                
+                for sub in self.content[head]["subs"]:
+                    #if self.content[head]["content"][sub]["hook"].has_access(user):
+                        menu[-1][2].append([sub, self.content[head]["content"][sub]["url"]])
+        
+        menu.append(["Logout", "/logout/", []])
+        return menu
+
+menu = _menu()
+
 def context(request):
     context = {"slogan": Config.get("Alliance", "name")}
     if request.session is not None:
@@ -93,15 +127,7 @@ def context(request):
         if slogan is not None:
             context["slogan"] = str(slogan)
         context["user"] = request.session.user.name
-        context["menu"] = (("Guide to %s"%(Config.get("Connection","nick"),), "/guide/", None,),
-                           ("Rankings", "/planets/", (
-                                ("Planets", "/planets/"),
-                                ("Galaxies", "/galaxies/"),
-                                ("Alliances", "/alliances/"),
-                                ("Alliances (intel)", "/ialliances/"),
-                            ),),
-                           ("Logout", "/logout/", None,),
-                          )
+        context["menu"] = menu.generate(request.session.user)
     return context
 
 def render(tpl, request, **context):

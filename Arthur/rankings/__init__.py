@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
+from Arthur.rankings import planets, galaxies, alliances, ialliances
 
 urlpatterns = patterns('Arthur.rankings',
     url(r'^planets/$', 'planets.planets'),

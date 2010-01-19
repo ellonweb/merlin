@@ -24,8 +24,9 @@ from sqlalchemy.sql import asc, desc
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, PlanetHistory, Alliance, Intel
-from Arthur.auth import render
+from Arthur.auth import menu, render
 
+@menu("Rankings", "Planets")
 def planets(request, page="1", sort="score", race="all"):
     page = int(page)
     offset = (page - 1)*50

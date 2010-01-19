@@ -23,8 +23,9 @@ from sqlalchemy.sql import asc, desc, case
 from sqlalchemy.sql.functions import count, sum
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
-from Arthur.auth import render
+from Arthur.auth import menu, render
 
+@menu("Rankings", "Alliances (intel)")
 def ialliances(request, page="1", sort="score"):
     page = int(page)
     offset = (page - 1)*50

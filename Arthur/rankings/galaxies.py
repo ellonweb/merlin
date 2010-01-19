@@ -23,8 +23,9 @@ from datetime import datetime
 from sqlalchemy.sql import asc, desc
 from Core.db import session
 from Core.maps import Updates, Galaxy, GalaxyHistory
-from Arthur.auth import render
+from Arthur.auth import menu, render
 
+@menu("Rankings", "Galaxies")
 def galaxies(request, page="1", sort="score"):
     page = int(page)
     offset = (page - 1)*50
