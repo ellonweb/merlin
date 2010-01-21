@@ -239,10 +239,14 @@ class Alliance(Base):
         Q = session.query(Alliance).filter_by(active=True)
         alliance = Q.filter(Alliance.name.ilike(name)).first()
         if alliance is None:
+            alliance = Q.filter(Alliance.name.ilike(name+"%")).first()
+        if alliance is None:
             alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
         if alliance is None and active == False:
             Q = session.query(Alliance)
             alliance = Q.filter(Alliance.name.ilike(name)).first()
+            if alliance is None:
+                alliance = Q.filter(Alliance.name.ilike(name+"%")).first()
             if alliance is None:
                 alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
         return alliance
@@ -539,6 +543,12 @@ class Ship(Base):
             ship = Q.filter_by(Ship.id == id).first()
         if name is not None:
             ship = Q.filter(Ship.name.ilike(name)).first()
+            if ship is None:
+                ship = Q.filter(Ship.name.ilike(name+"%")).first()
+            if ship is None and name[-1].lower()=="s":
+                ship = Q.filter(Ship.name.ilike(name[:-1]+"%")).first()
+            if ship is None and name[-3:].lower()=="ies":
+                ship = Q.filter(Ship.name.ilike(name[:-3]+"%")).first()
             if ship is None:
                 ship = Q.filter(Ship.name.ilike("%"+name+"%")).first()
             if ship is None and name[-1].lower()=="s":
