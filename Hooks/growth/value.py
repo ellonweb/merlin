@@ -56,9 +56,9 @@ class value(loadable):
             
             tick, value, vdiff, size, sdiff = result
             reply="Value on pt%s for %s:%s:%s: " % (tick,p.x,p.y,p.z)
-            reply+="value: %s (%s%s)" % (value,["+",""][vdiff<0],vdiff)
+            reply+="value: %s (%s%s)" % (value,["+","-"][vdiff<0],abs(vdiff))
             if sdiff!=0:
-                reply+=" roids: %s%s" % (["+",""][sdiff<0],sdiff)
+                reply+=" roids: %s%s" % (["+","-"][sdiff<0],abs(sdiff))
             message.reply(reply)
         else:
             tick = Updates.current_tick()
@@ -70,9 +70,9 @@ class value(loadable):
             
             prev=[]
             for tick, value, vdiff, size, sdiff in result:
-                reply="pt%s %s (%s%s)" % (tick, self.num2short(value), ["+",""][vdiff<0],self.num2short(vdiff),)
+                reply="pt%s %s (%s%s)" % (tick, self.num2short(value), ["+","-"][vdiff<0],self.num2short(abs(vdiff)),)
                 if sdiff!=0:
-                    reply+=" roids: %s%s" % (["+",""][sdiff<0],sdiff)
+                    reply+=" roids: %s%s" % (["+","-"][sdiff<0],abs(sdiff))
                 prev.append(reply)
             reply="Value in the last 15 ticks on %s:%s:%s: " % (p.x,p.y,p.z)+ ' | '.join(prev)
             message.reply(reply)
