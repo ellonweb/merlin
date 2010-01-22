@@ -82,11 +82,11 @@ class book(loadable):
                 return
         
         if free == when:
-            reply = "Booked landing on %s:%s:%s tick %s for user %s" % (planet.x,planet.y,planet.z, free, user.name,)
+            reply = "Booked landing on %s:%s:%s tick %s (eta %s) for user %s" % (planet.x,planet.y,planet.z, free, (free-tick), user.name,)
         elif free == when + 1:
-            reply = "You have been beaten to %s:%s:%s by %s. You are now getting sloppy seconds at tick %s" % (planet.x,planet.y,planet.z, book1.user.name, free,)
+            reply = "You have been beaten to %s:%s:%s by %s. You are now getting sloppy seconds at tick %s (eta %s)" % (planet.x,planet.y,planet.z, book1.user.name, free, (free-tick),)
         elif free == when + 2:
-            reply = "You've been beaten to %s:%s:%s by %s and %s you slow retarded faggot. I feel sorry for you, so have tick %s" % (planet.x,planet.y,planet.z, book1.user.name, book2.user.name, free,)
+            reply = "You've been beaten to %s:%s:%s by %s and %s you slow retarded faggot. I feel sorry for you, so have tick %s (eta %s)" % (planet.x,planet.y,planet.z, book1.user.name, book2.user.name, free, (free-tick),)
         
         try:
             planet.bookings.append(Target(user=user, tick=free))
