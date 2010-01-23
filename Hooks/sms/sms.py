@@ -21,7 +21,7 @@
  
 import re
 from urllib import urlencode
-from urllib2 import urlopen
+from urllib2 import urlopen, URLError
 from Core.config import Config
 from Core.db import session
 from Core.maps import User, SMS
@@ -67,7 +67,10 @@ class sms(loadable):
                          "text": text,
                         })
         
-        status, msg = urlopen("https://api.clickatell.com/http/sendmsg", get).read().split(":")
+        try:
+            status, msg = urlopen("https://api.clickatell.com/http/sendmsg", get, 5).read().split(":")
+        except URLError, e:
+            status, msg = "ERR", str(e)
         
         if status in ("OK","ID",):
             message.reply("Successfully processed To: %s Message: %s" % (receiver.name,text))
