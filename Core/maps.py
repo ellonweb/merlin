@@ -83,7 +83,7 @@ class Galaxy(Base):
         return galaxy
     
     def __str__(self):
-        retstr="%s:%s '%s' " % (self.x,self.y,self.name)
+        retstr="%s:%s '%s' (%s) " % (self.x,self.y,self.name,self.planet_loader.filter_by(active=True).count())
         retstr+="Score: %s (%s) " % (self.score,self.score_rank)
         retstr+="Value: %s (%s) " % (self.value,self.value_rank)
         retstr+="Size: %s (%s) " % (self.size,self.size_rank)
