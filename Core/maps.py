@@ -986,5 +986,6 @@ class SMS(Base):
     receiver_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     phone = Column(String(48))
     sms_text = Column(String(160))
+    mode = Column(String(12))
 SMS.sender = relation(User, primaryjoin=SMS.sender_id==User.id)
 SMS.receiver = relation(User, primaryjoin=SMS.receiver_id==User.id)

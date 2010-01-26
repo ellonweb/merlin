@@ -38,7 +38,7 @@ class smslog(loadable):
         if id:
             sms = self.get_sms(id)
             if sms:
-                reply = "SMS with ID %s sent by %s to %s with text: %s"%(sms.id,sms.sender.name,sms.receiver.name,sms.sms_text)
+                reply = "SMS with ID %s (%s) sent by %s to %s with text: %s"%(sms.id,sms.mode[:1].upper(),sms.sender.name,sms.receiver.name,sms.sms_text)
             else:
                 reply = "There was no SMS sent with ID %s"%(id,)
             message.reply(reply)

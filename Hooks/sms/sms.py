@@ -74,7 +74,7 @@ class sms(loadable):
         
         if status in ("OK","ID",):
             message.reply("Successfully processed To: %s Message: %s" % (receiver.name,text))
-            self.log_message(user,receiver,phone, public_text)
+            self.log_message(user,receiver,phone, public_text, "clickatell")
         elif status in ("ERR",):
             message.reply("Error sending message: %s" % (msg.strip(),))
         else:
@@ -86,6 +86,6 @@ class sms(loadable):
         s = "".join([c for c in text if c.isdigit()])
         return s.lstrip("00")
 
-    def log_message(self,sender,receiver,phone,text):
-        session.add(SMS(sender=sender,receiver=receiver,phone=phone,sms_text=text))
+    def log_message(self,sender,receiver,phone,text,mode):
+        session.add(SMS(sender=sender,receiver=receiver,phone=phone,sms_text=text,mode=mode))
         session.commit()
