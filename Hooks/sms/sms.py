@@ -61,7 +61,14 @@ class sms(loadable):
             message.reply("Max length for a text is 160 characters. Your text was %i characters long. Super secret message not sent." % (len(text),))
             return
 
-        error = self.send_clickatell(user, receiver, public_text, phone, text)
+        mode = Config.get("Misc", "sms")
+        error = ""
+        
+        if mode == "googlevoice" or mode == "combined":
+            error = self.send_googlevoice(user, receiver, public_text, phone, text)
+        if mode == "clickatell" or (mode == "combined" and error is not None):
+            error = self.send_clickatell(user, receiver, public_text, phone, text)
+        
         if error is None:
             message.reply("Successfully processed To: %s Message: %s" % (receiver.name,text))
         else:
