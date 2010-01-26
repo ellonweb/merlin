@@ -22,6 +22,7 @@
 import re
 from urllib import urlencode
 from urllib2 import urlopen, URLError
+from Core.exceptions_ import LoadableError
 from Core.config import Config
 from Core.db import session
 from Core.maps import User, SMS
@@ -67,22 +68,89 @@ class sms(loadable):
             message.reply(error or "That wasn't supposed to happen. I don't really know what went wrong. Maybe your mother dropped you.")
     
     def send_clickatell(self, user, receiver, public_text, phone, message):
-        post = urlencode({"user"    : Config.get("clickatell", "user"),
-                          "password": Config.get("clickatell", "pass"),
-                          "api_id"  : Config.get("clickatell", "api"),
-                          "to"      : phone,
-                          "text"    : message,
-                        })
         try:
+            post = urlencode({"user"        : Config.get("clickatell", "user"),
+                              "password"    : Config.get("clickatell", "pass"),
+                              "api_id"      : Config.get("clickatell", "api"),
+                              "to"          : phone,
+                              "text"        : message,
+                            })
             status, msg = urlopen("https://api.clickatell.com/http/sendmsg", post, 5).read().split(":")
             if status in ("OK","ID",):
                 self.log_message(user, receiver, phone, public_text, "clickatell")
+                return None
             elif status in ("ERR",):
-                return "Error sending message: %s" % (msg.strip(),)
+                raise SMSError(msg.strip())
             else:
                 return ""
-        except URLError, e:
+        except (URLError, SMSError) as e:
             return "Error sending message: %s" % (str(e),)
+    
+    def send_googlevoice(self, user, receiver, public_text, phone, message):
+        try:
+            post = urlencode({"accountType" : "GOOGLE",
+                              "Email"       : Config.get("googlevoice", "user"),
+                              "Passwd"      : Config.get("googlevoice", "pass"),
+                              "service"     : "grandcentral",
+                              "source"      : "Merlin",
+                            })
+            text = urlopen("https://www.google.com/accounts/ClientLogin", post, 5).read()
+            m = re.search(r"^Auth=(.+?)$", text, re.M)
+            if m is None:
+                raise SMSError("unable to authenticate")
+            auth = m.group(1)
+            
+            post = urlencode({"id"          : '',
+                              "phoneNumber" : phone,
+                              "text"        : message,
+                              "auth"        : auth,
+                              "_rnr_se"     : Config.get("googlevoice", "api"),
+                            })
+            text = urlopen("https://www.google.com/voice/sms/send/", post, 5).read()
+            if text != '{"ok":true,"data":{"code":0}}':
+                raise SMSError("success code not returned")
+            
+            get = urlencode({"auth"         : auth,
+                           })
+            text = urlopen("https://www.google.com/voice/inbox/recent/sms/?"+get, None, 5).read()
+            m = re.search(self.googlevoice_regex(message), text)
+            if m is None:
+                raise SMSError("message not found in SMS history")
+            if m.group(4) is None:
+                self.log_message(user, receiver, phone, public_text, "googlevoice")
+                return None
+            else:
+                return m.group(4)
+        except (URLError, SMSError) as e:
+            return "Error sending message: %s" % (str(e),)
+    
+    def googlevoice_regex(self, message):
+        message = re.escape(message)
+        regex = r'<div class="gc-message-sms-row">\s*'
+        regex+= r'<span class="gc-message-sms-from">\s*'
+        regex+= r'Me:\s*'
+        regex+= r'</span>\s*'
+        regex+= r'<span class="gc-message-sms-text">\s*'
+        regex+= r'('+message+')'
+        regex+= r'</span>\s*'
+        regex+= r'<span class="gc-message-sms-time">\s*'
+        regex+= r'(.*?)'
+        regex+= r'</span>\s*'
+        regex+= r'</div>\s*'
+        regex+= r'(?:'
+        regex+= r'<div class="gc-message-sms-row">\s*'
+        regex+= r'<span class="gc-message-sms-from">\s*'
+        regex+= r'(.*?):\s*'
+        regex+= r'</span>\s*'
+        regex+= r'<span class="gc-message-sms-text">\s*'
+        regex+= r'(Error: this message was not successfully delivered.)'
+        regex+= r'</span>\s*'
+        regex+= r'<span class="gc-message-sms-time">\s*'
+        regex+= r'(.*?)'
+        regex+= r'</span>\s*'
+        regex+= r'</div>\s*'
+        regex+= r')?'
+        return regex
     
     def prepare_phone_number(self,text):
         if not text:
@@ -93,3 +161,6 @@ class sms(loadable):
     def log_message(self,sender,receiver,phone,text,mode):
         session.add(SMS(sender=sender,receiver=receiver,phone=phone,sms_text=text,mode=mode))
         session.commit()
+
+class SMSError(LoadableError):
+    pass
