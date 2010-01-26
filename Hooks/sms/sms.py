@@ -108,7 +108,7 @@ class sms(loadable):
             auth = m.group(1)
             
             post = urlencode({"id"          : '',
-                              "phoneNumber" : phone,
+                              "phoneNumber" : '+'+phone,
                               "text"        : message,
                               "auth"        : auth,
                               "_rnr_se"     : Config.get("googlevoice", "api"),
