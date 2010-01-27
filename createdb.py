@@ -94,7 +94,7 @@ if round:
     session.execute(text("INSERT INTO prop_vote (vote,carebears,prop_id,voter_id) SELECT vote,carebears,prop_id,voter_id FROM %s.prop_vote;" % (round,)))
     session.execute(text("INSERT INTO cookie_log (log_time,year,week,howmany,giver_id,receiver_id) SELECT log_time,year,week,howmany,giver_id,receiver_id FROM %s.cookie_log;" % (round,)))
     print "Migrating smslog"
-    session.execute(text("INSERT INTO sms_log (sender_id,receiver_id,phone,sms_text) SELECT sender_id,receiver_id,phone,sms_text FROM %s.sms_log;" % (round,)))
+    session.execute(text("INSERT INTO sms_log (sender_id,receiver_id,phone,sms_text,mode) SELECT sender_id,receiver_id,phone,sms_text,mode FROM %s.sms_log;" % (round,)))
     session.commit()
     session.close()
 
