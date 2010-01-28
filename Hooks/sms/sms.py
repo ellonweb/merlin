@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
+import time
 from urllib import urlencode
 from urllib2 import urlopen, URLError
 from Core.exceptions_ import LoadableError
@@ -116,6 +117,8 @@ class sms(loadable):
             text = urlopen("https://www.google.com/voice/sms/send/", post, 5).read()
             if text != '{"ok":true,"data":{"code":0}}':
                 raise SMSError("success code not returned")
+            
+            time.sleep(5)
             
             get = urlencode({"auth"         : auth,
                            })
