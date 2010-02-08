@@ -34,7 +34,7 @@ class bitches(loadable):
     
     def execute(self, message, user, params):
         
-        tick = Updates.current_tick() + (params.group(1) or 1)
+        tick = Updates.current_tick() + int(params.group(1) or 1)
         replies = []
         
         Q = session.query(Galaxy.x, Galaxy.y, count())
