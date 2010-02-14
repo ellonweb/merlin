@@ -54,7 +54,7 @@ class sms(loadable):
             return
 
         phone = self.prepare_phone_number(receiver.phone)
-        if not phone or len(phone) <= 6:
+        if not phone or len(phone) <= 7:
             message.reply("%s has no phone number or their phone number is too short to be valid (under 6 digits). Super secret message not sent." % (receiver.name,))
             return
 
@@ -109,7 +109,7 @@ class sms(loadable):
             auth = m.group(1)
             
             post = urlencode({"id"          : '',
-                              "phoneNumber" : '+'+phone,
+                              "phoneNumber" : phone,
                               "text"        : message,
                               "auth"        : auth,
                               "_rnr_se"     : Config.get("googlevoice", "api"),
@@ -166,7 +166,7 @@ class sms(loadable):
         if not text:
             return text
         s = "".join([c for c in text if c.isdigit()])
-        return s.lstrip("00")
+        return "+"+s.lstrip("00")
 
     def log_message(self,sender,receiver,phone,text,mode):
         session.add(SMS(sender=sender,receiver=receiver,phone=phone,sms_text=text,mode=mode))
