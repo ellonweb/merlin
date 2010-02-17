@@ -28,7 +28,7 @@ from Core.loadable import loadable
 @loadable.module()
 class pref(loadable):
     """Set your planet, password for the webby, email and phone number; order doesn't matter"""
-    usage = " [planet=x.y.z] [password=pass] [email=my.email@address.com] [phone=999] [pubphone=T|F]"
+    usage = " [planet=x.y.z] [password=pass] [email=my.email@address.com] [phone=999] [pubphone=T|F] [smsmode=clickatell|google]"
     paramre = re.compile(r"\s(.+)")
     
     @loadable.require_user
@@ -75,5 +75,20 @@ class pref(loadable):
                 elif val.lower() in self.false:
                     user.pubphone = False
                     reply += " pubphone=%s"%(False)
+            if opt == "smsmode":
+                if Config.get("Misc", "sms") != "combined":
+                    message.alert("Your alliance doesn't support SMS mode switching")
+                    continue
+                if val[:1].lower() == "c":
+                    user.googlevoice = False
+                    reply += " smsmode=clickatell"
+                elif val[:1].lower() == "g":
+                    user.googlevoice = True
+                    reply += " smsmode=googlevoice"
+                elif val in self.nulls:
+                    user.googlevoice = None
+                    reply += " smsmode=None"
+        
         session.commit()
-        message.reply("Updated your preferences:"+reply)
+        if len(reply) > 0:
+            message.reply("Updated your preferences:"+reply)

@@ -64,6 +64,11 @@ class sms(loadable):
             return
 
         mode = Config.get("Misc", "sms")
+        if mode == "combined":
+            if user.googlevoice == True:
+                mode = "googlevoice"
+            if user.googlevoice == False:
+                mode = "clickatell"
         error = ""
         
         if mode == "googlevoice" or mode == "combined":

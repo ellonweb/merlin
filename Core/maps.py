@@ -346,6 +346,7 @@ class User(Base):
     emailre = re.compile(r"^([\w.-]+@[\w.-]+)")
     phone = Column(String(48))
     pubphone = Column(Boolean, default=False) # Asc
+    googlevoice = Column(Boolean, default=None)
     sponsor = Column(String(15)) # Asc
     quits = Column(Integer, default=0) # Asc
     available_cookies = Column(Integer, default=0)
