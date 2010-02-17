@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+import json
 import re
 import time
 from urllib import urlencode
@@ -77,13 +78,17 @@ class sms(loadable):
     
     def send_clickatell(self, user, receiver, public_text, phone, message):
         try:
+            # HTTP POST
             post = urlencode({"user"        : Config.get("clickatell", "user"),
                               "password"    : Config.get("clickatell", "pass"),
                               "api_id"      : Config.get("clickatell", "api"),
                               "to"          : phone,
                               "text"        : message,
                             })
+            # Send the SMS
             status, msg = urlopen("https://api.clickatell.com/http/sendmsg", post, 5).read().split(":")
+            
+            # Check returned status for error messages
             if status in ("OK","ID",):
                 self.log_message(user, receiver, phone, public_text, "clickatell")
                 return None
@@ -91,50 +96,93 @@ class sms(loadable):
                 raise SMSError(msg.strip())
             else:
                 return ""
+            
         except (URLError, SMSError) as e:
             return "Error sending message: %s" % (str(e),)
     
     def send_googlevoice(self, user, receiver, public_text, phone, message):
         try:
+            # HTTP POST
             post = urlencode({"accountType" : "GOOGLE",
                               "Email"       : Config.get("googlevoice", "user"),
                               "Passwd"      : Config.get("googlevoice", "pass"),
                               "service"     : "grandcentral",
                               "source"      : "Merlin",
                             })
+            # Authenticate with Google
             text = urlopen("https://www.google.com/accounts/ClientLogin", post, 5).read()
             m = re.search(r"^Auth=(.+?)$", text, re.M)
             if m is None:
                 raise SMSError("unable to authenticate")
             auth = m.group(1)
             
+            # HTTP POST
             post = urlencode({"id"          : '',
                               "phoneNumber" : phone,
                               "text"        : message,
                               "auth"        : auth,
                               "_rnr_se"     : Config.get("googlevoice", "api"),
                             })
+            # Send the SMS
             text = urlopen("https://www.google.com/voice/sms/send/", post, 5).read()
             if text != '{"ok":true,"data":{"code":0}}':
                 raise SMSError("success code not returned")
             
+            # Allow a small amount of time for the request to be processed
             time.sleep(5)
             
+            # HTTP GET
             get = urlencode({"auth"         : auth,
                            })
+            # Request the SMS inbox feed
             text = urlopen("https://www.google.com/voice/inbox/recent/sms/?"+get, None, 5).read()
-            m = re.search(self.googlevoice_regex(message), text)
+            
+            # Parse the feed and extract JSON data
+            m = re.search(self.googlevoice_regex_json(), text)
             if m is None:
-                raise SMSError("message not found in SMS history")
+                raise SMSError("json data not found in feed")
+            data = json.loads(m.group(1))
+            for conversation in data['messages'].values():
+                # One of the conversations should match
+                #  the phone number we just tried SMSing
+                if conversation['phoneNumber'] == phone:
+                    id = conversation['id']
+                    read = conversation['isRead']
+                    break
+            else:
+                raise SMSError("conversation not found in json data")
+            
+            # Parse the feed and extract the relevant conversation
+            m = re.search(self.googlevoice_regex_conversation(id, read), text, re.S)
+            if m is None:
+                raise SMSError("conversation not found in SMS history")
+            
+            # Parse the conversation and extract the message
+            m = re.search(self.googlevoice_regex_message(message), m.group(1))
+            if m is None:
+                raise SMSError("message not found in conversation")
+            
+            # Check the message for error replies
             if m.group(4) is None:
                 self.log_message(user, receiver, phone, public_text, "googlevoice")
                 return None
             else:
                 return m.group(4)
+            
         except (URLError, SMSError) as e:
             return "Error sending message: %s" % (str(e),)
     
-    def googlevoice_regex(self, message):
+    def googlevoice_regex_json(self):
+        regex = r'<json><!\[CDATA\[(.*?)\]\]></json>'
+        return regex
+    
+    def googlevoice_regex_conversation(self, id, read):
+        regex = r'<div id="'+id+'"\s*class="goog-flat-button gc-message gc-message-'+ ('read' if read else 'sms') +'">'
+        regex+= r'(.*?)'
+        regex+= r'(?:class="goog-flat-button gc-message|$)'
+        return regex
+    
+    def googlevoice_regex_message(self, message):
         message = re.escape(message)
         regex = r'<div class="gc-message-sms-row">\s*'
         regex+= r'<span class="gc-message-sms-from">\s*'
