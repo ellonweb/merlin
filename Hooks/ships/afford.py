@@ -62,10 +62,10 @@ class afford(loadable):
         
         class_factory_table = {'Fighter': 'factory_usage_light', 'Corvette': 'factory_usage_light', 'Frigate': 'factory_usage_medium',
                                'Destroyer': 'factory_usage_medium', 'Cruiser': 'factory_usage_heavy', 'Battleship': 'factory_usage_heavy'}
-        prod_modifier_table = {'None': 0, 'Low': 33, 'Medium': 66, 'High': 100}
+        prod_modifier_table = {'None': 0.0, 'Low': 0.33, 'Medium': 0.66, 'High': 1.0}
         
-        capped_number=min(res_m/cost_m, res_c/cost_c, res_e/cost_e)
-        overflow=res_m+res_c+res_e-(capped_number*(cost_m+cost_c+cost_e))
+        capped_number = min(res_m/cost_m, res_c/cost_c, res_e/cost_e)
+        overflow = res_m+res_c+res_e-(capped_number*(cost_m+cost_c+cost_e))
         buildable = capped_number + ((overflow*.95)/total_cost)
         
         demo = 1/(1+PA.getfloat("demo","prodcost"))
@@ -76,8 +76,8 @@ class afford(loadable):
         if prod_res > 0:
             factory_usage=getattr(planetscan,class_factory_table[ship.class_])
             max_prod_modifier=prod_modifier_table[factory_usage]
-            buildable_from_prod = buildable + max_prod_modifier*(prod_res)/100/total_cost
-            reply+=" Counting %d res in prod at %s usage:" % (prod_res,factory_usage)
-            reply+=" %s | Demo: %s | Total: %s "%(int(buildable_from_prod), int(buildable_from_prod*demo),int(buildable*total))
+            buildable_from_prod = buildable + max_prod_modifier*prod_res/total_cost
+            reply+=" Counting %d res in prod at %s usage:" % (self.num2short(prod_res),factory_usage)
+            reply+=" %s | Demo: %s | Total: %s "%(int(buildable_from_prod), int(buildable_from_prod*demo),int(buildable_from_prod*total))
         
         message.reply(reply)
