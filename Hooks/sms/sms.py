@@ -153,26 +153,27 @@ class sms(loadable):
                 if conversation['phoneNumber'] == phone:
                     id = conversation['id']
                     read = conversation['isRead']
-                    break
+                    
+                    # Parse the feed and extract the relevant conversation
+                    m = re.search(self.googlevoice_regex_conversation(id, read), text, re.S)
+                    if m is None:
+                        raise SMSError("conversation not found in SMS history")
+                    
+                    # Parse the conversation and extract the message
+                    m = re.search(self.googlevoice_regex_message(message), m.group(1))
+                    if m is None:
+                        #raise SMSError("message not found in conversation")
+                        continue
+                    
+                    # Check the message for error replies
+                    if m.group(4) is None:
+                        self.log_message(user, receiver, phone, public_text, "googlevoice")
+                        return None
+                    else:
+                        return m.group(4)
+                    
             else:
-                raise SMSError("conversation not found in json data")
-            
-            # Parse the feed and extract the relevant conversation
-            m = re.search(self.googlevoice_regex_conversation(id, read), text, re.S)
-            if m is None:
-                raise SMSError("conversation not found in SMS history")
-            
-            # Parse the conversation and extract the message
-            m = re.search(self.googlevoice_regex_message(message), m.group(1))
-            if m is None:
-                raise SMSError("message not found in conversation")
-            
-            # Check the message for error replies
-            if m.group(4) is None:
-                self.log_message(user, receiver, phone, public_text, "googlevoice")
-                return None
-            else:
-                return m.group(4)
+                raise SMSError("message not found in any of the matching conversations")
             
         except (URLError, SMSError) as e:
             return "Error sending message: %s" % (str(e),)
