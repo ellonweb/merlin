@@ -22,7 +22,7 @@
 # Basic loadable class, the baseclass for most plugins
 
 import re
-from Core.exceptions_ import LoadableError, PrefError, ParseError, ChanParseError, PNickParseError, UserError
+from Core.exceptions_ import MerlinSystemCall, LoadableError, PrefError, ParseError, ChanParseError, PNickParseError, UserError
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import Session
@@ -225,10 +225,11 @@ class loadable(object):
 # ###############################    SYSTEM    ############################## #
 # ########################################################################### #
 
-def system(trigger, command=False, admin=False):
+def system(trigger, command=False, admin=False, robocop=False):
     command = command or admin
     def wrapper(hook):
         trigg = trigger
+        systemcop = robocop
         class callback(loadable):
             __doc__ = hook.__doc__
             trigger = trigg
@@ -240,6 +241,10 @@ def system(trigger, command=False, admin=False):
             @route()
             def execute(loadable, message, access, params):
                 hook(message)
+            if systemcop is True:
+                @robohci
+                def robocop(loadable, message, **kwagrs):
+                    hook(message)
             def check_access(loadable, message, access=None, user=None, channel=None):
                 if command is not True:
                     return None

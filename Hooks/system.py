@@ -30,7 +30,7 @@ from Core.chanusertracker import CUT
 from Core.callbacks import Callbacks
 from Core.loadable import system
 
-@system('PRIVMSG', admin=True)
+@system('PRIVMSG', admin=True, robocop=True)
 def quit(message):
     """Quit IRC and close down"""
     msg = message.get_msg().split(None,1)
@@ -39,7 +39,7 @@ def quit(message):
     else:
         raise Quit
 
-@system('PRIVMSG', admin=True)
+@system('PRIVMSG', admin=True, robocop=True)
 def reboot(message):
     """Quit IRC reboot, reload and reconnect"""
     msg = message.get_msg().split(None,1)
@@ -48,7 +48,7 @@ def reboot(message):
     else:
         raise Reboot
 
-@system('PRIVMSG', admin=True)
+@system('PRIVMSG', admin=True, robocop=True)
 def reload(message):
     """Dynamically reload the Core and Hooks"""
     msg = message.get_msg().split(None,1)
