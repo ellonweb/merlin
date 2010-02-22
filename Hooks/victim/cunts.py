@@ -25,21 +25,20 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql import desc
 from Core.db import session
 from Core.maps import Updates, Planet, Alliance, Intel, FleetScan
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 from Core.config import Config
 from Core.paconf import PA
 
-@loadable.module("member")
 class cunts(loadable):
     """Target search, based on planets currently attacking our alliance, ordered by size"""
-    usage = "  [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
-    paramre = re.compile(r"\s+(.+)")
+    usage = " [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
     PrefError = "You must set your planet with !pref to use the bash option"
     alliancere=re.compile(r"(\S+)")
     rangere=re.compile(r"(<|>)?(\d+)")
     bashre=re.compile(r"(bash)",re.I)
     clusterre=re.compile(r"c(\d+)",re.I)
     
+    @route(r"\s+(.+)", access = "member")
     def execute(self, message, user, params):
         
         alliance=Alliance()

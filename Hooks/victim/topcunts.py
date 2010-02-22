@@ -19,62 +19,59 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import desc
 from sqlalchemy.sql.functions import count
 from Core.db import session
 from Core.maps import Updates, Galaxy, Planet, Alliance, User, Intel, FleetScan
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_planet
 from Core.config import Config
 from Core.paconf import PA
 
-@loadable.module("member")
 class topcunts(loadable):
     """Top planets attacking the specified target"""
     usage = " [x:y[:z]|alliance|user]"
-    paramre = (loadable.coordre, re.compile(r"(?:\s(\S+))?"),)
+    access = "member"
     
-    def execute(self, message, user, params):
-        
-        planet = None
-        galaxy = None
-        alliance = None
-        
-        # Planet or Galaxy
-        if len(params.groups()) == 5:
-            # Planet
-            if params.group(5) is not None:
-                planet = Planet.load(*params.group(1,3,5))
-                if planet is None:
-                    message.reply("No planet with coords %s:%s:%s found" % params.group(1,3,5))
-                    return
-            # Galaxy
+    @route(loadable.coord)
+    def planet_galaxy(self, message, user, params):
+        # Planet
+        if params.group(5) is not None:
+            planet = Planet.load(*params.group(1,3,5))
+            if planet is None:
+                message.reply("No planet with coords %s:%s:%s found" % params.group(1,3,5))
             else:
-                galaxy = Galaxy.load(*params.group(1,3))
-                if galaxy is None:
-                    message.reply("No galaxy with coords %s:%s" % params.group(1,3))
-                    return
-        # Alliance or User
-        else:
-            # Self
-            if params.group(1) is None:
-                planet = self.get_user_planet(user)
-            # Alliance or User
-            else:
-                alliance = Alliance.load(params.group(1))
-                # User
-                if alliance is None:
-                    u = User.load(params.group(1))
-                    if u is None:
-                        message.reply("No alliance or user matching '%s' found" % (params.group(1),))
-                        return
-                    elif u.planet is None:
-                        message.reply("User %s has not entered their planet details" % (u.name,))
-                        return
-                    else:
-                        planet = u.planet
+                self.execute(message, planet=planet)
 
+        # Galaxy
+        else:
+            galaxy = Galaxy.load(*params.group(1,3))
+            if galaxy is None:
+                message.reply("No galaxy with coords %s:%s" % params.group(1,3))
+            else:
+                self.execute(message, galaxy=galaxy)
+    
+    @route(r"\s+(\S+)")
+    def user_alliance(self, message, user, params):
+        alliance = Alliance.load(params.group(1))
+        if alliance is None:
+            u = User.load(name=params.group(1), exact=False, access="member")
+            if u is None:
+                message.reply("No alliance or user matching '%s' found" % (params.group(1),))
+            elif u.planet is None:
+                message.reply("User %s has not entered their planet details" % (u.name,))
+            else:
+                planet = u.planet
+                self.execute(message, planet=planet)
+        else:
+            self.execute(message, alliance=alliance)
+    
+    @route(r"\s*$")
+    @require_planet
+    def me(self, message, user, params):
+        self.execute(message, planet=user.planet)
+    
+    def execute(self, message, planet=None, galaxy=None, alliance=None):
         tick = Updates.current_tick()
         target = aliased(Planet)
         target_intel = aliased(Intel)
