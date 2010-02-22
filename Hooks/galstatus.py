@@ -24,11 +24,11 @@ import traceback
 from sqlalchemy.exc import IntegrityError
 from Core.db import session
 from Core.maps import Updates, Planet, User, FleetScan
-from Core.loadable import loadable
+from Core.loadable import system
 
 statusre=re.compile(r"(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\s+(.*?)\s+((Xan|Ter|Cat|Zik|Etd)\s+)?(\d+)\s+(Return|Attack|Defend)\s+(\d+)")
 
-@loadable.system('PRIVMSG')
+@system('PRIVMSG')
 def catcher(message):
     try:
         m = statusre.search(message.get_msg().replace("\x02",""))
