@@ -22,18 +22,17 @@
 from sqlalchemy.sql import asc
 from Core.db import session
 from Core.maps import Galaxy, Planet, Alliance, Intel
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
 options = ['alliance', 'nick', 'fakenick', 'defwhore', 'covop', 'scanner', 'dists', 'bg', 'gov', 'relay', 'reportchan', 'comment']
 
-@loadable.module("member")
 class intel(loadable):
     """View or set intel for a planet. Valid options: """
     __doc__ += ", ".join(options)
-    usage = " x.y[.z] [option=value]+"
-    paramre = loadable.coordre
+    usage = " <x.y[.z]> [option=value]+"
     
-    def execute(self, message, user, params):
+    @route(loadable.coord+r"\s*$", access = "member")
+    def view_intel(self, message, user, params):
         
         if params.group(5) is None:
             galaxy = Galaxy.load(*params.group(1,3))
@@ -64,6 +63,18 @@ class intel(loadable):
                 message.reply("No information stored for %s:%s" % (galaxy.x, galaxy.y,))
             return
         
+        planet = Planet.load(*params.group(1,3,5))
+        if planet is None:
+            message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
+            return
+        
+        if str(planet.intel):
+            message.reply("Information stored for %s:%s:%s -%s"% (planet.x, planet.y, planet.z, str(planet.intel),))
+        else:
+            message.reply("No information stored for %s:%s:%s"% (planet.x, planet.y, planet.z,))
+    
+    @route(loadable.planet_coord+r"\s+(\S.*)", access = "member")
+    def set_intel(self, message, user, params):
         planet = Planet.load(*params.group(1,3,5))
         if planet is None:
             message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
@@ -101,7 +112,7 @@ class intel(loadable):
             if opt == "comment":
                 planet.intel.comment = message.get_msg().split("comment=")[1]
         session.commit()
-        if planet.intel:
+        if str(planet.intel):
             message.reply("Information stored for %s:%s:%s -%s"% (planet.x, planet.y, planet.z, str(planet.intel),))
         else:
             message.reply("No information stored for %s:%s:%s"% (planet.x, planet.y, planet.z,))

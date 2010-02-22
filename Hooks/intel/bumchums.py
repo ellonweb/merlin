@@ -19,25 +19,23 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy.sql.functions import count
 from Core.db import session
 from Core.maps import Galaxy, Planet, Alliance, Intel
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class bumchums(loadable):
     """Pies"""
-    usage = " alliance number"
-    paramre = re.compile(r"\s(\S+)(?:\s(\d+))?")
+    usage = " <alliance> [number]"
     
+    @route(r"\s+(\S+)(?:\s+(\d+))?", access = "member")
     def execute(self, message, user, params):
         
         alliance = Alliance.load(params.group(1))
         if alliance is None:
             message.reply("No alliance matching '%s' found"%(params.group(1),))
             return
-        bums = int(params.group(2) or 1)
+        bums = int(params.group(2) or 2)
         Q = session.query(Galaxy.x, Galaxy.y, count())
         Q = Q.join(Galaxy.planets)
         Q = Q.join(Planet.intel)

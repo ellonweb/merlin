@@ -19,19 +19,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy.sql import asc
 from sqlalchemy.sql.functions import count, sum
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class racism(loadable):
     """Shows averages for each race matching a given alliance in intel."""
-    usage = " alliance"
-    paramre = re.compile(r"\s(\S+)")
+    usage = " <alliance>"
     
+    @route(r"\s+(\S+)", access = "member")
     def execute(self, message, user, params):
         
         alliance = Alliance.load(params.group(1))
