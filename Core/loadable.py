@@ -74,8 +74,8 @@ class loadable(object):
         return self
     
     def __init__(self):
-        self.commandre = re.compile(self.name+r"(\s+.*|$)",re.I)
-        self.helpre = re.compile("help "+self.name,re.I)
+        self.commandre = re.compile(r"%s(\s+.*|$)" %(self.name,), re.I)
+        self.helpre = re.compile(r"help %s\s*$" % (self.name,), re.I)
         self.usage = (self.name + self.usage) if self.usage else None
     
     def __call__(self, message):
