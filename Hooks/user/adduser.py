@@ -19,17 +19,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.exceptions_ import UserError
 from Core.config import Config
 from Core.db import session
 from Core.maps import User
 from Core.loadable import loadable, route, require_user
 
-#@loadable.module("admin")
 class adduser(loadable):
     """Used to add new users with the specified pnick and access level"""
-    usage = " pnick access"
+    usage = " <pnick> <access>"
     
     @route(r"\s+(.+)\s+(\S+)", access = "admin")
     @require_user

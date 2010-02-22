@@ -19,20 +19,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.config import Config
 from Core.db import session
 from Core.maps import User
 from Core.chanusertracker import CUT
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("admin")
 class edituser(loadable):
     """Used to change a user's access or (de)activate them"""
-    usage = " user <[access]|true|false>"
-    paramre = re.compile(r"\s(\S+)\s(\S+)")
+    usage = " <user> (<access>|true|false)"
     
-    @loadable.require_user
+    @route(r"\s+(\S+)\s+(\S+)", access = "admin")
+    @require_user
     def execute(self, message, user, params):
         
         username = params.group(1)

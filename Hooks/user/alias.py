@@ -19,19 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-
-import re
 from Core.db import session
 from Core.maps import User
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module()
 class alias(loadable):
     """Set an alias that maps to your pnick, useful if you have a different nick than your pnick and people use autocomplete."""
     usage = " <alias> (at most 15 characters)"
-    paramre = re.compile(r"(?:\s+(\S{3,15}))?")
     
-    @loadable.require_user
+    @route(r"(?:\s+(\S{3,15}))?")
+    @require_user
     def execute(self, message, user, params):
 
         # assign param variables 

@@ -19,19 +19,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.config import Config
 from Core.db import session
 from Core.maps import Alliance, User
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("member")
 class getanewdaddy(loadable):
     """Remove sponsorship of a member. Their access will be reduced to "galmate" level. Anyone is free to sponsor the person back under the usual conditions. This isn't a kick and it's not final.""" 
-    usage = " pnick"
-    paramre = re.compile(r"\s(\S+)")
+    usage = " <pnick>"
     
-    @loadable.require_user
+    @route(r"\s+(\S+)", access = "member")
+    @require_user
     def execute(self, message, user, params):
 
         # do stuff here

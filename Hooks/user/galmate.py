@@ -19,18 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.config import Config
 from Core.db import session
 from Core.maps import User
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("half")
 class galmate(loadable):
     """Add a user with galmate access"""
-    usage = " pnick"
-    paramre = re.compile(r"\s+(\S+)")
+    usage = " <pnick>"
     
+    @route(r"\s+(\S+)", access = "half")
     def execute(self, message, user, params):
         
         pnick = params.group(1)
