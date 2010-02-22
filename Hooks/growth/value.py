@@ -19,20 +19,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy import and_
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import asc
 from Core.db import session
 from Core.maps import Updates, Planet, PlanetHistory
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class value(loadable):
     """Value of a planet over the last 15 ticks"""
-    usage = " x:y:z"
-    paramre = re.compile(loadable.planet_coordre.pattern+r"(?:\s(\d+))?")
+    usage = " <x:y:z>"
     
+    @route(loadable.planet_coord+r"(?:\s(\d+))?")
     def execute(self, message, user, params):
         
         p = Planet.load(*params.group(1,3,5))

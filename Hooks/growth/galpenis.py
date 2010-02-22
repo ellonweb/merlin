@@ -20,14 +20,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from Core.maps import Galaxy
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class galpenis(loadable):
     """Cock"""
-    usage = " x:y"
-    paramre = loadable.coordre
+    usage = " <x:y>"
     
+    @route(loadable.coord)
     def execute(self, message, user, params):
         
         galaxy = Galaxy.load(*params.group(1,3))

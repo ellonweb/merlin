@@ -19,17 +19,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.config import Config
 from Core.maps import User
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class epenis(loadable):
     """Penis"""
-    usage = " user"
-    paramre = re.compile(r"(?:\s(\S+))?")
+    usage = " [user]"
     
+    @route(r"(?:\s+(\S+))?", access = "member")
     def execute(self, message, user, params):
         
         if params.group(1) is not None:

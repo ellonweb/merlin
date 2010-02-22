@@ -23,12 +23,12 @@ from sqlalchemy.sql import asc
 from Core.config import Config
 from Core.db import session
 from Core.maps import Alliance, User, epenis
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class bigdicks(loadable):
     """BEEFCAKE!!!11onetwo"""
     
+    @route(access = "member")
     def execute(self, message, user, params):
         
         alliance = Alliance.load(Config.get("Alliance","name"))
