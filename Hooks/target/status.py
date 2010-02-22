@@ -28,8 +28,9 @@ from Core.loadable import loadable, route
 class status(loadable):
     """List of targets booked by user, or list of bookings for a given galaxy or planet"""
     usage = " [x:y[:z]|user|alliance] [tick]"
+    access = "half"
     
-    @route(loadable.coord+r"(?:\s+(\d+))?", access = "half")
+    @route(loadable.coord+r"(?:\s+(\d+))?")
     def planet_galaxy(self, message, user, params):
         tick = Updates.current_tick()
         when = int(params.group(6) or 0)
@@ -117,7 +118,7 @@ class status(loadable):
             message.reply("\n".join(replies))
             return
     
-    @route(r"(?:\s+(\S+))?(?:\s+(\d+))?", access = "half")
+    @route(r"(?:\s+(\S+))?(?:\s+(\d+))?")
     def user_alliance(self, message, user, params):
         tick = Updates.current_tick()
         when = int(params.group(2) or 0)
