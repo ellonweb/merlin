@@ -23,17 +23,33 @@ import re
 from Core.config import Config
 from Core.db import session
 from Core.maps import Planet, Alliance, User, Intel
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module()
 class pref(loadable):
     """Set your planet, password for the webby, email and phone number; order doesn't matter"""
     usage = " [planet=x.y.z] [password=pass] [email=my.email@address.com] [phone=999] [pubphone=T|F] [smsmode=clickatell|google]"
-    paramre = re.compile(r"\s(.+)")
     planet_coordre = re.compile(loadable.planet_coord)
     
-    @loadable.require_user
-    def execute(self, message, user, params):
+    @route(r"\s*$")
+    @require_user
+    def show_prefs(self, message, user, params):
+        reply = ""
+        if user.planet is not None:
+            reply += " planet=%s:%s:%s" % (user.planet.x,user.planet.y,user.planet.z,)
+        if user.email:
+            reply += " email=%s" % (user.email,)
+        if user.phone:
+            reply += " phone=%s pubphone=%s" % (user.phone, str(user.pubphone)[0],)
+            if Config.get("Misc", "sms") == "combined" and user.googlevoice is not None:
+                reply += " smsmode=%s" % ("G" if user.googlevoice else "C",)
+        if len(reply) > 0:
+            message.reply("Your preferences are:" + reply)
+        else:
+            message.reply("You haven't set any preferences, use !help pref to view the options")
+    
+    @route(r"\s+(.+)")
+    @require_user
+    def set_prefs(self, message, user, params):
         
         params = self.split_opts(params.group(1))
         reply = ""
@@ -67,8 +83,12 @@ class pref(loadable):
                 else:
                     reply += " email=%s"%(val)
             if opt == "phone":
-                user.phone = val
-                reply += " phone=%s"%(val)
+                if val in self.nulls:
+                    user.phone = ""
+                    reply += " phone=None"
+                else:
+                    user.phone = val
+                    reply += " phone=%s"%(val)
             if opt == "pubphone":
                 if val.lower() in self.true:
                     user.pubphone = True
