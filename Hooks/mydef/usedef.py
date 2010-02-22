@@ -19,18 +19,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.db import session
 from Core.maps import Updates, User, Ship, UserFleet, FleetLog
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("member")
 class usedef(loadable):
-    """"""
     usage = " <pnick> <ship>"
-    paramre=re.compile(r"\s+(\S+)\s+(.*)")
     
-    @loadable.require_user
+    @route(r"\s+(\S+)\s+(.*)", access = "member")
+    @require_user
     def execute(self, message, user, params):
         
         name=params.group(1)

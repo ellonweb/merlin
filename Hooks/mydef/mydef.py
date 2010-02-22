@@ -22,17 +22,16 @@
 import re
 from Core.db import session
 from Core.maps import Updates, Ship, UserFleet
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("member")
 class mydef(loadable):
     """Add your fleets for defense listing. For example: 2x 20k Barghest 30k Harpy Call me any time for hot shipsex."""
     usage = " [fleets] x <[ship count] [ship name]> [comment]"
-    paramre = re.compile(r"\s+(\d)\s*x\s*(.*)",re.I)
     countre = re.compile(r"^(\d+(?:\.\d+)?[mk]?)$",re.I)
     shipre = re.compile(r"^(\w+),?$")
     
-    @loadable.require_user
+    @route(r"\s+(\d)\s*x\s*(.*)", access = "member")
+    @require_user
     def execute(self, message, user, params):
         
         fleetcount=int(params.group(1))

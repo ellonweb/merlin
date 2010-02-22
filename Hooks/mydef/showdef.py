@@ -19,29 +19,28 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
-from Core.db import session
 from Core.maps import Updates, User
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("member")
 class showdef(loadable):
-    """"""
     usage = " <pnick>"
-    paramre = re.compile(r"(?:\s+(\S+))?")
+    access = "member"
     
-    @loadable.require_user
-    def execute(self, message, user, params):
-        
+    @route(r"\s+(\S+)")
+    def user(self, message, user, params):
         name=params.group(1)
-        if name is not None:
-            u = User.load(name=name, exact=False, access="member")
-        else:
-            u = user
+        u = User.load(name=name, exact=False, access="member")
         if u is None:
             message.reply("No members matching %s found"%(name,))
-            return
-        
+        else:
+            self.execute(message, u)
+    
+    @route(r"\s*$")
+    @require_user
+    def me(self, message, user, params):
+        self.execute(message, user)
+    
+    def execute(self, message, u):
         tick = Updates.current_tick()
         ships = u.fleets.all()
         
