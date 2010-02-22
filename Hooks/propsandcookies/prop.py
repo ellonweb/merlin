@@ -20,269 +20,269 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import datetime
-import re
 from sqlalchemy.sql import asc, desc, literal, union
 from sqlalchemy.sql.functions import current_timestamp, sum
 from Core.config import Config
 from Core.db import session
 from Core.maps import Alliance, User, Invite, Kick, Vote
 from Core.messages import PUBLIC_REPLY
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user, channel
 
-@loadable.module("member")
 class prop(loadable):
     """A proposition is a vote to do something. For now, you can raise propositions to invite or kick someone. Once raised the proposition will stand until you expire it.  Make sure you give everyone time to have their say. Votes for and against a proposition are weighted by carebears. You must have at least 1 carebear to vote."""
     usage = " [<invite|kick> <pnick> <comment>] | [list] | [vote <number> <yes|no|abstain>] | [expire <number>] | [show <number>] | [cancel <number>] | [recent] | [search <pnick>]"
-    paramre = (re.compile(r"\s+(invite|kick)\s+(\S+)\s+(.+)",re.I),
-               re.compile(r"\s+(show|expire|cancel)\s+(\d+)",re.I),
-               re.compile(r"\s+(vote)\s+(\d+)\s+(yes|no|abstain|veto)",re.I),
-               re.compile(r"\s+(list|recent)",re.I),
-               re.compile(r"\s+(search)\s+(\S+)",re.I),
-               )
+    access = "member"
     
-    @loadable.require_user
-    def execute(self, message, user, params):
-        mode = params.group(1).lower()
+    @route(r"\s+show\s+(\d+)")
+    def show(self, message, user, params):
+        id = params.group(1)
+        prop = self.load_prop(id)
+        if prop is None:
+            message.reply("No proposition number %s exists (idiot)."%(id,))
+            return
         
-        if mode in ("invite", "kick", "expire", "cancel",):
-            self.execute2(message, user, params)
+        now = datetime.datetime.now()
+        age = (now - prop.created).days
+        reply = "proposition %s (%s days old):" %(prop.id,age,)
+        reply+= " %s %s." %(prop.type,prop.person,)
+        reply+= " %s commented '%s'." %(prop.proposer.name,prop.comment_text)
         
-        elif mode == "show":
-            id = params.group(2)
-            prop = self.load_prop(id)
-            if prop is None:
-                message.reply("No proposition number %s exists (idiot)."%(id,))
-                return
-            
-            now = datetime.datetime.now()
-            age = (now - prop.created).days
-            reply = "proposition %s (%s days old):" %(prop.id,age,)
-            reply+= " %s %s." %(prop.type,prop.person,)
-            reply+= " %s commented '%s'." %(prop.proposer.name,prop.comment_text)
-            
-            if not prop.active:
-                reply+= " This prop expired %d days ago."%((now-prop.closed).days,)
-            
-            if prop.active:
-                veto = prop.votes.filter_by(vote="veto").all()
-                if len(veto) > 0:
-                    reply+= " Vetoing: "
-                    reply+= ", ".join(map(lambda x: x.voter.name, veto))
-            
-            message.reply(reply)
-            
-            if prop.active:
-                vote = prop.votes.filter_by(voter=user).first()
-                if vote is not None:
-                    reply = "You are currently voting '%s'"%(vote.vote,)
-                    if vote.vote not in ("abstain","veto",):
-                        reply+= " with %s carebears"%(vote.carebears,)
-                    reply+= " on this proposition."
-                else:
-                    reply = "You are not currently voting on this proposition."
-                message.alert(reply)
-            
-            if not prop.active:
-                reply = self.text_result(prop.vote_result.lower(), *self.sum_votes(prop))
-                reply+= self.text_summary(prop)
-                message.reply(reply)
+        if not prop.active:
+            reply+= " This prop expired %d days ago."%((now-prop.closed).days,)
         
-        elif mode == "vote":
-            id = params.group(2)
-            vote = params.group(3).lower()
-            prop = self.load_prop(id)
-            if prop is None:
-                message.reply("No proposition number %s exists (idiot)."%(id,))
-                return
-            if not prop.active:
-                message.reply("You can't vote on prop %s, it's expired."%(id,))
-                return
-            if prop.proposer == user:
-                message.reply("Arbitrary Munin rule #167: No voting on your own props.")
-                return
-            if prop.person == user.name and vote == 'veto':
-                message.reply("You can't veto a vote to kick you.")
-                return
-            
-            old_vote = prop.votes.filter(Vote.voter==user).first()
-            prop.votes.filter(Vote.voter==user).delete()
-            prop.votes.append(Vote(voter=user, vote=vote, carebears=user.carebears))
-            session.commit()
-            
-            if old_vote is None:
-                reply = "Set your vote on proposition %s as %s"%(id,vote,)
+        if prop.active:
+            veto = prop.votes.filter_by(vote="veto").all()
+            if len(veto) > 0:
+                reply+= " Vetoing: "
+                reply+= ", ".join(map(lambda x: x.voter.name, veto))
+        
+        message.reply(reply)
+        
+        if prop.active:
+            vote = prop.votes.filter_by(voter=user).first()
+            if vote is not None:
+                reply = "You are currently voting '%s'"%(vote.vote,)
+                if vote.vote not in ("abstain","veto",):
+                    reply+= " with %s carebears"%(vote.carebears,)
+                reply+= " on this proposition."
             else:
-                reply = "Changed your vote on proposition %s from %s"%(id,old_vote.vote,)
-                if old_vote.vote not in ("abstain","veto",):
-                    reply+= " (%s)"%(old_vote.carebears,)
-                reply+= " to %s"%(vote,)
-            if vote not in ("abstain","veto",):
-                reply+= " with %s carebears"%(user.carebears,)
-            reply+= "."
+                reply = "You are not currently voting on this proposition."
+            message.alert(reply)
+        
+        if not prop.active:
+            reply = self.text_result(prop.vote_result.lower(), *self.sum_votes(prop))
+            reply+= self.text_summary(prop)
             message.reply(reply)
-        
-        elif mode == "list":
-            prev = []
-            for id, person, result, type in self.get_open_props():
-                prop_info = "%s: %s %s"%(id,type,person)
-                vote = user.votes.filter_by(prop_id=id).first()
-                if vote is not None and message.reply_type() is not PUBLIC_REPLY:
-                    prop_info += " (%s,%s)"%(vote.vote[0].upper(),vote.carebears)
-                prev.append(prop_info)
-            message.reply("Propositions currently being voted on: %s"%(", ".join(prev),))
-        
-        elif mode == "recent":
-            prev = []
-            for id, person, result, type in self.get_recent_props():
-                prev.append("%s: %s %s %s"%(id,type,person,result[0].upper() if result else ""))
-            message.reply("Recently expired propositions: %s"%(", ".join(prev),))
-        
-        elif mode == "search":
-            search = params.group(2)
-            prev = []
-            for id, person, result, type in self.search_props(search):
-                prev.append("%s: %s %s %s"%(id,type,person,result[0].upper() if result else ""))
-            message.reply("Propositions matching '%s': %s"%(search, ", ".join(prev),))
     
-    @loadable.channel("home")
-    def execute2(self, message, user, params):
-        mode = params.group(1).lower()
+    @route(r"\s+vote\s+(\d+)\s+(yes|no|abstain|veto)")
+    @require_user
+    def vote(self, message, user, params):
+        id = params.group(1)
+        vote = params.group(2).lower()
+        prop = self.load_prop(id)
+        if prop is None:
+            message.reply("No proposition number %s exists (idiot)."%(id,))
+            return
+        if not prop.active:
+            message.reply("You can't vote on prop %s, it's expired."%(id,))
+            return
+        if prop.proposer == user:
+            message.reply("Arbitrary Munin rule #167: No voting on your own props.")
+            return
+        if prop.person == user.name and vote == 'veto':
+            message.reply("You can't veto a vote to kick you.")
+            return
         
-        if mode == "invite":
-            person = params.group(2)
-            u = User.load(name=person,access="member")
-            if u is not None:
-                message.reply("Stupid %s, that wanker %s is already a member."%(user.name,person))
-                return
-            if self.is_already_proposed_invite(person):
-                message.reply("Silly %s, there's already a proposal to invite %s."%(user.name,person))
-                return
-            if not self.member_count_below_limit():
-                message.reply("You have tried to invite somebody, but we have too many losers and I can't be bothered dealing with more than %s of you."%(Config.getint("Alliance", "members"),))
-                return
-            anc = user.has_ancestor(person)
-            if anc is True:
-                message.reply("Ew, incest.")
-                return
-            if anc is None:
-                message.reply("Filthy orphans should be castrated.")
-                return
-            
-            prop = Invite(proposer=user, person=person, comment_text=params.group(3))
-            session.add(prop)
-            session.commit()
-            
-            reply = "%s created a new proposition (nr. %d) to invite %s." %(user.name, prop.id, person)
-            reply+= " When people have been given a fair shot at voting you can call a count using !prop expire %d."%(prop.id,)
-            message.reply(reply)
+        old_vote = prop.votes.filter(Vote.voter==user).first()
+        prop.votes.filter(Vote.voter==user).delete()
+        prop.votes.append(Vote(voter=user, vote=vote, carebears=user.carebears))
+        session.commit()
         
-        elif mode == "kick":
-            person = params.group(2)
-            if person.lower() == Config.get("Connection","nick").lower():
-                message.reply("I'll peck your eyes out, cunt.")
-                return
-            u = User.load(name=person,access="member")
-            if u is None:
-                message.reply("Stupid %s, you can't kick %s, they're not a member."%(user.name,person))
-                return
-            if self.is_already_proposed_kick(person):
-                message.reply("Silly %s, there's already a proposal to kick %s."%(user.name,person))
-                return
-            if u.access > user.access:
-                message.reply("Unfortunately I like %s more than you. So none of that."%(u.name,))
-                return
-            
-            prop = Kick(proposer=user, kicked=u, comment_text=params.group(3))
-            session.add(prop)
-            session.commit()
-            
-            reply = "%s created a new proposition (nr. %d) to kick %s." %(user.name, prop.id, person)
-            reply+= " When people have been given a fair shot at voting you can call a count using !prop expire %d."%(prop.id,)
-            message.reply(reply)
+        if old_vote is None:
+            reply = "Set your vote on proposition %s as %s"%(id,vote,)
+        else:
+            reply = "Changed your vote on proposition %s from %s"%(id,old_vote.vote,)
+            if old_vote.vote not in ("abstain","veto",):
+                reply+= " (%s)"%(old_vote.carebears,)
+            reply+= " to %s"%(vote,)
+        if vote not in ("abstain","veto",):
+            reply+= " with %s carebears"%(user.carebears,)
+        reply+= "."
+        message.reply(reply)
+    
+    @route(r"\s+list")
+    def list(self, message, user, params):
+        prev = []
+        for id, person, result, type in self.get_open_props():
+            prop_info = "%s: %s %s"%(id,type,person)
+            vote = user.votes.filter_by(prop_id=id).first()
+            if vote is not None and message.reply_type() is not PUBLIC_REPLY:
+                prop_info += " (%s,%s)"%(vote.vote[0].upper(),vote.carebears)
+            prev.append(prop_info)
+        message.reply("Propositions currently being voted on: %s"%(", ".join(prev),))
+    
+    @route(r"\s+recent")
+    def recent(self, message, user, params):
+        prev = []
+        for id, person, result, type in self.get_recent_props():
+            prev.append("%s: %s %s %s"%(id,type,person,result[0].upper() if result else ""))
+        message.reply("Recently expired propositions: %s"%(", ".join(prev),))
+    
+    @route(r"\s+search\s+(\S+)")
+    def search(self, message, user, params):
+        search = params.group(1)
+        prev = []
+        for id, person, result, type in self.search_props(search):
+            prev.append("%s: %s %s %s"%(id,type,person,result[0].upper() if result else ""))
+        message.reply("Propositions matching '%s': %s"%(search, ", ".join(prev),))
+    
+    @route(r"\s+invite\s+(\S+)\s+(.+)")
+    @channel("home")
+    @require_user
+    def invite(self, message, user, params):
+        person = params.group(1)
+        u = User.load(name=person,access="member")
+        if u is not None:
+            message.reply("Stupid %s, that wanker %s is already a member."%(user.name,person))
+            return
+        if self.is_already_proposed_invite(person):
+            message.reply("Silly %s, there's already a proposal to invite %s."%(user.name,person))
+            return
+        if not self.member_count_below_limit():
+            message.reply("You have tried to invite somebody, but we have too many losers and I can't be bothered dealing with more than %s of you."%(Config.getint("Alliance", "members"),))
+            return
+        anc = user.has_ancestor(person)
+        if anc is True:
+            message.reply("Ew, incest.")
+            return
+        if anc is None:
+            message.reply("Filthy orphans should be castrated.")
+            return
         
-        elif mode == "expire":
-            id = params.group(2)
-            prop = self.load_prop(id)
-            if prop is None:
-                message.reply("No proposition number %s exists (idiot)."%(id,))
-                return
-            if prop.proposer is not user and not user.is_admin():
-                message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
-                return
-            if prop.type == "invite" and not self.member_count_below_limit():
-                message.reply("You have tried to invite somebody, but we have too many losers and I can't be bothered dealing with more than %s of you."%(Config.getint("Alliance", "members"),))
-                return
-            
-            self.recalculate_carebears(prop)
-            
-            yes, no, veto = self.sum_votes(prop)
-            passed = yes > no and veto <= 0
-            vote_result = ['no','yes'][passed]
-            
-            reply = self.text_result(vote_result, yes, no, veto)
-            reply+= self.text_summary(prop)
-            message.reply(reply)
+        prop = Invite(proposer=user, person=person, comment_text=params.group(2))
+        session.add(prop)
+        session.commit()
         
-            if prop.type == "invite" and passed:
-                pnick = prop.person
-                access = Config.getint("Access", "member")
-                member = User.load(name=pnick, active=False)
-                if member is None:
-                    member = User(name=pnick, access=access, sponsor=prop.proposer.name)
-                    session.add(member)
-                elif not member.active:
-                    member.active = True
-                    member.access = access
-                    member.sponsor = prop.proposer.name
-                elif not member.is_member():
-                    member.access = access
-                    member.sponsor = prop.proposer.name
-                message.privmsg("adduser %s %s 399" %(Config.get("Channels","home"), pnick,), "P")
-                message.reply("%s has been added to %s and given member level access to me."%(pnick,Config.get("Channels","home")))
-            
-            if prop.type == "kick" and passed:
-                idiot = prop.kicked
-                if "galmate" in Config.options("Access"):
-                    idiot.access = Config.getint("Access","galmate")
-                else:
-                    idiot.access = 0
-                
-                if idiot.planet is not None and idiot.planet.intel is not None:
-                    intel = idiot.planet.intel
-                    alliance = Alliance.load(Config.get("Alliance","name"))
-                    if intel.alliance == alliance:
-                        intel.alliance = None
-                
-                message.privmsg("remuser %s %s"%(Config.get("Channels","home"), idiot.name,),'p')
-                message.privmsg("ban %s *!*@%s.users.netgamers.org Your sponsor doesn't like you anymore"%(Config.get("Channels","home"), idiot.name,),'p')
-                message.privmsg("note send %s A proposition to kick you from %s has been raised by %s with reason '%s' and passed by a vote of %s to %s."%(idiot.name,Config.get("Alliance","name"),prop.proposer.name,prop.comment_text,yes,no),'p')
-                message.reply("%s has been reduced to \"galmate\" level and removed from the channel."%(idiot.name,))
-            
-            prop.active = False
-            prop.closed = current_timestamp()
-            prop.vote_result = vote_result
-            session.commit()
+        reply = "%s created a new proposition (nr. %d) to invite %s." %(user.name, prop.id, person)
+        reply+= " When people have been given a fair shot at voting you can call a count using !prop expire %d."%(prop.id,)
+        message.reply(reply)
+    
+    @route(r"\s+kick\s+(\S+)\s+(.+)")
+    @channel("home")
+    @require_user
+    def kick(self, message, user, params):
+        person = params.group(1)
+        if person.lower() == Config.get("Connection","nick").lower():
+            message.reply("I'll peck your eyes out, cunt.")
+            return
+        u = User.load(name=person,access="member")
+        if u is None:
+            message.reply("Stupid %s, you can't kick %s, they're not a member."%(user.name,person))
+            return
+        if self.is_already_proposed_kick(person):
+            message.reply("Silly %s, there's already a proposal to kick %s."%(user.name,person))
+            return
+        if u.access > user.access:
+            message.reply("Unfortunately I like %s more than you. So none of that."%(u.name,))
+            return
         
-        elif mode == "cancel":
-            id = params.group(2)
-            prop = self.load_prop(id)
-            if prop is None:
-                message.reply("No proposition number %s exists (idiot)."%(id,))
-                return
-            if prop.proposer is not user and not user.is_admin():
-                message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
-                return
+        prop = Kick(proposer=user, kicked=u, comment_text=params.group(2))
+        session.add(prop)
+        session.commit()
+        
+        reply = "%s created a new proposition (nr. %d) to kick %s." %(user.name, prop.id, person)
+        reply+= " When people have been given a fair shot at voting you can call a count using !prop expire %d."%(prop.id,)
+        message.reply(reply)
+    
+    @route(r"\s+expire\s+(\d+)")
+    @channel("home")
+    @require_user
+    def expire(self, message, user, params):
+        id = params.group(1)
+        prop = self.load_prop(id)
+        if prop is None:
+            message.reply("No proposition number %s exists (idiot)."%(id,))
+            return
+        if prop.proposer is not user and not user.is_admin():
+            message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
+            return
+        if prop.type == "invite" and not self.member_count_below_limit():
+            message.reply("You have tried to invite somebody, but we have too many losers and I can't be bothered dealing with more than %s of you."%(Config.getint("Alliance", "members"),))
+            return
+        
+        self.recalculate_carebears(prop)
+        
+        yes, no, veto = self.sum_votes(prop)
+        passed = yes > no and veto <= 0
+        vote_result = ['no','yes'][passed]
+        
+        reply = self.text_result(vote_result, yes, no, veto)
+        reply+= self.text_summary(prop)
+        message.reply(reply)
+        
+        if prop.type == "invite" and passed:
+            pnick = prop.person
+            access = Config.getint("Access", "member")
+            member = User.load(name=pnick, active=False)
+            if member is None:
+                member = User(name=pnick, access=access, sponsor=prop.proposer.name)
+                session.add(member)
+            elif not member.active:
+                member.active = True
+                member.access = access
+                member.sponsor = prop.proposer.name
+            elif not member.is_member():
+                member.access = access
+                member.sponsor = prop.proposer.name
+            message.privmsg("adduser %s %s 399" %(Config.get("Channels","home"), pnick,), "P")
+            message.reply("%s has been added to %s and given member level access to me."%(pnick,Config.get("Channels","home")))
+        
+        if prop.type == "kick" and passed:
+            idiot = prop.kicked
+            if "galmate" in Config.options("Access"):
+                idiot.access = Config.getint("Access","galmate")
+            else:
+                idiot.access = 0
             
-            vote_result = "cancel"
+            if idiot.planet is not None and idiot.planet.intel is not None:
+                intel = idiot.planet.intel
+                alliance = Alliance.load(Config.get("Alliance","name"))
+                if intel.alliance == alliance:
+                    intel.alliance = None
             
-            reply = self.text_result(vote_result, yes, no, veto)
-            reply+= self.text_summary(prop)
-            message.reply(reply)
-            
-            prop.active = False
-            prop.closed = current_timestamp()
-            prop.vote_result = vote_result
-            session.commit()
+            message.privmsg("remuser %s %s"%(Config.get("Channels","home"), idiot.name,),'p')
+            message.privmsg("ban %s *!*@%s.users.netgamers.org Your sponsor doesn't like you anymore"%(Config.get("Channels","home"), idiot.name,),'p')
+            message.privmsg("note send %s A proposition to kick you from %s has been raised by %s with reason '%s' and passed by a vote of %s to %s."%(idiot.name,Config.get("Alliance","name"),prop.proposer.name,prop.comment_text,yes,no),'p')
+            message.reply("%s has been reduced to \"galmate\" level and removed from the channel."%(idiot.name,))
+        
+        prop.active = False
+        prop.closed = current_timestamp()
+        prop.vote_result = vote_result
+        session.commit()
+    
+    @route(r"\s+cancel\s+(\d+)")
+    @channel("home")
+    @require_user
+    def cancel(self, message, user, params):
+        id = params.group(1)
+        prop = self.load_prop(id)
+        if prop is None:
+            message.reply("No proposition number %s exists (idiot)."%(id,))
+            return
+        if prop.proposer is not user and not user.is_admin():
+            message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
+            return
+        
+        vote_result = "cancel"
+        
+        reply = self.text_result(vote_result, yes, no, veto)
+        reply+= self.text_summary(prop)
+        message.reply(reply)
+        
+        prop.active = False
+        prop.closed = current_timestamp()
+        prop.vote_result = vote_result
+        session.commit()
     
     def member_count_below_limit(self):
         Q = session.query(User).filter(User.active == True).filter(User.access >= Config.getint("Access", "member"))

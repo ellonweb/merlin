@@ -19,20 +19,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy.sql import desc
 from sqlalchemy.sql.functions import sum
 from Core.db import session
 from Core.maps import User, Cookie
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("member")
 class yourmum(loadable):
-    """"""
     usage = " [pnick]"
-    paramre = re.compile(r"(?:\s+(\S+))?")
     
-    @loadable.require_user
+    @route(r"(?:\s+(\S+))?", access = "member")
+    @require_user
     def execute(self, message, user, params):
         
         search = params.group(1)
@@ -45,6 +42,10 @@ class yourmum(loadable):
             return
         
         most_given = self.get_ten_biggest_mums(u)
+        
+        if len(most_given) < 1:
+            message.reply("%s doesn't have any circle jerking friends, what a loner!" % (u.name,))
+            return
         
         reply = "%s is %s carebears fat. These people care most for %s: " % (u.name,u.carebears,u.name)
         reply+= ", ".join(map(lambda x: "%s (%s)"%(x[0],x[1]),most_given))

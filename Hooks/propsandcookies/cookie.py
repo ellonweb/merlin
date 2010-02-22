@@ -20,29 +20,31 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import datetime
-import re
 from sqlalchemy.sql.functions import current_timestamp
 from Core.config import Config
 from Core.db import session
 from Core.maps import User, Cookie
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user, channel
 
-@loadable.module("member")
 class cookie(loadable):
     """Cookies are used to give out carebears. Carebears are rewards for carefaces. Give cookies to people when you think they've done something beneficial for you or for the alliance in general."""
     usage = " [howmany] <receiver> <reason> | [stat]"
-    paramre = re.compile(r"\s+(?:(?:(\d+)\s+)?(\S\S+)\s+(\S.*)|statu?s?)",re.I)
+    access = "member"
     
-    @loadable.channel("home")
-    @loadable.require_user
-    def execute(self, message, user, params):
+    @route(r"\s+statu?s?")
+    @require_user
+    def stat(self, message, user, params):
+        #Stats
+        self.update_available_cookies(user)
+        message.reply("You have %d cookies left until next bakeday, %s"%(user.available_cookies,user.name))
+    
+    @route(r"\s+(?:(\d+)\s+)?(\S\S+)\s+(\S.*)")
+    @channel("home")
+    @require_user
+    def cookie(self, message, user, params):
+        # Gief cookies!
         
         self.update_available_cookies(user)
-        
-        #Stats
-        if params.group(2) is None:
-            message.reply("You have %d cookies left until next bakeday, %s"%(user.available_cookies,user.name))
-            return
         
         howmany=params.group(1)
         if howmany:

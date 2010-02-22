@@ -19,20 +19,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.config import Config
 from Core.db import session
 from Core.maps import User
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user, channel
 
-@loadable.module("member")
 class adopt(loadable):
     """Adopt an orphan"""
     usage = " <pnick>"
-    paramre = re.compile(r"\s+(\S+)")
     
-    @loadable.channel("home")
-    @loadable.require_user
+    @route(r"\s+(\S+)", access = "member")
+    @channel("home")
+    @require_user
     def execute(self, message, user, params):
         
         adoptee = params.group(1)

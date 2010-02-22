@@ -24,12 +24,12 @@ from sqlalchemy.orm import aliased
 from Core.config import Config
 from Core.db import session
 from Core.maps import User
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class orphans(loadable):
     """Lists all members whose sponsors are no longer members. Use !adopt to someone."""
     
+    @route(access = "member")
     def execute(self, message, user, params):
         
         user = aliased(User)
