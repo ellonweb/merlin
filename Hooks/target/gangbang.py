@@ -19,18 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy.sql import asc
 from Core.db import session
 from Core.maps import Updates, Planet, Alliance, User, Intel, Target
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("half")
 class gangbang(loadable):
     """List of booked targets in an alliance"""
-    usage = " alliance [tick]"
-    paramre = re.compile(r"\s([\w-]+)(?:\s(\d+))?")
+    usage = " <alliance> [tick]"
     
+    @route(r"\s+(\S+)(?:\s+(\d+))?", access = "half")
     def execute(self, message, user, params):
         
         alliance = Alliance(name="Unknown") if params.group(1).lower() == "unknown" else Alliance.load(params.group(1))

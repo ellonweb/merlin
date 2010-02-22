@@ -19,19 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy.sql import asc
 from Core.db import session
 from Core.maps import Updates, Planet, User, Target
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("half")
 class unbook(loadable):
-    """"""
-    usage = " x:y:z [eta|landing tick]"
-    paramre = re.compile(loadable.planet_coordre.pattern+r"(?:\s(\d+))?(?:\s(yes))?")
+    usage = " <x:y:z> [eta|landing tick]"
     
-    @loadable.require_user
+    @route(loadable.planet_coord+r"(?:\s(\d+))?(?:\s(y))?", access = "half")
+    @require_user
     def execute(self, message, user, params):
         planet = Planet.load(*params.group(1,3,5))
         if planet is None:

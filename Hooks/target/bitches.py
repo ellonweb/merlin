@@ -19,19 +19,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy.sql.functions import count
 from Core.config import Config
 from Core.db import session
 from Core.maps import Updates, Galaxy, Planet, Alliance, Intel, Target
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("half")
 class bitches(loadable):
     """List of booked targets by galaxy and alliance"""
     usage = " [minimum eta]"
-    paramre = re.compile(r"(?:\s(\d+))?")
     
+    @route(r"(?:\s+(\d+))?", access = "half")
     def execute(self, message, user, params):
         
         tick = Updates.current_tick() + int(params.group(1) or 1)
