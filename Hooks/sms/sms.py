@@ -28,15 +28,14 @@ from Core.exceptions_ import LoadableError
 from Core.config import Config
 from Core.db import session
 from Core.maps import User, SMS
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("member")
 class sms(loadable):
     """Sends an SMS to the specified user. Your username will be appended to the end of each sms. The user must have their phone correctly added and you must have access to their number."""
     usage = " <nick> <message>"
-    paramre = re.compile(r"\s+(\S+)\s+(.+)")
     
-    @loadable.require_user
+    @route(r"\s+(\S+)\s+(.+)", access = "member")
+    @require_user
     def execute(self, message, user, params):
         
         rec = params.group(1)

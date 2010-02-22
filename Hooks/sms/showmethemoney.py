@@ -22,11 +22,11 @@
 from urllib import urlencode
 from urllib2 import urlopen
 from Core.config import Config
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class showmethemoney(loadable):
     
+    @route(access = "member")
     def execute(self, message, user, params):
         
         username = Config.get("clickatell", "user")
