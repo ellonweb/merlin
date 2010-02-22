@@ -63,7 +63,14 @@ class loadable(object):
         
         self.routes = self.routes or []
         self.routes.extend([(name, route._ROUTE, route._ACCESS,) for name, route in cls.__dict__.items() if hasattr(route, "_ROUTE") and hasattr(route, "_ACCESS")])
-        self.access = self.access or min([route._ACCESS for route in cls.__dict__.values() if hasattr(route, "_ROUTE") and hasattr(route, "_ACCESS")])
+        
+        if cls.access in Config.options("Access"):
+            self.access = Config.getint("Access", cls.access)
+        elif type(cls.access) is int:
+            self.access = cls.access
+        else:
+            self.access = min([route._ACCESS for route in cls.__dict__.values() if hasattr(route, "_ROUTE") and hasattr(route, "_ACCESS")])
+        
         return self
     
     def __init__(self):
