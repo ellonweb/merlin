@@ -30,7 +30,7 @@ class exp(loadable):
     """XP of a planet over the last 15 ticks"""
     usage = " <x:y:z>"
     
-    @route(loadable.planet_coord+r"(?:\s(\d+))?")
+    @route(loadable.planet_coord+r"(?:\s+(\d+))?")
     def execute(self, message, user, params):
         
         p = Planet.load(*params.group(1,3,5))

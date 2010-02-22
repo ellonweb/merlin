@@ -47,7 +47,7 @@ class lookup(loadable):
             message.reply(str(galaxy))
             return
     
-    @route(r"(?:\s(\S+))?")
+    @route(r"(?:\s+(\S+))?")
     def user_alliance(self, message, user, params):
         alliance = Alliance.load(params.group(1)) if params.group(1) is not None else None
         # Alliance
