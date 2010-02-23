@@ -23,12 +23,10 @@ from sqlalchemy.sql import asc, desc
 from sqlalchemy.sql.functions import count
 from Core.db import session
 from Core.maps import Planet
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class exile(loadable):
-    """Calculate how long it will take to repay a value loss capping roids."""
-    
+    @route()
     def execute(self, message, user, params):
         
         Q = session.query(Planet.x, Planet.y, count().label('planets'))

@@ -19,16 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.paconf import PA
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class roidcost(loadable):
     """Calculate how long it will take to repay a value loss capping roids."""
     usage = " <roids> <value_cost> [mining_bonus]"
-    paramre = re.compile(r"\s+(\d+)\s+(\d+(?:\.\d+)?[km]?)(?:\s+(\d+))?")
     
+    @route(r"\s+(\d+)\s+(\d+(?:\.\d+)?[km]?)(?:\s+(\d+))?")
     def execute(self, message, user, params):
         
         roids, cost, bonus = params.groups()

@@ -20,15 +20,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import datetime
-import re
 from Core.maps import Updates
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class launch(loadable):
     """Calculate launch tick, launch time, prelaunch tick and prelaunch modifier for a given ship class or eta, and land tick."""
     usage = " <class|eta> <land_tick>"
-    paramre = re.compile(r"\s+(\S+)\s+(\d+)")
     class_eta = {"fi": 8,
                  "co": 8,
                  "fr": 9,
@@ -36,6 +33,7 @@ class launch(loadable):
                  "cr": 10,
                  "bs": 10}
     
+    @route(r"\s+(\S+)\s+(\d+)")
     def execute(self, message, user, params):
         
         eta, land_tick = params.groups()

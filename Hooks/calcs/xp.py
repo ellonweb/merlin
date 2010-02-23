@@ -19,17 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.maps import Planet
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class xp(loadable):
     usage = " <x:y:z> [a:b:c]"
-    paramre = re.compile(r"%s(?:\s+%s)?"%((loadable.planet_coordre.pattern,)*2))
     
-    def execute(self, message, user, params):
-        
+    @route(r"%s(?:\s+%s)?"%((loadable.planet_coord,)*2))
+    def planet(self, message, user, params):
         if params.group(6) is None:
             target = Planet.load(*params.group(1,3,5))
             if target is None:
@@ -46,6 +43,9 @@ class xp(loadable):
                 message.alert("No planet with coords %s:%s:%s" % params.group(6,8,10))
                 return
         
+        self.execute(message, target, attacker)
+    
+    def execute(self, message, target, attacker):
         reply="Target "
         target_val = target.value
         attacker_val = attacker.value

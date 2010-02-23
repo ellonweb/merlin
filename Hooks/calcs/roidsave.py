@@ -19,16 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.paconf import PA
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class roidsave(loadable):
     """Tells you how much value will be mined by a number of roids in that many ticks."""
     usage = " <roids> <ticks> [mining_bonus]"
-    paramre = re.compile(r"\s+(\d+)\s+(\d+)(?:\s+(\d+))?")
     
+    @route(r"\s+(\d+)\s+(\d+)(?:\s+(\d+))?")
     def execute(self, message, user, params):
         
         roids=int(params.group(1))

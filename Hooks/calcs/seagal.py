@@ -20,16 +20,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import math
-import re
 from Core.maps import Planet
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_planet
 
-@loadable.module()
 class seagal(loadable):
     usage = " <x:y:z> [sum]"
-    paramre = re.compile(loadable.planet_coordre.pattern+r"(?:\s+(\d+))?")
     
-    @loadable.require_planet
+    @route(loadable.planet_coord+r"(?:\s+(\d+))?")
+    @require_planet
     def execute(self, message, user, params):
         
         p = Planet.load(*params.group(1,3,5))
