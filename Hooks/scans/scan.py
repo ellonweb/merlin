@@ -25,81 +25,106 @@ from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Planet, Scan
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-class scan(loadable):
-    """"""
+class scan(object):
     usage = " (<x:y:z> [old] [link] | <id>)"
-    paramre = (re.compile(loadable.planet_coordre.pattern+r"(?:\s+(o))?(?:\s+(l))?"), re.compile(r"\s+([0-9a-zA-Z]+)"),)
+    access = "half"
     type = ""
+    planetre = loadable.planet_coord+r"(?:\s+(o))?(?:\s+(l))?"
+    idre = r"\s+(\w+)\s*$"
     
-    def execute(self, message, user, params):
+    def planet(self, message, user, params):
+        planet = Planet.load(*params.group(1,3,5))
+        if planet is None:
+            message.reply("No planet with coords %s:%s:%s found" % params.group(1,3,5))
+            return
         
-        # Planet
-        if len(params.groups()) > 1:
-            planet = Planet.load(*params.group(1,3,5))
-            if planet is None:
-                message.reply("No planet with coords %s:%s:%s found" % params.group(1,3,5))
-                return
-            
-            # List of last 10 scans
-            if params.group(6) == "o":
-                scans = planet.scans.filter_by(scantype=self.type).order_by(desc(Scan.id))[:10]
-                if len(scans) < 1:
-                    message.reply("No %s Scans of %s:%s:%s found"%(PA.get(self.type,"name"),planet.x,planet.y,planet.z))
-                    return
-                prev = []
-                for scan in scans:
-                    prev.append("(pt%s %s)" % (scan.tick, scan.pa_id,))
-                reply = "Last 10 %s Scans on %s:%s:%s "%(PA.get(self.type,"name"),planet.x,planet.y,planet.z) + " ".join(prev)
-                message.reply(reply)
-                return
-            
-            # Latest scan
-            scan = planet.scan(self.type)
-            if scan is None:
+        # List of last 10 scans
+        if params.group(6) == "o":
+            scans = planet.scans.filter_by(scantype=self.type).order_by(desc(Scan.id))[:10]
+            if len(scans) < 1:
                 message.reply("No %s Scans of %s:%s:%s found"%(PA.get(self.type,"name"),planet.x,planet.y,planet.z))
                 return
-            
-            # Link to scan
-            if params.group(7) == "l":
-                reply = "%s on %s:%s:%s " % (PA.get(self.type,"name"),planet.x,planet.y,planet.z,)
-                reply+= Config.get("URL","viewscan") % (scan.pa_id,)
-                message.reply(reply)
-                return
-            
-            # Display the scan
-            message.reply(str(scan))
+            prev = []
+            for scan in scans:
+                prev.append("(pt%s %s)" % (scan.tick, scan.pa_id,))
+            reply = "Last 10 %s Scans on %s:%s:%s "%(PA.get(self.type,"name"),planet.x,planet.y,planet.z) + " ".join(prev)
+            message.reply(reply)
+            return
         
-        # ID
-        else:
-            Q = session.query(Scan)
-            Q = Q.filter(Scan.pa_id.ilike("%"+params.group(1)+"%"))
-            Q = Q.order_by(desc(Scan.id))
-            scan = Q.first()
-            if scan is None:
-                message.reply("No Scans matching ID '%s'"%(params.group(1),))
-                return
-            # Display the scan
-            message.reply(str(scan))
+        # Latest scan
+        scan = planet.scan(self.type)
+        if scan is None:
+            message.reply("No %s Scans of %s:%s:%s found"%(PA.get(self.type,"name"),planet.x,planet.y,planet.z))
+            return
+        
+        # Link to scan
+        if params.group(7) == "l":
+            reply = "%s on %s:%s:%s " % (PA.get(self.type,"name"),planet.x,planet.y,planet.z,)
+            reply+= Config.get("URL","viewscan") % (scan.pa_id,)
+            message.reply(reply)
+            return
+        
+        # Display the scan
+        message.reply(str(scan))
+    
+    def id(self, message, user, params):
+        Q = session.query(Scan)
+        Q = Q.filter(Scan.pa_id.ilike("%"+params.group(1)+"%"))
+        Q = Q.order_by(desc(Scan.id))
+        scan = Q.first()
+        if scan is None:
+            message.reply("No Scans matching ID '%s'"%(params.group(1),))
+            return
+        # Display the scan
+        message.reply(str(scan))
 
-@loadable.module("half")
-class planet(scan):
+class planet(scan, loadable):
     type = "P"
-@loadable.module("half")
-class dev(scan):
+    @route(scan.planetre)
+    def planet(*args):
+        scan.planet(*args)
+    @route(scan.idre)
+    def id(*args):
+        scan.id(*args)
+class dev(scan, loadable):
     type = "D"
-@loadable.module("half")
-class unit(scan):
+    @route(scan.planetre)
+    def planet(*args):
+        scan.planet(*args)
+    @route(scan.idre)
+    def id(*args):
+        scan.id(*args)
+class unit(scan, loadable):
     type = "U"
-@loadable.module("half")
-class au(scan):
+    @route(scan.planetre)
+    def planet(*args):
+        scan.planet(*args)
+    @route(scan.idre)
+    def id(*args):
+        scan.id(*args)
+class au(scan, loadable):
     type = "A"
-@loadable.module("half")
-class jgp(scan):
+    @route(scan.planetre)
+    def planet(*args):
+        scan.planet(*args)
+    @route(scan.idre)
+    def id(*args):
+        scan.id(*args)
+class jgp(scan, loadable):
     type = "J"
-@loadable.module("half")
-class news(scan):
+    @route(scan.planetre)
+    def planet(*args):
+        scan.planet(*args)
+    @route(scan.idre)
+    def id(*args):
+        scan.id(*args)
+class news(scan, loadable):
     type = "N"
-
-del scan
+    @route(scan.planetre)
+    def planet(*args):
+        scan.planet(*args)
+    @route(scan.idre)
+    def id(*args):
+        scan.id(*args)

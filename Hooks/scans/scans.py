@@ -25,14 +25,12 @@ from Core.paconf import PA
 from Core.db import session
 from Core.maps import Planet, Scan
 from Core.chanusertracker import CUT
-from Core.loadable import loadable
+from Core.loadable import loadable, route, robohci
 
-@loadable.module("half")
 class scans(loadable):
-    """"""
     usage = " <x:y:z>"
-    paramre = loadable.planet_coordre
     
+    @route(loadable.planet_coord, access = "half")
     def execute(self, message, user, params):
         
         planet = Planet.load(*params.group(1,3,5))
@@ -56,7 +54,7 @@ class scans(loadable):
         reply="scans for %s:%s:%s - " % (planet.x,planet.y,planet.z) + ", ".join(prev)
         message.reply(reply)
     
-    @loadable.robohci
+    @robohci
     def robocop(self, message, scantype, pa_id, x, y, z, names):
         reply = "%s on %s:%s:%s " % (PA.get(scantype,"name"),x,y,z,)
         reply+= Config.get("URL","viewscan") % (pa_id,)

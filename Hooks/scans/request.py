@@ -21,34 +21,25 @@
  
 # Request a scan
 
-import re
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Planet, Request
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("member")
 class request(loadable):
     """Request a scan"""
-    usage = " <scantype> <x.y.z> [dists] | cancel <id>"
-    paramre = (re.compile(r"\s+(cancel)\s+(\d+)", re.I),
-               re.compile(r"\s+("+"|".join(PA.options("scans"))+r")\w*\s+"+loadable.planet_coordre.pattern+r"(?:\s+(\d+))?", re.I),
-               )
+    usage = " <x.y.z> <scantype> [dists] | cancel <id>"
     
-    @loadable.require_user
+    @route(loadable.planet_coord+"\s+("+"|".join(PA.options("scans"))+r")\w*(?:\s+(\d+))?", access = "member")
+    @require_user
     def execute(self, message, user, params):
-        
-        if params.group(1).lower() == "cancel":
-            request = Request.load(params.group(2))
-            return
-        
-        planet = Planet.load(*params.group(2,4,6))
+        planet = Planet.load(*params.group(1,3,5))
         if planet is None:
-            message.alert("No planet with coords %s:%s:%s" % params.group(2,4,6))
+            message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
             return
         
-        scan = params.group(1).upper()
+        scan = params.group(6).upper()
         
         request = Request(target=planet, scantype=scan)
         request.dists = int(params.group(7) or 0)
@@ -61,6 +52,12 @@ class request(loadable):
         message.reply("Requested a %s Scan of %s:%s:%s. !request cancel %s to cancel the request." % (PA.get(scan, "name"), planet.x, planet.y, planet.z, request.id,))
         self.request(message, request.id, user.name, scan, planet.x, planet.y, planet.z, dists_intel, dists_request)
         return
+    
+    @route(r"\s+cancel\s+(\d+)", access = "member")
+    def cancel(self, message, user, params):
+        request = Request.load(params.group(2))
+        return
+        
     
     # @loadable.runcop
     # def robocop(self, message, params):

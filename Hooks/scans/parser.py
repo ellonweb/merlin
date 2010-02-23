@@ -31,14 +31,13 @@ from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, User, Intel, Ship, Scan, Request
 from Core.maps import PlanetScan, DevScan, UnitScan, FleetScan, CovOp
-from Core.loadable import loadable
-
-from .Core.robocop import push
+from Core.loadable import system
+from Core.robocop import push
 
 scanre=re.compile("http://[^/]+/showscan.pl\?scan_id=([0-9a-zA-Z]+)")
 scangrpre=re.compile("http://[^/]+/showscan.pl\?scan_grp=([0-9a-zA-Z]+)")
 
-@loadable.system('PRIVMSG')
+@system('PRIVMSG')
 def catcher(message):
     try:
         user = User.load(name=message.get_pnick())
