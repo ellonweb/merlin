@@ -22,7 +22,7 @@
 from Core.exceptions_ import PNickParseError
 from Core.db import session
 from Core.maps import Galaxy, Planet, Alliance, User
-from Core.loadable import loadable, route
+from Core.loadable import loadable, route, require_planet
 
 class lookup(loadable):
     usage = " [x:y[:z]|alliance|user]"
@@ -47,7 +47,12 @@ class lookup(loadable):
             message.reply(str(galaxy))
             return
     
-    @route(r"(?:\s+(\S+))?")
+    @route(r"\s*$")
+    @require_planet
+    def me(self, message, user, params):
+        message.reply(str(user.planet))
+    
+    @route(r"\s+(\S+)")
     def user_alliance(self, message, user, params):
         alliance = Alliance.load(params.group(1)) if params.group(1) is not None else None
         # Alliance
@@ -56,10 +61,7 @@ class lookup(loadable):
             return
         
         # User
-        if params.group(1) is None:
-            message.reply(str(self.get_user_planet(user)))
-            return
-        elif not self.is_user(user):
+        if not self.is_user(user):
             raise PNickParseError
         elif not user.is_member():
             message.reply("No alliance matching '%s' found" % (params.group(1),))
