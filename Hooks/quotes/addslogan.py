@@ -22,14 +22,13 @@
 import re
 from Core.db import session
 from Core.maps import Slogan
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class addslogan(loadable):
     usage = " <slogan goes here>"
-    paramre = re.compile(r"\s+(.*)")
     timestampre=re.compile(r"\s*\[?\s*\d{2}:\d{2}(:\d{2})?\s*\]?\s*")
     
+    @route(r"(.+)", access = "member")
     def execute(self, message, user, params):
         
         params = params.group(1)

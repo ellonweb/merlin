@@ -19,16 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.db import session
 from Core.maps import Quote
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class remquote(loadable):
     usage = " <quote to remove>"
-    paramre = re.compile(r"\s+(.*)")
     
+    @route(r"(.+)", access = "member")
     def execute(self, message, user, params):
         
         params = params.group(1)

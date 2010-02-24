@@ -19,14 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.maps import Slogan
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class slogan(loadable):
-    paramre = re.compile(r"(?:\s+(.*))?")
-    
+    @route(r"(.*)")
     def execute(self, message, user, params):
         
         params = params.group(1)
