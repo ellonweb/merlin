@@ -20,17 +20,15 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import math
-import re
 from Core.paconf import PA
 from Core.maps import Ship
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class prod(loadable):
     """Calculate ticks it takes to produce <number> <ships> with <factories>. Specify race and/or government for bonuses."""
     usage = " <number> <ship> <factories> [population] [race] [government]"
-    paramre = re.compile(r"\s+(\d+(?:\.\d+)?[km]?)\s+(\S+)\s+(\d+)(?:\s+(.*))?")
     
+    @route(r"(\d+(?:\.\d+)?[km]?)\s+(\S+)\s+(\d+)(?:\s+(.*))?")
     def execute(self, message, user, params):
         
         num, name, factories = params.group(1,2,3)
@@ -68,6 +66,7 @@ class prod(loadable):
         ticks = self.calc_ticks(cost, num, bonus, factories)
 
         reply = "It will take %s ticks to build %s %s (%s)" % (ticks, self.num2short(num), ship.name, self.num2short(num*ship.total_cost/100))
+        reply += " using %s factories" % (factories,) if factories > 1 else ""
         reply += " with a" if race or gov else ""
         reply += " %s"%(PA.get(gov,"name"),) if gov else ""
         reply += " %s"%(PA.get(race,"name"),) if race else ""

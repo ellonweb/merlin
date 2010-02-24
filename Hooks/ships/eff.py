@@ -19,22 +19,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Ship
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class eff(loadable):
     """Calculates the efficiency of the specified number of ships"""
     usage = " <number> <ship> [t1|t2|t3]"
-    paramre = re.compile(r"\s(\d+(?:\.\d+)?[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
     
+    @route(r"(\d+(?:\.\d+)?[km]?)\s+(\w+)(?:\s+(t1|t2|t3))?")
     def execute(self, message, user, params):
         
         num, name, target = params.groups()
-        target = target or "t1"
+        target = (target or "t1").lower()
         
         ship = Ship.load(name=name)
         num = self.short2num(num)

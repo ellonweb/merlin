@@ -19,22 +19,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import math, re
+import math
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Ship
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class stop(loadable):
     """Calculates the required defence to the specified number of ships"""
     usage = " <number> <ship> [t1|t2|t3]"
-    paramre = re.compile(r"\s(\d+(?:\.\d+)?[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
     
+    @route(r"(\d+(?:\.\d+)?[km]?)\s+(\w+)(?:\s+(t1|t2|t3))?")
     def execute(self, message, user, params):
         
         num, name, attacker = params.groups()
-        attacker = attacker or "t1"
+        attacker = (attacker or "t1").lower()
         
         num = self.short2num(num)
         ship = Ship.load(name=name)

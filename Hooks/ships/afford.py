@@ -19,18 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Planet, Ship, Scan, PlanetScan, DevScan
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class afford(loadable):
     """Calculates the number of a certain ship the planet can produce based on the most recent planet scan"""
     usage = " <x:y:z> <ship>"
-    paramre = re.compile(loadable.planet_coordre.pattern+r"\s+(\w+)")
     
+    @route(loadable.planet_coord+r"\s+(\w+)")
     def execute(self, message, user, params):
         
         p = Planet.load(*params.group(1,3,5))

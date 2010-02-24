@@ -19,17 +19,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.paconf import PA
 from Core.maps import Ship
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class cost(loadable):
     """Calculates the cost of producing the specified number of ships"""
     usage = " <number> <ship>"
-    paramre = re.compile(r"\s(\d+(?:\.\d+)?[km]?)\s(\w+)")
     
+    @route(r"(\d+(?:\.\d+)?[km]?)\s+(\w+)")
     def execute(self, message, user, params):
         
         num, name = params.groups()

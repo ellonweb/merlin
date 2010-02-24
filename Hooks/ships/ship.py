@@ -19,16 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.maps import Ship
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class ship(loadable):
     """Returns the stats of the specified ship"""
     usage = " <ship>"
-    paramre = re.compile(r"\s+(\w+)")
     
+    @route(r"(\w+)")
     def execute(self, message, user, params):
         
         name = params.group(1)
