@@ -7,11 +7,6 @@ http://www.sqlalchemy.org/trac/ticket/1638 (unicode/noerr)
 | SQLA map reload (1529) | ext. rare      | recoverable    |
 | Merlin.nick            | unlikely       | unknown/low    |
 
-loadable paramre platform update: multiple execute routes
-    param/subs parsing
-    access checking
-    execution choice
-
 exception model refactor
 rewrite CLI or integrate as an extra IO stream
 rewrite Connection.write and Action.write to use detached threaded system
