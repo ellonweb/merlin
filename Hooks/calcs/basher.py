@@ -34,7 +34,7 @@ class basher(loadable):
             return
         self.execute(message, planet)
     
-    @route(r"\s*$")
+    @route(r"")
     @require_planet
     def me(self, message, user, params):
         self.execute(message, user.planet)

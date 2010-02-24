@@ -28,7 +28,7 @@ class adopt(loadable):
     """Adopt an orphan"""
     usage = " <pnick>"
     
-    @route(r"\s+(\S+)", access = "member")
+    @route(r"(\S+)", access = "member")
     @channel("home")
     @require_user
     def execute(self, message, user, params):

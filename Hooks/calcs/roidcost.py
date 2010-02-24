@@ -26,7 +26,7 @@ class roidcost(loadable):
     """Calculate how long it will take to repay a value loss capping roids."""
     usage = " <roids> <value_cost> [mining_bonus]"
     
-    @route(r"\s+(\d+)\s+(\d+(?:\.\d+)?[km]?)(?:\s+(\d+))?")
+    @route(r"(\d+)\s+(\d+(?:\.\d+)?[km]?)(?:\s+(\d+))?")
     def execute(self, message, user, params):
         
         roids, cost, bonus = params.groups()

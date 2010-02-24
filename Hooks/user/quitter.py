@@ -27,7 +27,7 @@ from Core.loadable import loadable, route
 class quitter(loadable):
     usage = " <pnick>"
 
-    @route(r"\s+(\S+)", access = "member")
+    @route(r"(\S+)", access = "member")
     def execute(self, message, user, params):
 
         # assign param variables

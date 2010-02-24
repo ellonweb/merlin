@@ -29,7 +29,7 @@ class info(loadable):
     """Alliance information (All information taken from intel, for tag information use the lookup command)"""
     usage = " <alliance>"
     
-    @route(r"\s+(\S+)", access = "member")
+    @route(r"(\S+)", access = "member")
     def execute(self, message, user, params):
         
         alliance = Alliance.load(params.group(1))

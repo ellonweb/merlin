@@ -47,8 +47,8 @@ class loadable(object):
     AccessError = "You don't have access to this command"
     PrefError = "You must set your planet with !pref to use this command"
     ChanError = "This command may only be used in %s"
-    coord = r"\s*(\d+)([. :\-])(\d+)(\2(\d+))?"
-    planet_coord = r"\s*(\d+)([. :\-])(\d+)(\2(\d+))"
+    coord = r"(\d+)([. :\-])(\d+)(\2(\d+))?"
+    planet_coord = r"(\d+)([. :\-])(\d+)(\2(\d+))"
     govre = re.compile(r"("+ "|".join(PA.options("govs")) +")", re.I)
     racere = re.compile(r"("+ "|".join(PA.options("races")) +")", re.I)
     scanre = re.compile(r"("+ "|".join(PA.options("scans")) +")", re.I)
@@ -269,10 +269,12 @@ def system(trigger, command=False, admin=False, robocop=False):
 # ###############################    ROUTER    ############################## #
 # ########################################################################### #
 
-def route(regex=loadable.param, access=0):
+def route(regex=None, access=0):
     
-    if type(regex) is str:
-        param = re.compile(regex, re.I)
+    if regex is None:
+        param = re.compile(loadable.param, re.I)
+    elif type(regex) is str:
+        param = re.compile(r"\s*%s\s*$"%(regex,), re.I)
     else:
         raise LoadableError("Invalid route regex")
     

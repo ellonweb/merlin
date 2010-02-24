@@ -27,7 +27,7 @@ class alias(loadable):
     """Set an alias that maps to your pnick, useful if you have a different nick than your pnick and people use autocomplete."""
     usage = " <alias> (at most 15 characters)"
     
-    @route(r"(?:\s+(\S{3,15}))?")
+    @route(r"(\S{3,15})?")
     @require_user
     def execute(self, message, user, params):
 

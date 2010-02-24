@@ -118,7 +118,7 @@ class status(loadable):
             message.reply("\n".join(replies))
             return
     
-    @route(r"(?:\s+(\S+))?(?:\s+(\d+))?")
+    @route(r"(\S+)?(?:\s+(\d+))?")
     def user_alliance(self, message, user, params):
         tick = Updates.current_tick()
         when = int(params.group(2) or 0)

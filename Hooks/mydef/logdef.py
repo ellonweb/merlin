@@ -25,7 +25,7 @@ from Core.maps import Updates, User, Ship, FleetLog
 from Core.loadable import loadable, route
 
 class logdef(loadable):
-    @route(r"(?:\s+(\S+))?", access = "member")
+    @route(r"(\S+)?", access = "member")
     def execute(self, message, user, params):
         
         search=params.group(1)

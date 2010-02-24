@@ -51,7 +51,7 @@ class surprisesex(loadable):
             else:
                 self.execute(message, galaxy=galaxy)
     
-    @route(r"\s+(\S+)")
+    @route(r"(\S+)")
     def user_alliance(self, message, user, params):
         alliance = Alliance.load(params.group(1))
         if alliance is None:
@@ -66,7 +66,7 @@ class surprisesex(loadable):
         else:
             self.execute(message, alliance=alliance)
     
-    @route(r"\s*$")
+    @route(r"")
     @require_planet
     def me(self, message, user, params):
         self.execute(message, planet=user.planet)

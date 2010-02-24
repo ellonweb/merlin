@@ -30,7 +30,7 @@ class mydef(loadable):
     countre = re.compile(r"^(\d+(?:\.\d+)?[mk]?)$",re.I)
     shipre = re.compile(r"^(\w+),?$")
     
-    @route(r"\s+(\d)\s*x\s*(.*)", access = "member")
+    @route(r"(\d)\s*x\s*(.*)", access = "member")
     @require_user
     def execute(self, message, user, params):
         

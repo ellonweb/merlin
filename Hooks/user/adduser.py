@@ -29,7 +29,7 @@ class adduser(loadable):
     """Used to add new users with the specified pnick and access level"""
     usage = " <pnick> <access>"
     
-    @route(r"\s+(.+)\s+(\S+)", access = "admin")
+    @route(r"(.+)\s+(\S+)", access = "admin")
     @require_user
     def execute(self, message, user, params):
         

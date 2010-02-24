@@ -27,7 +27,7 @@ class epenis(loadable):
     """Penis"""
     usage = " [user]"
     
-    @route(r"(?:\s+(\S+))?", access = "member")
+    @route(r"(\S+)?", access = "member")
     def execute(self, message, user, params):
         
         if params.group(1) is not None:

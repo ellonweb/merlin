@@ -29,7 +29,7 @@ class edituser(loadable):
     """Used to change a user's access or (de)activate them"""
     usage = " <user> (<access>|true|false)"
     
-    @route(r"\s+(\S+)\s+(\S+)", access = "admin")
+    @route(r"(\S+)\s+(\S+)", access = "admin")
     @require_user
     def execute(self, message, user, params):
         

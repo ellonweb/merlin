@@ -26,7 +26,7 @@ class roidsave(loadable):
     """Tells you how much value will be mined by a number of roids in that many ticks."""
     usage = " <roids> <ticks> [mining_bonus]"
     
-    @route(r"\s+(\d+)\s+(\d+)(?:\s+(\d+))?")
+    @route(r"(\d+)\s+(\d+)(?:\s+(\d+))?")
     def execute(self, message, user, params):
         
         roids=int(params.group(1))

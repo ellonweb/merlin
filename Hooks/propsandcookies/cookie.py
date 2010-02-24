@@ -31,14 +31,14 @@ class cookie(loadable):
     usage = " [howmany] <receiver> <reason> | [stat]"
     access = "member"
     
-    @route(r"\s+statu?s?")
+    @route(r"statu?s?")
     @require_user
     def stat(self, message, user, params):
         #Stats
         self.update_available_cookies(user)
         message.reply("You have %d cookies left until next bakeday, %s"%(user.available_cookies,user.name))
     
-    @route(r"\s+(?:(\d+)\s+)?(\S\S+)\s+(\S.*)")
+    @route(r"(?:(\d+)\s+)?(\S\S+)\s+(\S.*)")
     @channel("home")
     @require_user
     def cookie(self, message, user, params):

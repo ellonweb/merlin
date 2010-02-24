@@ -33,7 +33,7 @@ class launch(loadable):
                  "cr": 10,
                  "bs": 10}
     
-    @route(r"\s+(\S+)\s+(\d+)")
+    @route(r"(\S+)\s+(\d+)")
     def execute(self, message, user, params):
         
         eta, land_tick = params.groups()

@@ -29,7 +29,7 @@ class bitches(loadable):
     """List of booked targets by galaxy and alliance"""
     usage = " [minimum eta]"
     
-    @route(r"(?:\s+(\d+))?", access = "half")
+    @route(r"(\d+)?", access = "half")
     def execute(self, message, user, params):
         
         tick = Updates.current_tick() + int(params.group(1) or 1)

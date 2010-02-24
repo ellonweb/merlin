@@ -47,12 +47,12 @@ class lookup(loadable):
             message.reply(str(galaxy))
             return
     
-    @route(r"\s*$")
+    @route(r"")
     @require_planet
     def me(self, message, user, params):
         message.reply(str(user.planet))
     
-    @route(r"\s+(\S+)")
+    @route(r"(\S+)")
     def user_alliance(self, message, user, params):
         alliance = Alliance.load(params.group(1)) if params.group(1) is not None else None
         # Alliance

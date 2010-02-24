@@ -29,14 +29,14 @@ class smslog(loadable):
     usage = " [id]"
     access = "member"
     
-    @route(r"\s*$")
+    @route(r"")
     def get_last_ten(self, message, user, params):
         last_ten = session.query(SMS).order_by(desc(SMS.id))[:10]
         reply="Last 10 SMSes: "
         reply+=", ".join(map(lambda x: "id: %s (%s -> %s)"%(x.id,x.sender.name,x.receiver.name),last_ten))
         message.reply(reply)
     
-    @route(r"\s+(\d+)")
+    @route(r"(\d+)")
     def get_sms(self, message, user, params):
         id = params.group(1)
         sms = session.query(SMS).filter_by(id=id).first()

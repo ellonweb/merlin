@@ -28,7 +28,7 @@ from Core.loadable import loadable, route, require_user
 class yourmum(loadable):
     usage = " [pnick]"
     
-    @route(r"(?:\s+(\S+))?", access = "member")
+    @route(r"(\S+)?", access = "member")
     @require_user
     def execute(self, message, user, params):
         

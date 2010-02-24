@@ -33,7 +33,7 @@ class prop(loadable):
     usage = " [<invite|kick> <pnick> <comment>] | [list] | [vote <number> <yes|no|abstain>] | [expire <number>] | [show <number>] | [cancel <number>] | [recent] | [search <pnick>]"
     access = "member"
     
-    @route(r"\s+show\s+(\d+)")
+    @route(r"show\s+(\d+)")
     def show(self, message, user, params):
         id = params.group(1)
         prop = self.load_prop(id)
@@ -74,7 +74,7 @@ class prop(loadable):
             reply+= self.text_summary(prop)
             message.reply(reply)
     
-    @route(r"\s+vote\s+(\d+)\s+(yes|no|abstain|veto)")
+    @route(r"vote\s+(\d+)\s+(yes|no|abstain|veto)")
     @require_user
     def vote(self, message, user, params):
         id = params.group(1)
@@ -110,7 +110,7 @@ class prop(loadable):
         reply+= "."
         message.reply(reply)
     
-    @route(r"\s+list")
+    @route(r"list")
     def list(self, message, user, params):
         prev = []
         for id, person, result, type in self.get_open_props():
@@ -121,14 +121,14 @@ class prop(loadable):
             prev.append(prop_info)
         message.reply("Propositions currently being voted on: %s"%(", ".join(prev),))
     
-    @route(r"\s+recent")
+    @route(r"recent")
     def recent(self, message, user, params):
         prev = []
         for id, person, result, type in self.get_recent_props():
             prev.append("%s: %s %s %s"%(id,type,person,result[0].upper() if result else ""))
         message.reply("Recently expired propositions: %s"%(", ".join(prev),))
     
-    @route(r"\s+search\s+(\S+)")
+    @route(r"search\s+(\S+)")
     def search(self, message, user, params):
         search = params.group(1)
         prev = []
@@ -136,7 +136,7 @@ class prop(loadable):
             prev.append("%s: %s %s %s"%(id,type,person,result[0].upper() if result else ""))
         message.reply("Propositions matching '%s': %s"%(search, ", ".join(prev),))
     
-    @route(r"\s+invite\s+(\S+)\s+(.+)")
+    @route(r"invite\s+(\S+)\s+(.+)")
     @channel("home")
     @require_user
     def invite(self, message, user, params):
@@ -167,7 +167,7 @@ class prop(loadable):
         reply+= " When people have been given a fair shot at voting you can call a count using !prop expire %d."%(prop.id,)
         message.reply(reply)
     
-    @route(r"\s+kick\s+(\S+)\s+(.+)")
+    @route(r"kick\s+(\S+)\s+(.+)")
     @channel("home")
     @require_user
     def kick(self, message, user, params):
@@ -194,7 +194,7 @@ class prop(loadable):
         reply+= " When people have been given a fair shot at voting you can call a count using !prop expire %d."%(prop.id,)
         message.reply(reply)
     
-    @route(r"\s+expire\s+(\d+)")
+    @route(r"expire\s+(\d+)")
     @channel("home")
     @require_user
     def expire(self, message, user, params):
@@ -260,7 +260,7 @@ class prop(loadable):
         prop.vote_result = vote_result
         session.commit()
     
-    @route(r"\s+cancel\s+(\d+)")
+    @route(r"cancel\s+(\d+)")
     @channel("home")
     @require_user
     def cancel(self, message, user, params):

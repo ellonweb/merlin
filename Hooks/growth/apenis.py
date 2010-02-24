@@ -27,7 +27,7 @@ class apenis(loadable):
     """Schlong"""
     usage = " [alliance]"
     
-    @route(r"(?:\s+(\S+))?")
+    @route(r"(\S+)?")
     def execute(self, message, user, params):
         
         if params.group(1) is not None:

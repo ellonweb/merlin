@@ -28,7 +28,7 @@ class phone(loadable):
     """Lookup someone's phone number or set permissions for who can view your number if you've not set public (pref)"""
     usage = " <list|allow|deny|show> [pnick]"
     
-    @route(r"\s+list")
+    @route(r"list")
     @require_user
     def list(self, message, user, params):
         # List of users than can see your phonenumber
@@ -41,7 +41,7 @@ class phone(loadable):
             reply += " "+friend.name
         message.reply(reply)
     
-    @route(r"\s+allow\s+(\S+)")
+    @route(r"allow\s+(\S+)")
     @require_user
     def allow(self, message, user, params):
         trustee=params.group(1)
@@ -59,7 +59,7 @@ class phone(loadable):
             reply="Added %s to the list of people able to view your phone number."%(member.name,)
         message.reply(reply)
     
-    @route(r"\s+deny\s+(\S+)")
+    @route(r"deny\s+(\S+)")
     @require_user
     def deny(self, message, user, params):
         trustee=params.group(1)
@@ -78,7 +78,7 @@ class phone(loadable):
             reply="Removed %s from the list of people allowed to see your phone number." % (member.name,)
         message.reply(reply)
     
-    @route(r"\s+show\s+(\S+)")
+    @route(r"show\s+(\S+)")
     @require_user
     def show(self, message, user, params):
         trustee=params.group(1)

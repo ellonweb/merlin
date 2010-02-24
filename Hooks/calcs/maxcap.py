@@ -25,7 +25,7 @@ from Core.loadable import loadable, route
 class maxcap(loadable):
     usage = " (<total roids>|<x:y:z> [a:b:c])"
     
-    @route(r"\s+(\d+)\s*$")
+    @route(r"(\d+)\s*$")
     def size(self, message, user, params):
         target = Planet(size=int(params.group(1)))
         attacker = None

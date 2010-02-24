@@ -29,10 +29,12 @@ class help(loadable):
     """Help"""
     usage = " [command]"
     
-    @route(r"\s*(\S*)")
+    @route(r"\S+")
+    def command(self, message, user, params):
+        pass
+    
+    @route(r"")
     def execute(self, message, user, params):
-        if params.group(1) != "":
-            return
         commands = []
         message.reply(self.doc+". For more information use: "+self.usage)
         if message.in_chan():

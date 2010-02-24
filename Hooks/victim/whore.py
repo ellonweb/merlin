@@ -36,7 +36,7 @@ class whore(loadable):
     bashre=re.compile(r"(bash)",re.I)
     clusterre=re.compile(r"c(\d+)",re.I)
     
-    @route(r"\s+(.+)", access = "member")
+    @route(r"(.+)", access = "member")
     @require_planet
     def execute(self, message, user, params):
         

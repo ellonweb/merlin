@@ -28,7 +28,7 @@ class getanewdaddy(loadable):
     """Remove sponsorship of a member. Their access will be reduced to "galmate" level. Anyone is free to sponsor the person back under the usual conditions. This isn't a kick and it's not final.""" 
     usage = " <pnick>"
     
-    @route(r"\s+(\S+)", access = "member")
+    @route(r"(\S+)", access = "member")
     @require_user
     def execute(self, message, user, params):
 

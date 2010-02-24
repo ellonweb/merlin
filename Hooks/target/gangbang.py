@@ -28,7 +28,7 @@ class gangbang(loadable):
     """List of booked targets in an alliance"""
     usage = " <alliance> [tick]"
     
-    @route(r"\s+(\S+)(?:\s+(\d+))?", access = "half")
+    @route(r"(\S+)(?:\s+(\d+))?", access = "half")
     def execute(self, message, user, params):
         
         alliance = Alliance(name="Unknown") if params.group(1).lower() == "unknown" else Alliance.load(params.group(1))

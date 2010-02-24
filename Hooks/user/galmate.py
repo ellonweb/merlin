@@ -28,7 +28,7 @@ class galmate(loadable):
     """Add a user with galmate access"""
     usage = " <pnick>"
     
-    @route(r"\s+(\S+)", access = "half")
+    @route(r"(\S+)", access = "half")
     def execute(self, message, user, params):
         
         pnick = params.group(1)

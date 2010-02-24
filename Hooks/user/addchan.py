@@ -29,7 +29,7 @@ class addchan(loadable):
     """Adds a channel with the given level with maxlevel equal to your own access level"""
     usage = " <chan> <level>"
     
-    @route(r"\s+(#\S+)\s+(\S+)", access = "admin")
+    @route(r"(#\S+)\s+(\S+)", access = "admin")
     @require_user
     def execute(self, message, user, params):
         

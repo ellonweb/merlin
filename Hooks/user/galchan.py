@@ -29,7 +29,7 @@ class galchan(loadable):
     """Adds a channel where the access of commands is limited to 1 in that channel (so you don't accidentally do !intel or something 'important')"""
     usage = " <chan>"
     
-    @route(r"\s+(#\S+)", access = "member")
+    @route(r"(#\S+)", access = "member")
     @require_user
     def execute(self, message, user, params):
         

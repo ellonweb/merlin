@@ -53,7 +53,7 @@ class request(loadable):
         self.request(message, request.id, user.name, scan, planet.x, planet.y, planet.z, dists_intel, dists_request)
         return
     
-    @route(r"\s+cancel\s+(\d+)", access = "member")
+    @route(r"cancel\s+(\d+)", access = "member")
     def cancel(self, message, user, params):
         request = Request.load(params.group(2))
         return

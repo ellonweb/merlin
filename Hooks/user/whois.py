@@ -27,7 +27,7 @@ class whois(loadable):
     """Lookup a user's details"""
     usage = " <pnick>"
     
-    @route(r"\s+(\S+)", access = "member")
+    @route(r"(\S+)", access = "member")
     def execute(self, message, user, params):
 
         # assign param variables 

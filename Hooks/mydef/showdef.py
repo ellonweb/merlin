@@ -26,7 +26,7 @@ class showdef(loadable):
     usage = " <pnick>"
     access = "member"
     
-    @route(r"\s+(\S+)")
+    @route(r"(\S+)")
     def user(self, message, user, params):
         name=params.group(1)
         u = User.load(name=name, exact=False, access="member")
@@ -35,7 +35,7 @@ class showdef(loadable):
         else:
             self.execute(message, u)
     
-    @route(r"\s*$")
+    @route(r"")
     @require_user
     def me(self, message, user, params):
         self.execute(message, user)

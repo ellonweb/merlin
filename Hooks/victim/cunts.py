@@ -38,7 +38,7 @@ class cunts(loadable):
     bashre=re.compile(r"(bash)",re.I)
     clusterre=re.compile(r"c(\d+)",re.I)
     
-    @route(r"\s+(.+)", access = "member")
+    @route(r"(.+)", access = "member")
     def execute(self, message, user, params):
         
         alliance=Alliance()

@@ -32,7 +32,7 @@ class scan(object):
     access = "half"
     type = ""
     planetre = loadable.planet_coord+r"(?:\s+(o))?(?:\s+(l))?"
-    idre = r"\s+(\w+)\s*$"
+    idre = r"(\w+)"
     
     def planet(self, message, user, params):
         planet = Planet.load(*params.group(1,3,5))

@@ -30,7 +30,7 @@ class pref(loadable):
     usage = " [planet=x.y.z] [password=pass] [email=my.email@address.com] [phone=999] [pubphone=T|F] [smsmode=clickatell|google]"
     planet_coordre = re.compile(loadable.planet_coord)
     
-    @route(r"\s*$")
+    @route(r"")
     @require_user
     def show_prefs(self, message, user, params):
         reply = ""
@@ -47,7 +47,7 @@ class pref(loadable):
         else:
             message.reply("You haven't set any preferences, use !help pref to view the options")
     
-    @route(r"\s+(.+)")
+    @route(r"(.+)")
     @require_user
     def set_prefs(self, message, user, params):
         

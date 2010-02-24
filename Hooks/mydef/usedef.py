@@ -26,7 +26,7 @@ from Core.loadable import loadable, route, require_user
 class usedef(loadable):
     usage = " <pnick> <ship>"
     
-    @route(r"\s+(\S+)\s+(.*)", access = "member")
+    @route(r"(\S+)\s+(.*)", access = "member")
     @require_user
     def execute(self, message, user, params):
         
