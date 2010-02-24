@@ -5,7 +5,7 @@ Requirements:
 
 Python 2.6
 PostgreSQL 8.4
-psycopg2 (recommended) or pg8000 (untested)
+psycopg2
 SQLAlchemy 0.5.7
 It is also recommended you install Git so you can track your changes
 
@@ -46,13 +46,16 @@ Access settings:
 
 Merlin's system hooks use the list of admins defined in merlin.cfg to control
 access. System hooks can be identified by the system modifier:
-@loadable.system(..)
+@system(..)
 
-Merlin's non-system hooks (the majority of the functionality) use a two-level
-access system. The access requirement of a hook is provided in the modifier:
-@loadable.module("member")
-This can be changed to any of the access levels defined in merlin.cfg, or
-instead of passing a string you can provide an actual number.
+Merlin's non-system hooks (the majority of the functionality) are split into
+different routes and utilise a two-level access system. The access requirement
+of a route is provided in the modifier:
+@route(.. access = "member")
+The hook can also be given a default access level for all of its routes by
+defining the access variable at class level.
+This parameter can be changed to any of the access levels defined in merlin.cfg,
+or instead of passing a string you can provide an actual number.
 
 If a command is executed in a channel Merlin first checks the channel's
 min and max levels. If the channel's max level is higher than the command's
@@ -61,6 +64,6 @@ min level match or exceed the requirement the command is executed.
 
 If you want to limit a command to use in a specific channel or in PM, you
 can use this modifier on the execute method of the hook:
-@loadable.channel("home")
+@channel("home")
 This can be changed to any channels defined in merlin.cfg or simply "PM", or
 you can specify the specific channel.
