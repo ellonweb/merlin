@@ -53,7 +53,7 @@ def connected(message):
     nick = Config.get("Connection", "nick")
     if Merlin.nick != nick:
         message.privmsg("RECOVER %s %s %s" % (nick, nick, Config.get("Connection", "passwd")), "P@cservice.netgamers.org")
-    else: login(message)
+    login(message)
 
 @system('NOTICE')
 def PNS(message):
@@ -75,6 +75,9 @@ def login(message):
 def loggedin(message):
     # Authentication complete
     if "is now your hidden host" == message.get_msg():
+        nick = Config.get("Connection", "nick")
+        if Merlin.nick != nick:
+            message.nick(nick)
         return # This is now deprecated in favour of
                #  setting autoinvite when adding the chan
         for channel in session.query(Channel):
