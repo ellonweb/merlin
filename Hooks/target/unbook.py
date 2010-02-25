@@ -27,9 +27,17 @@ from Core.loadable import loadable, route, require_user
 class unbook(loadable):
     usage = " <x:y:z> [eta|landing tick]"
     
-    @route(loadable.planet_coord+r"(?:\s(\d+))?(?:\s(y))?", access = "half")
+    @route(loadable.planet_coord+r"(?:\s+(\d+))?", access = "half")
     @require_user
-    def execute(self, message, user, params):
+    def normal(self, message, user, params):
+        self.execute(message, user, params, False)
+    
+    @route(loadable.planet_coord+r"(?:\s+(\d+))?\s+(y)\S*", access = "member")
+    @require_user
+    def override(self, message, user, params):
+        self.execute(message, user, params, True)
+    
+    def execute(self, message, user, params, override):
         planet = Planet.load(*params.group(1,3,5))
         if planet is None:
             message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
@@ -48,12 +56,10 @@ class unbook(loadable):
         if when > 32767:
             when = 32767 
         
-        override = params.group(7)
-        
         Q = session.query(Target)
         Q = Q.join(Target.user)
         Q = Q.filter(Target.planet == planet)
-        Q = Q.filter(Target.user == user) if override is None else Q
+        Q = Q.filter(Target.user == user) if override is False else Q
         Q = Q.filter(Target.tick == when) if when else Q.filter(Target.tick >= tick)
         Q = Q.order_by(asc(Target.tick))
         result = Q.all()
@@ -63,10 +69,10 @@ class unbook(loadable):
         session.commit()
         
         if count < 1:
-            reply=("You have no " if override is None else "No ") +"bookings matching %s:%s:%s"%(planet.x,planet.y,planet.z,)
+            reply=("You have no " if override is False else "No ") +"bookings matching %s:%s:%s"%(planet.x,planet.y,planet.z,)
             if when:
                 reply+=" for landing on tick %s"%(when,)
-            reply+=". If you are trying to unbook someone else's target, you must confirm with 'yes'." if override is None else ""
+            reply+=". If you are trying to unbook someone else's target, you must confirm with 'yes'." if override is False else ""
         else:
             reply="You have unbooked %s:%s:%s"%(planet.x,planet.y,planet.z,)
             if when:
