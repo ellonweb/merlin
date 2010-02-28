@@ -20,28 +20,32 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from Core.maps import Planet
-from Core.loadable import loadable, route
+from Core.loadable import loadable, route, require_planet
 
 class xp(loadable):
     usage = " <x:y:z> [a:b:c]"
     
-    @route(r"%s(?:\s+%s)?"%((loadable.planet_coord,)*2))
+    @route(r"%s\s+%s"%((loadable.planet_coord,)*2))
     def planet(self, message, user, params):
-        if params.group(6) is None:
-            target = Planet.load(*params.group(1,3,5))
-            if target is None:
-                message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
-                return
-            attacker = self.get_user_planet(user)
-        else:
-            target = Planet.load(*params.group(1,3,5))
-            if target is None:
-                message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
-                return
-            attacker = Planet.load(*params.group(6,8,10))
-            if attacker is None:
-                message.alert("No planet with coords %s:%s:%s" % params.group(6,8,10))
-                return
+        target = Planet.load(*params.group(1,3,5))
+        if target is None:
+            message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
+            return
+        attacker = Planet.load(*params.group(6,8,10))
+        if attacker is None:
+            message.alert("No planet with coords %s:%s:%s" % params.group(6,8,10))
+            return
+        
+        self.execute(message, target, attacker)
+    
+    @route(loadable.planet_coord)
+    @require_planet
+    def me(self, message, user, params):
+                target = Planet.load(*params.group(1,3,5))
+        if target is None:
+            message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
+            return
+        attacker = user.planet
         
         self.execute(message, target, attacker)
     
