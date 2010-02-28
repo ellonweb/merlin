@@ -41,7 +41,7 @@ class xp(loadable):
     @route(loadable.planet_coord)
     @require_planet
     def me(self, message, user, params):
-                target = Planet.load(*params.group(1,3,5))
+        target = Planet.load(*params.group(1,3,5))
         if target is None:
             message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
             return
