@@ -86,7 +86,7 @@ class loadable(object):
             return regex.match(message.get_msg()[1:])
     
     def router(self, message, command):
-        for route, regex, access in self.routes:
+        for name, regex, access in self.routes:
             params = regex.match(command)
             if params is None:
                 continue
@@ -95,11 +95,26 @@ class loadable(object):
         else:
             raise ParseError
         
+        route = getattr(self, name)
+        
         user = self.check_access(message, access)
         if user is None:
             raise UserError
         
-        return route, user, params
+        if getattr(route, "_USER", False) is True:
+            if self.is_user(user) is False:
+                message.get_pnick()
+                raise UserError
+        
+        if getattr(route, "_PLANET", False) is True:
+            if self.user_has_planet(user) is False:
+                raise PrefError
+        
+        if getattr(route, "_CHANNEL", None) is not None:
+            if self.is_chan(message, route._CHANNEL) is False:
+                raise ChanParseError(route._CHANNEL)
+        
+        return route, name, user, params
     
     def run(self, message):
         m = self.match(message, self.commandre)
@@ -110,14 +125,14 @@ class loadable(object):
         command = m.group(1)
         
         try:
-            route, user, params = self.router(message, command)
+            route, subcommand, user, params = self.router(message, command)
             
-            getattr(self, route)(message, user, params)
+            route(message, user, params)
             
             session = Session()
             session.add(Command(command_prefix = message.get_prefix(),
                                 command = self.name,
-                                subcommand = route,
+                                subcommand = subcommand,
                                 command_parameters = message.get_msg()[len(self.name)+1:],
                                 nick = message.get_nick(),
                                 username = "" if user is True else user.name,
@@ -297,22 +312,13 @@ def route(regex=None, access=0):
 # ###############################    ACCESS    ############################## #
 # ########################################################################### #
 
-def require_user(hook):
-    def execute(self, message, user, params):
-        if self.is_user(user):
-            hook(self, message, user, params)
-            return
-        elif message.get_pnick():
-            raise UserError
+def require_user(execute):
+    execute._USER = True
     return execute
 
-def require_planet(hook):
-    def execute(self, message, user, params):
-        if self.is_user(user) and self.get_user_planet(user):
-            hook(self, message, user, params)
-            return
-        elif message.get_pnick():
-            raise UserError
+def require_planet(execute):
+    execute._USER = True
+    execute._PLANET = True
     return execute
 
 def channel(chan):
@@ -323,13 +329,8 @@ def channel(chan):
             chan = Config.get("Connection","nick")
         else:
             raise LoadableError("Invalid channel")
-    def wrapper(hook):
-        def execute(self, message, user, params):
-            if self.is_chan(message, chan):
-                hook(self, message, user, params)
-                return
-            else:
-                raise ChanParseError(chan)
+    def wrapper(execute):
+        execute._CHANNEL = chan
         return execute
     return wrapper
 
