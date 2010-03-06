@@ -270,7 +270,7 @@ class prop(loadable):
             message.reply("No proposition number %s exists (idiot)."%(id,))
             return
         if prop.proposer is not user and not user.is_admin():
-            message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
+            message.reply("Only %s may cancel proposition %d."%(prop.proposer.name,id))
             return
         
         vote_result = "cancel"
