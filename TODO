@@ -15,7 +15,3 @@ Robocop
     scan requests (!request)
 
 Hooks.scans.request
-    request.dists
-        fill in from scan requests ("ellonweb informs that atleast n dists are needed")
-        fill in from intel
-        fill in from Hooks.scans.blocked

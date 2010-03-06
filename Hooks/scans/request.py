@@ -29,7 +29,7 @@ from Core.loadable import loadable, route, require_user
 
 class request(loadable):
     """Request a scan"""
-    usage = " <x.y.z> <scantype> [dists] | cancel <id>"
+    usage = " <x.y.z> <scantype> [dists] | <id> blocks <amps> | cancel <id>"
     
     @route(loadable.planet_coord+"\s+("+"|".join(PA.options("scans"))+r")\w*(?:\s+(\d+))?", access = "member")
     @require_user
@@ -67,7 +67,19 @@ class request(loadable):
         request.active = False
         session.commit()
         message.reply("Cancelled scan request %s" % (id,))
+    
+    @route(r"(\d+)\s+block(?:s|ed)?\s+(\d+)", access = "member")
+    def blocks(self, message, user, params):
+        id = params.group(1)
+        dists = int(params.group(2))
+        request = Request.load(id)
+        if request is None:
+            message.reply("No open request number %s exists (idiot)."%(id,))
+            return
         
+        request.dists = max(request.dists, dists)
+        session.commit()
+        message.reply("Updated request %s dists to %s" % (id, request.dists,))
     
     # @loadable.runcop
     # def robocop(self, message, params):
