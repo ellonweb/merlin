@@ -29,7 +29,7 @@ from Core.loadable import loadable, route, require_user
 
 class request(loadable):
     """Request a scan"""
-    usage = " <x.y.z> <scantype> [dists] | <id> blocks <amps> | cancel <id>"
+    usage = " <x.y.z> <scantype> [dists] | <id> blocks <amps> | cancel <id> | list | links"
     
     @route(loadable.planet_coord+"\s+("+"|".join(PA.options("scans"))+r")\w*(?:\s+(\d+))?", access = "member")
     @require_user
@@ -81,6 +81,22 @@ class request(loadable):
         session.commit()
         message.reply("Updated request %s dists to %s" % (id, request.dists,))
     
+    @route(r"list", access = "member")
+    def list(self, message, user, params):
+        Q = session.query(Request)
+        Q = Q.filter(Request.scan==None)
+        Q = Q.filter(Request.active==True)
+        
+        message.reply(" ".join(map(lambda request: "[%s: %s %s:%s:%s]" % (request.id, request.scantype, request.target.x, request.target.y, request.target.z,), Q.all())))
+    
+    @route(r"links", access = "member")
+    def links(self, message, user, params):
+        Q = session.query(Request)
+        Q = Q.filter(Request.scan==None)
+        Q = Q.filter(Request.active==True)
+        
+        message.reply(" ".join(map(lambda request: "[%s: %s]" % (request.id, self.link(request),), Q.all())))
+    
     # @loadable.runcop
     # def robocop(self, message, params):
         # id = int(params.group(1))
@@ -93,3 +109,6 @@ class request(loadable):
     def request(self, message, id, name, scan, x,y,z, dists_intel, dists_request):
         scannerchan = Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")
         message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (id, name, PA.get(scan, "name"), x,y,z, dists_intel, dists_request,) + Config.get("URL", "reqscan") % (PA.get(scan, "type"),x,y,z,), scannerchan)
+    
+    def link(self, request):
+        return Config.get("URL", "reqscan") % (request.scantype, request.target.x, request.target.y, request.target.z,)
