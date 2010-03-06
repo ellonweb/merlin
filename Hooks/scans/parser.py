@@ -117,11 +117,13 @@ class parse(Thread):
         Q = Q.filter(Request.scantype==scantype)
         Q = Q.filter(Request.target==planet)
         Q = Q.filter(Request.scan==None)
+        Q = Q.filter(Request.active==True)
         result = Q.all()
         
         users = []
         for request in result:
             request.scan_id = scan_id
+            request.active = False
             users.append(request.user.name)
         session.commit()
         

@@ -51,12 +51,22 @@ class request(loadable):
         
         message.reply("Requested a %s Scan of %s:%s:%s. !request cancel %s to cancel the request." % (PA.get(scan, "name"), planet.x, planet.y, planet.z, request.id,))
         self.request(message, request.id, user.name, scan, planet.x, planet.y, planet.z, dists_intel, dists_request)
-        return
     
     @route(r"cancel\s+(\d+)", access = "member")
+    @require_user
     def cancel(self, message, user, params):
-        request = Request.load(params.group(2))
-        return
+        id = params.group(1)
+        request = Request.load(id)
+        if request is None:
+            message.reply("No open request number %s exists (idiot)."%(id,))
+            return
+        if request.user is not user and not user.is_admin():
+            message.reply("Only %s may cancel request %d."%(request.user.name,id))
+            return
+        
+        request.active = False
+        session.commit()
+        message.reply("Cancelled scan request %s" % (id,))
         
     
     # @loadable.runcop

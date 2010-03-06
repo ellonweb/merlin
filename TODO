@@ -15,8 +15,6 @@ Robocop
     scan requests (!request)
 
 Hooks.scans.request
-    would be nice to have platform update done
-    !request cancel id
     request.dists
         fill in from scan requests ("ellonweb informs that atleast n dists are needed")
         fill in from intel
