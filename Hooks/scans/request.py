@@ -24,8 +24,8 @@
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Planet, Request
-from Core.loadable import loadable, route, require_user
+from Core.maps import Planet, User, Request
+from Core.loadable import loadable, route, require_user, robohci
 
 class request(loadable):
     """Request a scan"""
@@ -40,17 +40,26 @@ class request(loadable):
             return
         
         scan = params.group(6).upper()
+        dists = int(params.group(7) or 0)
         
-        request = Request(target=planet, scantype=scan)
-        request.dists = int(params.group(7) or 0)
+        request = self.request(message, user, planet, scan, dists)
+        message.reply("Requested a %s Scan of %s:%s:%s. !request cancel %s to cancel the request." % (PA.get(scan, "name"), planet.x, planet.y, planet.z, request.id,))
+    
+    @robohci
+    def robocop(self, message, user_id, x,y,z, scan, dists):
+        user = User.load(id=user_id)
+        planet = Planet.load(x,y,z)
+        self.request(message, user, planet, scan, dists)
+    
+    def request(self, message, user, planet, scan, dists):
+        request = Request(target=planet, scantype=scan, dists=dists)
         user.requests.append(request)
         session.commit()
         
         dists_intel = planet.intel.dists if planet.intel else 0
-        dists_request = request.dists
+        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (request.id, user.name, PA.get(scan, "name"), planet.x,planet.y,planet.z, dists_intel, request.dists,) + self.link(request), self.scanchan())
         
-        message.reply("Requested a %s Scan of %s:%s:%s. !request cancel %s to cancel the request." % (PA.get(scan, "name"), planet.x, planet.y, planet.z, request.id,))
-        self.request(message, request.id, user.name, scan, planet.x, planet.y, planet.z, dists_intel, dists_request)
+        return request
     
     @route(r"cancel\s+(\d+)", access = "member")
     @require_user
@@ -97,18 +106,8 @@ class request(loadable):
         
         message.reply(" ".join(map(lambda request: "[%s: %s]" % (request.id, self.link(request),), Q.all())))
     
-    # @loadable.runcop
-    # def robocop(self, message, params):
-        # id = int(params.group(1))
-        # name = params.group(2)
-        # scan = params.group(3).upper()
-        # x,y,z = params.group(4,5,6)
-        # dists_intel, dists_request = params.group(7,8)
-        # self.request(message, id, name, scan, x, y, z, dists_intel, dists_request)
-    
-    def request(self, message, id, name, scan, x,y,z, dists_intel, dists_request):
-        scannerchan = Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")
-        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (id, name, PA.get(scan, "name"), x,y,z, dists_intel, dists_request,) + Config.get("URL", "reqscan") % (PA.get(scan, "type"),x,y,z,), scannerchan)
+    def scanchan(self):
+        return Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")
     
     def link(self, request):
         return Config.get("URL", "reqscan") % (request.scantype, request.target.x, request.target.y, request.target.z,)
