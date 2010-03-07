@@ -22,7 +22,7 @@
 from sqlalchemy.sql import asc, desc
 from sqlalchemy.sql.functions import count
 from Core.db import session
-from Core.maps import Planet
+from Core.maps import Galaxy, Planet
 from Core.loadable import loadable, route
 
 class exile(loadable):
@@ -30,7 +30,9 @@ class exile(loadable):
     def execute(self, message, user, params):
         
         Q = session.query(Planet.x, Planet.y, count().label('planets'))
+        Q = Q.join(Planet.galaxy)
         Q = Q.filter(Planet.active == True)
+        Q = Q.filter(Galaxy.private == False)
         Q = Q.filter(Planet.x < 200)
         Q = Q.group_by(Planet.x, Planet.y)
         Q = Q.order_by(desc(count()))
