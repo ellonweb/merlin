@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -20,18 +20,16 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import math
-import re
 from Core.paconf import PA
 from Core.maps import Ship
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class rprod(loadable):
     """Calculate how many <ship> you can build in <ticks> with <factories>. Specify race and/or government for bonuses."""
-    usage = " <ship> <ticks> <factories> [race] [government]"
-    paramre = re.compile(r"\s+(\S+)\s+(\d+)\s+(\d+)(?:\s+(.*))?")
+    usage = " <ship> <ticks> <factories> [population] [race] [government]"
     dx = tolerance = 0.00001
     
+    @route(r"(\S+)\s+(\d+)\s+(\d+)(?:\s+(.*))?")
     def execute(self, message, user, params):
         
         name, ticks, factories = params.group(1,2,3)
@@ -44,6 +42,7 @@ class rprod(loadable):
         factories = int(factories)
 
         race = gov = None
+        pop = 0
         for p in (params.group(4) or "").split():
             m=self.racere.match(p)
             if m and not race:
@@ -53,9 +52,12 @@ class rprod(loadable):
             if m and not gov:
                 gov=m.group(1).lower()
                 continue
+            if p.isdigit() and not pop:
+                pop = int(p)
+                continue
 
         cost = ship.total_cost
-        bonus = 1
+        bonus = 1 + pop/100.0
         if gov:
             cost *= (1+PA.getfloat(gov,"prodcost"))
             bonus += PA.getfloat(gov,"prodtime")
@@ -66,10 +68,12 @@ class rprod(loadable):
         ships = int(res / cost)
 
         reply = "You can build %s %s (%s) in %d ticks" % (self.num2short(ships), ship.name, self.num2short(ships*ship.total_cost/100), ticks)
+        reply += " using %s factories" % (factories,) if factories > 1 else ""
         reply += " with a" if race or gov else ""
         reply += " %s"%(PA.get(gov,"name"),) if gov else ""
         reply += " %s"%(PA.get(race,"name"),) if race else ""
         reply += " planet" if race or gov else ""
+        reply += " with %s%% population"%(pop,) if pop else ""
         message.reply(reply)
 
     def derive(self, f):

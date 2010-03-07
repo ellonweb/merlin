@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -21,10 +21,8 @@
  
 # This determines what the bot can send to the server, and is basically the IRC-API for plugin writers
 
-from merlin import Merlin
-from Core.exceptions_ import ParseError
 from Core.connection import Connection
-from Core.chanusertracker import Channels, Nicks
+from Core.chanusertracker import CUT
 from Core.messages import Message, PUBLIC_REPLY, PRIVATE_REPLY, NOTICE_REPLY
 
 class Action(Message):
@@ -49,17 +47,14 @@ class Action(Message):
     def notice(self, text, target=None):
         # If we're opped in a channel in common with the user, we can reply with
         #  CNOTICE instead of NOTICE which doesn't count towards the flood limit.
-        print self.get_chan(), self.get_chan() in Channels, self.get_nick(), self.get_nick() in Nicks, target, target in Nicks
-        print Channels.keys(), Nicks.keys()
-        if (self.get_chan() in Channels.keys()
-            and Channels[self.get_chan()].opped is True
-            and (target or self.get_nick()) in Nicks.keys()
-            and Nicks[target or self.get_nick()] in Channels[self.get_chan()].nicks):
+        if CUT.opped(self.get_chan()) and CUT.nick_in_chan(target or self.get_nick(), self.get_chan()):
             self.write("CNOTICE %s %s :%s" % (target or self.get_nick(), self.get_chan(), text))
         else:
             self.write("NOTICE %s :%s" % (target or self.get_nick(), text))
     
     def reply(self, text):
+        if self.get_command() != "PRIVMSG":
+            return
         # Always reply to a PM with a PM, otherwise only ! replies with privmsg
         # Always reply to an @command with a PM
         reply = self.reply_type()
@@ -71,6 +66,8 @@ class Action(Message):
             self.notice(text)
     
     def alert(self, text):
+        if self.get_command() != "PRIVMSG":
+            return
         # Notice the user, unless it was a PM
         if self.in_chan():
             self.notice(text)
@@ -110,11 +107,4 @@ class Action(Message):
             self.write("KICK %s %s :%s" % (channel, target, message))
         else:
             self.write("KICK %s %s" % (channel, target))
-    
-    def __str__(self):
-        # String representation of the Action object (Namely for debugging purposes)
-        try:
-            return "[%s] <%s> %s" % (self.get_chan(), self.get_nick(), self.get_msg())
-        except ParseError:
-            return ""
     

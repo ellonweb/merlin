@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,37 +19,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy.sql import desc
 from Core.db import session
 from Core.maps import SMS
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module(100)
 class smslog(loadable):
     """Show the last ten SMS sent, or the text of a specific SMS sender."""
     usage = " [id]"
-    paramre = re.compile(r"\s*(\d+)?")
+    access = "member"
     
-    def execute(self, message, user, params):
-        
-        id=params.group(1)
-        
-        if id:
-            sms = self.get_sms(id)
-            if sms:
-                reply = "SMS with ID %s sent by %s to %s with text: %s"%(sms.id,sms.sender.name,sms.receiver.name,sms.sms_text)
-            else:
-                reply = "There was no SMS sent with ID %s"%(id,)
-            message.reply(reply)
+    @route(r"")
+    def get_last_ten(self, message, user, params):
+        last_ten = session.query(SMS).order_by(desc(SMS.id))[:10]
+        reply="Last 10 SMSes: "
+        reply+=", ".join(map(lambda x: "id: %s (%s -> %s)"%(x.id,x.sender.name,x.receiver.name),last_ten))
+        message.reply(reply)
+    
+    @route(r"(\d+)")
+    def get_sms(self, message, user, params):
+        id = params.group(1)
+        sms = session.query(SMS).filter_by(id=id).first()
+        if sms:
+            reply = "SMS with ID %s (%s) sent by %s to %s with text: %s"%(sms.id,sms.mode[:1].upper(),sms.sender.name,sms.receiver.name,sms.sms_text)
         else:
-            last_ten = self.get_last_ten()
-            reply="Last 10 SMSes: "
-            reply+=", ".join(map(lambda x: "id: %s (%s -> %s)"%(x.id,x.sender.name,x.receiver.name),last_ten))
-            message.reply(reply)
-    
-    def get_sms(self, id):
-        return session.query(SMS).filter_by(id=id).first()
-        
-    def get_last_ten(self):
-        return session.query(SMS).order_by(desc(SMS.id))[:10]
+            reply = "There was no SMS sent with ID %s"%(id,)
+        message.reply(reply)

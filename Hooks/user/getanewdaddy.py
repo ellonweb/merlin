@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,19 +19,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.config import Config
 from Core.db import session
-from Core.maps import User
-from Core.loadable import loadable
+from Core.maps import Alliance, User
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("member")
 class getanewdaddy(loadable):
     """Remove sponsorship of a member. Their access will be reduced to "galmate" level. Anyone is free to sponsor the person back under the usual conditions. This isn't a kick and it's not final.""" 
-    usage = " pnick"
-    paramre = re.compile(r"\s(\S+)")
+    usage = " <pnick>"
     
-    @loadable.require_user
+    @route(r"(\S+)", access = "member")
+    @require_user
     def execute(self, message, user, params):
 
         # do stuff here
@@ -47,7 +45,15 @@ class getanewdaddy(loadable):
             idiot.access = Config.getint("Access","galmate")
         else:
             idiot.access = 0
+        
+        if idiot.planet is not None and idiot.planet.intel is not None:
+            intel = idiot.planet.intel
+            alliance = Alliance.load(Config.get("Alliance","name"))
+            if intel.alliance == alliance:
+                intel.alliance = None
+        
         session.commit()
+        
         message.privmsg("remuser %s %s"%(Config.get("Channels","home"), idiot.name,),'p')
         message.privmsg("ban %s *!*@%s.users.netgamers.org Your sponsor doesn't like you anymore"%(Config.get("Channels","home"), idiot.name,),'p')
         if idiot.sponsor != user.name:

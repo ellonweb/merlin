@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,17 +19,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.config import Config
 from Core.db import session
 from Core.maps import User
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class quitter(loadable):
-    usage = " pnick"
-    paramre = re.compile(r"\s(\S+)")
+    usage = " <pnick>"
 
+    @route(r"(\S+)", access = "member")
     def execute(self, message, user, params):
 
         # assign param variables

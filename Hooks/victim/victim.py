@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -24,20 +24,19 @@ from sqlalchemy import cast, Float, func, Integer, or_
 from sqlalchemy.sql import desc
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_planet
 from Core.paconf import PA
 
-@loadable.module("member")
 class victim(loadable):
     """Target search, ordered by maxcap"""
     usage = " [alliance] [race] [<|>][size] [<|>][value] [bash] (must include at least one search criteria, order doesn't matter)"
-    paramre = re.compile(r"\s+(.+)")
     alliancere=re.compile(r"(\S+)")
     rangere=re.compile(r"(<|>)?(\d+)")
     bashre=re.compile(r"(bash)",re.I)
     clusterre=re.compile(r"c(\d+)",re.I)
     
-    @loadable.require_planet
+    @route(r"(.+)", access = "member")
+    @require_planet
     def execute(self, message, user, params):
         
         alliance=Alliance()
@@ -82,9 +81,10 @@ class victim(loadable):
                     return
                 continue
 
-        caprate = PA.getfloat("roids","maxcap")
+        maxcap = PA.getfloat("roids","maxcap")
+        mincap = PA.getfloat("roids","mincap")
         modifier = (cast(Planet.value,Float).op("/")(float(attacker.value))).op("^")(0.5)
-        caprate = func.float8smaller(modifier.op("*")(caprate),caprate)
+        caprate = func.float8larger(mincap,func.float8smaller(modifier.op("*")(maxcap),maxcap))
         maxcap = cast(func.floor(cast(Planet.size,Float).op("*")(caprate)),Integer)
         
         Q = session.query(Planet, Intel, maxcap.label("maxcap"))

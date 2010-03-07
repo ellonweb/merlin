@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,16 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.paconf import PA
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class roidsave(loadable):
     """Tells you how much value will be mined by a number of roids in that many ticks."""
     usage = " <roids> <ticks> [mining_bonus]"
-    paramre = re.compile(r"\s+(\d+)\s+(\d+)(?:\s+(\d+))?")
     
+    @route(r"(\d+)\s+(\d+)(?:\s+(\d+))?")
     def execute(self, message, user, params):
         
         roids=int(params.group(1))
@@ -38,10 +36,12 @@ class roidsave(loadable):
 
         mining = mining *(float(bonus+100)/100)
 
-        cost=self.num2short(ticks*roids*mining/100)
-        reply="In %s ticks (%s days) %s roids with %s%% bonus will mine %s value" % (ticks,ticks/24,roids,bonus,cost)
+        cost = ticks*roids*mining/100
+        demo = self.num2short(cost/(1+PA.getfloat("demo","prodcost")))
+        total = self.num2short(cost/(1+PA.getfloat("total","prodcost")))
+        cost = self.num2short(cost)
 
-        cost=self.num2short(ticks*roids*mining/100*(1/(1+PA.getfloat("feud","prodcost"))))
-        reply+=" Feudalism: %s value" % (cost)
+        reply = "In %s ticks (%s days) %s roids with %s%% bonus will mine %s value " % (ticks,ticks/24,roids,bonus,cost)
+        reply+= "Demo: %s value Total: %s value" % (demo,total)
 
         message.reply(reply)

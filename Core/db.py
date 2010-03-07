@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -23,8 +23,8 @@
 
 import sys
 import sqlalchemy
-if not 5.6 <= float(sqlalchemy.__version__[2:5]) < 6.0:
-    sys.exit("SQLAlchemy 0.5.6+ Required")
+if not 5.7 <= float(sqlalchemy.__version__[2:5]) < 6.0:
+    sys.exit("SQLAlchemy 0.5.7+ Required")
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base

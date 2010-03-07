@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,20 +19,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from Core.exceptions_ import UserError
 from Core.config import Config
 from Core.db import session
 from Core.maps import User
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("admin")
 class adduser(loadable):
     """Used to add new users with the specified pnick and access level"""
-    usage = " pnick access"
-    paramre = re.compile(r"\s+(.+)\s+(\S+)")
+    usage = " <pnick> <access>"
     
-    @loadable.require_user
+    @route(r"(.+)\s+(\S+)", access = "admin")
+    @require_user
     def execute(self, message, user, params):
         
         pnicks = params.group(1)
@@ -77,9 +75,9 @@ class adduser(loadable):
         if len(added) and access >= Config.getint("Access","member"):
             message.privmsg("adduser %s %s 399" %(Config.get("Channels","home"), ",".join(added),), "P")
     
-    def check_access(self, message, user=None, channel=None):
+    def check_access(self, message, access=None, user=None, channel=None):
         try:
-            user = loadable.check_access(self, message, user, channel)
+            user = loadable.check_access(self, message, access, user, channel)
             if not self.is_user(user):
                 raise UserError
             else:

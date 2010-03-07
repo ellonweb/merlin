@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -26,8 +26,7 @@ import sys
 from sqlalchemy import *
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates, relation, backref, dynamic_loader
-from sqlalchemy.sql import desc
-from sqlalchemy.sql.functions import current_timestamp, max, random
+from sqlalchemy.sql.functions import current_timestamp, max as max_sql, random
 
 from Core.exceptions_ import LoadableError
 from Core.config import Config
@@ -48,7 +47,7 @@ class Updates(Base):
     
     @staticmethod
     def current_tick():
-        tick = session.query(max(Updates.id)).scalar() or 0
+        tick = session.query(max_sql(Updates.id)).scalar() or 0
         return tick
 
 class Galaxy(Base):
@@ -83,7 +82,7 @@ class Galaxy(Base):
         return galaxy
     
     def __str__(self):
-        retstr="%s:%s '%s' " % (self.x,self.y,self.name)
+        retstr="%s:%s '%s' (%s) " % (self.x,self.y,self.name,self.planet_loader.filter_by(active=True).count())
         retstr+="Score: %s (%s) " % (self.score,self.score_rank)
         retstr+="Value: %s (%s) " % (self.value,self.value_rank)
         retstr+="Size: %s (%s) " % (self.size,self.size_rank)
@@ -166,10 +165,11 @@ class Planet(Base):
     
     def caprate(self, attacker=None):
         maxcap = PA.getfloat("roids","maxcap")
+        mincap = PA.getfloat("roids","mincap")
         if not attacker or not self.value:
             return maxcap
         modifier=(float(self.value)/float(attacker.value))**0.5
-        return min(maxcap*modifier, maxcap)
+        return max(mincap,min(maxcap*modifier, maxcap))
     
     def maxcap(self, attacker=None):
         return int(self.size * self.caprate(attacker))
@@ -177,7 +177,7 @@ class Planet(Base):
     def resources_per_agent(self, target):
         return min(10000,(target.value * 2000)/self.value)
 Planet._idx_x_y_z = Index('planet_x_y_z', Planet.x, Planet.y, Planet.z)
-Galaxy.planets = relation(Planet, order_by=Planet.z, backref="galaxy")
+Galaxy.planets = relation(Planet, order_by=asc(Planet.z), backref="galaxy")
 Galaxy.planet_loader = dynamic_loader(Planet)
 class PlanetHistory(Base):
     __tablename__ = 'planet_history'
@@ -201,7 +201,7 @@ class PlanetHistory(Base):
     idle = Column(Integer)
     vdiff = Column(Integer)
 Planet.history_loader = dynamic_loader(PlanetHistory, backref="current")
-GalaxyHistory.planets = relation(PlanetHistory, order_by=PlanetHistory.z, backref="galaxy")
+GalaxyHistory.planets = relation(PlanetHistory, order_by=asc(PlanetHistory.z), backref="galaxy")
 GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory)
 class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
@@ -235,12 +235,19 @@ class Alliance(Base):
     
     @staticmethod
     def load(name, active=True):
-        Q = session.query(Alliance)
-        if active is True:
-            Q = Q.filter_by(active=True)
+        Q = session.query(Alliance).filter_by(active=True)
         alliance = Q.filter(Alliance.name.ilike(name)).first()
         if alliance is None:
+            alliance = Q.filter(Alliance.name.ilike(name+"%")).first()
+        if alliance is None:
             alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
+        if alliance is None and active == False:
+            Q = session.query(Alliance)
+            alliance = Q.filter(Alliance.name.ilike(name)).first()
+            if alliance is None:
+                alliance = Q.filter(Alliance.name.ilike(name+"%")).first()
+            if alliance is None:
+                alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
         return alliance
     
     def __str__(self):
@@ -338,6 +345,7 @@ class User(Base):
     emailre = re.compile(r"^([\w.-]+@[\w.-]+)")
     phone = Column(String(48))
     pubphone = Column(Boolean, default=False) # Asc
+    googlevoice = Column(Boolean, default=None)
     sponsor = Column(String(15)) # Asc
     quits = Column(Integer, default=0) # Asc
     available_cookies = Column(Integer, default=0)
@@ -498,11 +506,11 @@ class Intel(Base):
             ret += " comment=%s"%(self.comment,)
         return ret
 Planet.intel = relation(Intel, uselist=False, backref="planet")
-Galaxy.intel = relation(Intel, Planet.__table__, order_by=Planet.z)
+Galaxy.intel = relation(Intel, Planet.__table__, order_by=asc(Planet.z))
 Intel.alliance = relation(Alliance)
 #Planet.alliance = relation(Alliance, Intel.__table__, uselist=False, viewonly=True, backref="planets")
 Planet.alliance = association_proxy("intel", "alliance")
-Alliance.planets = relation(Planet, Intel.__table__, order_by=(Planet.x, Planet.y, Planet.z), viewonly=True)
+Alliance.planets = relation(Planet, Intel.__table__, order_by=(asc(Planet.x), asc(Planet.y), asc(Planet.z)), viewonly=True)
 
 # ########################################################################### #
 # #############################    BOOKINGS    ############################## #
@@ -553,6 +561,12 @@ class Ship(Base):
         if name is not None:
             ship = Q.filter(Ship.name.ilike(name)).first()
             if ship is None:
+                ship = Q.filter(Ship.name.ilike(name+"%")).first()
+            if ship is None and name[-1].lower()=="s":
+                ship = Q.filter(Ship.name.ilike(name[:-1]+"%")).first()
+            if ship is None and name[-3:].lower()=="ies":
+                ship = Q.filter(Ship.name.ilike(name[:-3]+"%")).first()
+            if ship is None:
                 ship = Q.filter(Ship.name.ilike("%"+name+"%")).first()
             if ship is None and name[-1].lower()=="s":
                 ship = Q.filter(Ship.name.ilike("%"+name[:-1]+"%")).first()
@@ -591,9 +605,15 @@ class Scan(Base):
     
     def __str__(self):
         p = self.planet
+        ph = p.history(self.tick)
+        
         head = "%s on %s:%s:%s " % (PA.get(self.scantype,"name"),p.x,p.y,p.z,)
-        id_tick = "(id: %s, pt: %s)" % (self.pa_id,self.tick,)
-        id_age_value = "(id: %s, age: %s, value diff: %s)" % (self.pa_id,Updates.current_tick()-self.tick,p.value-p.history(self.tick).value)
+        if self.scantype in ("P","D","J","N",):
+            id_tick = "(id: %s, pt: %s)" % (self.pa_id,self.tick,)
+        if self.scantype in ("U","A",):
+            vdiff = p.value-ph.value if ph else None
+            id_age_value = "(id: %s, age: %s, value diff: %s)" % (self.pa_id,Updates.current_tick()-self.tick,vdiff)
+        
         if self.scantype in ("P",):
             return head + id_tick + str(self.planetscan)
         if self.scantype in ("D",):
@@ -615,6 +635,13 @@ class Request(Base):
     scantype = Column(String(1))
     dists = Column(Integer)
     scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='set null'))
+    active = Column(Boolean, default=True)
+    
+    @staticmethod
+    def load(id):
+        Q = session.query(Request)
+        request = Q.filter_by(id = id, active = True).first()
+        return request
 Request.user = relation(User, backref="requests")
 Request.target = relation(Planet)
 Request.scan = relation(Scan)
@@ -804,7 +831,7 @@ class FleetScan(Base):
     def __str__(self):
         p = self.owner
         return "(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.landing_tick-self.scan.tick,)
-Scan.fleets = relation(FleetScan, backref="scan")
+Scan.fleets = relation(FleetScan, backref="scan", order_by=asc(FleetScan.landing_tick))
 FleetScan.owner = relation(Planet, primaryjoin=FleetScan.owner_id==Planet.id)
 FleetScan.target = relation(Planet, primaryjoin=FleetScan.target_id==Planet.id)
 
@@ -882,20 +909,22 @@ class UserFleet(Base):
     __tablename__ = 'user_fleet'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
-    ship = Column(String(30))
+    ship_id = Column(Integer, ForeignKey(Ship.id, ondelete='cascade'))
     ship_count = Column(Integer)
 User.fleets = dynamic_loader(UserFleet, backref="user")
+UserFleet.ship = relation(Ship)
 
 class FleetLog(Base):
     __tablename__ = 'fleet_log'
     id = Column(Integer, primary_key=True)
     taker_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
-    ship = Column(String(30))
+    ship_id = Column(Integer, ForeignKey(Ship.id, ondelete='cascade'))
     ship_count = Column(Integer)
     tick = Column(Integer)
 FleetLog.taker = relation(User, primaryjoin=FleetLog.taker_id==User.id)
-FleetLog.user = relation(User, primaryjoin=FleetLog.user_id==User.id)
+User.fleetlogs = dynamic_loader(FleetLog, backref="user", primaryjoin=User.id==FleetLog.user_id, order_by=desc(FleetLog.id))
+FleetLog.ship = relation(Ship)
 
 # ########################################################################### #
 # #########################    PROPS AND COOKIES    ######################### #
@@ -948,7 +977,7 @@ class Vote(Base):
     carebears = Column(Integer)
     prop_id = Column(Integer)
     voter_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
-Vote.voter = relation(User)
+User.votes = dynamic_loader(Vote, backref="voter")
 Invite.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Invite.id==Vote.prop_id)
 Kick.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Kick.id==Vote.prop_id)
 
@@ -961,10 +990,11 @@ class Command(Base):
     id = Column(Integer, primary_key=True)
     command_prefix = Column(String(1))
     command = Column(String(20))
+    subcommand = Column(String(20))
     command_parameters = Column(String(512))
     nick = Column(String(15))
     username = Column(String(15))
-    hostname = Column(String(64))
+    hostname = Column(String(100))
     target = Column(String(150))
     command_time = Column(DateTime, default=current_timestamp())
 
@@ -975,5 +1005,6 @@ class SMS(Base):
     receiver_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     phone = Column(String(48))
     sms_text = Column(String(160))
+    mode = Column(String(12))
 SMS.sender = relation(User, primaryjoin=SMS.sender_id==User.id)
 SMS.receiver = relation(User, primaryjoin=SMS.receiver_id==User.id)

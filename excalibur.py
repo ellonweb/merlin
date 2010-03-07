@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -146,12 +146,18 @@ while True:
         #  based on an x,y match in the two tables (and active=True)
         session.execute(text("""UPDATE galaxy_temp AS t SET
                                   id = g.id
-                                FROM (SELECT id, x, y FROM galaxy WHERE active = :true) AS g
+                                FROM (SELECT id, x, y FROM galaxy) AS g
                                   WHERE t.x = g.x AND t.y = g.y
+                            ;"""))
+
+        # Make sure all the galaxies are active,
+        #  some might have been deactivated previously
+        session.execute(text("""UPDATE galaxy SET
+                                  active = :true
                             ;""", bindparams=[true]))
 
         t2=time.time()-t1
-        print "Copy galaxy ids to temp in %.3f seconds" % (t2,)
+        print "Copy galaxy ids to temp and activate in %.3f seconds" % (t2,)
         t1=time.time()
 
         # For galaxies that are no longer present in the new dump, we will
@@ -320,12 +326,18 @@ while True:
         #  based on a name match in the two tables (and active=True)
         session.execute(text("""UPDATE alliance_temp AS t SET
                                   id = a.id
-                                FROM (SELECT id, name FROM alliance WHERE active = :true) AS a
+                                FROM (SELECT id, name FROM alliance) AS a
                                   WHERE t.name = a.name
+                            ;"""))
+
+        # Make sure all the alliances are active,
+        #  some might have been deactivated previously
+        session.execute(text("""UPDATE alliance SET
+                                  active = :true
                             ;""", bindparams=[true]))
 
         t2=time.time()-t1
-        print "Copy alliance ids to temp in %.3f seconds" % (t2,)
+        print "Copy alliance ids to temp and activate in %.3f seconds" % (t2,)
         t1=time.time()
 
         # For alliances that are no longer present in the new dump, we will
@@ -420,7 +432,7 @@ t_start=time.time()
 t1=t_start
 session.execute(epenis.__table__.delete())
 session.execute(text("SELECT setval('epenis_rank_seq', 1, :false);", bindparams=[false]))
-session.execute(text("INSERT INTO epenis (user_id, penis) SELECT users.id, planet.score - planet_history.score FROM users, planet, planet_history WHERE planet.active = :true AND users.planet_id = planet.id AND planet.id = planet_history.id AND planet_history.tick = :tick ORDER BY planet.score - planet_history.score DESC;", bindparams=[true,bindparam("tick",history_tick)]))
+session.execute(text("INSERT INTO epenis (user_id, penis) SELECT users.id, planet.score - planet_history.score FROM users, planet, planet_history WHERE users.active = :true AND users.access >= :member AND planet.active = :true AND users.planet_id = planet.id AND planet.id = planet_history.id AND planet_history.tick = :tick ORDER BY planet.score - planet_history.score DESC;", bindparams=[true,bindparam("member",Config.getint("Access","member")),bindparam("tick",history_tick)]))
 t2=time.time()-t1
 print "epenis in %.3f seconds" % (t2,)
 t1=time.time()

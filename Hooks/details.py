@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -21,23 +21,22 @@
  
 from Core.db import session
 from Core.maps import Updates, Planet, Target
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class details(loadable):
     """This command basically collates lookup, xp, intel and status into one simple to use command. Neat, huh?"""
-    usage = " x.y.z"
-    paramre = loadable.planet_coordre
+    usage = " <x.y.z>"
     
+    @route(loadable.planet_coord, access = "member")
     def execute(self, message, user, params):
         
-        target = Planet.load(*params.groups())
+        target = Planet.load(*params.group(1,3,5))
         if target is None:
-            message.reply("No planet matching '%s:%s:%s' found"%params.groups())
+            message.reply("No planet matching '%s:%s:%s' found"%params.group(1,3,5))
             return
         replies = [str(target)]
         
-        if self.is_user(user) and user.planet is not None:
+        if self.user_has_planet(user):
             attacker = user.planet
             reply="Target "
             target_val = target.value

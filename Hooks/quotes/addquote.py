@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -22,14 +22,13 @@
 import re
 from Core.db import session
 from Core.maps import Quote
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class addquote(loadable):
     usage = " <quote goes here>"
-    paramre = re.compile(r"\s+(.*)")
     timestampre=re.compile(r"\s*\[?\s*\d{2}:\d{2}(:\d{2})?\s*\]?\s*")
     
+    @route(r"(.+)", access = "member")
     def execute(self, message, user, params):
         
         params = params.group(1)

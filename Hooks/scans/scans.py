@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -20,21 +20,22 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from sqlalchemy.sql.functions import count, max
+from Core.config import Config
+from Core.paconf import PA
 from Core.db import session
 from Core.maps import Planet, Scan
-from Core.loadable import loadable
+from Core.chanusertracker import CUT
+from Core.loadable import loadable, route, robohci
 
-@loadable.module("half")
 class scans(loadable):
-    """"""
     usage = " <x:y:z>"
-    paramre = loadable.planet_coordre
     
+    @route(loadable.planet_coord, access = "half")
     def execute(self, message, user, params):
         
-        planet = Planet.load(*params.group(1,2,3))
+        planet = Planet.load(*params.group(1,3,5))
         if planet is None:
-            message.reply("No planet with coords %s:%s:%s found" % params.group(1,2,3))
+            message.reply("No planet with coords %s:%s:%s found" % params.group(1,3,5))
             return
         
         Q = session.query(Scan.scantype, max(Scan.tick), count())
@@ -52,3 +53,11 @@ class scans(loadable):
         
         reply="scans for %s:%s:%s - " % (planet.x,planet.y,planet.z) + ", ".join(prev)
         message.reply(reply)
+    
+    @robohci
+    def robocop(self, message, scantype, pa_id, x, y, z, names):
+        reply = "%s on %s:%s:%s " % (PA.get(scantype,"name"),x,y,z,)
+        reply+= Config.get("URL","viewscan") % (pa_id,)
+        for name in names.split(","):
+            for nick in CUT.list_user_nicks(name):
+                message.privmsg(reply, nick)

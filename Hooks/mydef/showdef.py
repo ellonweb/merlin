@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,37 +19,35 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
-from Core.db import session
 from Core.maps import Updates, User
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module(100)
 class showdef(loadable):
-    """"""
     usage = " <pnick>"
-    paramre = re.compile(r"(?:\s+(\S+))?")
+    access = "member"
     
-    @loadable.require_user
-    def execute(self, message, user, params):
-        
+    @route(r"(\S+)")
+    def user(self, message, user, params):
         name=params.group(1)
-        if name is not None:
-            u = User.load(name=name, exact=False, access="member")
-        else:
-            u = user
+        u = User.load(name=name, exact=False, access="member")
         if u is None:
             message.reply("No members matching %s found"%(name,))
-            return
-        
+        else:
+            self.execute(message, u)
+    
+    @route(r"")
+    @require_user
+    def me(self, message, user, params):
+        self.execute(message, user)
+    
+    def execute(self, message, u):
+        tick = Updates.current_tick()
         ships = u.fleets.all()
         
         if len(ships) < 1:
-            message.reply("%s is either a lazy pile of shit that hasn't entered any ships for def, or a popular whore who's already turned their tricks."%(u.name,))
-            return
-        
-        tick = Updates.current_tick()
-        reply ="%s def info: fleetcount %s, updated: %s (%s), ships: " %(u.name,u.fleetcount,u.fleetupdated,u.fleetupdated-tick)
-        reply+= ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship),ships))
-        reply+=" comment: %s"%(u.fleetcomment,)
-        message.reply(reply)
+            message.reply("That lazy pile of shit %s hasn't updated their def since tick %s. (comment: %s)"%(u.name,u.fleetupdated,u.fleetcomment))
+        else:
+            reply = "%s def info: fleetcount %s, updated: %s (%s), ships: " %(u.name,u.fleetcount,u.fleetupdated,u.fleetupdated-tick)
+            reply+= ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship.name),ships))
+            reply+= " comment: %s"%(u.fleetcomment,)
+            message.reply(reply)

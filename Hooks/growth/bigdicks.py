@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -23,12 +23,12 @@ from sqlalchemy.sql import asc
 from Core.config import Config
 from Core.db import session
 from Core.maps import Alliance, User, epenis
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class bigdicks(loadable):
     """BEEFCAKE!!!11onetwo"""
     
+    @route(access = "member")
     def execute(self, message, user, params):
         
         alliance = Alliance.load(Config.get("Alliance","name"))
@@ -41,7 +41,7 @@ class bigdicks(loadable):
         result = Q[:5]
         
         if len(result) < 1:
-            msg.alert("There is no penis")
+            message.alert("There is no penis")
             return
         
         prev = []

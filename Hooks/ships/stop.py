@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,31 +19,30 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import math, re
+import math
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Ship
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class stop(loadable):
     """Calculates the required defence to the specified number of ships"""
     usage = " <number> <ship> [t1|t2|t3]"
-    paramre = re.compile(r"\s(\d+(?:\.\d+)?[km]?)\s(\w+)(?:\s(t1|t2|t3))?",re.I)
     
+    @route(r"(\d+(?:\.\d+)?[km]?)\s+(\w+)(?:\s+(t1|t2|t3))?")
     def execute(self, message, user, params):
         
         num, name, attacker = params.groups()
-        attacker = attacker or "t1"
+        attacker = (attacker or "t1").lower()
         
         num = self.short2num(num)
         ship = Ship.load(name=name)
-        if "asteroids".rfind(name.lower()) > -1:
-            total_armor = 50 * num
+        if ship is not None:
+            pass
+        elif "asteroids".rfind(name.lower()) > -1:
+            ship = Ship(name="Asteroids",class_="Roids",armor=50,total_cost=20000)
         elif "constructions".rfind(name.lower()) > -1:
-            total_armor = 500 * num
-        elif ship is not None:
-            total_armor = ship.armor * num
+            ship = Ship(name="Constructions",class_="Struct",armor=500,total_cost=150000)
         else:
             message.alert("No Ship called: %s" % (name,))
             return
@@ -51,7 +50,7 @@ class stop(loadable):
         attacker_class = getattr(Ship, attacker)
         attackers = session.query(Ship).filter(attacker_class == ship.class_)
         if attackers.count() == 0:
-            message.reply("%s is not hit by anything as that category (%s)" % (ship.name,attacker))
+            message.reply("%s are not hit by anything as that category (%s)" % (ship.name,attacker))
             return
         if ship.class_ == "Roids":
             reply="Capturing"
@@ -64,6 +63,6 @@ class stop(loadable):
             if attacker.type.lower() == "emp" :
                 needed=int((math.ceil(num/(float(100-ship.empres)/100)/attacker.guns))/efficiency)
             else:
-                needed=int((math.ceil(float(total_armor)/attacker.damage))/efficiency)
+                needed=int((math.ceil(float(ship.armor*num)/attacker.damage))/efficiency)
             reply+="%s: %s (%s) " % (attacker.name,needed,self.num2short(attacker.total_cost*needed/100))
         message.reply(reply)

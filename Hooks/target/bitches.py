@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,22 +19,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy.sql.functions import count
 from Core.config import Config
 from Core.db import session
 from Core.maps import Updates, Galaxy, Planet, Alliance, Intel, Target
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("half")
 class bitches(loadable):
     """List of booked targets by galaxy and alliance"""
     usage = " [minimum eta]"
-    paramre = re.compile(r"(?:\s(\d+))?")
     
+    @route(r"(\d+)?", access = "half")
     def execute(self, message, user, params):
         
-        tick = Updates.current_tick() + (params.group(1) or 1)
+        tick = Updates.current_tick() + int(params.group(1) or 1)
         replies = []
         
         Q = session.query(Galaxy.x, Galaxy.y, count())

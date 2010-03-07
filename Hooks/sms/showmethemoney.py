@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -22,11 +22,11 @@
 from urllib import urlencode
 from urllib2 import urlopen
 from Core.config import Config
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module(100)
 class showmethemoney(loadable):
     
+    @route(access = "member")
     def execute(self, message, user, params):
         
         username = Config.get("clickatell", "user")

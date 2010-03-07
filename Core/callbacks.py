@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -22,16 +22,22 @@
 # This module handles callbacks
 
 import os
+import socket
 import sys
+import time
+import traceback
+from Core.exceptions_ import MerlinSystemCall
+from Core.config import Config
 from Core.loader import Loader
+from Core.db import session
 from Core.loadable import loadable
 
-use_init_all = True
-
 class callbacks(object):
+    use_init_all = True
     # Modules/Callbacks/Hooks controller
-    callbacks = {}
     modules = []
+    callbacks = {}
+    robocops = {}
     
     def init(self):
         # Load in everything in /Hooks/
@@ -42,7 +48,7 @@ class callbacks(object):
         #Loader.backup(*self.modules)
     
     def load_package(self, path):
-        if use_init_all:
+        if self.use_init_all:
         # Using __init__'s __all__ to detect module list
             # Load the current module/package
             package = self.load_module(path)
@@ -89,6 +95,11 @@ class callbacks(object):
             self.callbacks[event]+= [callback,]
         else:
             self.callbacks[event] = [callback,]
+        
+        # Store the callback again for RoboCop if
+        #  it has an executable robocop method
+        if callable(callback.robocop):
+            self.robocops[callback.name] = callback
     
     def callback(self, message):
         # Call back a hooked module
@@ -98,7 +109,42 @@ class callbacks(object):
             # cycle through them
             for callback in self.callbacks[event]:
                 # and call each one, passing in the message
-                callback(message)
+                try:
+                    callback(message)
+                except (MerlinSystemCall, socket.error):
+                    raise
+                except Exception, e:
+                    # Error while executing a callback/mod/hook
+                    message.alert("Error in module '%s'. Please report the command you used to the bot owner as soon as possible." % (callback.name,))
+                    with open(Config.get("Misc","errorlog"), "a") as errorlog:
+                        errorlog.write("%s - IRC Callback Error: %s\n%s\n\n" % (time.asctime(),e.__str__(),message,))
+                        errorlog.write(traceback.format_exc())
+                        errorlog.write("\n\n\n")
+                finally:
+                    # Remove any uncommitted or unrolled-back state
+                    session.remove()
+    
+    def robocop(self, message):
+        # Call back a hooked robocop module
+        command = message.get_command()
+        # Check we have a callback stored for this command,
+        if self.robocops.has_key(command):
+            callback = self.robocops[command]
+            # and call it, passing in the message
+            try:
+                callback.robocop(message)
+            except (MerlinSystemCall, socket.error):
+                raise
+            except Exception, e:
+                # Error while executing a callback/mod/hook
+                message.alert(False)
+                with open(Config.get("Misc","errorlog"), "a") as errorlog:
+                    errorlog.write("%s - RoboCop Callback Error: %s\n%s\n\n" % (time.asctime(),e.__str__(),message,))
+                    errorlog.write(traceback.format_exc())
+                    errorlog.write("\n\n\n")
+            finally:
+                # Remove any uncommitted or unrolled-back state
+                session.remove()
 
 Callbacks = callbacks()
 Callbacks.init()

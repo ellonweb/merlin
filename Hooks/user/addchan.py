@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,20 +19,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy.exc import IntegrityError
 from Core.config import Config
 from Core.db import session
 from Core.maps import Channel
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module("admin")
 class addchan(loadable):
     """Adds a channel with the given level with maxlevel equal to your own access level"""
     usage = " <chan> <level>"
-    paramre = re.compile(r"\s+(#\S+)\s+(\S+)")
     
-    @loadable.require_user
+    @route(r"(#\S+)\s+(\S+)", access = "admin")
+    @require_user
     def execute(self, message, user, params):
         
         chan = params.group(1)

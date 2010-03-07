@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -24,11 +24,11 @@ import traceback
 from sqlalchemy.exc import IntegrityError
 from Core.db import session
 from Core.maps import Updates, Planet, User, FleetScan
-from Core.loadable import loadable
+from Core.loadable import system
 
 statusre=re.compile(r"(\d+):(\d+):(\d+)\*?\s+(\d+):(\d+):(\d+)\s+(.*?)\s+((Xan|Ter|Cat|Zik|Etd)\s+)?(\d+)\s+(Return|Attack|Defend)\s+(\d+)")
 
-@loadable.system('PRIVMSG')
+@system('PRIVMSG')
 def catcher(message):
     try:
         m = statusre.search(message.get_msg().replace("\x02",""))

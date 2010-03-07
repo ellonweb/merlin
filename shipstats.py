@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -27,15 +27,15 @@ from Core.config import Config
 from Core.db import true, false, session
 from Core.maps import Ship
 
-regex = r'^<tr class="(Ter|Cath|Xan|Zik|Etd)">.+?(\w+)</td>' # race & name
+regex = r'^<tr class="(Ter|Cat|Xan|Zik|Etd)">.+?>([^<]+)</td>' # race & name
 regex += r'<td>(\w+)</td>' # class
-regex += r'<td>(\w\w|\-)</td>'*3 # t1,t2,t3
+regex += r'(?:<td>(\w\w|\-)</td>)?'*3 # t1,t2,t3
 regex += r'<td>(\w+)</td>' # type
 regex += r'.+?(\d+|\-)</td>'*8 # some numbers
 regex += r'.+?</tr>$' # end of the line
 sre = re.compile(regex,re.I|re.M)
 
-mapping = {    "Fi": "Fighter",
+mapping = { "Fi": "Fighter",
             "Co": "Corvette",
             "Fr": "Frigate",
             "De": "Destroyer",
@@ -45,7 +45,7 @@ mapping = {    "Fi": "Fighter",
             "St": "Struct",
             "Ter": "Terran",
             "Etd": "Eitraides",
-            "Cath": "Cathaar",
+            "Cat": "Cathaar",
             "Zik": "Zikonian",
             "Xan": "Xandathrii"}
 
@@ -65,7 +65,7 @@ def main(url = Config.get("URL", "ships"), debug=False):
                 line[index] = mapping[line[index]]
             elif line[index].isdigit():
                 line[index] = int(line[index])
-            if line[index] != '-':
+            if line[index] not in ('-', '',):
                 setattr(ship,key,line[index])
         ship.total_cost = ship.metal + ship.crystal + ship.eonium
         if debug: print "%12s%12s%12s%12s" % (ship.name, ship.class_, ship.race, ship.type,)

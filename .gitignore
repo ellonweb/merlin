@@ -1,2 +1,5 @@
 cmd.exe.lnk
 *.pyc
+log.txt
+dumplog.txt
+errorlog.txt

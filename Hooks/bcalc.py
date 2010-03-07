@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,16 +19,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class bcalc(loadable):
     
+    @route()
     def execute(self, message, user, params):
         
-        bcalc = ["http://bcalc.thrud.co.uk/","http://beta.5th-element.org/","http://bcalc.lch-hq.org/index.php",
-                 "http://parser.5th-element.org/","http://munin.ascendancy.tv/",
-                 "http://pa.xqwzts.com/prod.aspx","http://www.everyday-hero.net/reshack.html",
-                 "http://patools.thrud.co.uk/", "http://game.planetarion.com/bcalc.pl"]
+        bcalc = ["http://sandmans.co.uk",
+                 "http://parser.5th-element.org/",
+                 "http://parser.vision-hq.com",
+                 "http://game.planetarion.com/bcalc.pl",
+                 "http://www.lch-hq.org/pilkara/",
+                ]
         
         message.reply("Bcalcs: "+" | ".join(bcalc))

@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -21,56 +21,93 @@
  
 # Request a scan
 
-import re
-from .variables import access, channels
-from .Core.modules import M
-loadable = M.loadable.loadable
-from Hooks.scans import scans, requesturl
+from Core.config import Config
+from Core.paconf import PA
+from Core.db import session
+from Core.maps import Planet, User, Request
+from Core.loadable import loadable, route, require_user, robohci
 
 class request(loadable):
     """Request a scan"""
+    usage = " <x.y.z> <scantype> [dists] | <id> blocks <amps> | cancel <id> | list | links"
     
-    def __init__(self):
-        loadable.__init__(self)
-        self.paramre = re.compile(r"\s("+"|".join(scans.keys())+r")\w*\s"+self.planet_coordre.pattern+r"(?:\s(\d+))?", re.I)
-        self.robore = re.compile(r"\s(\d+)\s(\S+)\s("+"|".join(scans.keys())+r")\s"+self.planet_coordre.pattern+r"(\d+)(\d+)", re.I)
-        self.usage += " scantype x.y.z [dists]"
-    
-    @loadable.run_with_access(access['member'])
+    @route(loadable.planet_coord+"\s+("+"|".join(PA.options("scans"))+r")\w*(?:\s+(\d+))?", access = "member")
+    @require_user
     def execute(self, message, user, params):
-        
-        planet = M.DB.Maps.Planet.load(*params.group(2,3,4))
+        planet = Planet.load(*params.group(1,3,5))
         if planet is None:
-            message.alert("No planet with coords %s:%s:%s" % params.group(2,3,4))
+            message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
             return
         
-        scan = params.group(1).upper()
+        scan = params.group(6).upper()
+        dists = int(params.group(7) or 0)
         
-        session = M.DB.Session()
-        session.add(user)
-        
-        request = M.DB.Maps.Request(target=planet, scantype=scan)
-        request.dists = int(params.group(5) or 0)
+        request = self.request(message, user, planet, scan, dists)
+        message.reply("Requested a %s Scan of %s:%s:%s. !request cancel %s to cancel the request." % (PA.get(scan, "name"), planet.x, planet.y, planet.z, request.id,))
+    
+    @robohci
+    def robocop(self, message, user_id, x,y,z, scan, dists):
+        user = User.load(id=user_id)
+        planet = Planet.load(x,y,z)
+        self.request(message, user, planet, scan, dists)
+    
+    def request(self, message, user, planet, scan, dists):
+        request = Request(target=planet, scantype=scan, dists=dists)
         user.requests.append(request)
         session.commit()
         
-        session.add(planet)
         dists_intel = planet.intel.dists if planet.intel else 0
-        dists_request = request.dists
-        session.close()
+        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (request.id, user.name, PA.get(scan, "name"), planet.x,planet.y,planet.z, dists_intel, request.dists,) + self.link(request), self.scanchan())
         
-        message.reply("Requested a %s Scan of %s:%s:%s. !cancelscan %s to cancel the request." % (scans[scan]['name'], planet.x, planet.y, planet.z, request.id,))
-        self.request(message, request.id, user.name, scan, planet.x, planet.y, planet.z, dists_intel, dists_request)
-        return
+        return request
     
-    @loadable.runcop
-    def robocop(self, message, params):
-        id = int(params.group(1))
-        name = params.group(2)
-        scan = params.group(3).upper()
-        x,y,z = params.group(4,5,6)
-        dists_intel, dists_request = params.group(7,8)
-        self.request(message, id, name, scan, x, y, z, dists_intel, dists_request)
+    @route(r"cancel\s+(\d+)", access = "member")
+    @require_user
+    def cancel(self, message, user, params):
+        id = params.group(1)
+        request = Request.load(id)
+        if request is None:
+            message.reply("No open request number %s exists (idiot)."%(id,))
+            return
+        if request.user is not user and not user.is_admin():
+            message.reply("Only %s may cancel request %d."%(request.user.name,id))
+            return
+        
+        request.active = False
+        session.commit()
+        message.reply("Cancelled scan request %s" % (id,))
     
-    def request(self, message, id, name, scan, x,y,z, dists_intel, dists_request):
-        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (id, name, scans[scan]['name'], x,y,z, dists_intel, dists_request,) + requesturl % (scans[scan]['type'],x,y,z,), channels.get('scan', channels['private']))
+    @route(r"(\d+)\s+block(?:s|ed)?\s+(\d+)", access = "member")
+    def blocks(self, message, user, params):
+        id = params.group(1)
+        dists = int(params.group(2))
+        request = Request.load(id)
+        if request is None:
+            message.reply("No open request number %s exists (idiot)."%(id,))
+            return
+        
+        request.dists = max(request.dists, dists)
+        session.commit()
+        message.reply("Updated request %s dists to %s" % (id, request.dists,))
+    
+    @route(r"list", access = "member")
+    def list(self, message, user, params):
+        Q = session.query(Request)
+        Q = Q.filter(Request.scan==None)
+        Q = Q.filter(Request.active==True)
+        
+        message.reply(" ".join(map(lambda request: "[%s: %s %s:%s:%s]" % (request.id, request.scantype, request.target.x, request.target.y, request.target.z,), Q.all())))
+    
+    @route(r"links", access = "member")
+    def links(self, message, user, params):
+        Q = session.query(Request)
+        Q = Q.filter(Request.scan==None)
+        Q = Q.filter(Request.active==True)
+        
+        message.reply(" ".join(map(lambda request: "[%s: %s]" % (request.id, self.link(request),), Q.all())))
+    
+    def scanchan(self):
+        return Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")
+    
+    def link(self, request):
+        return Config.get("URL", "reqscan") % (request.scantype, request.target.x, request.target.y, request.target.z,)

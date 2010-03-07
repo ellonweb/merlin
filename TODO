@@ -1,25 +1,14 @@
-http://www.sqlalchemy.org/trac/ticket/1468
-http://www.sqlalchemy.org/trac/ticket/1529
-http://www.sqlalchemy.org/trac/ticket/1537
-http://www.sqlalchemy.org/trac/ticket/1565
-http://www.sqlalchemy.org/trac/ticket/1576
+http://www.sqlalchemy.org/trac/ticket/1529 (reloading/err)
+http://www.sqlalchemy.org/trac/ticket/1537 (alias/join0.6)
+http://www.sqlalchemy.org/trac/ticket/1565 (sequences 0.6)
+http://www.sqlalchemy.org/trac/ticket/1638 (unicode/noerr)
 
-rewrite CLI
+|       Known Bugs       |   Occurrence   |     Effect     |
+| SQLA map reload (1529) | ext. rare      | recoverable    |
+| Merlin.nick            | unlikely       | unknown/low    |
 
-migrate db system for createdb.py
-    investigate schemas/namespaces as alternative to seperate DBs
-
+exception model refactor
+rewrite CLI or integrate as an extra IO stream
 rewrite Connection.write and Action.write to use detached threaded system
-
-Reimplement Robocop (threaded?)
-    scan requests (!request)
-    scans parsed (!scans)
-
-Hooks.scans.request
-    !request cancel id
-    request.dists
-        fill in from scan requests ("ellonweb informs that atleast n dists are needed")
-        fill in from intel
-        fill in from Hooks.scans.blocked
 
 Remove use of django.views.static.serve (configure for apache, etc)

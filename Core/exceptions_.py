@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -21,22 +21,31 @@
  
 # The standard exceptions used by Merlin
 
-class Quit(Exception):
+class MerlinError(Exception):
     pass
 
-class Reboot(Exception):
+class MerlinSystemCall(MerlinError):
     pass
 
-class Reload(Exception):
+class Quit(MerlinSystemCall):
     pass
 
-class LoadableError(Exception):
+class Reboot(MerlinSystemCall):
+    pass
+
+class Reload(MerlinSystemCall):
+    pass
+
+class Call999(MerlinSystemCall):
+    pass
+
+class LoadableError(MerlinError):
     pass
 
 class PrefError(LoadableError):
     pass
 
-class ParseError(Exception):
+class ParseError(MerlinError):
     pass
 
 class ChanParseError(ParseError):
@@ -48,5 +57,5 @@ class MsgParseError(ParseError):
 class PNickParseError(ParseError):
     pass
 
-class UserError(Exception):
+class UserError(MerlinError):
     pass

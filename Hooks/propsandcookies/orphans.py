@@ -19,24 +19,31 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import aliased
+from Core.config import Config
 from Core.db import session
-from Core.maps import Slogan
+from Core.maps import User
 from Core.loadable import loadable, route
 
-class remslogan(loadable):
-    usage = " <slogan to remove>"
+class orphans(loadable):
+    """Lists all members whose sponsors are no longer members. Use !adopt to someone."""
     
-    @route(r"(.+)", access = "member")
+    @route(access = "member")
     def execute(self, message, user, params):
         
-        params = params.group(1)
-        slogan, count = Slogan.search(params)
-        if count < 1:
-            reply = "No slogans matching '%s'" % (params,)
-        if count > 1:
-            reply = "There were %d slogans matching your search, I can only be bothered to delete one slogan at a time you demanding fuckwit" % (count,)
-        if count == 1:
-            session.delete(slogan)
-            session.commit()
-            reply="Removed: '%s'" % (slogan,)
+        user = aliased(User)
+        sponsor = aliased(User)
+        Q = session.query(user.name)
+        Q = Q.filter(and_(user.active == True, user.access >= Config.get("Access", "member")))
+        Q = Q.filter(user.sponsor.ilike(sponsor.name))
+        Q = Q.filter(or_(sponsor.active == False, sponsor.access < Config.get("Access", "member")))
+        result = Q.all()
+        
+        if len(result) < 1:
+            message.reply("There are no orphans. KILL A PARENT NOW.")
+            return
+        
+        reply = "The following members are orphans: "
+        reply+= ", ".join(map(lambda x:x[0],result))
         message.reply(reply)

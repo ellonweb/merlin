@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,21 +19,19 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
-from sqlalchemy import or_
+from sqlalchemy.sql import asc
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class spam(loadable):
     """Spam alliance coords"""
-    usage = " alliance"
-    paramre = re.compile(r"\s(\S+)")
+    usage = " <alliance>"
     
+    @route(r"(\S+)", access = "member")
     def execute(self, message, user, params):
         
-        alliance = Alliance.load(params.group(1))
+        alliance = Alliance.load(params.group(1), active=False)
         if alliance is None:
             message.reply("No alliance matching '%s' found"%(params.group(1),))
             return
@@ -42,6 +40,7 @@ class spam(loadable):
         Q = Q.join(Planet.intel)
         Q = Q.filter(Planet.active == True)
         Q = Q.filter(Intel.alliance==alliance)
+        Q = Q.order_by(asc(Planet.x), asc(Planet.y), asc(Planet.z))
         result = Q.all()
         if len(result) < 1:
             message.reply("No planets in intel match alliance %s"%(alliance.name,))

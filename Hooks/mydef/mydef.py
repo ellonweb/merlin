@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -22,18 +22,16 @@
 import re
 from Core.db import session
 from Core.maps import Updates, Ship, UserFleet
-from Core.loadable import loadable
+from Core.loadable import loadable, route, require_user
 
-@loadable.module(100)
 class mydef(loadable):
-    """Add your fleets for defense listing. Ship can be a shipclass. For example: 2x 20k Barghest 30k Harpy 20k BS Call me any time for hot shipsex."""
+    """Add your fleets for defense listing. For example: 2x 20k Barghest 30k Harpy Call me any time for hot shipsex."""
     usage = " [fleets] x <[ship count] [ship name]> [comment]"
-    paramre = re.compile(r"\s+(\d)\s*x\s*(.*)")
-    countre = re.compile(r"^(\d+(?:\.\d+)?[mk]?)$")
+    countre = re.compile(r"^(\d+(?:\.\d+)?[mk]?)$",re.I)
     shipre = re.compile(r"^(\w+),?$")
-    ship_classes = ['fi','co','fr','de','cr','bs']
     
-    @loadable.require_user
+    @route(r"(\d)\s*x\s*(.*)", access = "member")
+    @require_user
     def execute(self, message, user, params):
         
         fleetcount=int(params.group(1))
@@ -52,7 +50,7 @@ class mydef(loadable):
         ships = user.fleets.all()
         
         reply = "Updated your def info to: fleetcount %s, updated: pt%s ships: " %(user.fleetcount,user.fleetupdated)
-        reply+= ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship),ships))
+        reply+= ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship.name),ships))
         reply+= " and comment: %s" %(user.fleetcomment)
         message.reply(reply)
     
@@ -86,19 +84,13 @@ class mydef(loadable):
                 break
             
             count=self.short2num(mc.group(1))
-            ship=ms.group(1).lower()
+            ship=ms.group(1)
             
-            s = Ship.load(name=ship)
-            
-            if ship in self.ship_classes:
-                pass
-            elif s is not None:
-                ship=s.name
-            else:
+            ship = Ship.load(name=ship)
+            if ship is None:
                 break
             
             ships[ship]=count
-            
             
             parts.pop(0)
             parts.pop(0)

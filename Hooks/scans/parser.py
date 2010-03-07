@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -31,22 +31,19 @@ from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, User, Intel, Ship, Scan, Request
 from Core.maps import PlanetScan, DevScan, UnitScan, FleetScan, CovOp
-from Core.loadable import loadable
-
-'''
-from .Core.robocop import push
-'''
+from Core.loadable import system
+from Core.robocop import push
 
 scanre=re.compile("http://[^/]+/showscan.pl\?scan_id=([0-9a-zA-Z]+)")
 scangrpre=re.compile("http://[^/]+/showscan.pl\?scan_grp=([0-9a-zA-Z]+)")
 
-@loadable.system('PRIVMSG')
+@system('PRIVMSG')
 def catcher(message):
     try:
         user = User.load(name=message.get_pnick())
-        uid = user.id if user else 0
+        uid = user.id if user else None
     except PNickParseError:
-        uid = 0
+        uid = None
     for m in scanre.finditer(message.get_msg()):
         parse(uid, "scan", m.group(1)).start()
     for m in scangrpre.finditer(message.get_msg()):
@@ -85,6 +82,7 @@ class parse(Thread):
     
     def scan(self, uid, pa_id, gid=None):
         page = urlopen(Config.get("URL","viewscan")%(pa_id,)).read()
+        page = unicode(page, encoding='latin-1') # Encode the page
         
         m = re.search('>([^>]+) on (\d+)\:(\d+)\:(\d+) in tick (\d+)', page)
         if not m:
@@ -119,17 +117,18 @@ class parse(Thread):
         Q = Q.filter(Request.scantype==scantype)
         Q = Q.filter(Request.target==planet)
         Q = Q.filter(Request.scan==None)
+        Q = Q.filter(Request.active==True)
         result = Q.all()
         
         users = []
         for request in result:
             request.scan_id = scan_id
+            request.active = False
             users.append(request.user.name)
         session.commit()
         
-        '''
-        push("!scans %s %s %s" % (scantype, pa_id, " ".join(users),))
-        '''
+        if len(users) > 0:
+            push("scans", scantype=scantype, pa_id=pa_id, x=planet.x, y=planet.y, z=planet.z, names=",".join(users))
     
     def parse_P(self, scan_id, scan, page):
         planetscan = scan.planetscan = PlanetScan()
@@ -301,10 +300,9 @@ class parse(Thread):
             try:
                 scan.fleets.append(fleetscan)
                 session.commit()
-            except IntegrityError:
+            except IntegrityError, e:
                 session.rollback()
-                print "Caught exception in jgp: "+e.__str__()
-                traceback.print_exc()
+                print "Caught integrity exception in jgp: "+e.__str__()
                 print "Trying to update instead"
                 query = session.query(FleetScan).filter_by(owner=attacker, target=scan.planet, fleet_size=fleetsize, fleet_name=fleet, landing_tick=eta+scan.tick, mission=mission)
                 try:

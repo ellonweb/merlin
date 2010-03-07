@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,18 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re
 from sqlalchemy.sql import asc
 from Core.db import session
 from Core.maps import Updates, Planet, Alliance, User, Intel, Target
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("half")
 class gangbang(loadable):
     """List of booked targets in an alliance"""
-    usage = " alliance [tick]"
-    paramre = re.compile(r"\s([\w-]+)(?:\s(\d+))?")
+    usage = " <alliance> [tick]"
     
+    @route(r"(\S+)(?:\s+(\d+))?", access = "half")
     def execute(self, message, user, params):
         
         alliance = Alliance(name="Unknown") if params.group(1).lower() == "unknown" else Alliance.load(params.group(1))
@@ -41,7 +39,7 @@ class gangbang(loadable):
         tick = Updates.current_tick()
         
         when = int(params.group(2) or 0)
-        if when and when < 80:
+        if when and when < 32:
             when += tick
         elif when and when <= tick:
             message.alert("Can not check status on the past. You wanted tick %s, but current tick is %s." % (when, tick,))

@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,28 +19,33 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from sqlalchemy.sql import asc
 from Core.db import session
 from Core.maps import Galaxy, Planet, Alliance, Intel
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
 options = ['alliance', 'nick', 'fakenick', 'defwhore', 'covop', 'scanner', 'dists', 'bg', 'gov', 'relay', 'reportchan', 'comment']
 
-@loadable.module("member")
 class intel(loadable):
     """View or set intel for a planet. Valid options: """
     __doc__ += ", ".join(options)
-    usage = " x.y[.z] [option=value]+"
-    paramre = loadable.coordre
+    usage = " <x.y[.z]> [option=value]+"
     
-    def execute(self, message, user, params):
+    @route(loadable.coord, access = "member")
+    def view_intel(self, message, user, params):
         
-        if params.group(3) is None:
-            galaxy = Galaxy.load(*params.group(1,2))
+        if params.group(5) is None:
+            galaxy = Galaxy.load(*params.group(1,3))
             if galaxy is None:
-                message.alert("No galaxy with coords %s:%s" % params.group(1,2))
+                message.alert("No galaxy with coords %s:%s" % params.group(1,3))
                 return
+            
+            Q = session.query(Planet)
+            Q = Q.filter(Planet.active == True)
+            Q = Q.filter(Planet.galaxy == galaxy)
+            Q = Q.order_by(asc(Planet.z))
             prev = []
-            for planet in galaxy.planets:
+            for planet in Q:
                 if planet.intel is not None:
                     reply = "#%s"%(planet.z,)
                     if planet.intel.nick:
@@ -58,9 +63,21 @@ class intel(loadable):
                 message.reply("No information stored for %s:%s" % (galaxy.x, galaxy.y,))
             return
         
-        planet = Planet.load(*params.group(1,2,3))
+        planet = Planet.load(*params.group(1,3,5))
         if planet is None:
-            message.alert("No planet with coords %s:%s:%s" % params.group(1,2,3))
+            message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
+            return
+        
+        if str(planet.intel):
+            message.reply("Information stored for %s:%s:%s -%s"% (planet.x, planet.y, planet.z, str(planet.intel),))
+        else:
+            message.reply("No information stored for %s:%s:%s"% (planet.x, planet.y, planet.z,))
+    
+    @route(loadable.planet_coord+r"\s+(\S.*)", access = "member")
+    def set_intel(self, message, user, params):
+        planet = Planet.load(*params.group(1,3,5))
+        if planet is None:
+            message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
             return
         
         if planet.intel is None:
@@ -83,9 +100,9 @@ class intel(loadable):
             if opt in ("nick","fakenick","bg","gov","reportchan"):
                 setattr(planet.intel, opt, val)
             if opt in ("defwhore","covop","scanner","relay"):
-                if val in self.true:
+                if val.lower() in self.true:
                     setattr(planet.intel, opt, True)
-                if val in self.false:
+                if val.lower() in self.false:
                     setattr(planet.intel, opt, False)
             if opt == "dists":
                 try:
@@ -95,4 +112,7 @@ class intel(loadable):
             if opt == "comment":
                 planet.intel.comment = message.get_msg().split("comment=")[1]
         session.commit()
-        message.reply(("Information stored for %s:%s:%s -"+str(planet.intel) if str(planet.intel) else "No information stored for %s:%s:%s") % (planet.x, planet.y, planet.z,))
+        if str(planet.intel):
+            message.reply("Information stored for %s:%s:%s -%s"% (planet.x, planet.y, planet.z, str(planet.intel),))
+        else:
+            message.reply("No information stored for %s:%s:%s"% (planet.x, planet.y, planet.z,))

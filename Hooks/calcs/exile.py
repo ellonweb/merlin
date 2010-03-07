@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -23,12 +23,10 @@ from sqlalchemy.sql import asc, desc
 from sqlalchemy.sql.functions import count
 from Core.db import session
 from Core.maps import Planet
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module()
 class exile(loadable):
-    """Calculate how long it will take to repay a value loss capping roids."""
-    
+    @route()
     def execute(self, message, user, params):
         
         Q = session.query(Planet.x, Planet.y, count().label('planets'))
@@ -50,11 +48,14 @@ class exile(loadable):
 
         gals=0
         bracket=0
+        base_bracket_gals = 0
         max_planets=0
 
         for planets, galaxies in result:
             gals+=galaxies
+        
         bracket=int(gals*.2)
+        
         for planets, galaxies in result:
             bracket-=galaxies
             if bracket < 0:
@@ -63,8 +64,10 @@ class exile(loadable):
                 rest_planets=planets
                 break
             max_planets=planets
+            base_bracket_gals+=galaxies
 
-        reply="Total galaxies: %s Maximum planets to guarantee a galaxy is in the exile bracket: %s" % (gals,max_planets)
-        reply+=" | Also in the bracket: %s of %s galaxies with %s planets."%(rest_gals,total_rest_gals,rest_planets)
+        reply = "Total galaxies: %s"%(gals,)
+        reply+= " | %s galaxies with a maximum of %s planets guaranteed to be in the exile bracket"%(base_bracket_gals,max_planets,)
+        reply+= " | Also in the bracket: %s of %s galaxies with %s planets."%(rest_gals,total_rest_gals,rest_planets,)
 
         message.reply(reply)

@@ -1,5 +1,5 @@
 # This file is part of Merlin.
-# Merlin is the Copyright (C)2008-2009 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -24,18 +24,22 @@ from sqlalchemy.sql.functions import sum
 from Core.config import Config
 from Core.db import session
 from Core.maps import Cookie
-from Core.loadable import loadable
+from Core.loadable import loadable, route
 
-@loadable.module("member")
 class gac(loadable):
     """Displays stats about the Gross Alliance Cookies. Similar to the Gross Domestic Product, GAC covers how many cookies changed hands in a given week."""
     
+    @route(access = "member")
     def execute(self, message, user, params):
         
         last_5_gac=self.get_last_5_gac()
         
         max_gac=self.get_max_gac()
         min_gac=self.get_min_gac()
+        
+        if (max_gac or min_gac) is None:
+            message.reply("Apparently noone likes the cookies I baked! Why don't you feed some to your friends?")
+            return
         
         reply = "Gross Alliance Cookies for %s for last 5 weeks (current first): %s"%(Config.get("Alliance","name"),', '.join(last_5_gac))
         reply+= " | Highest ever GAC: %s in week %s/%s."%(max_gac[0],max_gac[1],max_gac[2])
