@@ -94,7 +94,7 @@ class merlin(object):
                             Loader.reload(Config)
                             continue
                     
-                except Reboot as exc:
+                except (Reboot, socket.error) as exc:
                     # Reset the connection first
                     self.irc = Connection.disconnect(str(exc) or "Rebooting")
                     
