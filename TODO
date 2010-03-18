@@ -12,3 +12,7 @@ rewrite CLI or integrate as an extra IO stream
 rewrite Connection.write and Action.write to use detached threaded system
 
 Remove use of django.views.static.serve (configure for apache, etc)
+
+Arthur loadable derivative
+    access control
+Arthur scan request interface
