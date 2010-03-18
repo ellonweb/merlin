@@ -20,9 +20,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import traceback
-from Core.exceptions_ import UserError
+from Core.exceptions_ import LoadableError, UserError
 from Core.config import Config
 from Core.db import Session
+from Arthur.auth import render
 
 # ########################################################################### #
 # ##############################    LOADABLE    ############################# #
@@ -38,6 +39,8 @@ class loadable(object):
             self.access = Config.getint("Access", cls.access)
         elif type(cls.access) is int:
             self.access = cls.access
+        else:
+            raise LoadableError("Invalid access level")
         
         return self
     
@@ -60,10 +63,7 @@ class loadable(object):
             return response
         
         except UserError:
-            # some redirection
-            pass
-        except Exception:
-            traceback.print_exc()
+            return render("login.tpl", request, msg="Fuck off.")
     
     def execute(self, request, user, **kwargs):
         pass
@@ -73,5 +73,4 @@ class loadable(object):
             return True
         else:
             return False
-    
     
