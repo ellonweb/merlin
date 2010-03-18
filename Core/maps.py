@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from datetime import datetime
 import hashlib
 from math import ceil
 import re
@@ -48,6 +49,15 @@ class Updates(Base):
     @staticmethod
     def current_tick():
         tick = session.query(max_sql(Updates.id)).scalar() or 0
+        return tick
+    
+    @staticmethod
+    def midnight_tick():
+        now = datetime.now()
+        d1 = datetime(now.year, now.month, now.day, now.hour)
+        d2 = datetime(now.year, now.month, now.day)
+        hours = (d1-d2).seconds/60/60
+        tick = Updates.current_tick() - hours
         return tick
 
 class Galaxy(Base):
