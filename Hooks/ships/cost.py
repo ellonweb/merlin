@@ -37,20 +37,22 @@ class cost(loadable):
             message.alert("No Ship called: %s" % (name,))
             return
         
-        demo = PA.getfloat("demo","prodcost")
-        total = PA.getfloat("total","prodcost")
         num = self.short2num(num)
         reply="Buying %s %s will cost %s metal, %s crystal and %s eonium."%(num,ship.name,
                 self.num2short(ship.metal*num),
                 self.num2short(ship.crystal*num),
                 self.num2short(ship.eonium*num))
-        reply+=" Demo: %s metal, %s crystal and %s eonium."%(
-                self.num2short(ship.metal*(1+demo)*num),
-                self.num2short(ship.crystal*(1+demo)*num),
-                self.num2short(ship.eonium*(1+demo)*num))
-        reply+=" Total: %s metal, %s crystal and %s eonium."%(
-                self.num2short(ship.metal*(1+total)*num),
-                self.num2short(ship.crystal*(1+total)*num),
-                self.num2short(ship.eonium*(1+total)*num))
+        
+        for gov in PA.options("govs"):
+            bonus = PA.getfloat(gov, "prodcost")
+            if bonus == 0:
+                continue
+            
+            reply += " %s: %s metal, %s crystal and %s eonium."%(
+                        PA.get(gov, "name"),
+                        self.num2short(ship.metal*(1+bonus)*num),
+                        self.num2short(ship.crystal*(1+bonus)*num),
+                        self.num2short(ship.eonium*(1+bonus)*num))
+        
         reply+=" It will add %s value"%(self.num2short(ship.total_cost*num/100),)
         message.reply(reply)
