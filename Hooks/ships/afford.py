@@ -66,16 +66,26 @@ class afford(loadable):
         overflow = res_m+res_c+res_e-(capped_number*(cost_m+cost_c+cost_e))
         buildable = capped_number + ((overflow*.95)/total_cost)
         
-        demo = 1/(1+PA.getfloat("demo","prodcost"))
-        total = 1/(1+PA.getfloat("total","prodcost"))
         reply="Newest planet scan on %s:%s:%s (id: %s, pt: %s)" % (p.x,p.y,p.z,rand_id,tick)
-        reply+=" can purchase %s: %s | Demo: %s | Total: %s"%(ship.name,int(buildable),int(buildable*demo),int(buildable*total))
+        reply+=" can purchase %s: %s"%(ship.name,int(buildable))
         
-        if prod_res > 0:
-            factory_usage=getattr(planetscan,class_factory_table[ship.class_])
+        for gov in PA.options("govs"):
+            bonus = PA.getfloat(gov, "prodcost")
+            if bonus == 0:
+                continue
+            reply+=" | %s: %s"%(PA.get(gov, "name"),int(buildable/(1+bonus)))
+        
+        factory_usage=getattr(planetscan,class_factory_table[ship.class_])
+        if prod_res > 0 and factory_usage != "None":
             max_prod_modifier=prod_modifier_table[factory_usage]
             buildable_from_prod = buildable + max_prod_modifier*prod_res/total_cost
             reply+=" Counting %s res in prod at %s usage:" % (self.num2short(prod_res),factory_usage)
-            reply+=" %s | Demo: %s | Total: %s "%(int(buildable_from_prod), int(buildable_from_prod*demo),int(buildable_from_prod*total))
+            reply+=" %s"%(int(buildable_from_prod))
+            
+            for gov in PA.options("govs"):
+                bonus = PA.getfloat(gov, "prodcost")
+                if bonus == 0:
+                    continue
+                reply+=" | %s: %s"%(PA.get(gov, "name"),int(buildable_from_prod/(1+bonus)))
         
         message.reply(reply)
