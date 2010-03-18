@@ -19,11 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from datetime import datetime
-from django.conf.urls.defaults import include, patterns, url
+from django.conf.urls.defaults import *
 from Core.config import Config
 from Core.maps import Updates
 from Arthur.auth import menu, render
+from Arthur.loadable import loadable
 
 urlpatterns = patterns('',
     (r'^(?:home/)?$', 'Arthur.home'),
@@ -33,16 +33,14 @@ urlpatterns = patterns('',
 )
 
 @menu("Home")
-def home(request):
-    planet = request.session.user.planet
-    now = datetime.now()
-    d1 = datetime(now.year, now.month, now.day, now.hour)
-    d2 = datetime(now.year, now.month, now.day)
-    hours = (d1-d2).seconds/60/60
-    tick = Updates.current_tick() - hours
-    ph = planet.history(tick)
-    return render("index.tpl", request, planets=((planet, ph, None, None),), title="Your planet")
+class home(loadable):
+    def execute(self, request, user):
+        planet = user.planet
+        tick = Updates.midnight_tick()
+        ph = planet.history(tick)
+        return render("index.tpl", request, planets=((planet, ph, None, None),), title="Your planet")
 
 @menu("Guide to %s"%(Config.get("Connection","nick"),))
-def guide(request):
-    return render("guide.tpl", request, bot=Config.get("Connection","nick"), alliance=Config.get("Alliance", "name"))
+class guide(loadable):
+    def execute(self, request, user):
+        return render("guide.tpl", request, bot=Config.get("Connection","nick"), alliance=Config.get("Alliance", "name"))
