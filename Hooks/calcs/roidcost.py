@@ -40,11 +40,13 @@ class roidcost(loadable):
         mining=mining * ((float(bonus)+100)/100)
 
         repay = (cost*100)/(roids*mining)
-        demo = int(repay/(1+PA.getfloat("demo","prodcost")))
-        total = int(repay/(1+PA.getfloat("total","prodcost")))
-        repay = int(repay)
-
-        reply = "Capping %s roids at %s value with %s%% bonus will repay in %s ticks (%s days) " % (roids,self.num2short(cost),bonus,repay,repay/24)
-        reply+= "Demo: %s ticks (%s days) Total: %s ticks (%s days)" % (demo,demo/24,total,total/24)
-
+        reply = "Capping %s roids at %s value with %s%% bonus will repay in %s ticks (%s days)" % (roids,self.num2short(cost),bonus,int(repay),int(repay/24))
+        
+        for gov in PA.options("govs"):
+            bonus = PA.getfloat(gov, "prodcost")
+            if bonus == 0:
+                continue
+            repay_b = repay/(1+bonus)
+            reply += " %s: %s ticks (%s days)" % (PA.get(gov, "name"), int(repay_b), int(repay_b/24))
+        
         message.reply(reply)
