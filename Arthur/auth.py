@@ -21,6 +21,7 @@
  
 import datetime
 import random
+
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -94,6 +95,7 @@ class _menu(object):
         
         def wrapper(hook):
             url = "/" + hook.__name__ + "/"
+            hook = hook()
             
             if head not in self.heads:
                 self.heads.append(head)
@@ -108,11 +110,11 @@ class _menu(object):
     def generate(self, user):
         menu = []
         for head in self.heads:
-            #if self.content[head]["hook"].has_access(user):
+            if self.content[head]["hook"].check_access(user):
                 menu.append([head, self.content[head]["url"], []])
                 
                 for sub in self.content[head]["subs"]:
-                    #if self.content[head]["content"][sub]["hook"].has_access(user):
+                    if self.content[head]["content"][sub]["hook"].check_access(user):
                         menu[-1][2].append([sub, self.content[head]["content"][sub]["url"]])
         
         menu.append(["Logout", "/logout/", []])
