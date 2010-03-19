@@ -53,7 +53,7 @@ class authentication(object):
             request.session = auth
             return
         elif (request.REQUEST.get(USER) is not None and request.REQUEST.get(PASS) is not None):
-            user = User.load(name=request.REQUEST.get(USER), passwd=request.REQUEST.get(PASS), access="member")
+            user = User.load(name=request.REQUEST.get(USER), passwd=request.REQUEST.get(PASS))
             if user is None:
                 request._COOKIE = None
                 return self.login_page(request, "Invalid user.")
@@ -96,6 +96,8 @@ class _menu(object):
         def wrapper(hook):
             url = "/" + hook.__name__ + "/"
             hook = hook()
+            if head is False:
+                return hook
             
             if head not in self.heads:
                 self.heads.append(head)

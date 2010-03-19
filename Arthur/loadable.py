@@ -53,7 +53,6 @@ class loadable(object):
             if self.check_access(user) is not True:
                 raise UserError
             
-            print self.execute
             response = self.execute(request, user, **kwargs)
             
             session = Session()
