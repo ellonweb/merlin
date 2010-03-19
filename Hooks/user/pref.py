@@ -27,7 +27,7 @@ from Core.loadable import loadable, route, require_user
 
 class pref(loadable):
     """Set your planet, password for the webby, email and phone number; order doesn't matter"""
-    usage = " [planet=x.y.z] [password=pass] [email=my.email@address.com] [phone=999] [pubphone=T|F] [smsmode=clickatell|google]"
+    usage = " [planet=x.y.z] [password=pass] [email=my.email@address.com] [phone=999] [pubphone=T|F] [smsmode=clickatell|google|both]"
     planet_coordre = re.compile(loadable.planet_coord)
     
     @route(r"")
@@ -106,7 +106,7 @@ class pref(loadable):
                 elif val[:1].lower() == "g":
                     user.googlevoice = True
                     reply += " smsmode=googlevoice"
-                elif val in self.nulls:
+                elif val[:1].lower() == "b" or val in self.nulls:
                     user.googlevoice = None
                     reply += " smsmode=None"
         
