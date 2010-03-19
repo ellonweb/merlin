@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.paconf import PA
 from Core.db import session
@@ -46,9 +47,8 @@ class planets(loadable):
         Q = session.query(Planet, PlanetHistory, Intel.nick, Alliance.name)
         Q = Q.outerjoin(Planet.intel)
         Q = Q.outerjoin(Intel.alliance)
-        Q = Q.outerjoin(Planet.history_loader)
+        Q = Q.outerjoin((PlanetHistory, and_(Planet.id == PlanetHistory.id, PlanetHistory.tick == tick)))
         Q = Q.filter(Planet.active == True)
-        Q = Q.filter(PlanetHistory.tick == tick)
         
         if race.lower() in PA.options("races"):
             Q = Q.filter(Planet.race.ilike(race))

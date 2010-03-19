@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.http import HttpResponseRedirect
+from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.db import session
 from Core.maps import Updates, Galaxy, Planet, PlanetHistory, Alliance, Intel
@@ -39,8 +40,8 @@ class galaxy(loadable):
         Q = session.query(Planet, PlanetHistory, Intel.nick, Alliance.name)
         Q = Q.outerjoin(Planet.intel)
         Q = Q.outerjoin(Intel.alliance)
-        Q = Q.outerjoin(Planet.history_loader)
-        Q = Q.filter(PlanetHistory.tick == tick)
+        Q = Q.outerjoin((PlanetHistory, and_(Planet.id == PlanetHistory.id, PlanetHistory.tick == tick)))
+        Q = Q.filter(Planet.active == True)
         Q = Q.filter(Planet.galaxy == galaxy)
         Q = Q.order_by(asc(Planet.z))
         return render("planets.tpl", request, planets=Q.all(), title=galaxy.name, intel=user.is_member(), galaxy=galaxy, gh=gh)

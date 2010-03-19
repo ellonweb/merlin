@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.db import session
 from Core.maps import Updates, Galaxy, GalaxyHistory
@@ -42,9 +43,8 @@ class galaxies(loadable):
         tick = Updates.midnight_tick()
         
         Q = session.query(Galaxy, GalaxyHistory)
-        Q = Q.outerjoin(Galaxy.history_loader)
+        Q = Q.outerjoin((GalaxyHistory, and_(Galaxy.id == GalaxyHistory.id, GalaxyHistory.tick == tick)))
         Q = Q.filter(Galaxy.active == True)
-        Q = Q.filter(GalaxyHistory.tick == tick)
         
         count = Q.count()
         pages = count/50 + int(count%50 > 0)

@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.db import session
 from Core.maps import Updates, Alliance, AllianceHistory
@@ -43,9 +44,8 @@ class alliances(loadable):
         tick = Updates.midnight_tick()
         
         Q = session.query(Alliance, AllianceHistory)
-        Q = Q.outerjoin(Alliance.history_loader)
+        Q = Q.outerjoin((AllianceHistory, and_(Alliance.id == AllianceHistory.id, AllianceHistory.tick == tick)))
         Q = Q.filter(Alliance.active == True)
-        Q = Q.filter(AllianceHistory.tick == tick)
         
         count = Q.count()
         pages = count/50 + int(count%50 > 0)
