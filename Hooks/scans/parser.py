@@ -239,26 +239,26 @@ class parse(Thread):
             print "Updating planet-intel-dists"
 
     def parse_U(self, scan_id, scan, page):
-        for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+)</td>', page):
+        for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+(?:,\d\d\d)*)</td>', page):
             print m.groups()
 
             ship = Ship.load(name=m.group(1))
             if ship is None:
                 print "No such unit %s" % (m.group(1),)
                 continue
-            scan.units.append(UnitScan(ship=ship, amount=m.group(2)))
+            scan.units.append(UnitScan(ship=ship, amount=m.group(2).replace(',', '')))
 
         session.commit()
 
     def parse_A(self, scan_id, scan, page):
-        for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+)</td>', page):
+        for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+(?:,\d\d\d)*)</td>', page):
             print m.groups()
 
             ship = Ship.load(name=m.group(1))
             if ship is None:
                 print "No such unit %s" % (m.group(1),)
                 continue
-            scan.units.append(UnitScan(ship=ship, amount=m.group(2)))
+            scan.units.append(UnitScan(ship=ship, amount=m.group(2).replace(',', '')))
 
         session.commit()
 
