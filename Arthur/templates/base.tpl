@@ -40,7 +40,7 @@
 <div align="center">
     Uses <a href="http://www.twinhelix.com/">DHTML / JavaScript Menu &copy; by TwinHelix Designs</a>
     <br />
-    Templates &copy; 2006-2009 Arho Huttunen, Thomas D&auml;hling &amp; Elliot Rosemarine.
+    Templates &copy; 2006-2010 Arho Huttunen, Thomas D&auml;hling &amp; Elliot Rosemarine.
 </div>
 </body>
 </html>
