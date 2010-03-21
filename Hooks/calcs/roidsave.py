@@ -36,14 +36,14 @@ class roidsave(loadable):
 
         mining = mining *(float(bonus+100)/100)
 
-        cost = ticks*roids*mining/100
-        reply = "In %s ticks (%s days) %s roids with %s%% bonus will mine %s value" % (ticks,ticks/24,roids,bonus,self.num2short(cost))
+        value = ticks*roids*mining/100
+        reply = "In %s ticks (%s days) %s roids with %s%% bonus will mine %s value" % (ticks,ticks/24,roids,bonus,self.num2short(value))
         
         for gov in PA.options("govs"):
             bonus = PA.getfloat(gov, "prodcost")
             if bonus == 0:
                 continue
-            cost_b = cost/(1+bonus)
-            reply += " %s: %s value" % (PA.get(gov, "name"), self.num2short(cost_b))
+            value_b = value/(1+bonus)
+            reply += " %s: %s value" % (PA.get(gov, "name"), self.num2short(value_b))
         
         message.reply(reply)
