@@ -112,7 +112,7 @@ class Message(object):
     
     def get_prefix(self):
         # Return the prefix used for commands
-        return self.get_msg()[0] if self.get_msg()[0] in PUBLIC_PREFIX+PRIVATE_PREFIX+NOTICE_PREFIX else None
+        return self.get_msg()[0] if self.get_msg() and self.get_msg()[0] in PUBLIC_PREFIX+PRIVATE_PREFIX+NOTICE_PREFIX else None
     
     def reply_type(self):
         # Return the proper way to respond based on the command prefix used

@@ -82,7 +82,7 @@ class loadable(object):
         self.run(message)
     
     def match(self, message, regex):
-        if message.get_prefix():
+        if message.get_msg() and message.get_prefix():
             return regex.match(message.get_msg()[1:])
     
     def router(self, message, command):
