@@ -35,10 +35,12 @@ urlpatterns = patterns('',
 @menu("Home")
 class home(loadable):
     def execute(self, request, user):
-        planet = user.planet
-        tick = Updates.midnight_tick()
-        ph = planet.history(tick)
-        return render("index.tpl", request, planets=((planet, ph, None, None),), title="Your planet")
+        if user.planet is not None:
+            tick = Updates.midnight_tick()
+            planets = (user.planet, user.planet.history(tick), None, None),
+        else:
+            planets = ()
+        return render("index.tpl", request, planets=planets, title="Your planet")
 
 @menu("Guide to %s"%(Config.get("Connection","nick"),))
 class guide(loadable):
