@@ -25,6 +25,7 @@ import random
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+
 from Core.config import Config
 from Core.db import session
 from Core.maps import User, Session, Slogan
@@ -70,16 +71,12 @@ class authentication(object):
             return self.login_page(request, "Hi! Please login below:")
     
     def process_response(self, request, response):
-        session.close()
         if hasattr(request, "_COOKIE"):
             if request._COOKIE == None:
                 response.delete_cookie(SESSION_KEY)
             else:
                 response.set_cookie(SESSION_KEY, request._COOKIE)
         return response
-    
-    def process_exception(self, request, exception):
-        session.close()
     
     def login_page(self, request, msg):
         return render("login.tpl", request, msg=msg)
