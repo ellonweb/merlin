@@ -109,8 +109,17 @@ class parse(Thread):
             print e.__str__()
             return
         
-        if hasattr(self,"parse_"+scantype):
-            getattr(self, "parse_"+scantype)(scan_id, scan, page)
+        parser = {
+                  "P": self.parse_P,
+                  "D": self.parse_D,
+                  "U": self.parse_U,
+                  "A": self.parse_U,
+                  "J": self.parse_J,
+                  "N": self.parse_N,
+                 }.get(scantype)
+        if parser is not None:
+            parser(scan_id, scan, page)
+        
         print PA.get(scantype,"name"), "%s:%s:%s" % (x,y,z,)
         
         Q = session.query(Request)
@@ -239,19 +248,7 @@ class parse(Thread):
             print "Updating planet-intel-dists"
 
     def parse_U(self, scan_id, scan, page):
-        for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+(?:,\d\d\d)*)</td>', page):
-            print m.groups()
-
-            ship = Ship.load(name=m.group(1))
-            if ship is None:
-                print "No such unit %s" % (m.group(1),)
-                continue
-            scan.units.append(UnitScan(ship=ship, amount=m.group(2).replace(',', '')))
-
-        session.commit()
-
-    def parse_A(self, scan_id, scan, page):
-        for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+(?:,\d\d\d)*)</td>', page):
+        for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+(?:,\d{3})*)</td>', page):
             print m.groups()
 
             ship = Ship.load(name=m.group(1))
@@ -272,7 +269,7 @@ class parse(Thread):
 
         #<tr><td class="left">10:1:10</td><td class="left">Defend</td><td class="left">Pesticide IV</td><td class="right">1</td><td class="right">0</td></tr>
 
-        for m in re.finditer('<td[^>]*>(\d+)\:(\d+)\:(\d+)</td><td[^>]*>([^<]+)</td><td[^>]*>([^<]+)</td><td[^>]*>(\d+)</td><td[^>]*>(\d+)</td>', page):
+        for m in re.finditer('<td[^>]*>(\d+)\:(\d+)\:(\d+)</td><td[^>]*>([^<]+)</td><td[^>]*>([^<]+)</td><td[^>]*>(\d+)</td><td[^>]*>(\d+(?:,\d{3})*)</td>', page):
             fleetscan = FleetScan()
 
             originx = m.group(1)
@@ -281,7 +278,7 @@ class parse(Thread):
             mission = m.group(4)
             fleet = m.group(5)
             eta = int(m.group(6))
-            fleetsize = m.group(7)
+            fleetsize = m.group(7).replace(',', '')
 
             fleetscan.mission = mission
             fleetscan.fleet_name = fleet
