@@ -59,6 +59,7 @@ class pref(loadable):
                 if m:
                     planet = Planet.load(*m.group(1,3,5))
                     if planet is None:
+                        message.alert("No planet with coords %s:%s:%s" % m.group(1,3,5))
                         continue
                     user.planet = planet
                     reply += " planet=%s:%s:%s"%(planet.x,planet.y,planet.z)
