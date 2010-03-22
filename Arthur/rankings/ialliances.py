@@ -23,7 +23,7 @@ from sqlalchemy.sql import asc, desc, case
 from sqlalchemy.sql.functions import count, sum
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
-from Arthur.auth import menu, render
+from Arthur.context import menu, render
 from Arthur.loadable import loadable
 
 @menu("Rankings", "Alliances (intel)")

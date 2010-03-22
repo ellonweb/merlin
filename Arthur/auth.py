@@ -22,13 +22,10 @@
 import datetime
 import random
 
-from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-
 from Core.config import Config
 from Core.db import session
-from Core.maps import User, Session, Slogan
+from Core.maps import User, Session
+from Arthur.context import render
 
 SESSION_KEY = "%sSESSID" % (Config.get("Alliance", "name")[:3].upper(),)
 LOGOUT = "/logout/"
@@ -83,53 +80,3 @@ class authentication(object):
     
     def generate_key(self, user):
         return User.hasher(user.name+user.passwd+str(datetime.datetime.now())+str(random.randrange(1,1000000000)))
-
-class _menu(object):
-    heads = []
-    content = {}
-    
-    def __call__(self, head, sub=None):
-        
-        def wrapper(hook):
-            url = "/" + hook.__name__ + "/"
-            hook = hook()
-            if head is False:
-                return hook
-            
-            if head not in self.heads:
-                self.heads.append(head)
-                self.content[head] = {"hook":hook, "url":url, "subs":[], "content":{}}
-            if sub is not None:
-                self.content[head]["subs"].append(sub)
-                self.content[head]["content"][sub] = {"hook":hook, "url":url}
-            
-            return hook
-        return wrapper
-    
-    def generate(self, user):
-        menu = []
-        for head in self.heads:
-            if self.content[head]["hook"].check_access(user):
-                menu.append([head, self.content[head]["url"], []])
-                
-                for sub in self.content[head]["subs"]:
-                    if self.content[head]["content"][sub]["hook"].check_access(user):
-                        menu[-1][2].append([sub, self.content[head]["content"][sub]["url"]])
-        
-        menu.append(["Logout", "/logout/", []])
-        return menu
-
-menu = _menu()
-
-def context(request):
-    context = {"slogan": Config.get("Alliance", "name")}
-    if request.session is not None:
-        slogan, count = Slogan.search("")
-        if slogan is not None:
-            context["slogan"] = str(slogan)
-        context["user"] = request.session.user.name
-        context["menu"] = menu.generate(request.session.user)
-    return context
-
-def render(tpl, request, **context):
-    return render_to_response(tpl, context, RequestContext(request))

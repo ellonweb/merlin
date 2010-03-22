@@ -17,7 +17,7 @@ TEMPLATE_LOADERS = (
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-    'Arthur.auth.context',
+    'Arthur.context.context',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -22,7 +22,7 @@
 from django.conf.urls.defaults import include, patterns, url
 from Core.config import Config
 from Core.maps import Updates
-from Arthur.auth import menu, render
+from Arthur.context import menu, render
 from Arthur.loadable import loadable
 
 handler404 = 'Arthur.errors.page_not_found'
@@ -49,3 +49,5 @@ class home(loadable):
 class guide(loadable):
     def execute(self, request, user):
         return render("guide.tpl", request, bot=Config.get("Connection","nick"), alliance=Config.get("Alliance", "name"))
+
+from Arthur import rankings

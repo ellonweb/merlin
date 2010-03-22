@@ -19,11 +19,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import traceback
 from Core.exceptions_ import LoadableError, UserError
 from Core.config import Config
 from Core.db import Session
-from Arthur.auth import render
+from Arthur.context import render
 
 # ########################################################################### #
 # ##############################    LOADABLE    ############################# #

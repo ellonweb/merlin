@@ -24,7 +24,7 @@ from sqlalchemy.sql import asc, desc
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, PlanetHistory, Alliance, Intel
-from Arthur.auth import menu, render
+from Arthur.context import menu, render
 from Arthur.loadable import loadable
 
 @menu("Rankings", "Planets")

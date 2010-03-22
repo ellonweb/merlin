@@ -24,7 +24,7 @@ from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.db import session
 from Core.maps import Updates, Galaxy, Planet, PlanetHistory, Alliance, Intel
-from Arthur.auth import menu, render
+from Arthur.context import menu, render
 from Arthur.loadable import loadable
 
 @menu(False)

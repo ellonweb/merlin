@@ -26,7 +26,7 @@ from django.http import HttpResponseNotFound, HttpResponseServerError
 
 from Core.config import Config
 from Core.db import session
-from Arthur.auth import render
+from Arthur.context import render
 
 class db(object):
     def process_request(self, request):

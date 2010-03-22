@@ -23,7 +23,7 @@ from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.db import session
 from Core.maps import Updates, Galaxy, GalaxyHistory
-from Arthur.auth import menu, render
+from Arthur.context import menu, render
 from Arthur.loadable import loadable
 
 @menu("Rankings", "Galaxies")
