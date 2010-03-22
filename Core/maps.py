@@ -1008,10 +1008,10 @@ class Command(Base):
     target = Column(String(150))
     command_time = Column(DateTime, default=current_timestamp())
 
-class Request(Base):
+class PageView(Base):
     __tablename__ = 'arthur_log'
     id = Column(Integer, primary_key=True)
-    request = Column(String(20))
+    page = Column(String(20))
     full_request = Column(String(512))
     username = Column(String(15))
     session = Column(String(32))

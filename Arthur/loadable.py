@@ -22,7 +22,7 @@
 from Core.exceptions_ import LoadableError, UserError
 from Core.config import Config
 from Core.db import Session
-from Core.maps import Request
+from Core.maps import PageView
 from Arthur.context import render
 
 # ########################################################################### #
@@ -58,11 +58,11 @@ class loadable(object):
             response = self.execute(request, user, **kwargs)
             
             session = Session()
-            session.add(Request(request = self.name,
-                                full_request = request.get_full_path(),
-                                username = user.name,
-                                session = request.session.key,
-                                hostname = request.get_host(),))
+            session.add(PageView(page = self.name,
+                                 full_request = request.get_full_path(),
+                                 username = user.name,
+                                 session = request.session.key,
+                                 hostname = request.get_host(),))
             session.commit()
             
             return response
