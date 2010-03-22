@@ -22,6 +22,7 @@
 from Core.exceptions_ import LoadableError, UserError
 from Core.config import Config
 from Core.db import Session
+from Core.maps import Request
 from Arthur.context import render
 
 # ########################################################################### #
@@ -33,6 +34,7 @@ class loadable(object):
     
     def __new__(cls):
         self = super(loadable, cls).__new__(cls)
+        self.name = cls.__name__
         
         if cls.access in Config.options("Access"):
             self.access = Config.getint("Access", cls.access)
@@ -48,6 +50,7 @@ class loadable(object):
     
     def run(self, request, **kwargs):
         user = request.session.user
+        
         try:
             if self.check_access(user) is not True:
                 raise UserError
@@ -55,7 +58,11 @@ class loadable(object):
             response = self.execute(request, user, **kwargs)
             
             session = Session()
-            # some logging here
+            session.add(Request(request = self.name,
+                                full_request = request.get_full_path(),
+                                username = user.name,
+                                session = request.session.key,
+                                hostname = request.get_host(),))
             session.commit()
             
             return response

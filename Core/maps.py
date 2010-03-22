@@ -1008,6 +1008,16 @@ class Command(Base):
     target = Column(String(150))
     command_time = Column(DateTime, default=current_timestamp())
 
+class Request(Base):
+    __tablename__ = 'arthur_log'
+    id = Column(Integer, primary_key=True)
+    request = Column(String(20))
+    full_request = Column(String(512))
+    username = Column(String(15))
+    session = Column(String(32))
+    hostname = Column(String(100))
+    request_time = Column(DateTime, default=current_timestamp())
+
 class SMS(Base):
     __tablename__ = 'sms_log'
     id = Column(Integer, primary_key=True)
