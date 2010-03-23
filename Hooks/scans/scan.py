@@ -30,7 +30,7 @@ class scan(object):
     usage = " (<x:y:z> [old] [link] | <id>)"
     access = "half"
     type = ""
-    planetre = loadable.planet_coord+r"(?:\s+(o))?(?:\s+(l))?"
+    planetre = loadable.planet_coord+r"(?:\s+(o)\S*)?(?:\s+(l)\S*)?"
     idre = r"(\w+)"
     
     def planet(self, message, user, params):
