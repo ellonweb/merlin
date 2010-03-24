@@ -33,7 +33,7 @@ class smslog(loadable):
     def get_last_ten(self, message, user, params):
         last_ten = session.query(SMS).order_by(desc(SMS.id))[:10]
         reply="Last 10 SMSes: "
-        reply+=", ".join(map(lambda x: "id: %s (%s -> %s)"%(x.id,x.sender.name,x.receiver.name),last_ten))
+        reply+=", ".join(map(lambda x: "id: %s (%s) (%s -> %s)"%(x.id,x.mode[:1].upper(),x.sender.name,x.receiver.name),last_ten))
         message.reply(reply)
     
     @route(r"(\d+)")
