@@ -68,7 +68,7 @@ class exile(loadable):
             max_planets=planets
             base_bracket_gals+=galaxies
 
-        reply = "Total galaxies: %s"%(gals,)
+        reply = "Total random galaxies: %s"%(gals,)
         reply+= " | %s galaxies with a maximum of %s planets guaranteed to be in the exile bracket"%(base_bracket_gals,max_planets,)
         reply+= " | Also in the bracket: %s of %s galaxies with %s planets."%(rest_gals,total_rest_gals,rest_planets,)
 

@@ -22,6 +22,7 @@
 import re, time, traceback, urllib2
 from sqlalchemy.sql import text, bindparam
 from Core.config import Config
+from Core.paconf import PA
 from Core.db import true, false, session
 from Core.maps import Updates, Galaxy, Planet, Alliance, epenis, galpenis, apenis
 from Core.maps import galaxy_temp, planet_temp, alliance_temp, planet_new_id_search, planet_old_id_search
@@ -105,6 +106,14 @@ while True:
         session.execute(planet_temp.delete())
         session.execute(alliance_temp.delete())
 
+        # If the new tick is below the shuffle tick, empty out all the data
+        #  and don't store anything from the dumps other than the tick itself
+        if planet_tick < PA.getint("numbers", "shuffle"):
+            print "Pre-shuffle dumps detected, emptying out the data"
+            planets.readlines()
+            galaxies.readlines()
+            alliances.readlines()
+
         # Insert the data to the temporary tables, some DBMS do not support
         #  multiple row insert in the same statement so we have to do it one at
         #  a time which is a bit slow unfortunatly
@@ -175,7 +184,7 @@ while True:
         # Galaxies with 8 or less planets are private, random
         #  galaxies should start with a minimum of 12. (R36)
         session.execute(text("""INSERT INTO galaxy (x, y, active, private)
-                                SELECT g.x, g.y, :true, count(p) <= 8
+                                SELECT g.x, g.y, :true, count(p) <= 8 OR (g.x = 1 AND g.y = 1)
                                 FROM
                                   galaxy_temp as g,
                                   (SELECT x, y FROM planet_temp) as p
