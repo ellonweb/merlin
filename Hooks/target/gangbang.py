@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from sqlalchemy.sql import asc
+from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, Alliance, User, Intel, Target
 from Core.loadable import loadable, route
@@ -39,7 +40,7 @@ class gangbang(loadable):
         tick = Updates.current_tick()
         
         when = int(params.group(2) or 0)
-        if when and when < 32:
+        if when and when < PA.getint("numbers", "protection"):
             when += tick
         elif when and when <= tick:
             message.alert("Can not check status on the past. You wanted tick %s, but current tick is %s." % (when, tick,))

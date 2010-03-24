@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from sqlalchemy.sql import asc
+from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, User, Target
 from Core.loadable import loadable, route, require_user
@@ -45,7 +46,7 @@ class unbook(loadable):
         
         tick = Updates.current_tick()
         when = int(params.group(6) or 0)
-        if 0 < when < 32:
+        if 0 < when < PA.getint("numbers", "protection"):
             eta = when
             when += tick
         elif 0 < when <= tick:

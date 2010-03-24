@@ -21,6 +21,7 @@
  
 from sqlalchemy.sql import asc
 from Core.exceptions_ import PNickParseError
+from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Galaxy, Planet, Alliance, User, Intel, Target
 from Core.loadable import loadable, route
@@ -34,7 +35,7 @@ class status(loadable):
     def planet_galaxy(self, message, user, params):
         tick = Updates.current_tick()
         when = int(params.group(6) or 0)
-        if when and when < 32:
+        if when and when < PA.getint("numbers", "protection"):
             when += tick
         elif when and when <= tick:
             message.alert("Can not check status on the past. You wanted tick %s, but current tick is %s." % (when, tick,))

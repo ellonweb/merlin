@@ -22,6 +22,7 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import asc
 from Core.config import Config
+from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, User, Target
 from Core.loadable import loadable, route, require_user
@@ -40,7 +41,7 @@ class book(loadable):
         
         tick = Updates.current_tick()
         when = int(params.group(6))
-        if when < 32:
+        if when < PA.getint("numbers", "protection"):
             eta = when
             when += tick
         elif when <= tick:
