@@ -26,12 +26,12 @@ from Core.maps import Updates, User, Ship, UserFleet
 from Core.loadable import loadable, route
 
 class searchdef(loadable):
-    usage = " <number> <ship>"
+    usage = " [number] <ship>"
     
-    @route(r"(\d+(?:\.\d+)?[mk]?)\s+(\S+)", access = "member")
+    @route(r"(\d+(?:\.\d+)?[mk]?)?\s+(\S+)", access = "member")
     def execute(self, message, user, params):
         
-        count = self.short2num(params.group(1))
+        count = self.short2num(params.group(1) or "1")
         name = params.group(2)
 
         ship = Ship.load(name=name)
