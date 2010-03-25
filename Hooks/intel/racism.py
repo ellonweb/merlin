@@ -77,5 +77,5 @@ class racism(loadable):
             reply+=" Score(%s)" % (self.num2short(score/members),)
             reply+=" Size(%s) XP(%s)" % (size/members,self.num2short(xp/members),)
             prev.append(reply)
-        reply="Demographics for %s: "%(target,)+ ' | '.join(prev)
+        reply="Demographics for %s - "%(target,)+ ' | '.join(prev)
         message.reply(reply)
