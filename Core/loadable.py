@@ -62,7 +62,7 @@ class loadable(object):
         self.doc = cls.__doc__
         
         self.routes = self.routes or []
-        self.routes.extend([(name, route._ROUTE, route._ACCESS,) for name, route in cls.__dict__.items() if hasattr(route, "_ROUTE") and hasattr(route, "_ACCESS")])
+        self.routes.extend([(name, route._ROUTE, route._ACCESS,) for name, route in sorted(cls.__dict__.items()) if hasattr(route, "_ROUTE") and hasattr(route, "_ACCESS")])
         
         if cls.access in Config.options("Access"):
             self.access = Config.getint("Access", cls.access)
