@@ -26,6 +26,7 @@ from Core.config import Config
 from Core.db import session
 from Core.maps import User, Session
 from Arthur.context import render
+from Arthur.errors import server_error, exceptions
 
 SESSION_KEY = "%sSESSID" % (Config.get("Alliance", "name")[:3].upper(),)
 LOGOUT = "/logout/"
@@ -34,38 +35,42 @@ PASS = "password"
 
 class authentication(object):
     def process_request(self, request):
-        if request.path[:8] == "/static/":
-            return
-        request.session = None
-        key = request.COOKIES.get(SESSION_KEY)
-        if key:
-            auth = Session.load(key, datetime.datetime.now())
-            if auth is None:
-                request._COOKIE = None
-                return self.login_page(request, "Your session has expired, please login again.")
-            if request.path == LOGOUT:
-                session.delete(auth)
-                session.commit()
-                request._COOKIE = None
-                return self.login_page(request, "Logged out.")
-            request.session = auth
-            return
-        elif (request.REQUEST.get(USER) is not None and request.REQUEST.get(PASS) is not None):
-            user = User.load(name=request.REQUEST.get(USER), passwd=request.REQUEST.get(PASS))
-            if user is None:
-                request._COOKIE = None
-                return self.login_page(request, "Invalid user.")
-            else:
-                key = self.generate_key(user)
-                auth = Session(key=key, expire=datetime.datetime.now()+datetime.timedelta(days=1), user=user)
-                session.query(Session).filter(Session.user == user).delete()
-                session.add(auth)
-                session.commit()
-                request.session = auth
-                request._COOKIE = key
+        try:
+            if request.path[:8] == "/static/":
                 return
-        else:
-            return self.login_page(request, "Hi! Please login below:")
+            request.session = None
+            key = request.COOKIES.get(SESSION_KEY)
+            if key:
+                auth = Session.load(key, datetime.datetime.now())
+                if auth is None:
+                    request._COOKIE = None
+                    return self.login_page(request, "Your session has expired, please login again.")
+                if request.path == LOGOUT:
+                    session.delete(auth)
+                    session.commit()
+                    request._COOKIE = None
+                    return self.login_page(request, "Logged out.")
+                request.session = auth
+                return
+            elif (request.REQUEST.get(USER) and request.REQUEST.get(PASS)):
+                user = User.load(name=request.REQUEST.get(USER), passwd=request.REQUEST.get(PASS))
+                if user is None:
+                    request._COOKIE = None
+                    return self.login_page(request, "Invalid user.")
+                else:
+                    key = self.generate_key(user)
+                    auth = Session(key=key, expire=datetime.datetime.now()+datetime.timedelta(days=1), user=user)
+                    session.query(Session).filter(Session.user == user).delete()
+                    session.add(auth)
+                    session.commit()
+                    request.session = auth
+                    request._COOKIE = key
+                    return
+            else:
+                return self.login_page(request, "Hi! Please login below:")
+        except Exception as exc:
+            exceptions().process_exception(request, exc)
+            return server_error(request)
     
     def process_response(self, request, response):
         if hasattr(request, "_COOKIE"):
