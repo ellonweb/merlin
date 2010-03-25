@@ -1,3 +1,7 @@
+html {
+	height: 100%;
+}
+
 body {
 	font-family: Verdana, Arial, Helvetica;
 	font-size: 7pt;
@@ -6,6 +10,19 @@ body {
 	background-image: url(back.gif);
 	margin: 0;
 	padding: 0;
+	height: 100%;
+}
+
+#wrapper {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	margin: 0 auto -4em;
+}
+
+#footer, #push {
+	height: 4em;
+	clear: both;
 }
 
 table {

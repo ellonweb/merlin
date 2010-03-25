@@ -18,6 +18,7 @@
 </head>
 
 <body>
+<div id="wrapper">
     {% if menu %}
     <ul class="menulist" id="listMenuRoot">
         {% for drop in menu %}
@@ -37,8 +38,12 @@
 
     <div style="clear: both; height: 2em"></div>
     {% block content %}{% endblock %}
-<div align="center">
+    <div id="push"></div>
+</div>
+<div id="footer" align="center">
     Uses <a href="http://www.twinhelix.com/">DHTML / JavaScript Menu &copy; by TwinHelix Designs</a>
+    <br />
+    All your base are belong to us. Codez &copy; 2009-2010 Elliot Rosemarine.
     <br />
     Templates &copy; 2006-2010 Arho Huttunen, Thomas D&auml;hling &amp; Elliot Rosemarine.
 </div>
