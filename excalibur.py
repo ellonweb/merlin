@@ -36,6 +36,13 @@ t1=t_start
 while True:
     try:
 
+        # How long has passed since starting?
+        # If 55 mins, we're not likely getting dumps this tick, so quit
+        if (time.time() - t_start) >= (55 * 60):
+            print "55 minutes without a successful dump, giving up!"
+            session.close()
+            exit()
+
         # Open the dump files
         try:
             planets = urllib2.urlopen(Config.get("URL", "planets"))
