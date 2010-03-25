@@ -19,11 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from datetime import datetime
 import hashlib
 from math import ceil
 import re
 import sys
-from time import time
 from sqlalchemy import *
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import validates, relation, backref, dynamic_loader
@@ -49,6 +49,15 @@ class Updates(Base):
     @staticmethod
     def current_tick():
         tick = session.query(max_sql(Updates.id)).scalar() or 0
+        return tick
+    
+    @staticmethod
+    def midnight_tick():
+        now = datetime.now()
+        d1 = datetime(now.year, now.month, now.day, now.hour)
+        d2 = datetime(now.year, now.month, now.day)
+        hours = (d1-d2).seconds/60/60
+        tick = Updates.current_tick() - hours
         return tick
 
 class Galaxy(Base):
@@ -393,7 +402,7 @@ class User(Base):
                 user = Q.filter(User.alias.ilike(name)).first()
             if user is None and exact is not True:
                 user = Q.filter(User.alias.ilike(name+"%")).first()
-        if passwd is not None:
+        if (user and passwd) is not None:
             user = user if user.passwd == User.hasher(passwd) else None
         return user
     
@@ -418,6 +427,23 @@ def user_access_function(num):
 for lvl, num in Config.items("Access"):
     # Bind user access functions
     setattr(User, "is_"+lvl, user_access_function(int(num)))
+
+class Session(Base):
+    __tablename__ = 'session'
+    key = Column(String(40), primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.id, ondelete='set null'))
+    expire = Column(DateTime)
+    @staticmethod
+    def load(key, now=None):
+        Q = session.query(Session)
+        if now is not None:
+            Q = Q.filter(Session.expire > now)
+        auth = Q.filter(Session.key == key).first()
+        if auth is not None and auth.user is not None and auth.user.active == True:
+            return auth
+        else:
+            return None
+Session.user = relation(User)
 
 class PhoneFriend(Base):
     __tablename__ = 'phonefriends'
@@ -982,6 +1008,16 @@ class Command(Base):
     hostname = Column(String(100))
     target = Column(String(150))
     command_time = Column(DateTime, default=current_timestamp())
+
+class PageView(Base):
+    __tablename__ = 'arthur_log'
+    id = Column(Integer, primary_key=True)
+    page = Column(String(20))
+    full_request = Column(String(512))
+    username = Column(String(15))
+    session = Column(String(32))
+    hostname = Column(String(100))
+    request_time = Column(DateTime, default=current_timestamp())
 
 class SMS(Base):
     __tablename__ = 'sms_log'

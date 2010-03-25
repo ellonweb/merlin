@@ -1,0 +1,183 @@
+html {
+	height: 100%;
+}
+
+body {
+	font-family: Verdana, Arial, Helvetica;
+	font-size: 7pt;
+	color: white;
+	background-color: #0a0a13;
+	background-image: url(back.gif);
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+
+#wrapper {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	margin: 0 auto -4em;
+}
+
+#footer, #push {
+	height: 4em;
+	clear: both;
+}
+
+table {
+	font-size: 7pt;
+}
+
+a {
+	color: #9999c9;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #ccccfc;
+}
+
+a.gray {
+	color: #cccccc;
+}
+
+a.gray:hover {
+	color: #ffffff;
+}
+
+input {
+	font-family: Verdana, Arial, Helvetica;
+	font-size: x-small;
+}
+
+select {
+	font-family: Verdana, Arial, Helvetica;
+	font-size: x-small;
+}
+
+table.black {
+	background-color: black;
+}
+
+tr.header {
+	background-color: #293452;
+	background-image: url(dataheader.jpg);
+}
+
+tr.datahigh {
+ background-color: #181C29;
+}
+
+tr.odd {
+	background-color: #292d3a;
+}
+
+tr.even {
+	background-color: #252936;
+}
+
+tr.defend {
+	background-color: #598959;
+}
+
+tr.attack {
+	background-color: #895959;
+}
+
+tr.unknown {
+	background-color: #898959;
+}
+
+.green {
+	color: #00ff00;
+}
+
+.red {
+	color: #ff0000;
+}
+
+.yellow {
+	color: #ffff00;
+}
+
+.Cat {
+	color: #6699cc;
+	font-weight: bold;
+}
+
+.Ter {
+	color: #aa7744;
+	font-weight: bold;
+}
+
+.Xan {
+	color: #00cc00;
+	font-weight: bold;
+}
+
+.Zik {
+	color: #cccc00;
+	font-weight: bold;
+}
+
+.Uncovered {
+	background-color: #AD7070;
+}
+
+.Semi-covered {
+	background-color: #AAAA6F;
+}
+
+.Covered {
+	background-color: #598959;
+}
+
+.Recheck {
+	background-color: #92AA6F;
+}
+
+.Fake {
+	background-color: #87577B;
+}
+
+.Recalled {
+	background-color: #6F7587;
+}
+
+.Impossible {
+	background-color: #717157;
+}
+
+.Friendly {
+	color: #00FF00;
+}
+
+.Neutral {
+	color: white;
+}
+
+.Hostile {
+	color: #FF0000;
+}
+
+.napped {
+	font-weight: bold;
+	color: #00FF00;
+}
+
+.High {
+	background-color: #598959;
+}
+
+.Medium {
+	background-color: #AAAA6F;
+}
+
+.Low {
+	background-color: #AD7070;
+}
+
+.Nodef {
+	background-color: #717157;
+}
