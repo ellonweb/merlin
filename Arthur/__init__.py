@@ -23,7 +23,7 @@ from django.conf.urls.defaults import include, patterns, url
 from Core.config import Config
 from Core.maps import Updates
 from Arthur.context import menu, render
-from Arthur.loadable import loadable
+from Arthur.loadable import loadable, load
 
 handler404 = 'Arthur.errors.page_not_found'
 handler500 = 'Arthur.errors.server_error'
@@ -37,6 +37,7 @@ urlpatterns = patterns('',
 )
 
 @menu("Home")
+@load
 class home(loadable):
     def execute(self, request, user):
         if user.planet is not None:
@@ -49,6 +50,7 @@ class home(loadable):
 from Arthur import links
 
 @menu("Guide to %s"%(Config.get("Connection","nick"),))
+@load
 class guide(loadable):
     def execute(self, request, user):
         return render("guide.tpl", request, bot=Config.get("Connection","nick"), alliance=Config.get("Alliance", "name"))

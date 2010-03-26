@@ -32,10 +32,7 @@ class _menu(object):
     def __call__(self, head, sub=None):
         
         def wrapper(hook):
-            url = "/" + hook.__name__ + "/"
-            hook = hook()
-            if head is False:
-                return hook
+            url = "/" + hook.name + "/"
             
             if head not in self.heads:
                 self.heads.append(head)

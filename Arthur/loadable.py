@@ -79,3 +79,5 @@ class loadable(object):
         else:
             return False
     
+def load(hook):
+    return hook()

@@ -24,10 +24,10 @@ from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.db import session
 from Core.maps import Updates, Galaxy, Planet, PlanetHistory, Alliance, Intel
-from Arthur.context import menu, render
-from Arthur.loadable import loadable
+from Arthur.context import render
+from Arthur.loadable import loadable, load
 
-@menu(False)
+@load
 class galaxy(loadable):
     def execute(self, request, user, x, y):
         tick = Updates.midnight_tick()

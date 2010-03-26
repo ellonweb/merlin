@@ -24,9 +24,10 @@ from sqlalchemy.sql import asc, desc
 from Core.db import session
 from Core.maps import Updates, Galaxy, GalaxyHistory
 from Arthur.context import menu, render
-from Arthur.loadable import loadable
+from Arthur.loadable import loadable, load
 
 @menu("Rankings", "Galaxies")
+@load
 class galaxies(loadable):
     def execute(self, request, user, page="1", sort="score"):
         page = int(page)

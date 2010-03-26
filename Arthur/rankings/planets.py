@@ -25,9 +25,10 @@ from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, PlanetHistory, Alliance, Intel
 from Arthur.context import menu, render
-from Arthur.loadable import loadable
+from Arthur.loadable import loadable, load
 
 @menu("Rankings", "Planets")
+@load
 class planets(loadable):
     def execute(self, request, user, page="1", sort="score", race="all"):
         page = int(page)

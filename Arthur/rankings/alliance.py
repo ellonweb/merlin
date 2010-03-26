@@ -25,10 +25,10 @@ from sqlalchemy.sql import asc, desc
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Alliance, Planet, PlanetHistory, Alliance, Intel
-from Arthur.context import menu, render
-from Arthur.loadable import loadable
+from Arthur.context import render
+from Arthur.loadable import loadable, load
 
-@menu(False)
+@load
 class alliance(loadable):
     access = "member"
     def execute(self, request, user, name, page="1", sort="score", race="all"):

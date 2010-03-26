@@ -22,7 +22,7 @@
 from django.conf.urls.defaults import include, patterns, url
 from django.http import HttpResponseRedirect
 from Arthur.context import menu
-from Arthur.loadable import loadable
+from Arthur.loadable import loadable, load
 
 urlpatterns = patterns('Arthur.links',
     url(r'^game/$', 'game'),
@@ -32,21 +32,25 @@ urlpatterns = patterns('Arthur.links',
 )
 
 @menu("Planetarion", "Game")
+@load
 class game(loadable):
     def execute(self, request, user):
         return HttpResponseRedirect("http://game.planetarion.com")
 
 @menu("Planetarion", "Forums")
+@load
 class forums(loadable):
     def execute(self, request, user):
         return HttpResponseRedirect("http://pirate.planetarion.com")
 
 @menu("Planetarion", "Sandmans")
+@load
 class sandmans(loadable):
     def execute(self, request, user):
         return HttpResponseRedirect("http://sandmans.co.uk")
 
 @menu("Planetarion", "BCalc")
+@load
 class bcalc(loadable):
     def execute(self, request, user):
         return HttpResponseRedirect("http://game.planetarion.com/bcalc.pl")

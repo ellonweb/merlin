@@ -24,9 +24,10 @@ from sqlalchemy.sql import asc, desc
 from Core.db import session
 from Core.maps import Updates, Alliance, AllianceHistory
 from Arthur.context import menu, render
-from Arthur.loadable import loadable
+from Arthur.loadable import loadable, load
 
 @menu("Rankings", "Alliances")
+@load
 class alliances(loadable):
     def execute(self, request, user, page="1", sort="score"):
         page = int(page)
