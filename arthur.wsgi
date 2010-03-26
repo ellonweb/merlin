@@ -19,7 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import os
+import os, sys
+sys.path.append('F:/Code/Git/merlin/')
+os.chdir('F:/Code/Git/merlin/')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'Arthur.settings'
 
 import Arthur
