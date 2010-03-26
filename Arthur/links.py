@@ -20,37 +20,33 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
-from Core.config import Config
-from Core.maps import Updates
-from Arthur.context import menu, render
+from django.http import HttpResponseRedirect
+from Arthur.context import menu
 from Arthur.loadable import loadable
 
-handler404 = 'Arthur.errors.page_not_found'
-handler500 = 'Arthur.errors.server_error'
-
-urlpatterns = patterns('',
-    (r'^(?:home/)?$', 'Arthur.home'),
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
-    (r'^guide/$', 'Arthur.guide'),
-    (r'', include('Arthur.links')),
-    (r'', include('Arthur.rankings')),
+urlpatterns = patterns('Arthur.links',
+    url(r'^game/$', 'game'),
+    url(r'^forums/$', 'forums'),
+    url(r'^sandmans/$', 'sandmans'),
+    url(r'^bcalc/$', 'bcalc'),
 )
 
-@menu("Home")
-class home(loadable):
+@menu("Planetarion", "Game")
+class game(loadable):
     def execute(self, request, user):
-        if user.planet is not None:
-            tick = Updates.midnight_tick()
-            planets = (user.planet, user.planet.history(tick), None, None),
-        else:
-            planets = ()
-        return render("index.tpl", request, planets=planets, title="Your planet")
+        return HttpResponseRedirect("http://game.planetarion.com")
 
-from Arthur import links
-
-@menu("Guide to %s"%(Config.get("Connection","nick"),))
-class guide(loadable):
+@menu("Planetarion", "Forums")
+class forums(loadable):
     def execute(self, request, user):
-        return render("guide.tpl", request, bot=Config.get("Connection","nick"), alliance=Config.get("Alliance", "name"))
+        return HttpResponseRedirect("http://pirate.planetarion.com")
 
-from Arthur import rankings
+@menu("Planetarion", "Sandmans")
+class sandmans(loadable):
+    def execute(self, request, user):
+        return HttpResponseRedirect("http://sandmans.co.uk")
+
+@menu("Planetarion", "BCalc")
+class bcalc(loadable):
+    def execute(self, request, user):
+        return HttpResponseRedirect("http://game.planetarion.com/bcalc.pl")
