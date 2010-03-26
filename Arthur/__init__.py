@@ -30,7 +30,7 @@ handler500 = 'Arthur.errors.server_error'
 
 urlpatterns = patterns('',
     (r'^(?:home/)?$', 'Arthur.home'),
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': '/Code/Git/merlin/Arthur/static/'}),
+    (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
     (r'^guide/$', 'Arthur.guide'),
     (r'', include('Arthur.rankings')),
 )
