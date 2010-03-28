@@ -20,6 +20,9 @@
 <body>
 <div id="wrapper">
     {% if menu %}
+    <table cellspacing="1" cellpadding="3">
+        <tr class="header">
+            <td>
     <ul class="menulist" id="listMenuRoot">
         {% for drop in menu %}
         <li>
@@ -34,6 +37,14 @@
         </li>
         {% endfor %}
     </ul>
+            </td>
+<form method="post" action="/lookup/">
+            <th>Lookup:</th>
+            <td><input type="text" name="lookup" size="8"/></td>
+            <td><input type="submit" value="!"/></td>
+</form>
+        </tr>
+    </table>
     {% endif %}
 
     <div style="clear: both; height: 2em"></div>

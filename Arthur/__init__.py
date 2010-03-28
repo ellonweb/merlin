@@ -35,6 +35,7 @@ urlpatterns = patterns('',
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
     (r'^guide/$', 'Arthur.guide'),
     (r'^links/(?P<link>\w+)/$', 'Arthur.links'),
+    (r'', include('Arthur.lookup')),
     (r'', include('Arthur.rankings')),
 )
 
