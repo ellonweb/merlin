@@ -37,9 +37,11 @@ class _menu(object):
             if head not in self.heads:
                 self.heads.append(head)
                 self.content[head] = {"hook":hook, "url":url, "subs":[], "content":{}}
+                self.content[head]["link"] = hook.name == "links"
             if sub is not None:
                 self.content[head]["subs"].append(sub)
                 self.content[head]["content"][sub] = {"hook":hook, "url":url}
+                self.content[head]["content"][sub]["link"] = hook.name == "links"
             
             return hook
         return wrapper
@@ -48,11 +50,11 @@ class _menu(object):
         menu = []
         for head in self.heads:
             if self.content[head]["hook"].check_access(user):
-                menu.append([head, self.content[head]["url"], []])
+                menu.append([head, self.content[head]["url"], self.content[head]["link"], []])
                 
                 for sub in self.content[head]["subs"]:
                     if self.content[head]["content"][sub]["hook"].check_access(user):
-                        menu[-1][2].append([sub, self.content[head]["content"][sub]["url"]])
+                        menu[-1][3].append([sub, self.content[head]["content"][sub]["url"], self.content[head]["content"][sub]["link"]])
         
         menu.append(["Logout", "/logout/", []])
         return menu

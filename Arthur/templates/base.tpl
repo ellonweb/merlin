@@ -23,11 +23,11 @@
     <ul class="menulist" id="listMenuRoot">
         {% for drop in menu %}
         <li>
-            <a href="{{ drop.1 }}">{{ drop.0 }}</a>
+            <a href="{{ drop.1 }}"{% if drop.2 %} target="_blank"{% endif %}>{{ drop.0 }}</a>
             <ul>
-            {% if drop.2 %}
-                {% for sub in drop.2 %}
-                <li><a href="{{ sub.1 }}">{{ sub.0 }}</a></li>
+            {% if drop.3 %}
+                {% for sub in drop.3 %}
+                <li><a href="{{ sub.1 }}"{% if sub.2 %} target="_blank"{% endif %}>{{ sub.0 }}</a></li>
                 {% endfor%}
             {% endif %}
             </ul>
