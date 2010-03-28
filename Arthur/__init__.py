@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
+from django.http import Http404, HttpResponseRedirect
 from Core.config import Config
 from Core.maps import Updates
 from Arthur.context import menu, render
@@ -32,7 +33,7 @@ urlpatterns = patterns('',
     (r'^(?:home/)?$', 'Arthur.home'),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
     (r'^guide/$', 'Arthur.guide'),
-    (r'', include('Arthur.links')),
+    (r'^links/(?P<link>\w+)/$', 'Arthur.links'),
     (r'', include('Arthur.rankings')),
 )
 
@@ -47,7 +48,22 @@ class home(loadable):
             planets = ()
         return render("index.tpl", request, planets=planets, title="Your planet")
 
-from Arthur import links
+@menu("Planetarion", "BCalc",       suffix = "bcalc")
+@menu("Planetarion", "Sandmans",    suffix = "sandmans")
+@menu("Planetarion", "Forums",      suffix = "forums")
+@menu("Planetarion", "Game",        suffix = "game")
+@load
+class links(loadable):
+    links = {"game"        : "http://game.planetarion.com",
+             "forums"      : "http://pirate.planetarion.com",
+             "sandmans"    : "http://sandmans.co.uk",
+             "bcalc"       : "http://game.planetarion.com/bcalc.pl",
+            }
+    def execute(self, request, user, link):
+        link = self.links.get(link)
+        if link is None:
+            raise Http404
+        return HttpResponseRedirect(link)
 
 @menu("Guide to %s"%(Config.get("Connection","nick"),))
 @load
