@@ -20,10 +20,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
-from django.http import Http404, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from Core.config import Config
 from Core.maps import Updates
 from Arthur.context import menu, render
+from Arthur.errors import page_not_found
 from Arthur.loadable import loadable, load
 
 handler404 = 'Arthur.errors.page_not_found'
@@ -62,7 +63,7 @@ class links(loadable):
     def execute(self, request, user, link):
         link = self.links.get(link)
         if link is None:
-            raise Http404
+            return page_not_found(request)
         return HttpResponseRedirect(link)
 
 @menu("Guide to %s"%(Config.get("Connection","nick"),))
