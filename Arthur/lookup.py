@@ -22,7 +22,8 @@
 import re
 from django.conf.urls.defaults import include, patterns, url
 from django.http import HttpResponseRedirect
-from Core.maps import Alliance
+from Core.db import session
+from Core.maps import Planet, Alliance, User, Intel
 from Arthur.loadable import loadable, load
 
 urlpatterns = patterns('Arthur.lookup',
@@ -40,8 +41,26 @@ class lookup(loadable):
             alliance = Alliance.load(lookup) if lookup else None
             if alliance:
                 return HttpResponseRedirect("/alliance/%s/" %(alliance.name,))
-            else:
+            
+            elif not user.is_member():
                 return HttpResponseRedirect("/alliances/")
+            
+            else:
+                member = User.load(lookup, exact=False, access="member") if lookup else None
+                if member:
+                    return HttpResponseRedirect("/user/%s/" %(member.name,))
+                
+                else:
+                    Q = session.query(Planet)
+                    Q = Q.join(Planet.intel)
+                    Q = Q.filter(Planet.active == True)
+                    Q = Q.filter(Intel.nick.ilike(lookup+"%"))
+                    planet = Q.first()
+                    if planet:
+                        return HttpResponseRedirect("/planet/%s:%s:%s/" %(planet.x,planet.y,planet.z,))
+                    
+                    else:
+                        return HttpResponseRedirect("/alliances/")
         
         elif m.group(5) is not None:
             return HttpResponseRedirect("/planet/%s:%s:%s/" %m.group(1,3,5))
