@@ -50,6 +50,7 @@ class home(loadable):
             planets = ()
         return render("index.tpl", request, planets=planets, title="Your planet")
 
+@menu("Planetarion", "Parser",      suffix = "parser")
 @menu("Planetarion", "BCalc",       suffix = "bcalc")
 @menu("Planetarion", "Sandmans",    suffix = "sandmans")
 @menu("Planetarion", "Forums",      suffix = "forums")
@@ -60,6 +61,7 @@ class links(loadable):
              "forums"      : "http://pirate.planetarion.com",
              "sandmans"    : "http://sandmans.co.uk",
              "bcalc"       : "http://game.planetarion.com/bcalc.pl",
+             "parser"      : "http://parser.5th-element.org/",
             }
     def execute(self, request, user, link):
         link = self.links.get(link)
