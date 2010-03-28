@@ -62,7 +62,9 @@ class _menu(object):
 menu = _menu()
 
 def context(request):
-    context = {"slogan": Config.get("Alliance", "name")}
+    context = {"name"   : Config.get("Alliance", "name"),
+               "slogan" : Config.get("Alliance", "name")
+               }
     if request.session is not None:
         slogan, count = Slogan.search("")
         if slogan is not None:
