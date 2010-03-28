@@ -68,7 +68,7 @@ class intel(loadable):
             message.alert("No planet with coords %s:%s:%s" % params.group(1,3,5))
             return
         
-        if str(planet.intel):
+        if planet.intel and str(planet.intel):
             message.reply("Information stored for %s:%s:%s -%s"% (planet.x, planet.y, planet.z, str(planet.intel),))
         else:
             message.reply("No information stored for %s:%s:%s"% (planet.x, planet.y, planet.z,))
