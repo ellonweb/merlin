@@ -36,11 +36,11 @@
         <th><a href="{% url ialliances "t100v" page|default:1 %}">Top 100</a></th>
         <th><a href="{% url ialliances "t200v" page|default:1 %}">Top 200</a></th>
     </tr>
-    {% for size, value, score, asize, avalue, ascore, t10s, t50s, t100s, t200s, t10v, t50v, t100v, t200v, members, name in alliances %}
+    {% for size, value, score, asize, avalue, ascore, t10s, t50s, t100s, t200s, t10v, t50v, t100v, t200v, imembers, members, name in alliances %}
     <tr class="{% cycle 'odd' 'even' %}">
         <td>{{ forloop.counter|add:offset }}</td>
         <td><a href="/alliance/{{ name }}/" class="gray">{{ name }}</a></td>
-        <td align="right">{{ members }}</td>
+        <td align="right">{{ imembers }}({{ members }})</td>
         
         <td align="right">{{ asize }}</td>
         <td align="right">{{ avalue }}</td>

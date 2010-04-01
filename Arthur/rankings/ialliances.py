@@ -73,12 +73,13 @@ class ialliances(loadable):
                           avg_size, avg_value, avg_score,
                           t10s, t50s, t100s, t200s,
                           t10v, t50v, t100v, t200v,
-                          members, Alliance.name,
+                          members, Alliance.members,
+                          Alliance.name,
                           )
         Q = Q.join(Planet.intel)
         Q = Q.join(Intel.alliance)
         Q = Q.filter(Planet.active == True)
-        Q = Q.group_by(Alliance.id, Alliance.name)
+        Q = Q.group_by(Alliance.id, Alliance.name, Alliance.members)
         
         count_ = Q.count()
         pages = count_/50 + int(count_%50 > 0)
