@@ -29,7 +29,8 @@ class _menu(object):
     heads = []
     content = {}
     
-    def __call__(self, head, sub=None, prefix="", suffix=""):
+    def __call__(self, head, sub=None, prefix=False, suffix=""):
+        prefix = head if prefix else ""
         
         def wrapper(hook):
             url = ("/%s/%s/%s/"%(prefix,hook.name,suffix,)).replace("//","/")
@@ -37,7 +38,7 @@ class _menu(object):
             if head not in self.heads:
                 self.heads.append(head)
                 self.content[head] = {"hook":hook, "url":url, "subs":[], "content":{}}
-                self.content[head]["link"] = hook.name == "links"
+                self.content[head]["link"] = hook.name == "links" and not sub == Config.get("Alliance", "name")
             if sub is not None:
                 self.content[head]["subs"].append(sub)
                 self.content[head]["content"][sub] = {"hook":hook, "url":url}
