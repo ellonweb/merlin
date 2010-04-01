@@ -24,6 +24,7 @@ from django.conf.urls.defaults import include, patterns, url
 from django.http import HttpResponseRedirect
 from Core.db import session
 from Core.maps import Planet, Alliance, User, Intel
+from Hooks.scans.parser import scanre, scangrpre, parse
 from Arthur.loadable import loadable, load
 
 urlpatterns = patterns('Arthur.lookup',
@@ -34,7 +35,22 @@ urlpatterns = patterns('Arthur.lookup',
 class lookup(loadable):
     coord = re.compile(r"(\d+)([. :\-])(\d+)(\2(\d+))?")
     def execute(self, request, user):
-        lookup = request.REQUEST.get("lookup") or ""
+        lookup = (request.REQUEST.get("lookup") or "").strip()
+        if not lookup:
+            if user.is_member():
+                return HttpResponseRedirect("/user/%s/" %(user.name,))
+            return HttpResponseRedirect("/home/")
+        
+        scans = scanre.findall(lookup)
+        groups = scangrpre.findall(lookup)
+        if len(scans) or len(groups):
+            for url in scans:
+                parse(user.id, "scan", url).start()
+            for url in groups:
+                parse(user.id, "group", url).start()
+            
+            return HttpResponseRedirect("/scans/")
+        
         m = self.coord.match(lookup)
         
         if m is None:
@@ -68,4 +84,3 @@ class lookup(loadable):
         elif m.group(3) is not None:
             return HttpResponseRedirect("/galaxy/%s:%s/" %m.group(1,3))
         
-        return HttpResponseRedirect("/home/")

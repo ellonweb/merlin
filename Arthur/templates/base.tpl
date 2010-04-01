@@ -22,7 +22,7 @@
 <center>
 <table cellspacing="1" cellpadding="3">
     <tr class="datahigh">
-        <th colspan="2">{{ slogan }}</th>
+        <th>{{ slogan }}</th>
     </tr>
 </table>
 </center>
@@ -47,7 +47,7 @@
             </td>
 <form method="post" action="/lookup/">
             <th>Lookup:</th>
-            <td><input type="text" name="lookup" size="8"/></td>
+            <td><input type="text" name="lookup" size="8" onkeyup="var val=this.value;this.value=val+' ';this.value=val; var tl=val.length; if(tl<8){this.size=8;return;} if(tl>80){ this.size=100;return;} this.size=tl+(tl/4);"/></td>
             <td><input type="submit" value="!"/></td>
 </form>
         </tr>

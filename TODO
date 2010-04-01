@@ -12,3 +12,9 @@ rewrite CLI or integrate as an extra IO stream
 rewrite Connection.write and Action.write to use detached threaded system
 
 Arthur scan request interface
+
+!attack command, creates arthur page with scans and ability to book in the web
+
+/planets/
+    shows incoming/outgoing fleets (froglet)
+    links to scans
