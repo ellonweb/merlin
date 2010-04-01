@@ -146,7 +146,7 @@ while True:
         alliance_insert+= "VALUES (%s, '%s', %s, %s, %s, %s, %s);"
         for line in alliances:
             a=line.strip().split("\t")
-            session.execute(text(unicode(alliance_insert % (a[0], a[1].strip("\""), a[2], a[3], a[4], int(a[2])/min(60,int(a[3])), int(a[4])/min(60,int(a[3])),), encoding='latin-1')))
+            session.execute(text(unicode(alliance_insert % (a[0], a[1].strip("\""), a[2], a[3], a[4], int(a[2])/int(a[3]), int(a[4])/min(PA.getint("numbers", "tag_count"),int(a[3])),), encoding='latin-1')))
 
         t2=time.time()-t1
         print "Inserted dumps in %.3f seconds" % (t2,)
