@@ -705,15 +705,15 @@ class DevScan(Base):
     def infra_str(self):
         level = self.infrastructure
         if level==0:
-            return "10 constructions"
-        if level==1:
             return "20 constructions"
-        if level==2:
+        if level==1:
             return "50 constructions"
-        if level==3:
+        if level==2:
             return "100 constructions"
-        if level==4:
+        if level==3:
             return "150 constructions"
+        if level==4:
+            return "250 constructions"
     
     def hulls_str(self):
         level = self.hulls
@@ -729,15 +729,15 @@ class DevScan(Base):
         if level==0:
             return "Planet"
         if level==1:
-            return "Surface"
+            return "Landing"
         if level==2:
-            return "Technology"
+            return "Development"
         if level==3:
             return "Unit"
         if level==4:
             return "News"
         if level==5:
-            return "Fleet"
+            return "Incoming"
         if level==6:
             return "JGP"
         if level==7:
@@ -746,57 +746,57 @@ class DevScan(Base):
     def covop_str(self):
         level = self.covert_op
         if level==0:
-            return "Research Hack"
+            return "Research hack"
         if level==1:
-            return "Raise Stealth"
+            return "Lower stealth"
         if level==2:
             return "Blow up roids"
         if level==3:
-            return "Blow up shits"
+            return "Blow up ships"
         if level==4:
-            return "Blow up Amps/Dists"
+            return "Blow up guards"
         if level==5:
-            return "Resource hacking (OMG!)"
+            return "Blow up amps/dists"
         if level==6:
-            return "Blow up Strucs"
+            return "Resource hacking (OMG!)"
+        if level==7:
+            return "Blow up strucs"
     
     def mining_str(self):
         level = self.mining+1
         if level==0:
-            return "50 roids"
-        if level==1:
             return "100 roids (scanner!)"
-        if level==2:
+        if level==1:
             return "200 roids"
-        if level==3:
+        if level==2:
             return "300 roids"
-        if level==4:
+        if level==3:
             return "500 roids"
-        if level==5:
+        if level==4:
             return "750 roids"
-        if level==6:
+        if level==5:
             return "1k roids"
-        if level==7:
+        if level==6:
             return "1250 roids"
-        if level==8:
+        if level==7:
             return "1500 roids"
-        if level==9:
+        if level==8:
             return "Jan 1. 1900"
-        if level==10:
+        if level==9:
             return "2500 roids"
-        if level==11:
+        if level==10:
             return "3000 roids"
-        if level==12:
+        if level==11:
             return "3500 roids"
-        if level==13:
+        if level==12:
             return "4500 roids"
-        if level==14:
+        if level==13:
             return "5500 roids"
-        if level==15:
+        if level==14:
             return "6500 roids"
-        if level==16:
+        if level==15:
             return "8000 roids"
-        if level==17:
+        if level==16:
             return "top10 or dumb"
     
     def total(self):
