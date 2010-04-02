@@ -37,7 +37,7 @@ urlpatterns = patterns('',
     (r'^guide/$', 'Arthur.guide'),
     (r'^links/(?P<link>\w+)/$', 'Arthur.links'),
     (r'', include('Arthur.lookup')),
-    (r'^%s/' %(name,), include('Arthur.alliance')),
+    (r'', include('Arthur.alliance')),
     (r'', include('Arthur.rankings')),
 )
 

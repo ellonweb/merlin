@@ -27,7 +27,7 @@ from Core.maps import Updates, Planet, User, PhoneFriend
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
-@menu(Config.get("Alliance", "name"), "Members", prefix = True)
+@menu(Config.get("Alliance", "name"), "Members")
 @load
 class members(loadable):
     access = "admin"
