@@ -19,8 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from sqlalchemy.sql import asc, desc, case
-from sqlalchemy.sql.functions import count, sum
+from sqlalchemy.sql import asc, desc
 from Core.config import Config
 from Core.db import session
 from Core.maps import Updates, Planet, User, PhoneFriend
@@ -31,18 +30,31 @@ from Arthur.loadable import loadable, load
 @load
 class members(loadable):
     access = "admin"
-    def execute(self, request, user):
+    def execute(self, request, user, sort=None):
         
-        levels = sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True)
+        if sort is None:
+            levels = sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True)
+        else:
+            levels = [("All member", 1,),]
+        
+        order =  {"name"  : (asc(User.name),),
+                  "sponsor" : (asc(User.sponsor),),
+                  "access" : (desc(User.access),),
+                  "planet" : (asc(Planet.x),asc(Planet.y),asc(Planet.z),),
+                  }
+        if sort not in order.keys():
+            sort = "name"
+        order = order.get(sort)
         
         members = []
         for level in levels:
-            Q = session.query(User.name, User.alias, User.sponsor, Planet, User.fleetupdated,
+            Q = session.query(User.name, User.alias, User.sponsor, User.access, Planet, User.fleetupdated,
                               User.phone, User.pubphone, User.id.in_(session.query(PhoneFriend.user_id).filter_by(friend=user)))
             Q = Q.outerjoin(User.planet)
             Q = Q.filter(User.access >= level[1])
             Q = Q.filter(User.access < levels[levels.index(level)-1][1]) if levels.index(level) > 0 else Q
-            Q = Q.order_by(User.name)
+            for o in order:
+                Q = Q.order_by(o)
             
             members.append((level[0], Q.all(),))
         

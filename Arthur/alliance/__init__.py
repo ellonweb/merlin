@@ -24,4 +24,5 @@ from Arthur.alliance import members
 
 urlpatterns = patterns('Arthur.alliance',
     url(r'^members/$', 'members.members'),
+    url(r'^members/(?P<sort>\w+)/$', 'members.members', name="members"),
 )

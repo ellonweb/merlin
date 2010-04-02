@@ -6,21 +6,23 @@
 <td>
 <table cellspacing="1" cellpadding="3" width="100%">
     <tr class="datahigh">
-        <th colspan="5">
+        <th colspan="6">
             {{ level|capfirst }}s
         </th>
     </tr>
     <tr class="header">
-        <th width="100">User (Alias)</th>
-        <th width="100">Sponsor</th>
-        <th width="100">Planet</th>
+        <th width="100"><a href="{% url members "name" %}">User (Alias)</a></th>
+        <th width="100"><a href="{% url members "sponsor" %}">Sponsor</a></th>
+        <th width="100"><a href="{% url members "access" %}">Access</a></th>
+        <th width="100"><a href="{% url members "planet" %}">Planet</a></th>
         <th width="100">MyDef Age</th>
         <th width="100">Phone</th>
     </tr>
-    {% for member, alias, sponsor, planet, fleetupdated, phone, pubphone, phonefriend in members %}
+    {% for member, alias, sponsor, access, planet, fleetupdated, phone, pubphone, phonefriend in members %}
     <tr class="{% cycle 'odd' 'even' %}">
         <td>{{ member }}{% if alias %} ({{ alias }}){% endif %}</td>
         <td>{{ sponsor }}</td>
+        <td>{{ access }}</td>
         <td>{% if planet %}{{ planet.x }}:{{ planet.y }}:{{ planet.z }}{% endif %}</td>
         <td>{% if fleetupdated %}{{ tick|add:fleetupdated }}{% endif %}</td>
         <td>{% if pubphone or phonefriend %}{{ phone }}{% else %}Hidden{% endif %}</td>
