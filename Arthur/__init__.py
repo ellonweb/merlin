@@ -26,6 +26,7 @@ from Core.maps import Updates
 from Arthur.context import menu, render
 from Arthur.errors import page_not_found
 from Arthur.loadable import loadable, load
+name = Config.get("Alliance", "name")
 
 handler404 = 'Arthur.errors.page_not_found'
 handler500 = 'Arthur.errors.server_error'
@@ -36,6 +37,7 @@ urlpatterns = patterns('',
     (r'^guide/$', 'Arthur.guide'),
     (r'^links/(?P<link>\w+)/$', 'Arthur.links'),
     (r'', include('Arthur.lookup')),
+    (r'^%s/' %(name,), include('Arthur.alliance')),
     (r'', include('Arthur.rankings')),
 )
 
@@ -50,6 +52,7 @@ class home(loadable):
             planets = ()
         return render("index.tpl", request, planets=planets, title="Your planet")
 
+@menu(name,          name,          suffix = name)
 @menu("Planetarion", "Parser",      suffix = "parser")
 @menu("Planetarion", "BCalc",       suffix = "bcalc")
 @menu("Planetarion", "Sandmans",    suffix = "sandmans")
@@ -62,6 +65,7 @@ class links(loadable):
              "sandmans"    : "http://sandmans.co.uk",
              "bcalc"       : "http://game.planetarion.com/bcalc.pl",
              "parser"      : "http://parser.5th-element.org/",
+             name          : "/alliance/%s/" % (name,),
             }
     def execute(self, request, user, link):
         link = self.links.get(link)
@@ -69,10 +73,11 @@ class links(loadable):
             return page_not_found(request)
         return HttpResponseRedirect(link)
 
-@menu("Guide to %s"%(Config.get("Connection","nick"),))
+@menu(name, "Guide to %s"%(Config.get("Connection","nick"),))
 @load
 class guide(loadable):
     def execute(self, request, user):
-        return render("guide.tpl", request, bot=Config.get("Connection","nick"), alliance=Config.get("Alliance", "name"))
+        return render("guide.tpl", request, bot=Config.get("Connection","nick"), alliance=name)
 
+from Arthur import alliance
 from Arthur import rankings
