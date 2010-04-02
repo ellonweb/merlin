@@ -26,6 +26,7 @@ from Core.maps import Updates
 from Arthur.context import menu, render
 from Arthur.errors import page_not_found
 from Arthur.loadable import loadable, load
+bot = Config.get("Connection","nick")
 name = Config.get("Alliance", "name")
 
 handler404 = 'Arthur.errors.page_not_found'
@@ -52,7 +53,7 @@ class home(loadable):
             planets = ()
         return render("index.tpl", request, planets=planets, title="Your planet")
 
-@menu(name,          name,          suffix = name)
+@menu(name,                         suffix = name)
 @menu("Planetarion", "Parser",      suffix = "parser")
 @menu("Planetarion", "BCalc",       suffix = "bcalc")
 @menu("Planetarion", "Sandmans",    suffix = "sandmans")
@@ -73,7 +74,7 @@ class links(loadable):
             return page_not_found(request)
         return HttpResponseRedirect(link)
 
-@menu(name, "Guide to %s"%(Config.get("Connection","nick"),))
+@menu(bot, "Guide to %s"%(Config.get("Connection","nick"),))
 @load
 class guide(loadable):
     def execute(self, request, user):

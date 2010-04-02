@@ -22,11 +22,12 @@
 from sqlalchemy.sql import asc, desc
 from Core.config import Config
 from Core.db import session
-from Core.maps import Updates, Planet, User, PhoneFriend
+from Core.maps import Updates, Planet, User, PhoneFriend, Channel
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
+bot = Config.get("Connection","nick")
 
-@menu(Config.get("Alliance", "name"), "Members")
+@menu(bot, "Members")
 @load
 class members(loadable):
     access = "member"
@@ -60,7 +61,7 @@ class members(loadable):
         
         return render("members.tpl", request, accesslist=members, tick=Updates.current_tick()*-1)
 
-@menu(Config.get("Alliance", "name"), "Galmates")
+@menu(bot, "Galmates")
 @load
 class galmates(loadable):
     access = "member"
@@ -87,3 +88,35 @@ class galmates(loadable):
             Q = Q.order_by(o)
         
         return render("galmates.tpl", request, members=Q.all())
+
+@menu(bot, "Channels")
+@load
+class channels(loadable):
+    access = "member"
+    def execute(self, request, user, sort=None):
+        
+        levels = sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True)
+        if sort is not None:
+            levels = [("All", 0,),]
+        else:
+            levels.append(("Galaxy", 0,))
+        
+        order =  {"name"  : (asc(Channel.name),),
+                  "userlevel" : (asc(Channel.userlevel),),
+                  "maxlevel" : (desc(Channel.maxlevel),),
+                  }
+        if sort not in order.keys():
+            sort = "name"
+        order = order.get(sort)
+        
+        channels = []
+        for level in levels:
+            Q = session.query(Channel.name, Channel.userlevel, Channel.maxlevel)
+            Q = Q.filter(Channel.userlevel >= level[1])
+            Q = Q.filter(Channel.userlevel < levels[levels.index(level)-1][1]) if levels.index(level) > 0 else Q
+            for o in order:
+                Q = Q.order_by(o)
+            
+            channels.append((level[0], Q.all(),))
+        
+        return render("channels.tpl", request, accesslist=channels)

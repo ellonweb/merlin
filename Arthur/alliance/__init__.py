@@ -27,4 +27,6 @@ urlpatterns = patterns('Arthur.alliance',
     url(r'^members/(?P<sort>\w+)/$', 'members.members', name="members"),
     url(r'^galmates/$', 'members.galmates'),
     url(r'^galmates/(?P<sort>\w+)/$', 'members.galmates', name="galmates"),
+    url(r'^channels/$', 'members.channels'),
+    url(r'^channels/(?P<sort>\w+)/$', 'members.channels', name="channels"),
 )
