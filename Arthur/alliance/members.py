@@ -50,6 +50,7 @@ class members(loadable):
             Q = session.query(User.name, User.alias, User.sponsor, User.access, Planet, User.fleetupdated,
                               User.phone, User.pubphone, User.id.in_(session.query(PhoneFriend.user_id).filter_by(friend=user)))
             Q = Q.outerjoin(User.planet)
+            Q = Q.filter(User.active == True)
             Q = Q.filter(User.access >= level[1])
             Q = Q.filter(User.access < levels[levels.index(level)-1][1]) if levels.index(level) > 0 else Q
             for o in order:
@@ -58,3 +59,31 @@ class members(loadable):
             members.append((level[0], Q.all(),))
         
         return render("members.tpl", request, accesslist=members, tick=Updates.current_tick()*-1)
+
+@menu(Config.get("Alliance", "name"), "Galmates")
+@load
+class galmates(loadable):
+    access = "member"
+    def execute(self, request, user, sort=None):
+        
+        levels = sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True)
+        
+        order =  {"name"  : (asc(User.name),),
+                  "sponsor" : (asc(User.sponsor),),
+                  "access" : (desc(User.access),),
+                  "planet" : (asc(Planet.x),asc(Planet.y),asc(Planet.z),),
+                  }
+        if sort not in order.keys():
+            sort = "name"
+        order = order.get(sort)
+        
+        members = []
+        Q = session.query(User.name, User.alias, User.sponsor, User.access, Planet,
+                          User.phone, User.pubphone, User.id.in_(session.query(PhoneFriend.user_id).filter_by(friend=user)))
+        Q = Q.outerjoin(User.planet)
+        Q = Q.filter(User.active == True)
+        Q = Q.filter(User.access < levels[-1][1])
+        for o in order:
+            Q = Q.order_by(o)
+        
+        return render("galmates.tpl", request, members=Q.all())
