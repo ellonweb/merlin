@@ -29,13 +29,12 @@ from Arthur.loadable import loadable, load
 @menu(Config.get("Alliance", "name"), "Members")
 @load
 class members(loadable):
-    access = "admin"
+    access = "member"
     def execute(self, request, user, sort=None):
         
-        if sort is None:
-            levels = sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True)
-        else:
-            levels = [("All member", 1,),]
+        levels = sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True)
+        if sort is not None:
+            levels = [("All member", levels[-1][1],),]
         
         order =  {"name"  : (asc(User.name),),
                   "sponsor" : (asc(User.sponsor),),
