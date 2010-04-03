@@ -14,7 +14,44 @@ rewrite Connection.write and Action.write to use detached threaded system
 Arthur scan request interface
 
 !attack command, creates arthur page with scans and ability to book in the web
+    !attack x:y[:z] landtick
+    !editattack id add x:y[:z]
+    !editattack id rem x:y[:z]
+    !editattack id land tick
+/attack/id/
+    booking table
+    show latest P/A(U)/D for each, xvx style
+    link to /scans/ and /planet/ for each
+    if landtick - currenttick < 5, show latest jgp
+    if landtick + 12 < currenttick, remove attack
+    (/attack/id)?/book/x:y:z/
+    (/attack/id)?/unbook/x:y:z/
+        (possible to book without an attack)
+        forward to /attack/id/ or /user/name/
 
-/planets/
+/planet/x:y:z/
+    shows latest P/A(U)/D
     shows incoming/outgoing fleets (froglet)
-    links to scans
+    links to /scans/x:y:z/
+
+/scans/x:y:z/
+    table of latest scans etc
+    click shows scan info in webby where possible /scan/id/
+    shift+click opens PA link
+
+/user/name/
+    access=member
+    forward to /planet/ ?
+    sponsor, gimps
+    access
+    mydef
+    phone
+        (phone allow list? - only if self?)
+    carebears
+    scans done (if self?)
+    requested scans (if self)
+    current bookings w/ /unbook/ link
+        (link to /attack/id/ if possible?)
+    include part of /planet/ or link?
+
+/home/ forwards to /user/name/
