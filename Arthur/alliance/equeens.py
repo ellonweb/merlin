@@ -19,15 +19,22 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from django.conf.urls.defaults import include, patterns, url
-from Arthur.alliance import members, equeens
+from sqlalchemy.sql import asc
+from Core.config import Config
+from Core.db import session
+from Core.maps import User, Planet, epenis
+from Arthur.context import menu, render
+from Arthur.loadable import loadable, load
+name = Config.get("Alliance", "name")
 
-urlpatterns = patterns('Arthur.alliance',
-    url(r'^members/$', 'members.members'),
-    url(r'^members/(?P<sort>\w+)/$', 'members.members', name="members"),
-    url(r'^galmates/$', 'members.galmates'),
-    url(r'^galmates/(?P<sort>\w+)/$', 'members.galmates', name="galmates"),
-    url(r'^channels/$', 'members.channels'),
-    url(r'^channels/(?P<sort>\w+)/$', 'members.channels', name="channels"),
-    url(r'^equeens/$', 'equeens.equeens'),
-)
+@menu(name, "eQueens")
+@load
+class equeens(loadable):
+    access = "member"
+    def execute(self, request, user):
+        
+        Q = session.query(User, Planet, epenis)
+        Q = Q.join(User.planet)
+        Q = Q.join(User.epenis)
+        Q = Q.order_by(asc(epenis.rank))
+        return render("equeens.tpl", request, queens=Q.all())

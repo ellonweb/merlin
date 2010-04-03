@@ -53,7 +53,7 @@ class home(loadable):
             planets = ()
         return render("index.tpl", request, planets=planets, title="Your planet")
 
-@menu(name,                         suffix = name)
+@menu(name,          "Intel",       suffix = name)
 @menu("Planetarion", "Parser",      suffix = "parser")
 @menu("Planetarion", "BCalc",       suffix = "bcalc")
 @menu("Planetarion", "Sandmans",    suffix = "sandmans")
