@@ -39,7 +39,8 @@ class members(loadable):
         
         order =  {"name"  : (asc(User.name),),
                   "sponsor" : (asc(User.sponsor),),
-                  "access" : (desc(User.access),),
+                  "access" : (desc(User.access),desc(User.carebears),asc(User.name),),
+                  "carebears" : (desc(User.carebears),),
                   "planet" : (asc(Planet.x),asc(Planet.y),asc(Planet.z),),
                   }
         if sort not in order.keys():
@@ -48,7 +49,7 @@ class members(loadable):
         
         members = []
         for level in levels:
-            Q = session.query(User.name, User.alias, User.sponsor, User.access, Planet, User.fleetupdated,
+            Q = session.query(User.name, User.alias, User.sponsor, User.access, User.carebears, Planet, User.fleetupdated,
                               User.phone, User.pubphone, User.id.in_(session.query(PhoneFriend.user_id).filter_by(friend=user)))
             Q = Q.outerjoin(User.planet)
             Q = Q.filter(User.active == True)
