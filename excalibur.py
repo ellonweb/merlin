@@ -474,7 +474,7 @@ session.execute(apenis.__table__.delete())
 session.execute(text("SELECT setval('apenis_rank_seq', 1, :false);", bindparams=[false]))
 session.execute(text("INSERT INTO apenis (alliance_id, penis) SELECT alliance.id, alliance.score - alliance_history.score FROM alliance, alliance_history WHERE alliance.active = :true AND alliance.id = alliance_history.id AND alliance_history.tick = :tick ORDER BY alliance.score - alliance_history.score DESC;", bindparams=[true,bindparam("tick",history_tick)]))
 t2=time.time()-t1
-print "galpenis in %.3f seconds" % (t2,)
+print "apenis in %.3f seconds" % (t2,)
 session.commit()
 t1=time.time()-t_start
 print "Total penis time: %.3f seconds" % (t1,)
