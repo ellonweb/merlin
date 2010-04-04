@@ -33,7 +33,7 @@ class members(loadable):
     access = "member"
     def execute(self, request, user, sort=None):
         
-        levels = sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True)
+        levels = [].extend(User.levels)
         if sort is not None:
             levels = [("All member", levels[-1][1],),]
         
@@ -68,7 +68,7 @@ class galmates(loadable):
     access = "member"
     def execute(self, request, user, sort=None):
         
-        levels = sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True)
+        levels = [].extend(User.levels)
         
         order =  {"name"  : (asc(User.name),),
                   "sponsor" : (asc(User.sponsor),),
@@ -96,7 +96,7 @@ class channels(loadable):
     access = "member"
     def execute(self, request, user, sort=None):
         
-        levels = sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True)
+        levels = [].extend(User.levels)
         if sort is not None:
             levels = [("All", 0,),]
         else:

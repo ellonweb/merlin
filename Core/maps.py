@@ -365,6 +365,23 @@ class User(Base):
     fleetcount = Column(Integer, default=0)
     fleetcomment = Column(String(512))
     fleetupdated = Column(Integer, default=0)
+    levels = sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True)
+    
+    @property
+    def level(self):
+        if not self.active:
+            return None
+        for level, access in self.levels:
+            if self.access >= int(access):
+                return level
+        return "galmate"
+    
+    @level.setter
+    def level(self, value):
+        if value in (True, False,):
+            self.active = value
+        else:
+            self.access = Config.getint("Access", value)
     
     @validates('passwd')
     def valid_passwd(self, key, passwd):
