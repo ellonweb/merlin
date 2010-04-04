@@ -70,7 +70,7 @@ def context(request):
         slogan, count = Slogan.search("")
         if slogan is not None:
             context["slogan"] = str(slogan)
-        context["user"] = request.session.user.name
+        context["user"] = request.session.user
         context["menu"] = menu.generate(request.session.user)
     return context
 
