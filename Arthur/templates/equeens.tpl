@@ -5,18 +5,20 @@
 <td>
 <table cellspacing="1" cellpadding="3" width="100%">
     <tr class="datahigh">
-        <th colspan="3">
+        <th colspan="4">
             eQueens
         </th>
     </tr>
     <tr class="header">
-        <th width="100">User</th>
-        <th width="100">Planet</th>
-        <th width="100">ePenis</th>
+        <th>#</th>
+        <th>User</th>
+        <th>Planet</th>
+        <th>ePenis</th>
     </tr>
     {% for member, planet, epenis in queens %}
     <tr class="{% cycle 'odd' 'even' %}">
-        <td>{{ member }}</td>
+        <td>{{ epenis.rank }}</td>
+        <td>{{ member.name }}</td>
         <td>{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</td>
         <td>{{ epenis.penis }}</td>
     </tr>
