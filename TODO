@@ -11,6 +11,12 @@ exception model refactor
 rewrite CLI or integrate as an extra IO stream
 rewrite Connection.write and Action.write to use detached threaded system
 
+Google voice inbox parsing
+OR push google voice inbox to email AND:
+email server and parsing with Lamson
+
+Arthur message object that can be pushed to merlin hooks?
+
 Arthur scan request interface
 
 !attack command, creates arthur page with scans and ability to book in the web
