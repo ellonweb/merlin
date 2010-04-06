@@ -365,7 +365,7 @@ class User(Base):
     fleetcount = Column(Integer, default=0)
     fleetcomment = Column(String(512))
     fleetupdated = Column(Integer, default=0)
-    levels = sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True)
+    levels = filter(lambda lev: not lev[0] == "galmate", sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True))
     
     @property
     def level(self):
