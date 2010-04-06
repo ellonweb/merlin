@@ -42,7 +42,7 @@ class _menu(object):
             if sub is not None:
                 self.content[head]["subs"].append(sub)
                 self.content[head]["content"][sub] = {"hook":hook, "url":url}
-                self.content[head]["content"][sub]["link"] = hook.name == "links"
+                self.content[head]["content"][sub]["link"] = hook.name == "links" and not head == Config.get("Alliance", "name")
             
             return hook
         return wrapper
