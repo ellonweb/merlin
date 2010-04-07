@@ -11,6 +11,15 @@ exception model refactor
 rewrite CLI or integrate as an extra IO stream
 rewrite Connection.write and Action.write to use detached threaded system
 
+update README with Excalibur (sh) and Arthur instructions
+
+google voice error "message not found in any of the matching conversations"
+check parser, update etc
+
+@route params reverser
+    loadable.planet_coord x/y/z, planet_coord2 a/b/c
+    self.short2num
+
 Google voice inbox parsing
 OR push google voice inbox to email AND:
 email server and parsing with Lamson
@@ -44,6 +53,9 @@ Arthur scan request interface
     table of latest scans etc
     click shows scan info in webby where possible /scan/id/
     shift+click opens PA link
+    
+/scan/type/x:y:z/
+    shows latest of specific type
 
 /user/name/
     access=member
