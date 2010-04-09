@@ -243,7 +243,7 @@ while True:
         print "Copy planet ids to temp in %.3f seconds" % (t2,)
         t1=time.time()
 
-        while last_tick > 0: #looks are deceiving, this only runs once
+        while last_tick > PA.getint("numbers", "shuffle"): #looks are deceiving, this only runs once
             # This code is designed to match planets whose ruler/planet names
             #  change, by matching them with new planets using certain criteria
 
@@ -285,7 +285,9 @@ while True:
                                         planet_old_id_search.z = planet_new_id_search.z AND
                                         planet_old_id_search.race = planet_new_id_search.race AND
                                         planet_old_id_search.value > 500000 AND
-                                        planet_new_id_search.value BETWEEN planet_old_id_search.value - (2* planet_old_id_search.vdiff) AND planet_old_id_search.value + (2* planet_old_id_search.vdiff)
+                                        planet_new_id_search.value BETWEEN
+                                                planet_old_id_search.value - (2* planet_old_id_search.vdiff) AND 
+                                                planet_old_id_search.value + (2* planet_old_id_search.vdiff)
                                       );"""))
             # Third set of criterion
             if load_planet_id_search() is None: break
@@ -295,7 +297,22 @@ while True:
                                         planet_old_id_search.size > 500 AND
                                         planet_old_id_search.size = planet_new_id_search.size AND
                                         planet_old_id_search.value > 500000 AND
-                                        planet_new_id_search.value BETWEEN planet_old_id_search.value - (2* planet_old_id_search.vdiff) AND planet_old_id_search.value + (2* planet_old_id_search.vdiff)
+                                        planet_new_id_search.value BETWEEN
+                                                planet_old_id_search.value - (2* planet_old_id_search.vdiff) AND
+                                                planet_old_id_search.value + (2* planet_old_id_search.vdiff)
+                                      );"""))
+            # Fourth set of criterion for smaller planets
+            if load_planet_id_search() is None: break
+            session.execute(text("""UPDATE planet_new_id_search SET id = (
+                                      SELECT id FROM planet_old_id_search WHERE
+                                        planet_old_id_search.x = planet_new_id_search.x AND
+                                        planet_old_id_search.y = planet_new_id_search.y AND
+                                        planet_old_id_search.z = planet_new_id_search.z AND
+                                        planet_old_id_search.race = planet_new_id_search.race AND
+                                        planet_old_id_search.size = planet_new_id_search.size AND
+                                        planet_new_id_search.value BETWEEN
+                                                planet_old_id_search.value - (2* planet_old_id_search.vdiff) AND
+                                                planet_old_id_search.value + (2* planet_old_id_search.vdiff)
                                       );"""))
             break
 
