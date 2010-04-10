@@ -41,7 +41,7 @@ class remchan(loadable):
                 message.part(channel)
             return
         
-        if chan.userlevel >= user.access:
+        if chan.userlevel >= user.access and not user.is_admin():
             message.reply("You may not remove %s, the channel's access (%s) exceeds your own (%s)" % (chan.name, chan.userlevel, user.access,))
             return
         
