@@ -289,11 +289,11 @@ class prop(loadable):
         return Q.count() < Config.getint("Alliance", "members")
     
     def is_already_proposed_invite(self, person):
-        Q = session.query(Invite).filter(Invite.person.ilike(person)).filter_by(active=True)
+        Q = session.query(Invite).filter(Invite.person.ilike(person)).filter(Invite.active == True)
         return Q.count() > 0
     
     def is_already_proposed_kick(self, person):
-        Q = session.query(Kick).join(Kick.kicked).filter(User.name.ilike(person)).filter_by(active=True)
+        Q = session.query(Kick).join(Kick.kicked).filter(User.name.ilike(person)).filter(Kick.active == True)
         return Q.count() > 0
     
     def load_prop(self, id):
