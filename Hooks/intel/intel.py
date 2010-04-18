@@ -46,7 +46,7 @@ class intel(loadable):
             Q = Q.order_by(asc(Planet.z))
             prev = []
             for planet in Q:
-                if planet.intel is not None:
+                if planet.intel is not None and (planet.intel.nick or planet.alliance):
                     reply = "#%s"%(planet.z,)
                     if planet.intel.nick:
                         reply += " %s"%(planet.intel.nick,)
@@ -112,7 +112,7 @@ class intel(loadable):
             if opt == "comment":
                 planet.intel.comment = message.get_msg().split("comment=")[1]
         session.commit()
-        if str(planet.intel):
+        if planet.intel and str(planet.intel):
             message.reply("Information stored for %s:%s:%s -%s"% (planet.x, planet.y, planet.z, str(planet.intel),))
         else:
             message.reply("No information stored for %s:%s:%s"% (planet.x, planet.y, planet.z,))

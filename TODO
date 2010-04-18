@@ -16,6 +16,10 @@ update README with Excalibur (sh) and Arthur instructions
 google voice error "message not found in any of the matching conversations"
 check parser, update etc
 
+commandlog
+    able to specify user and no command (!commandlog user=ellonweb)
+    no parameters defaults to %
+
 @route params reverser
     loadable.planet_coord x/y/z, planet_coord2 a/b/c
     self.short2num
