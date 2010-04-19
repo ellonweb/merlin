@@ -54,6 +54,21 @@ class mydef(loadable):
         reply+= " and comment: %s" %(user.fleetcomment)
         message.reply(reply)
     
+    @route(r"", access = "member")
+    @require_user
+    def showdef(self, message, user, params):
+        u = user
+        tick = Updates.current_tick()
+        ships = u.fleets.all()
+        
+        if len(ships) < 1:
+            message.reply("That lazy pile of shit %s hasn't updated their def since tick %s. (comment: %s)"%(u.name,u.fleetupdated,u.fleetcomment))
+        else:
+            reply = "%s def info: fleetcount %s, updated: %s (%s), ships: " %(u.name,u.fleetcount,u.fleetupdated,u.fleetupdated-tick)
+            reply+= ", ".join(map(lambda x:"%s %s" %(self.num2short(x.ship_count),x.ship.name),ships))
+            reply+= " comment: %s"%(u.fleetcomment,)
+            message.reply(reply)
+    
     def reset_ships_and_comment(self,user,ships,fleetcount,comment,reset_ships):
         self.update_comment_and_fleetcount(user,fleetcount,comment)
         if len(ships) > 0 or reset_ships:
