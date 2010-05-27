@@ -11,8 +11,6 @@ exception model refactor
 rewrite CLI or integrate as an extra IO stream
 rewrite Connection.write and Action.write to use detached threaded system
 
-update README with Excalibur (sh) and Arthur instructions
-
 google voice error "message not found in any of the matching conversations"
 check parser, update etc
 

@@ -2,68 +2,172 @@ Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine,
 Please read the included LICENSE.
 
 Requirements:
+    Git
+    Python 2.6
+    PostgreSQL 8.4
+    psycopg2
+    SQLAlchemy 0.5.8
 
-Python 2.6
-PostgreSQL 8.4
-psycopg2
-SQLAlchemy 0.5.7
-It is also recommended you install Git so you can track your changes
+Additional Arthur requirements:
+    Apache 2.2
+    mod_wsgi
 
-Installation instructions:
+Setting up Git: (Consult Git's website for full instructions)
+    1) Navigate to the parent directory where you wish to install Merlin
+    2) Use Git to download the code and create a branch to track your changes:
+            git clone git://github.com/ellonweb/merlin.git
+            cd merlin
+            git checkout -b <your_branch_name>
+    3) After making changes to the code/config, you should store your changes:
+            git add <name_of_changed_files>
+            git commit -m <short_description_of_changes>
+    4) To update the code to the latest available source:
+            git checkout master
+            git pull
+            git checkout <your_branch_name>
+            git rebase master
+       This will re-apply your changes on top of the latest source. If you
+        made some incompatible changes you might need to modify your change!
 
-1) Install all the requirements and their dependancies.
-2) Follow Postgre's instructions to create a database, use UTF8 encoding.
-   You could also use pgAdmin or execute:
-   CREATE DATABASE yourdbnamehere WITH ENCODING = 'UTF8';
-3) If you've decided to use Git, use these commands to download the code and
-   create your own branch to future-proof any changes you make:
-   git clone git://github.com/ellonweb/merlin.git
-   cd merlin
-   git checkout -b <yourbranchname>
-   After making changes you should use git add and git commit. When you want to
-   upgrade Merlin, just do git pull followed by git rebase master.
-4) Edit merlin.cfg as required. You should only need to change the Connection,
-   Admin, Alliance and DB settings. If you're using the SMS features you'll
-   need to add your details in the clickatell section.
-5) Inspect and modify /Hooks/__init__.py as needed. This controls which groups
-   of commands will be enabled. The SMS package is disabled by default, if you
-   have a clickatell account to use you will want to remove the # character.
-   Many alliances will want to disable the prop/cookie package, use a #
-   character at the beginning of the line.
-5) Run createdb.py. This will create all the neccessary tables for you, as
-   well as configuring the bot to join your alliance's main channel and
-   downloading the shipstats from PA.
-6) Run merlin.py. Hopefully it will connect to IRC without any errors and join
-   your alliance channel without trouble.
-7) You will need to add yourself to the bot using !adduser:
-   !adduser yourpnickhere admin
-   If you haven't added yourself to the Admin section of merlin.cfg this won't
-   work! (You can add other admins/members without adding them to the config
-   once you've added yourself.)
-8) Configure crontab or another task scheduler to run excalibur.py every tick.
+Configuration and Database:
+    5) Create a database for the tools using pgAdmin, psql or similar tool.
+            CREATE DATABASE <your_database_name> WITH ENCODING = 'UTF8';
+    6) Edit merlin.cfg in a text editor as required. You should only need to
+        change the Connection, Admin, Alliance, Channel and DB settings. If
+        you're using the SMS features you'll need to add your details in the
+        clickatell and googlevoice section and check the sms setting in Misc.
+       Commit your changes (see #3).
+    7) Run createdb.py. This will create all the neccessary tables for you, as
+        well as configuring the bot to join your alliance's main channel and
+        downloading the shipstats from PA. Linux users, there is no shebang
+        line so you will need to run: python createdb.py
 
-Access settings:
+Access settings and running Merlin:
+    8) Inspect and modify /Hooks/__init__.py as needed. This controls which
+        groups of commands will be enabled. The SMS package is disabled by
+        default, if you have a clickatell account to use you will want to
+        remove the # character. Many alliances will want to disable the
+        prop/cookie package, use a # character at the beginning of the line.
+       Commit your changes!
+    9) You may also want to change the access levels for some of the commands,
+        you should do that now. There is a description of the access settings
+        later in this text.
+       Commit your changes!
+   10) Run merlin.py. Again, there is no shebang line. Hopefully the bot will
+        connect to IRC without any errors and join your alliance channel.
+   11) You will need to add yourself to the bot using !adduser:
+            !adduser <your_pnick> admin
+       If you haven't added yourself to the Admin section of merlin.cfg this
+        won't work! (You can add other admins/members without adding them to
+        the config once you've added yourself.)
+   12) Any time you make changes to any of Merlin's code, you will need to use
+        !reload. There are a few exceptions to this, such as changes to
+        merlin.cfg, in which case you will need to !reboot.
 
-Merlin's system hooks use the list of admins defined in merlin.cfg to control
-access. System hooks can be identified by the system modifier:
-@system(..)
+Configuring Excalibur:
+   13) You need to use a task scheduler to run excalibur.py one minute after
+        every tick. If you're using crontab, you might use a command like this:
+            1 * * * * /path/to/merlin/excalibur.sh >> /path/to/merlin/dumplog.txt 2>&1
+       You'd then also need to create the excalibur.sh file with executable
+        permission and insert the following commands:
+            cd /path/to/merlin/
+            python excalibur.py
 
-Merlin's non-system hooks (the majority of the functionality) are split into
-different routes and utilise a two-level access system. The access requirement
-of a route is provided in the modifier:
-@route(.. access = "member")
-The hook can also be given a default access level for all of its routes by
-defining the access variable at class level.
-This parameter can be changed to any of the access levels defined in merlin.cfg,
-or instead of passing a string you can provide an actual number.
+Configuring Apache and running Arthur: (Consult their respective websites for full instructions)
+   14) You should download the mod_wsgi .so file to your Apache's /modules/
+        directory. Make sure it is named "mod_wsgi.so".
+   15) Open your httpd.conf in a text editor, and add the following line just
+        above the LoadModule directives:
+            LoadModule wsgi_module modules/mod_wsgi.so
+   16) At the bottom of your httpd.conf, add the following lines:
+            WSGIScriptAlias / /path/to/merlin/arthur.wsgi
+            <Directory /path/to/merlin/>
+                <Files arthur.wsgi>
+                    Order allow,deny
+                    Allow from all
+                </Files>
+            </Directory>
+            
+            Alias /static/ /path/to/merlin/Arthur/static/
+            <Directory /path/to/merlin/Arthur/static/>
+                Order allow,deny
+                Allow from all
+            </Directory>
+       Make sure you edit all the paths!
+   17) Open the arthur.wsgi file and edit the two paths in that file.
+       Commit your changes!
+   18) You may want to change the access levels for some of the pages, you
+        should do that now. Access settings are described later.
+       Commit your changes!
+   19) Restart your Apache server! You will need to restart the server every
+        time the Arthur code is modified or updated.
+   20) The dynamic menu does not always fully initialise on the first page
+        view, just load another page or try logging out and back in.
 
-If a command is executed in a channel Merlin first checks the channel's
-min and max levels. If the channel's max level is higher than the command's
-requirement the command is denied. If the user's access level or the channel's
-min level match or exceed the requirement the command is executed.
+Updating for a new round:
+   21) You should disable your task scheduler from running Excalibur when the
+        round is over, it is not guaranteed to function correctly during havoc.
+   22) Make sure you have the latest source code! (see #4)
+   23) Run createdb.py with the --migrate switch and the old round number. For
+        example, just before the start of round 37:
+            python createdb.py --migrate 36
+       This will store the old database in an alternate schema for archiving,
+        and copy your user list (among other things) to a new schema.
+   24) The migration tool will automatically pull the ship stats from PA. If
+        the stats change before tick start or if you want to load beta stats,
+        you can run shipstats.py manually:
+            python shipstats.py [optional_url_to_stats]
+       Avoid running this midround, it will delete stored unit/au scans.
+   25) Don't forget to enable your task scheduler again once ticks start!
 
-If you want to limit a command to use in a specific channel or in PM, you
-can use this modifier on the execute method of the hook:
-@channel("home")
-This can be changed to any channels defined in merlin.cfg or simply "PM", or
-you can specify the specific channel.
+Merlin Access Settings:
+
+    All of Merlin's functionality is stored in /Hooks/
+
+    Merlin's system hooks use the list of admins defined in merlin.cfg to
+    control access. System hooks can be identified by the system modifier:
+        @system(..)
+
+    Merlin's non-system hooks (the majority of the functionality) are split
+    into different routes and utilise a two-level access system. The access
+    requirement of a route is provided in the modifier:
+        @route(.. access = "member")
+
+    The hook can also be given a default access level for all of its routes by
+    defining the access variable at class level.
+
+    This parameter can be changed to any of the access levels defined in
+    merlin.cfg, or instead of passing a string you can provide an actual
+    number, though this is not recommended!
+
+    If a command is executed in a channel Merlin first checks the channel's min
+    and max levels. If the channel's max level is higher than the command's
+    requirement the command is denied. If the user's access level or the
+    channel's min level match or exceed the requirement the command is executed.
+
+    If you want to limit a command to use in a specific channel or in PM, you
+    can use this modifier on the execute method of the hook:
+        @channel("home")
+
+    This can be changed to any channels defined in merlin.cfg or simply "PM",
+    or you can specify the specific channel.
+
+Arthur Access Settings:
+
+    All of Arthur's functionality is stored in /Arthur/
+
+    Arthur's hooks use a similar but simpler access model to Merlin. The hooks
+    all have an access level defined at the class level, similar to Merlin's
+    default route access.
+
+    This parameter can be changed to any of the access levels defined in
+    merlin.cfg, or instead of passing a string you can provide an actual
+    number, though this is not recommended!
+
+    These access levels not only control the access but also the items in the
+    dynamic menu.
+
+    Anyone with an active user account is able to login to the website. This
+    means galmates as well as members, though obviously there is very little
+    for galmates to see! You have the option of making tools open for public
+    use or the opposite, restricting what your members can see.
