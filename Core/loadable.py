@@ -133,7 +133,7 @@ class loadable(object):
             session.add(Command(command_prefix = message.get_prefix(),
                                 command = self.name,
                                 subcommand = subcommand,
-                                command_parameters = message.get_msg()[len(self.name)+1:],
+                                command_parameters = message.get_msg()[len(self.name)+1:].strip(),
                                 nick = message.get_nick(),
                                 username = "" if user is True else user.name,
                                 hostname = message.get_hostmask(),

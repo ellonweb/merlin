@@ -29,11 +29,19 @@ class commandlog(loadable):
     usage = " <command> [user=<username>] <parameters> | <id>"
     access = "admin"
     
-    @route(r"(\w+)(?:\s+user=(\S+))?\s+(.+)")
-    def search(self, message, user, params):
-        
-        cmd, usr, prms = params.group(1,2,3)
-        
+    @route(r"(\w+)\s*(.*)")
+    def search3_cmd(self, message, user, params):
+        self.execute(message, params.group(1), None, params.group(2))
+    
+    @route(r"(\w+)(?:\s+user=(\S+))?\s*(.*)")
+    def search2_cmd_user(self, message, user, params):
+        self.execute(message, params.group(1), params.group(2), params.group(3))
+    
+    @route(r"user=(\S+)\s*(.*)")
+    def search1_user(self, message, user, params):
+        self.execute(message, None, params.group(1), params.group(2))
+    
+    def execute(self, message, cmd, usr, prms):
         if usr is not None:
             spy = User.load(name=usr)
             if spy is None:
@@ -41,8 +49,8 @@ class commandlog(loadable):
                 return
         
         Q = session.query(Command)
-        Q = Q.filter(Command.command.ilike(cmd))
-        Q = Q.filter(Command.command_parameters.ilike(prms))
+        Q = Q.filter(Command.command.ilike(cmd)) if cmd else Q
+        Q = Q.filter(Command.command_parameters.ilike(prms)) if prms else Q
         Q = Q.filter(Command.username == spy.name) if usr else Q
         Q = Q.order_by(desc(Command.id))
         result = Q[:5]
