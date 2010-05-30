@@ -23,7 +23,7 @@ import json
 import re
 import time
 from urllib import urlencode
-from urllib2 import urlopen, URLError
+from urllib2 import urlopen, Request, URLError
 from Core.exceptions_ import LoadableError
 from Core.config import Config
 from Core.db import session
@@ -128,7 +128,9 @@ class sms(loadable):
                               "_rnr_se"     : Config.get("googlevoice", "api"),
                             })
             # Send the SMS
-            text = urlopen("https://www.google.com/voice/sms/send/", post, 5).read()
+            req = Request("https://www.google.com/voice/sms/send/")
+            req.add_header('Authorization', "GoogleLogin auth="+auth)
+            text = urlopen(req, post, 5).read()
             if text != '{"ok":true,"data":{"code":0}}':
                 raise SMSError("success code not returned")
             
@@ -139,7 +141,9 @@ class sms(loadable):
             get = urlencode({"auth"         : auth,
                            })
             # Request the SMS inbox feed
-            text = urlopen("https://www.google.com/voice/inbox/recent/sms/?"+get, None, 5).read()
+            req = Request("https://www.google.com/voice/inbox/recent/sms/?"+get)
+            req.add_header('Authorization', "GoogleLogin auth="+auth)
+            text = urlopen(req, None, 5).read()
             
             # Parse the feed and extract JSON data
             m = re.search(self.googlevoice_regex_json(), text)
