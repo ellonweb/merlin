@@ -115,7 +115,7 @@ while True:
 
         # If the new tick is below the shuffle tick, empty out all the data
         #  and don't store anything from the dumps other than the tick itself
-        if planet_tick < PA.getint("numbers", "shuffle"):
+        if planet_tick <= PA.getint("numbers", "shuffle"):
             print "Pre-shuffle dumps detected, emptying out the data"
             planets.readlines()
             galaxies.readlines()
