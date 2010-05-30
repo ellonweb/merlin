@@ -76,6 +76,7 @@ class request(loadable):
         request.active = False
         session.commit()
         message.reply("Cancelled scan request %s" % (id,))
+        message.privmsg("Cancelled scan request %s" % (id,), self.scanchan())
     
     @route(r"(\d+)\s+block(?:s|ed)?\s+(\d+)", access = "member")
     def blocks(self, message, user, params):
