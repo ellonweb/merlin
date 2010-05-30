@@ -29,6 +29,10 @@ class stop(loadable):
     """Calculates the required defence to the specified number of ships"""
     usage = " <number> <ship> [t1|t2|t3]"
     
+    @route(r"hammertime")
+    def hammertime(self, message, user, params):
+        message.reply("Can't touch this!")
+    
     @route(r"(\d+(?:\.\d+)?[km]?)\s+(\w+)(?:\s+(t1|t2|t3))?")
     def execute(self, message, user, params):
         
