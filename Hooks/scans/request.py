@@ -111,4 +111,4 @@ class request(loadable):
         return Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")
     
     def link(self, request):
-        return Config.get("URL", "reqscan") % (request.scantype, request.target.x, request.target.y, request.target.z,)
+        return Config.get("URL", "reqscan") % (PA.get(request.scantype, "type"), request.target.x, request.target.y, request.target.z,)
