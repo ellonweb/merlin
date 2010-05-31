@@ -70,6 +70,7 @@ class parse(Thread):
             print "Exception in scan: "+e.__str__()
             traceback.print_exc()
         print time()
+        session.remove()
     
     def group(self, uid, gid):
         page = urlopen(Config.get("URL","viewgroup")%(gid,)).read()
