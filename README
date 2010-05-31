@@ -11,6 +11,7 @@ Requirements:
 Additional Arthur requirements:
     Apache 2.2
     mod_wsgi
+    Django
 
 Setting up Git: (Consult Git's website for full instructions)
     1) Navigate to the parent directory where you wish to install Merlin
