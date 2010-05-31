@@ -203,6 +203,9 @@ class prop(loadable):
         if prop is None:
             message.reply("No proposition number %s exists (idiot)."%(id,))
             return
+        if not prop.active:
+            message.reply("You can't expire on prop %s, it's already expired."%(id,))
+            return
         if prop.proposer is not user and not user.is_admin():
             message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
             return
@@ -269,10 +272,16 @@ class prop(loadable):
         if prop is None:
             message.reply("No proposition number %s exists (idiot)."%(id,))
             return
+        if not prop.active:
+            message.reply("You can't cancel on prop %s, it's already expired."%(id,))
+            return
         if prop.proposer is not user and not user.is_admin():
             message.reply("Only %s may cancel proposition %d."%(prop.proposer.name,id))
             return
         
+        self.recalculate_carebears(prop)
+        
+        yes, no, veto = self.sum_votes(prop)
         vote_result = "cancel"
         
         reply = self.text_result(vote_result, yes, no, veto)
