@@ -69,7 +69,7 @@ class request(loadable):
         if request is None:
             message.reply("No open request number %s exists (idiot)."%(id,))
             return
-        if request.user is not user and not user.is_admin():
+        if request.user is not user and not user.is_admin() and not self.is_chan(message, self.scanchan()):
             message.reply("Only %s may cancel request %s."%(request.user.name,id))
             return
         
