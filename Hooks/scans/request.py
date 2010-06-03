@@ -70,7 +70,7 @@ class request(loadable):
             message.reply("No open request number %s exists (idiot)."%(id,))
             return
         if request.user is not user and not user.is_admin():
-            message.reply("Only %s may cancel request %d."%(request.user.name,id))
+            message.reply("Only %s may cancel request %s."%(request.user.name,id))
             return
         
         request.active = False
