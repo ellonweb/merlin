@@ -36,61 +36,68 @@ class ChanUserTracker(object):
         self.Nicks.clear()
         self.Pusers.clear()
     
+    def mode_is(self, *modes):
+        return Config.get("Misc","usercache") in modes
+    
     def new_chan(self, chan):
+        self.del_chan(chan)
         self.Channels[chan] = Channel(chan)
     
     def valid_chan(f):
         def validate(self, chan, *args):
             if self.Channels.has_key(chan):
-                return f(self, chan, *args)
+                return f(self, self.Channels[chan], *args)
         return validate
     
     def valid_nick(f):
         def validate(self, nick, *args):
             if self.Nicks.has_key(nick):
-                return f(self, nick, *args)
+                return f(self, self.Nicks[nick], *args)
         return validate
     
     def valid_nick_chan(f):
         def validate(self, nick, chan, *args):
             if self.Nicks.has_key(nick) and self.Channels.has_key(chan):
-                return f(self, nick, chan, *args)
+                nick = self.Nicks[nick]
+                chan = self.Channels[chan]
+                if nick in chan.nicks:
+                    return f(self, nick, chan, *args)
         return validate
     
     @valid_chan
     def del_chan(self, chan):
-        del self.Channels[chan]
+        chan.part()
     
     @valid_nick
     def del_nick(self, nick):
-        del self.Nicks[nick]
+        nick.quit()
     
     @valid_nick
     def nick_change(self, nick, new):
-        self.Nicks[nick].nick(new)
+        nick.nick(new)
     
     @valid_chan
     def join(self, chan, nick):
-        self.Channels[chan].addnick(nick)
+        chan.addnick(nick)
     
-    @valid_chan
-    def part(self, chan, nick):
-        self.Channels[chan].remnick(nick)
+    @valid_nick_chan
+    def part(self, nick, chan):
+        chan.remnick(nick)
     
     @valid_chan
     def topic(self, chan, topic):
-        self.Channels[chan].topic = topic
+        chan.topic = topic
     
     @valid_chan
     def opped(self, chan, status=None):
         if status is not None:
-            self.Channels[chan].opped = status
-        if self.Channels[chan].opped:
+            chan.opped = status
+        if chan.opped:
             return True
     
     @valid_nick_chan
     def nick_in_chan(self, nick, chan):
-        return self.Nicks[nick] in self.Channels[chan].nicks
+        return True
     
     def untrack_user(self, pnick):
         if self.Pusers.has_key(pnick):
@@ -123,7 +130,7 @@ class ChanUserTracker(object):
         if user is None:
             raise UserError
         
-        if (nick is not None) and (Config.get("Misc","usercache") in ("join", "command",)):
+        if (nick is not None) and self.mode_is("rapid", "join", "command"):
             if self.Pusers.get(user.name) is None:
                 # Add the user to the tracker
                 self.Pusers[user.name] = Puser(user.name)
@@ -158,7 +165,7 @@ class ChanUserTracker(object):
         if user is None:
             return None
         
-        if (nick is not None) and (Config.get("Misc","usercache") in ("join", "command",)):
+        if (nick is not None) and self.mode_is("rapid", "join", "command"):
             if self.Pusers.get(user.name) is None:
                 # Add the user to the tracker
                 self.Pusers[user.name] = Puser(user.name)
@@ -190,26 +197,21 @@ class Channel(object):
         self.nicks.add(nick)
         nick.channels.add(self.chan)
     
-    def remnick(self, name):
+    def remnick(self, nick):
         # Remove a nick from the list
-        if name not in CUT.Nicks.keys():
-            return
-        nick = CUT.Nicks[name]
         self.nicks.remove(nick)
         nick.channels.remove(self.chan)
         if len(nick.channels) == 0:
-            del CUT.Nicks[nick.name]
+            nick.quit()
     
-    def __del__(self):
-        # We've parted or been kicked, update nicks
-        for nick in self.nicks:
-            nick.channels.remove(self.chan)
-            if len(nick.channels) == 0:
-                try:
-                    del CUT.Nicks[nick.name]
-                # Might occur when the bot is quitting
-                except (AttributeError, KeyError, TypeError):
-                    pass
+    def part(self):
+        # We've parted or been kicked
+        if self.chan in CUT.Channels:
+            del CUT.Channels[self.chan]
+        
+        # Update nicks
+        for nick in self.nicks.copy():
+            self.remnick(nick)
     
 
 class Nick(object):
@@ -227,18 +229,19 @@ class Nick(object):
     
     def quit(self):
         # Quitting
-        for channel in self.channels.copy():
-            CUT.Channels[channel].remnick(self.name)
-    
-    def __del__(self):
+        if self.name in CUT.Nicks:
+            del CUT.Nicks[self.name]
+        
+        # Remove puser
         if self.puser is not None:
-            try:
-                self.puser.nicks.remove(self)
-                if len(self.puser.nicks) == 0:
-                    del CUT.Pusers[self.puser.name]
-            # Might occur when the bot is quitting
-            except (AttributeError, KeyError, TypeError):
-                pass
+            self.puser.nicks.remove(self)
+            if len(self.puser.nicks) == 0:
+                del CUT.Pusers[self.puser.name]
+            self.puser = None
+        
+        # Remove from channels
+        for channel in self.channels.copy():
+            CUT.Channels[channel].remnick(self)
     
 
 class Puser(object):

@@ -36,7 +36,7 @@ def join(message):
     else:
         # Someone is joining a channel we're in
         CUT.join(message.get_chan(), message.get_nick())
-        if Config.get("Misc","usercache") == "join":
+        if CUT.mode_is("rapid", "join"):
             # Set the user's pnick
             CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
 
@@ -56,9 +56,11 @@ def names(message):
     for nick in message.get_msg().split():
         if nick == "@"+Merlin.nick:
             CUT.opped(message.get_chan(), True)
+        elif nick == "+"+Merlin.nick or nick == Merlin.nick:
+            CUT.opped(message.get_chan(), False)
         if nick[0] in ("@","+"): nick = nick[1:]
         CUT.join(message.get_chan(), nick)
-        if Config.get("Misc","usercache") == "join":
+        if CUT.mode_is("rapid"):
             # Use whois to get the user's pnick
             message.write("WHOIS %s" % (nick,))
 
@@ -70,7 +72,7 @@ def part(message):
         CUT.del_chan(message.get_chan())
     else:
         # Someone is leaving a channel we're in
-        CUT.part(message.get_chan(), message.get_nick())
+        CUT.part(message.get_nick(), message.get_chan())
 
 @system('KICK')
 def kick(message):
@@ -81,7 +83,7 @@ def kick(message):
         CUT.del_chan(message.get_chan())
     else:
         # Someone is kicked from a channel we're in
-        CUT.part(message.get_chan(), kname)
+        CUT.part(kname, message.get_chan())
 
 @system('QUIT')
 def quit(message):
@@ -111,9 +113,11 @@ def channels(message):
     if message.get_chan() == Merlin.nick:
         # Cycle through the list of channels
         for chan in message.get_msg().split():
+            opped = chan[0] == "@"
             if chan[0] in ("@","+"): chan = chan[1:]
             # Reset the channel and get a list of nicks
             CUT.new_chan(chan)
+            CUT.opped(chan, opped)
             message.write("NAMES %s\nTOPIC %s" % (chan,chan,))
 
 @system('MODE')
