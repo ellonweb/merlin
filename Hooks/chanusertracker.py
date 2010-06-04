@@ -38,7 +38,7 @@ def join(message):
         CUT.join(message.get_chan(), message.get_nick())
         if CUT.mode_is("rapid", "join"):
             # Set the user's pnick
-            CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
+            CUT.get_user(message.get_nick(), message.get_chan(), pnickf=message.get_pnick)
 
 @system('332')
 def topic_join(message):
@@ -105,7 +105,7 @@ def pnick(message):
         nick = message.line.split()[3]
         pnick = message.line.split()[4]
         # Set the user's pnick
-        CUT.get_user(nick, pnick=pnick)
+        CUT.get_user(nick, None, pnick=pnick)
 
 @system('319')
 def channels(message):
@@ -118,7 +118,8 @@ def channels(message):
             # Reset the channel and get a list of nicks
             CUT.new_chan(chan)
             CUT.opped(chan, opped)
-            message.write("NAMES %s\nTOPIC %s" % (chan,chan,))
+            if CUT.mode_is("rapid"):
+                message.write("NAMES %s\nTOPIC %s" % (chan,chan,))
 
 @system('MODE')
 def op(message):
@@ -167,7 +168,8 @@ def auth(message):
         message.alert("!auth user pass")
         return
     try:
-        user = CUT.auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
+        chan = message.get_chan() if message.in_chan() else None
+        user = CUT.auth_user(message.get_nick(), chan, message.get_pnick, username=msg[1], password=msg[2])
         if user is not None:
             message.reply("You have been authenticated as %s" % (user.name,))
     except UserError:
@@ -182,7 +184,8 @@ def letmein(message):
         message.alert("!letmein user pass")
         return
     try:
-        user = CUT.auth_user(message.get_nick(), message.get_pnick, username=msg[1], password=msg[2])
+        chan = message.get_chan() if message.in_chan() else None
+        user = CUT.auth_user(message.get_nick(), chan, message.get_pnick, username=msg[1], password=msg[2])
         if (user is not None) and user.is_member():
             message.invite(message.get_nick(), Config.get("Channels","home"))
     except UserError:

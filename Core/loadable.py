@@ -162,7 +162,8 @@ class loadable(object):
                 raise UserError
         else:
             channel = Channel(userlevel=0)
-        user = user or CUT.get_user(message.get_nick(), pnickf=message.get_pnick)
+        chan = message.get_chan() if message.in_chan() else None
+        user = user or CUT.get_user(message.get_nick(), chan, pnickf=message.get_pnick)
         if self.is_user(user):
             if max(user.access, channel.userlevel) >= access:
                 return user
