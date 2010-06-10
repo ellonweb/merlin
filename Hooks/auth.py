@@ -94,3 +94,5 @@ def secure(message):
     """Secures the PNick of the bot."""
     message.privmsg("SET MAXLOGINS 2\nSET INVISIBLE ON\nSET AUTOKILL ON", "P")
     message.reply("Secured the PNick")
+    for chan, name in Config.items("Channels"):
+        message.privmsg("set %s autoinvite on" %(name,),'P');
