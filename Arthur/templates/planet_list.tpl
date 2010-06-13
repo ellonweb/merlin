@@ -75,7 +75,7 @@
         
         <td align="right"><a href="{% url galaxy planet.x planet.y %}">{{ planet.x }}</a></td>
         <td align="right"><a href="{% url galaxy planet.x planet.y %}">{{ planet.y }}</a></td>
-        <td align="right">{{ planet.z }}</td>
+        <td align="right"><a href="{% url planet planet.x planet.y planet.z %}">{{ planet.z }}</a></td>
         <td>{{ planet.rulername }}</td>
         <td>{{ planet.planetname }}</td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
