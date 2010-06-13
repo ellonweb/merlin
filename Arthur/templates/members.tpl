@@ -16,7 +16,7 @@
         <th width="100"><a href="{% url members "access" %}">Access</a></th>
         <th width="100"><a href="{% url members "carebears" %}">CareBears</a></th>
         <th width="100"><a href="{% url members "planet" %}">Planet</a></th>
-        <th width="100">MyDef Age</th>
+        <th width="100"><a href="{% url members "defage" %}">MyDef Age</a></th>
         <th width="100">Phone</th>
     </tr>
     {% for member, alias, sponsor, access, carebears, planet, fleetupdated, phone, pubphone, phonefriend in members %}

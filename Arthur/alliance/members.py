@@ -43,6 +43,7 @@ class members(loadable):
                   "access" : (desc(User.access),desc(User.carebears),asc(User.name),),
                   "carebears" : (desc(User.carebears),),
                   "planet" : (asc(Planet.x),asc(Planet.y),asc(Planet.z),),
+                  "defage" : (asc(User.fleetupdated),),
                   }
         if sort not in order.keys():
             sort = "name"
