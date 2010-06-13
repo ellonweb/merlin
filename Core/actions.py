@@ -55,6 +55,9 @@ class Action(Message):
     def reply(self, text):
         if self.get_command() != "PRIVMSG":
             return
+        # Caps Lock is cruise control for awesome
+        if self.get_msg().isupper():
+            text = text.upper()
         # Always reply to a PM with a PM, otherwise only ! replies with privmsg
         # Always reply to an @command with a PM
         reply = self.reply_type()
