@@ -33,4 +33,5 @@ ROOT_URLCONF = 'Arthur'
 
 INSTALLED_APPS = (
     'Arthur',
+    'django.contrib.humanize',
 )

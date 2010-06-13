@@ -1,5 +1,6 @@
 {% extends "base.tpl" %}
 {% block content %}
+{% load humanize %}
 {% load growth %}
 <table cellspacing="0" cellpadding="0" width="100%" class="black">
 <tr>
@@ -43,10 +44,10 @@
         
         <td><a href="/alliance/{{ alliance.name }}/" class="gray">{{ alliance.name }}</a></td>
         <td align="right">{{ alliance.members }}</td>
-        <td align="right">{{ alliance.size_avg }}</td>
-        <td align="right">{{ alliance.score_avg }}</td>
-        <td align="right">{{ alliance.size }}</td>
-        <td align="right">{{ alliance.score }}</td>
+        <td align="right">{{ alliance.size_avg|intcomma }}</td>
+        <td align="right">{{ alliance.score_avg|intcomma }}</td>
+        <td align="right">{{ alliance.size|intcomma }}</td>
+        <td align="right">{{ alliance.score|intcomma }}</td>
         
         <td align="right">{% if ah %}{{ alliance.size_avg|growth_roid:ah.size_avg }}{% endif %}</td>
         <td align="right">{% if ah %}{{ alliance.score_avg|growth:ah.score_avg }}{% endif %}</td>

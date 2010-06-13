@@ -1,3 +1,4 @@
+{% load humanize %}
 {% load growth %}
 <table cellspacing="0" cellpadding="0" width="100%" class="black">
 <tr>
@@ -79,10 +80,10 @@
         <td>{{ planet.rulername }}</td>
         <td>{{ planet.planetname }}</td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
-        <td align="right">{{ planet.size }}</td>
-        <td align="right">{{ planet.value }}</td>
-        <td align="right">{{ planet.score }}</td>
-        <td align="right">{{ planet.xp }}</td>
+        <td align="right">{{ planet.size|intcomma }}</td>
+        <td align="right">{{ planet.value|intcomma }}</td>
+        <td align="right">{{ planet.score|intcomma }}</td>
+        <td align="right">{{ planet.xp|intcomma }}</td>
         
         <td align="right">{% if ph %}{{ planet.size|growth_roid:ph.size }}{% endif %}</td>
         <td align="right">{% if ph %}{{ planet.value|growth:ph.value }}{% endif %}</td>
@@ -121,10 +122,10 @@
         <td>&nbsp;</td>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
-        <td align="right">{{ galaxy.size }}</td>
-        <td align="right">{{ galaxy.value }}</td>
-        <td align="right">{{ galaxy.score }}</td>
-        <td align="right">{{ galaxy.xp }}</td>
+        <td align="right">{{ galaxy.size|intcomma }}</td>
+        <td align="right">{{ galaxy.value|intcomma }}</td>
+        <td align="right">{{ galaxy.score|intcomma }}</td>
+        <td align="right">{{ galaxy.xp|intcomma }}</td>
         
         <td align="right">{% if gh %}{{ galaxy.size|growth_roid:gh.size }}{% endif %}</td>
         <td align="right">{% if gh %}{{ galaxy.value|growth:gh.value }}{% endif %}</td>

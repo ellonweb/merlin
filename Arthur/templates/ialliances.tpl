@@ -1,5 +1,6 @@
 {% extends "base.tpl" %}
 {% block content %}
+{% load humanize %}
 {% load growth %}
 <table cellspacing="0" cellpadding="0" width="100%" class="black">
 <tr>
@@ -42,13 +43,13 @@
         <td><a href="/alliance/{{ name }}/" class="gray">{{ name }}</a></td>
         <td align="right">{{ imembers }}({{ members }})</td>
         
-        <td align="right">{{ asize }}</td>
-        <td align="right">{{ avalue }}</td>
-        <td align="right">{{ ascore }}</td>
+        <td align="right">{{ asize|intcomma }}</td>
+        <td align="right">{{ avalue|intcomma }}</td>
+        <td align="right">{{ ascore|intcomma }}</td>
         
-        <td align="right">{{ size }}</td>
-        <td align="right">{{ value }}</td>
-        <td align="right">{{ score }}</td>
+        <td align="right">{{ size|intcomma }}</td>
+        <td align="right">{{ value|intcomma }}</td>
+        <td align="right">{{ score|intcomma }}</td>
         
         <td align="right">{{ t10s }}</td>
         <td align="right">{{ t50s }}</td>

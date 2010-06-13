@@ -1,5 +1,6 @@
 {% extends "base.tpl" %}
 {% block content %}
+{% load humanize %}
 <table cellspacing="0" cellpadding="0" width="100%" class="black">
 <tr>
 <td>
@@ -20,7 +21,7 @@
         <td>{{ epenis.rank }}</td>
         <td>{{ member.name }}</td>
         <td>{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</td>
-        <td>{{ epenis.penis }}</td>
+        <td>{{ epenis.penis|intcomma }}</td>
     </tr>
     {% endfor %}
 </table>

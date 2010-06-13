@@ -1,5 +1,6 @@
 {% extends "base.tpl" %}
 {% block content %}
+{% load humanize %}
 {% load growth %}
 <table cellspacing="0" cellpadding="0" width="100%" class="black">
 <tr>
@@ -44,10 +45,10 @@
         <td align="right"><a href="{% url galaxy galaxy.x galaxy.y %}">{{ galaxy.x }}</a></td>
         <td align="right"><a href="{% url galaxy galaxy.x galaxy.y %}">{{ galaxy.y }}</a></td>
         <td>{{ galaxy.name }}</td>
-        <td align="right">{{ galaxy.size }}</td>
-        <td align="right">{{ galaxy.value }}</td>
-        <td align="right">{{ galaxy.score }}</td>
-        <td align="right">{{ galaxy.xp }}</td>
+        <td align="right">{{ galaxy.size|intcomma }}</td>
+        <td align="right">{{ galaxy.value|intcomma }}</td>
+        <td align="right">{{ galaxy.score|intcomma }}</td>
+        <td align="right">{{ galaxy.xp|intcomma }}</td>
         
         <td align="right">{% if gh %}{{ galaxy.size|growth_roid:gh.size }}{% endif %}</td>
         <td align="right">{% if gh %}{{ galaxy.value|growth:gh.value }}{% endif %}</td>
