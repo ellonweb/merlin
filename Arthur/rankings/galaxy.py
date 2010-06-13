@@ -44,4 +44,4 @@ class galaxy(loadable):
         Q = Q.filter(Planet.active == True)
         Q = Q.filter(Planet.galaxy == galaxy)
         Q = Q.order_by(asc(Planet.z))
-        return render("planets.tpl", request, planets=Q.all(), title=galaxy.name, intel=user.is_member(), galaxy=galaxy, gh=gh)
+        return render("planets.tpl", request, planets=Q.all(), title="%s ( %s:%s )" %(galaxy.name, galaxy.x, galaxy.y,), intel=user.is_member(), galaxy=galaxy, gh=gh)
