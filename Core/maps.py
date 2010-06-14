@@ -59,6 +59,11 @@ class Updates(Base):
         hours = (d1-d2).seconds/60/60
         tick = Updates.current_tick() - hours
         return tick
+    
+    @staticmethod
+    def week_tick():
+        tick = Updates.current_tick() - (24 * 7)
+        return tick
 
 class Galaxy(Base):
     __tablename__ = 'galaxy'

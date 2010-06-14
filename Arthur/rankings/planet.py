@@ -20,15 +20,18 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.http import HttpResponseRedirect
-from Core.maps import Updates, Planet
+from sqlalchemy.sql import desc
+from Core.db import session
+from Core.maps import Updates, Planet, Alliance, Intel, FleetScan
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
 @load
 class planet(loadable):
     access = "member"
-    def execute(self, request, user, x, y, z):
+    def execute(self, request, user, x, y, z, fleets):
         tick = Updates.midnight_tick()
+        week = Updates.week_tick()
         
         planet = Planet.load(x,y,z)
         if planet is None:
@@ -41,4 +44,22 @@ class planet(loadable):
         else:
             planets = (planet, ph, None, None),
         
-        return render("planet.tpl", request, planets=planets, title="%s:%s:%s"%(planet.x, planet.y, planet.z), intel=user.is_member())
+        Q = session.query(FleetScan, Planet, Alliance)
+        Q = Q.join(FleetScan.target)
+        Q = Q.outerjoin(Planet.intel).outerjoin(Intel.alliance)
+        Q = Q.filter(FleetScan.owner == planet)
+        Q = Q.order_by(desc(FleetScan.landing_tick))
+        if not fleets:
+            Q = Q.filter(FleetScan.landing_tick >= week)
+        outgoing = Q.all()
+        
+        Q = session.query(FleetScan, Planet, Alliance)
+        Q = Q.join(FleetScan.owner)
+        Q = Q.outerjoin(Planet.intel).outerjoin(Intel.alliance)
+        Q = Q.filter(FleetScan.target == planet)
+        Q = Q.order_by(desc(FleetScan.landing_tick))
+        if not fleets:
+            Q = Q.filter(FleetScan.landing_tick >= week)
+        incoming = Q.all()
+        
+        return render("planet.tpl", request, planet=planet, planets=planets, title="%s:%s:%s"%(planet.x, planet.y, planet.z), intel=user.is_member(), outgoing=outgoing, incoming=incoming)
