@@ -628,11 +628,12 @@ class Ship(Base):
 
 class Scan(Base):
     __tablename__ = 'scan'
+    __table_args__ = (UniqueConstraint('pa_id','tick'), {})
     id = Column(Integer, primary_key=True)
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), index=True)
     scantype = Column(String(1))
     tick = Column(Integer)
-    pa_id = Column(String(32), index=True, unique=True)
+    pa_id = Column(String(32), index=True)
     group_id = Column(String(32))
     scanner_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     
