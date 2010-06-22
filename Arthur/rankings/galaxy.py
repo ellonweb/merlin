@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
@@ -34,7 +35,7 @@ class galaxy(loadable):
         
         galaxy = Galaxy.load(x,y)
         if galaxy is None:
-            return HttpResponseRedirect("/galaxies/")
+            return HttpResponseRedirect(reverse("galaxy_ranks"))
         gh = galaxy.history(tick)
         
         Q = session.query(Planet, PlanetHistory, Intel.nick, Alliance.name)
