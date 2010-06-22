@@ -40,6 +40,7 @@ urlpatterns = patterns('',
     (r'^lookup/$', 'Arthur.lookup.lookup'),
     (r'', include('Arthur.alliance')),
     (r'', include('Arthur.rankings')),
+    (r'^scans/', include('Arthur.scans')),
 )
 
 @menu("Home")
