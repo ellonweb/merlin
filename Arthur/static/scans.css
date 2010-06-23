@@ -1,0 +1,122 @@
+td.menuheader 
+{
+	font-family : Verdana, Tahoma, Arial;
+	font-size : 8pt;
+	color: #FFFFFF;
+	font-weight: bold;
+	background-color: #102F7C;
+	padding-left: 3px;
+}
+
+.one {
+	background-color : #102F7C;
+	color : #DBDBDB;
+	font-size : 8pt;
+}
+
+.two {
+	background-color : #294388;
+	color : #DBDBDB;
+	font-size : 8pt;
+}
+
+.center {
+	text-align: center;
+}
+
+.scan td {
+	border: 1px solid #000000;
+	padding: 3px;
+	text-align: center;
+}
+
+.scan td.empty{
+	background-color: #000000;
+}
+
+
+table.scan {
+	border-collapse: collapse; 
+	border-style: none;
+	color : #CACACA;
+	background-color : transparent;	
+}
+
+.scan td.menuheader 
+{
+	font-family : Verdana, Tahoma, Arial;
+	font-size : 8pt;
+	color: #FFFFFF;
+	font-weight: bold;
+	background-color: #102F7C;
+}
+
+.scan .one {
+	background-color : #102F7C;
+	color : #DBDBDB;
+	font-size : 8pt;
+}
+
+.scan .two {
+	background-color : #294388;
+	color : #DBDBDB;
+	font-size : 8pt;
+}
+
+.scan span {
+	font-weight: bold; 
+}
+
+.scan span.link {
+	font-family: Verdana, Tahoma, Arial;
+	color : #4DA8EB;
+	text-decoration : none;
+	font-weight: normal;
+	font-size: 8pt;
+	background-color : inherit;
+}
+
+.scan span.link:hover {
+	font-family: Verdana, Tahoma, Arial;
+	font-size: 8pt;
+	text-decoration : none;
+	font-weight: normal;
+	color : #0083CA;
+	background-color : inherit;
+	text-decoration : underline;
+}
+
+.scan .attack {
+	color: #FF0000;
+}
+
+.scan .defend {
+	color: #00FF00;
+}
+
+.scan .unknown {
+	color: orange;
+}
+
+.scan .white {
+  color: #FFFFFF;
+}
+
+.scan .return {
+	color: #DBDBDB;
+}
+
+.right, div .right {
+	text-align: right;
+}
+
+.left, div .left {
+	text-align: left;
+}
+
+
+.scan div {
+	position: relative;
+	margin-top: 4em;
+	text-align: center;
+}

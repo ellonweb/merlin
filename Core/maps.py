@@ -642,11 +642,19 @@ class Scan(Base):
     group_id = Column(String(32))
     scanner_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     
+    @property
+    def type(self):
+        return PA.get(self.scantype,"name")
+    
+    @property
+    def link(self):
+        return Config.get("URL","viewscan") % (self.pa_id,)
+    
     def __str__(self):
         p = self.planet
         ph = p.history(self.tick)
         
-        head = "%s on %s:%s:%s " % (PA.get(self.scantype,"name"),p.x,p.y,p.z,)
+        head = "%s on %s:%s:%s " % (self.type,p.x,p.y,p.z,)
         pa_id = self.pa_id
         pa_id = encode(self.pa_id)
         id_tick = "(id: %s, pt: %s)" % (pa_id,self.tick,)
@@ -852,7 +860,7 @@ class UnitScan(Base):
     amount = Column(Integer)
     def __str__(self):
         return "%s %s" % (self.ship.name, self.amount,)
-Scan.units = relation(UnitScan, backref="scan")
+Scan.units = relation(UnitScan, backref="scan", order_by=asc(UnitScan.ship_id))
 UnitScan.ship = relation(Ship)
 
 class FleetScan(Base):

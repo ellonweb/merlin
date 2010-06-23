@@ -5,6 +5,7 @@
 <head>
     <title>{{ name }}</title>
     <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/scans.css" />
 
     {% if menu %}
     <!-- FreeStyle Menu v1.0RC by Angus Turnbull http://www.twinhelix.com -->
@@ -14,6 +15,18 @@
     <noscript><link rel="stylesheet" type="text/css" href="/static/listmenu_fallback.css" /></noscript>
     <script type="text/javascript" src="/static/anim.js"></script>
     {% endif %}
+
+    <script type="text/javascript">
+        function linkshift(event, link) {
+            if (event.ctrlKey==1 || event.shiftKey==1 || event.altKey==1) {
+                window.open(link);
+                return false;
+            }
+            else {
+              return true;
+            }
+        }
+    </script>
 
 </head>
 

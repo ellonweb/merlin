@@ -60,8 +60,8 @@ class scan(object):
         
         # Link to scan
         if params.group(7) == "l":
-            reply = "%s on %s:%s:%s " % (PA.get(self.type,"name"),planet.x,planet.y,planet.z,)
-            reply+= Config.get("URL","viewscan") % (scan.pa_id,)
+            reply = "%s on %s:%s:%s " % (scan.type,planet.x,planet.y,planet.z,)
+            reply+= scan.link
             message.reply(reply)
             return
         
