@@ -5,7 +5,6 @@ http://www.sqlalchemy.org/trac/ticket/1638 (unicode/noerr)
 
 |       Known Bugs       |   Occurrence   |     Effect     |
 | SQLA map reload (1529) | ext. rare      | recoverable    |
-| Merlin.nick            | unlikely       | unknown/low    |
 
 exception model refactor
 rewrite CLI or integrate as an extra IO stream

@@ -22,7 +22,7 @@
 # This module provides an entry point for system reboots or reloads
 
 from traceback import format_exc
-from merlin import Merlin
+from Core import Merlin
 from Core.exceptions_ import Quit, Reboot, Reload
 from Core.config import Config
 from Core.robocop import RoboCop
