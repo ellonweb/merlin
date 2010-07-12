@@ -65,13 +65,11 @@ class Message(object):
             self._msg = line[line.index(":",1)+1:]
         except ValueError:
             self._msgerror = True
-        else:
-            self._msg = unicode(self._msg, encoding='latin-1')
     
     def __str__(self):
         # String representation of the Message object (Namely for debugging purposes)
         try:
-            return "[%s] <%s> %s" % (self.get_chan(), self.get_nick(), self.get_msg().encode('latin-1'))
+            return "[%s] <%s> %s" % (self.get_chan(), self.get_nick(), self.get_msg())
         except ParseError:
             return ""
     

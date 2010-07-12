@@ -21,16 +21,30 @@
  
 from traceback import format_exc
 
+CRLF = "\r\n"
 encoding = "latin1"
 
-CRLF = "\r\n"
+def decode(text):
+    # Converts strings to Unicode
+    if type(text) is unicode:
+        return text
+    elif type(text) is str:
+        return text.decode(encoding)
+    else:
+        raise UnicodeDecodeError
+
+def encode(text):
+    # Converts Unicode to strings
+    if type(text) is str:
+        return text
+    elif type(text) is unicode:
+        return text.encode(encoding)
+    else:
+        raise UnicodeEncodeError
 
 def log(file, log, traceback=True):
     with open(file, "a") as file:
-        for seg in (log, format_exc()+"\n" if traceback else ""):
-            if type(seg) is str:
-                file.write(seg)
-            elif type(seg) is unicode:
-                file.write(seg.encode(encoding))
-            file.write("\n")
+        file.write(encode(log) + "\n")
+        if traceback is True:
+            file.write(format_exc() + "\n")
         file.write("\n\n")
