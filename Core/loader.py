@@ -21,9 +21,9 @@
  
 import sys
 import time
-import traceback
 
 mods = ["Core.paconf",
+        "Core.string",
         "Core.connection",
         "Core.db", "Core.maps",
         "Core.chanusertracker",
@@ -52,6 +52,7 @@ class loader(object):
             raise
     
     def reboot(self, Config):
+        from Core.string import log
         # If the reboot succeeds, this Loader instance will be
         #  replaced, so this .success is only tested if it fails.
         self.success = False
@@ -64,13 +65,11 @@ class loader(object):
         except Exception, e:
             # If the new Loader fails, catch the error and restore everything
             print "%s Reboot failed, reverting to previous." % (time.asctime(),)
-            with open(Config.get("Misc","errorlog"), "a") as errorlog:
-                errorlog.write("%s - Loader Reboot Error: %s\n\n" % (time.asctime(),e.__str__(),))
-                errorlog.write(traceback.format_exc())
-                errorlog.write("\n\n\n")
+            log(Config.get("Misc","errorlog"), "%s - Loader Reboot Error: %s\n" % (time.asctime(),str(e),))
             self.restore(sys)
     
     def reload(self, Config):
+        from Core.string import log
         self.success = False
         try:
             # Load all the main modules, they will also be
@@ -79,10 +78,7 @@ class loader(object):
         except Exception, e:
             # If the reload fails, catch the error and restore everything
             print "%s Reload failed, reverting to previous." % (time.asctime(),)
-            with open(Config.get("Misc","errorlog"), "a") as errorlog:
-                errorlog.write("%s - Loader Reload Error: %s\n\n" % (time.asctime(),e.__str__(),))
-                errorlog.write(traceback.format_exc())
-                errorlog.write("\n\n\n")
+            log(Config.get("Misc","errorlog"), "%s - Loader Reload Error: %s\n" % (time.asctime(),str(e),))
             self.restore(sys)
     
     def _reload(self):

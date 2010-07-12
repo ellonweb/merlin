@@ -19,6 +19,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from traceback import format_exc
+
 encoding = "latin1"
 
 CRLF = "\r\n"
+
+def log(file, log, traceback=True):
+    with open(file, "a") as file:
+        for seg in (log, format_exc()+"\n" if traceback else ""):
+            if type(seg) is str:
+                file.write(seg)
+            elif type(seg) is unicode:
+                file.write(seg.encode(encoding))
+            file.write("\n")
+        file.write("\n\n")
