@@ -21,7 +21,6 @@
  
 # This module provides an entry point for system reboots or reloads
 
-from traceback import format_exc
 from merlin import Merlin
 from Core.exceptions_ import Quit, Reboot, Reload
 from Core.config import Config
@@ -72,5 +71,5 @@ def debug(message):
     if len(msg) > 1:
         try:
             exec(msg[1])
-        except Exception:
-            message.alert(format_exc())
+        except Exception, e:
+            message.alert(str(e))
