@@ -27,8 +27,7 @@ import time
 
 from Core.exceptions_ import Reboot
 from Core.config import Config
-
-CRLF = "\r\n"
+from Core.string import CRLF
 
 class connection(object):
     # Socket/Connection handler
