@@ -642,11 +642,10 @@ class Scan(Base):
         ph = p.history(self.tick)
         
         head = "%s on %s:%s:%s " % (PA.get(self.scantype,"name"),p.x,p.y,p.z,)
-        if self.scantype in ("P","D","J","N",):
-            id_tick = "(id: %s, pt: %s)" % (self.pa_id,self.tick,)
-        if self.scantype in ("U","A",):
-            vdiff = p.value-ph.value if ph else None
-            id_age_value = "(id: %s, age: %s, value diff: %s)" % (self.pa_id,Updates.current_tick()-self.tick,vdiff)
+        pa_id = self.pa_id
+        id_tick = "(id: %s, pt: %s)" % (pa_id,self.tick,)
+        vdiff = p.value-ph.value if ph else None
+        id_age_value = "(id: %s, age: %s, value diff: %s)" % (pa_id,Updates.current_tick()-self.tick,vdiff)
         
         if self.scantype in ("P",):
             return head + id_tick + str(self.planetscan)
