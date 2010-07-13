@@ -37,7 +37,7 @@ class getanewdaddy(loadable):
         if idiot is None:
             message.reply("That idiot isn't a member!")
             return
-        if (not user.is_admin()) and idiot.sponsor != user.name:
+        if (not user.is_admin()) and user != idiot and idiot.sponsor != user.name:
             message.reply("You are not %s's sponsor"%(idiot.name,))
             return
         
