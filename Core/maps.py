@@ -255,15 +255,11 @@ class Alliance(Base):
         alliance = Q.filter(Alliance.name.ilike(name)).first()
         if alliance is None:
             alliance = Q.filter(Alliance.name.ilike(name+"%")).first()
-        if alliance is None:
-            alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
         if alliance is None and active == False:
             Q = session.query(Alliance)
             alliance = Q.filter(Alliance.name.ilike(name)).first()
             if alliance is None:
                 alliance = Q.filter(Alliance.name.ilike(name+"%")).first()
-            if alliance is None:
-                alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
         return alliance
     
     def __str__(self):
@@ -417,13 +413,17 @@ class User(Base):
         if id is not None:
             user = Q.filter(User.id == id).first()
         if name is not None:
-            user = Q.filter(User.name.ilike(name)).first()
-            if user is None and exact is not True:
-                user = Q.filter(User.name.ilike(name+"%")).first()
-            if user is None and exact is not True:
-                user = Q.filter(User.alias.ilike(name)).first()
-            if user is None and exact is not True:
-                user = Q.filter(User.alias.ilike(name+"%")).first()
+            for filter in (
+                            User.name.ilike(name),
+                            User.name.ilike(name+"%"),
+                            User.alias.ilike(name),
+                            User.alias.ilike(name+"%"),
+                            User.name.ilike("%"+name+"%"),
+                            User.alias.ilike("%"+name+"%"),
+                            ):
+                user = Q.filter(filter).first()
+                if user is not None or exact is True:
+                    break
         if (user and passwd) is not None:
             user = user if user.passwd == User.hasher(passwd) else None
         return user
