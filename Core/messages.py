@@ -77,6 +77,7 @@ class Message(object):
     def __str__(self):
         # String representation of the Message object (Namely for debugging purposes)
         try:
+            return "[%s] <%s> %s" % (self.get_chan(), self.get_nick(), encode(self.get_msg()))
             return "[%s] <%s> %s" % (self.get_chan(), self.get_nick(), self.get_msg())
         except ParseError:
             return ""
