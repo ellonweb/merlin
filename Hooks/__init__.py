@@ -40,5 +40,5 @@ __all__ = ["system",
            "ships",
            "quotes",
            "bcalc",
-           "galstatus",
+#           "galstatus",
            ]
