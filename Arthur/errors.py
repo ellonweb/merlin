@@ -20,11 +20,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import time
-import traceback
 
 from django.http import HttpResponseNotFound, HttpResponseServerError
 
 from Core.config import Config
+from Core.string import log
 from Core.db import session
 from Arthur.context import render
 
@@ -47,7 +47,4 @@ def server_error(request):
 
 class exceptions(object):
     def process_exception(self, request, exception):
-        with open(Config.get("Misc","arthurlog"), "a") as errorlog:
-            errorlog.write("%s - Arthur Error: %s\n\n" % (time.asctime(),str(exception),))
-            errorlog.write(traceback.format_exc())
-            errorlog.write("\n\n\n")
+        log(Config.get("Misc","arthurlog"), "%s - Arthur Error: %s\n" % (time.asctime(),str(exception),))

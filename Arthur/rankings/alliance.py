@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
@@ -48,7 +49,7 @@ class alliance(loadable):
         
         alliance = Alliance.load(name)
         if alliance is None:
-            return HttpResponseRedirect("/alliances/")
+            return HttpResponseRedirect(reverse("alliance_ranks"))
         
         Q = session.query(Planet, PlanetHistory, Intel.nick, Alliance.name)
         Q = Q.join(Planet.intel)

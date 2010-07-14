@@ -20,16 +20,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
-from django.conf.urls.defaults import include, patterns, url
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from Core.db import session
 from Core.maps import Planet, Alliance, User, Intel
 from Hooks.scans.parser import scanre, scangrpre, parse
 from Arthur.loadable import loadable, load
-
-urlpatterns = patterns('Arthur.lookup',
-    url(r'^lookup/$', 'lookup'),
-)
 
 @load
 class lookup(loadable):
@@ -39,7 +35,7 @@ class lookup(loadable):
         if not lookup:
             if user.is_member():
                 return HttpResponseRedirect("/user/%s/" %(user.name,))
-            return HttpResponseRedirect("/home/")
+            return HttpResponseRedirect("/")
         
         scans = scanre.findall(lookup)
         groups = scangrpre.findall(lookup)
@@ -59,7 +55,7 @@ class lookup(loadable):
                 return HttpResponseRedirect("/alliance/%s/" %(alliance.name,))
             
             elif not user.is_member():
-                return HttpResponseRedirect("/alliances/")
+                return HttpResponseRedirect(reverse("alliance_ranks"))
             
             else:
                 member = User.load(lookup, exact=False, access="member") if lookup else None
@@ -73,14 +69,14 @@ class lookup(loadable):
                     Q = Q.filter(Intel.nick.ilike(lookup+"%"))
                     planet = Q.first()
                     if planet:
-                        return HttpResponseRedirect("/planet/%s:%s:%s/" %(planet.x,planet.y,planet.z,))
+                        return HttpResponseRedirect(reverse("planet", kwargs={"x":planet.x, "y":planet.y, "z":planet.z}))
                     
                     else:
-                        return HttpResponseRedirect("/alliances/")
+                        return HttpResponseRedirect(reverse("alliance_ranks"))
         
         elif m.group(5) is not None:
-            return HttpResponseRedirect("/planet/%s:%s:%s/" %m.group(1,3,5))
+            return HttpResponseRedirect(reverse("planet", kwargs={"x":m.group(1), "y":m.group(3), "z":m.group(5)}))
         
         elif m.group(3) is not None:
-            return HttpResponseRedirect("/galaxy/%s:%s/" %m.group(1,3))
+            return HttpResponseRedirect(reverse("galaxy", kwargs={"x":m.group(1), "y":m.group(3)}))
         

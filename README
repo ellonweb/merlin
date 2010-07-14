@@ -34,6 +34,7 @@ Setting up Git: (Consult Git's website for full instructions)
 Configuration and Database:
     5) Create a database for the tools using pgAdmin, psql or similar tool.
             CREATE DATABASE <your_database_name> WITH ENCODING = 'UTF8';
+            ALTER DATABASE <your_database_name> SET client_encoding='LATIN1';
     6) Edit merlin.cfg in a text editor as required. You should only need to
         change the Connection, Admin, Alliance, Channel and DB settings. If
         you're using the SMS features you'll need to add your details in the
