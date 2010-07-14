@@ -25,6 +25,7 @@ import re, time
 
 from merlin import Merlin
 from Core.exceptions_ import ParseError, ChanParseError, MsgParseError, PNickParseError
+from Core.string import encode
 
 PUBLIC_PREFIX  = ("!",)
 PRIVATE_PREFIX = ("@",)
@@ -47,6 +48,7 @@ class Message(object):
         self._nick = line.split("!")[0][1:]
         self._hostmask = line.split()[0][1:]
         self._command = line.split()[1]
+        self._channel = ""
         
         # Channel
         try:
@@ -60,18 +62,23 @@ class Message(object):
         except IndexError:
             self._chanerror = True
         
+        # Encoding
+        self._nick = encode(self._nick)
+        self._hostmask = encode(self._hostmask)
+        self._command = encode(self._command)
+        self._channel = encode(self._channel)
+        
         # Message
         try:
             self._msg = line[line.index(":",1)+1:]
         except ValueError:
             self._msgerror = True
-        else:
-            self._msg = unicode(self._msg, encoding='latin-1')
     
     def __str__(self):
         # String representation of the Message object (Namely for debugging purposes)
         try:
-            return "[%s] <%s> %s" % (self.get_chan(), self.get_nick(), self.get_msg().encode('latin-1'))
+            return "[%s] <%s> %s" % (self.get_chan(), self.get_nick(), encode(self.get_msg()))
+            return "[%s] <%s> %s" % (self.get_chan(), self.get_nick(), self.get_msg())
         except ParseError:
             return ""
     

@@ -19,12 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from django import template
-from django.utils.safestring import mark_safe
+from Arthur.jinja import filter
 
-register = template.Library()
-
-@register.filter
+@filter
 def growth(present, past):
     diff = present - past
     ret = '<span class='
@@ -37,9 +34,9 @@ def growth(present, past):
     ret += ' title="' + str(diff) + ' points">'
     ret += str(round((float(diff) / past * 100),2) if past else present)
     ret += '%</span>'
-    return mark_safe(ret)
+    return ret
 
-@register.filter
+@filter
 def growth_roid(present, past):
     diff = present - past
     ret = '<span class='
@@ -52,9 +49,9 @@ def growth_roid(present, past):
     ret += ' title="' + str(diff) + ' roids">'
     ret += str(round((float(diff) / past * 100),2) if past else present)
     ret += '%</span>'
-    return mark_safe(ret)
+    return ret
 
-@register.filter
+@filter
 def growth_rank_image(present, past):
     diff = present - past
     ret = '<img src='
@@ -72,4 +69,4 @@ def growth_rank_image(present, past):
     else:
         ret += '"Non mover"'
     ret += ' />'
-    return mark_safe(ret)
+    return ret

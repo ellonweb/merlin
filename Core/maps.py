@@ -32,6 +32,7 @@ from sqlalchemy.sql.functions import current_timestamp, max as max_sql, random
 from Core.exceptions_ import LoadableError
 from Core.config import Config
 from Core.paconf import PA
+from Core.string import encode
 from Core.db import Base, session
 
 # ########################################################################### #
@@ -103,6 +104,7 @@ class Galaxy(Base):
         retstr+="Value: %s (%s) " % (self.value,self.value_rank)
         retstr+="Size: %s (%s) " % (self.size,self.size_rank)
         retstr+="XP: %s (%s) " % (self.xp,self.xp_rank)
+        return encode(retstr)
         return retstr
 Galaxy._idx_x_y = Index('galaxy_x_y', Galaxy.x, Galaxy.y, unique=True)
 class GalaxyHistory(Base):
@@ -169,6 +171,7 @@ class Planet(Base):
         retstr+="Size: %s (%s) " % (self.size,self.size_rank)
         retstr+="XP: %s (%s) " % (self.xp,self.xp_rank)
         retstr+="Idle: %s " % (self.idle,)
+        return encode(retstr)
         return retstr
     
     def bravery(self, target):
@@ -270,6 +273,7 @@ class Alliance(Base):
         retstr="'%s' Members: %s (%s) " % (self.name,self.members,self.members_rank)
         retstr+="Score: %s (%s) Avg: %s (%s) " % (self.score,self.score_rank,self.score_avg,self.score_avg_rank)
         retstr+="Size: %s (%s) Avg: %s (%s)" % (self.size,self.size_rank,self.size_avg,self.size_avg_rank)
+        return encode(retstr)
         return retstr
 class AllianceHistory(Base):
     __tablename__ = 'alliance_history'
@@ -537,6 +541,7 @@ class Intel(Base):
             ret += " reportchan=%s"%(self.reportchan,)
         if self.comment:
             ret += " comment=%s"%(self.comment,)
+        return encode(ret)
         return ret
 Planet.intel = relation(Intel, uselist=False, backref="planet")
 Galaxy.intel = relation(Intel, Planet.__table__, order_by=asc(Planet.z))
@@ -642,11 +647,11 @@ class Scan(Base):
         ph = p.history(self.tick)
         
         head = "%s on %s:%s:%s " % (PA.get(self.scantype,"name"),p.x,p.y,p.z,)
-        if self.scantype in ("P","D","J","N",):
-            id_tick = "(id: %s, pt: %s)" % (self.pa_id,self.tick,)
-        if self.scantype in ("U","A",):
-            vdiff = p.value-ph.value if ph else None
-            id_age_value = "(id: %s, age: %s, value diff: %s)" % (self.pa_id,Updates.current_tick()-self.tick,vdiff)
+        pa_id = self.pa_id
+        pa_id = encode(self.pa_id)
+        id_tick = "(id: %s, pt: %s)" % (pa_id,self.tick,)
+        vdiff = p.value-ph.value if ph else None
+        id_age_value = "(id: %s, age: %s, value diff: %s)" % (pa_id,Updates.current_tick()-self.tick,vdiff)
         
         if self.scantype in ("P",):
             return head + id_tick + str(self.planetscan)
@@ -864,6 +869,7 @@ class FleetScan(Base):
     mission = Column(String(7))
     def __str__(self):
         p = self.owner
+        return encode("(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.landing_tick-self.scan.tick,))
         return "(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.landing_tick-self.scan.tick,)
 Scan.fleets = relation(FleetScan, backref="scan", order_by=asc(FleetScan.landing_tick))
 FleetScan.owner = relation(Planet, primaryjoin=FleetScan.owner_id==Planet.id)
@@ -920,6 +926,7 @@ class Slogan(Base):
         Q = Q.filter(Slogan.text.ilike("%"+text+"%")).order_by(random())
         return Q.first(), Q.count()
     def __str__(self):
+        return encode(self.text)
         return self.text
 
 class Quote(Base):
@@ -933,6 +940,7 @@ class Quote(Base):
         Q = Q.filter(Quote.text.ilike("%"+text+"%")).order_by(random())
         return Q.first(), Q.count()
     def __str__(self):
+        return encode(self.text)
         return self.text
 
 # ########################################################################### #

@@ -11,15 +11,6 @@ TIME_ZONE = 'Europe/London'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-GB'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.app_directories.load_template_source',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'Arthur.context.context',
-)
-
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'Arthur.errors.exceptions',
@@ -33,5 +24,4 @@ ROOT_URLCONF = 'Arthur'
 
 INSTALLED_APPS = (
     'Arthur',
-    'django.contrib.humanize',
 )
