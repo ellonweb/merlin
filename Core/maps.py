@@ -1037,13 +1037,15 @@ class Attack(Base):
     __tablename__ = 'attack'
     id = Column(Integer,primary_key=True)
     landtick = Column(Integer)
-Attack.targets = dynamic_loader(Target)    
+    comment = Column(Text)
+    active = Column(Boolean, default=False)
 
-class Target(Base):
+class AttackTarget(Base):
     __tablename__ = 'attack_target'
+    id = Column(Integer,primary_key=True)
     attack_id = Column(Integer,ForeignKey(Attack.id,ondelete='cascade'))
-    planet_id = column(Integer,ForeignKey(Planet.id,ondelete='cascade'))
-
+    planet_id = Column(Integer,ForeignKey(Planet.id,ondelete='cascade'))
+Attack.planets = relation(Planet, secondary=AttackTarget.__table__, primaryjoin=AttackTarget.attack_id==Attack.id, secondaryjoin=AttackTarget.planet_id==Planet.id, order_by=(asc(Planet.x), asc(Planet.y), asc(Planet.z)))   
 # ########################################################################### #
 # ################################    LOGS    ############################### #
 # ########################################################################### #
