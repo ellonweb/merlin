@@ -1028,6 +1028,22 @@ Invite.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=In
 Kick.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Kick.id==Vote.prop_id)
 Suggestion.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Suggestion.id==Vote.prop_id)
 
+
+# ########################################################################### #
+# ################################  Attacks   ############################### #
+# ########################################################################### #
+
+class Attack(Base):
+    __tablename__ = 'attack'
+    id = Column(Integer,primary_key=True)
+    landtick = Column(Integer)
+Attack.targets = dynamic_loader(Target)    
+
+class Target(Base):
+    __tablename__ = 'attack_target'
+    attack_id = Column(Integer,ForeignKey(Attack.id,ondelete='cascade'))
+    planet_id = column(Integer,ForeignKey(Planet.id,ondelete='cascade'))
+
 # ########################################################################### #
 # ################################    LOGS    ############################### #
 # ########################################################################### #
