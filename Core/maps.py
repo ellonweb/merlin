@@ -650,6 +650,51 @@ class Scan(Base):
     def link(self):
         return Config.get("URL","viewscan") % (self.pa_id,)
     
+    def ship_count(self, cloak):
+        if self.scantype not in ("U","A",):
+            return
+        
+        count = 0
+        for unitscan in self.units:
+            count += unitscan.amount if cloak else unitscan.visible
+        
+        return count
+    
+    def ship_value(self):
+        if self.scantype not in ("U","A",):
+            return
+        
+        value = 0
+        for unitscan in self.units:
+            value += unitscan.amount * unitscan.ship.total_cost / 100
+        
+        return value
+    
+    def bcalc(self, target):
+        if self.scantype not in ("U","A",):
+            return
+        
+        bcalc = Config.get("URL","bcalc")
+        for unitscan in self.units:
+            bcalc += "%s_1_%d=%d&" % (("att", "def",)[target], unitscan.ship_id - 1, unitscan.amount,)
+        bcalc += "%s_planet_value_1=%d&" % (("att", "def",)[target], self.planet.value,)
+        bcalc += "%s_planet_score_1=%d&" % (("att", "def",)[target], self.planet.score,)
+        
+        if target:
+            pscan = self.planet.scan("P")
+            if pscan and pscan.planetscan.size == self.planet.size:
+                bcalc += "def_metal_asteroids=%d&" % (pscan.planetscan.roid_metal,)
+                bcalc += "def_crystal_asteroids=%d&" % (pscan.planetscan.roid_crystal,)
+                bcalc += "def_eonium_asteroids=%d&" % (pscan.planetscan.roid_eonium,)
+            else:
+                bcalc += "def_metal_asteroids=%d&" % (self.planet.size,)
+            
+            dscan = self.planet.scan("D")
+            if dscan:
+                bcalc += "def_structures=%d&" % (dscan.devscan.total(),)
+        
+        return bcalc
+    
     def __str__(self):
         p = self.planet
         ph = p.history(self.tick)
@@ -709,6 +754,11 @@ class PlanetScan(Base):
     prod_res = Column(Integer)
     agents = Column(Integer)
     guards = Column(Integer)
+    
+    @property
+    def size(self):
+        return self.roid_metal + self.roid_crystal + self.roid_eonium
+    
     def __str__(self):
         reply = " Roids: (m:%s, c:%s, e:%s) |" % (self.roid_metal,self.roid_crystal,self.roid_eonium,)
         reply+= " Resources: (m:%s, c:%s, e:%s) |" % (self.res_metal,self.res_crystal,self.res_eonium,)
@@ -858,6 +908,11 @@ class UnitScan(Base):
     scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='cascade'))
     ship_id = Column(Integer, ForeignKey(Ship.id, ondelete='cascade'))
     amount = Column(Integer)
+    
+    @property
+    def visible(self):
+        return self.amount if self.ship.type.lower() != "cloak" else 0
+    
     def __str__(self):
         return "%s %s" % (self.ship.name, self.amount,)
 Scan.units = relation(UnitScan, backref="scan", order_by=asc(UnitScan.ship_id))

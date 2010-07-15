@@ -47,5 +47,24 @@
             </tr>
         {% endif %}
     {% endfor %}
+    
+    <tr>
+        <td class=one width=100% colspan=6>
+            Total Units: {{ scan.ship_count(True)|intcomma }} ({{ scan.ship_count(False)|intcomma }} visible)
+        </td>
+        <td class=one width=100% colspan=6>
+            Total Value: {{ scan.ship_value()|intcomma }}
+        </td>
+    </tr>
+    
+    <tr>
+        <td class="two center" width=100% colspan=6>
+            <a href="{{ scan.bcalc(True) }}" target="_blank">Calc as Target</a>
+        </td>
+        <td class="two center" width=100% colspan=6>
+            <a href="{{ scan.bcalc(False) }}" target="_blank">Calc as Attacker</a>
+        </td>
+    </tr>
+    
 {% endwith %}
 </table>
