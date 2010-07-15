@@ -1,4 +1,11 @@
-{% with pscan = scan.planetscan %}
+<table width="500" class="scan">
+{% with planet = scan.planet, pscan = scan.planetscan %}
+    <tr>
+        <td class="menuheader" colspan=12 height=15>
+            {% include "scans/header.tpl" %}
+        </td>
+    </tr>
+    
     <tr>
         <td class="one left" height="15"> Ruler </td>
         <td class="two left" height="15"> {{ planet.rulername }} </td>
@@ -54,4 +61,6 @@
         <td class="two left"> {{ pscan.factory_usage_heavy }} </td>
         <td class="two left"> {{ pscan.prod_res|intcomma }} </td>
     </tr>
+    
 {% endwith %}
+</table>

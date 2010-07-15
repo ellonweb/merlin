@@ -1,4 +1,11 @@
-{% with dscan = scan.devscan %}
+<table width="500" class="scan">
+{% with planet = scan.planet, dscan = scan.devscan %}
+    <tr>
+        <td class="menuheader" colspan=12 height=15>
+            {% include "scans/header.tpl" %}
+        </td>
+    </tr>
+    
     <tr>
         <td class="one left" width="35%"> Light Factory </td>
         <td class="two left" width="15%"> {{ dscan.light_factory|and_percent(dscan.total) }} </td>
@@ -74,4 +81,6 @@
     </tr>
     <tr><td class="one" colspan="4"> Total Technologies: {{ dscan.travel + dscan.infrastructure + dscan.hulls + dscan.waves + dscan.core + dscan.covert_op + dscan.mining }} </td></tr>
     
+    
 {% endwith %}
+</table>
