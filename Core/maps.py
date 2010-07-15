@@ -691,7 +691,7 @@ class Scan(Base):
             
             dscan = self.planet.scan("D")
             if dscan:
-                bcalc += "def_structures=%d&" % (dscan.devscan.total(),)
+                bcalc += "def_structures=%d&" % (dscan.devscan.total,)
         
         return bcalc
     
@@ -788,6 +788,10 @@ class DevScan(Base):
     core = Column(Integer)
     covert_op = Column(Integer)
     mining = Column(Integer)
+    
+    def travel_str(self):
+        return "eta -%s" %(self.travel,)
+    
     def infra_str(self):
         level = self.infrastructure
         if level==0:
@@ -828,6 +832,9 @@ class DevScan(Base):
             return "JGP"
         if level==7:
             return "Advanced Unit"
+    
+    def core_str(self):
+        return ("1000","3500","6000","9000","12000")[self.core] + " ept"
     
     def covop_str(self):
         level = self.covert_op
@@ -885,6 +892,7 @@ class DevScan(Base):
         if level==16:
             return "top10 or dumb"
     
+    @property
     def total(self):
         total = self.light_factory+self.medium_factory+self.heavy_factory
         total+= self.wave_amplifier+self.wave_distorter
@@ -893,12 +901,12 @@ class DevScan(Base):
         return total
         
     def __str__(self):
-        reply = " Travel: %s, Infrajerome: %s, Hulls: %s," % (self.travel,self.infra_str(),self.hulls_str(),)
-        reply+= " Waves: %s, Core: %s, Covop: %s, Mining: %s" % (self.waves_str(),self.core,self.covop_str(),self.mining_str(),)
+        reply = " Travel: %s, Infrajerome: %s, Hulls: %s," % (self.travel_str(),self.infra_str(),self.hulls_str(),)
+        reply+= " Waves: %s, Core: %s, Covop: %s, Mining: %s" % (self.waves_str(),self.core_str(),self.covop_str(),self.mining_str(),)
         reply+= "\n"
         reply+= "Structures: LFac: %s, MFac: %s, HFac: %s, Amp: %s," % (self.light_factory,self.medium_factory,self.heavy_factory,self.wave_amplifier,)
         reply+= " Dist: %s, MRef: %s, CRef: %s, ERef: %s," % (self.wave_distorter,self.metal_refinery,self.crystal_refinery,self.eonium_refinery,)
-        reply+= " ResLab: %s (%s%%), FC: %s, Sec: %s (%s%%)" % (self.research_lab,int(float(self.research_lab)/self.total()*100),self.finance_centre,self.security_centre,int(float(self.security_centre)/self.total()*100),)
+        reply+= " ResLab: %s (%s%%), FC: %s, Sec: %s (%s%%)" % (self.research_lab,int(float(self.research_lab)/self.total*100),self.finance_centre,self.security_centre,int(float(self.security_centre)/self.total*100),)
         return reply
 Scan.devscan = relation(DevScan, uselist=False, backref="scan")
 

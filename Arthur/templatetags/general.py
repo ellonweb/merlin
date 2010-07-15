@@ -19,21 +19,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from jinja2 import Environment, FileSystemLoader
+from Arthur.jinja import filter
 
-from Arthur.templatetags.url import URLReverserExtension
-jinja = Environment(extensions=["jinja2.ext.with_", URLReverserExtension], loader=FileSystemLoader('Arthur/templates'))
+@filter
+def percent(value, total):
+    return "%s%%" % (round(float(value) / total * 100, 1),)
 
-def filter(f):
-    jinja.filters[f.__name__] = f
-    return f
-
-from django.template.defaultfilters import default, force_escape, linebreaks, slice_
-filter(default)
-filter(force_escape)
-filter(linebreaks)
-filter(slice_)
-from django.contrib.humanize.templatetags.humanize import intcomma
-filter(intcomma)
-
-from Arthur.templatetags import general, growth
+@filter
+def and_percent(value, total):
+    return "%s (%s%%)" % (value, round(float(value) / total * 100, 1),)
