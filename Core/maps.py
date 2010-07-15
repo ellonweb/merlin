@@ -1046,7 +1046,10 @@ class Attack(Base):
     def removeGalaxy(self,galaxy):
         for planet in galaxy.planets:
             if planet.active:  
-                self.planets.remove(planet)
+                try:
+                    self.planets.remove(planet)
+                except ValueError:
+                    return    
     @staticmethod
     def load(id):
         Q = session.query(Attack)
