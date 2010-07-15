@@ -695,6 +695,30 @@ class Scan(Base):
         
         return bcalc
     
+    @property
+    def total_hostile(self):
+        if self.scantype not in ("J",):
+            return
+        return sum([fleet.fleet_size for fleet in self.fleets if fleet.mission.lower() == "attack"])
+    
+    @property
+    def total_hostile_fleets(self):
+        if self.scantype not in ("J",):
+            return
+        return len([fleet for fleet in self.fleets if fleet.mission.lower() == "attack"])
+    
+    @property
+    def total_friendly(self):
+        if self.scantype not in ("J",):
+            return
+        return sum([fleet.fleet_size for fleet in self.fleets if fleet.mission.lower() == "defend"])
+    
+    @property
+    def total_friendly_fleets(self):
+        if self.scantype not in ("J",):
+            return
+        return len([fleet for fleet in self.fleets if fleet.mission.lower() == "defend"])
+    
     def __str__(self):
         p = self.planet
         ph = p.history(self.tick)
@@ -938,10 +962,15 @@ class FleetScan(Base):
     launch_tick = Column(Integer)
     landing_tick = Column(Integer)
     mission = Column(String(7))
+    
+    @property
+    def eta(self):
+        return self.landing_tick - self.scan.tick
+    
     def __str__(self):
         p = self.owner
-        return encode("(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.landing_tick-self.scan.tick,))
-        return "(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.landing_tick-self.scan.tick,)
+        return encode("(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.eta,))
+        return "(%s:%s:%s %s | %s %s %s)" % (p.x,p.y,p.z,self.fleet_name,self.fleet_size,self.mission,self.eta,)
 Scan.fleets = relation(FleetScan, backref="scan", order_by=asc(FleetScan.landing_tick))
 FleetScan.owner = relation(Planet, primaryjoin=FleetScan.owner_id==Planet.id)
 FleetScan.target = relation(Planet, primaryjoin=FleetScan.target_id==Planet.id)

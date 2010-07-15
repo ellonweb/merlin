@@ -10,6 +10,9 @@
     {% if scan.scantype == "U" %}
         {% include "scans/unit.tpl" %}
     {% endif %}
+    {% if scan.scantype == "J" %}
+        {% include "scans/jgp.tpl" %}
+    {% endif %}
     {% if scan.scantype == "A" %}
         {% include "scans/unit.tpl" %}
     {% endif %}
