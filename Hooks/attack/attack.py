@@ -70,6 +70,9 @@ class attack(loadable):
                 if planet is None:
                     message.alert("No planet with coords %s:%s:%s" %(coord[0],coord[2],coord[4]))
                     return
+                if planet in attack.planets:
+                    message.alert("Planet with coords %s:%s:%s already added to attack %d"%(coord[0],coord[2],coord[4],attack.id))    
+                    return
                     
                 attack.planets.append(planet)
                 
@@ -123,7 +126,10 @@ class attack(loadable):
                     
                 attack = Attack(landtick=when,comment=comment)
                 session.add(attack)
-            
+                if planet in attack.planets:
+                    message.alert("Planet with coords %s:%s:%s already added to attack %d"%(coord[0],coord[2],coord[4],attack.id))
+                    return
+                    
                 attack.planets.append(planet)
                 
                 added += " %d:%d:%d" %(planet.x,planet.y,planet.z)

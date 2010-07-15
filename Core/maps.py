@@ -1041,7 +1041,7 @@ class Attack(Base):
    
     def addGalaxy(self,galaxy):
         for planet in galaxy.planets:
-            if planet.active:  
+            if planet.active and not planet in self.planets:  
                 self.planets.append(planet)
     def removeGalaxy(self,galaxy):
         for planet in galaxy.planets:
