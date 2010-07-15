@@ -1038,8 +1038,25 @@ class Attack(Base):
     id = Column(Integer,primary_key=True)
     landtick = Column(Integer)
     comment = Column(Text)
-    active = Column(Boolean, default=False)
-
+   
+    def addGalaxy(self,galaxy):
+        for planet in galaxy.planets:
+            if planet.active:  
+                self.planets.append(planet)
+    def removeGalaxy(self,galaxy):
+        for planet in galaxy.planets:
+            if planet.active:  
+                self.planets.remove(planet)
+    @staticmethod
+    def load(id):
+        Q = session.query(Attack)
+        Q = Q.filter_by(id=id)
+        attack = Q.first()
+        return attack
+    @property    
+    def active(self):
+        return Updates.current_tick() <= self.landtick + 12
+                
 class AttackTarget(Base):
     __tablename__ = 'attack_target'
     id = Column(Integer,primary_key=True)
