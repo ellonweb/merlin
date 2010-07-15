@@ -1,11 +1,3 @@
-<table width=500 class="scan">
-{% with planet = scan.planet %}
-    <tr>
-        <td class="menuheader" colspan=12 height=15>
-            {% include "scans/header.tpl" %}
-        </td>
-    </tr>
-    
     <tr>
         <td class="menuheader left" width=30%>Ship</td>
         <td class="menuheader left" width=10%>Amount</td>
@@ -65,6 +57,3 @@
             <a href="{{ scan.bcalc(False) }}" target="_blank">Calc as Attacker</a>
         </td>
     </tr>
-    
-{% endwith %}
-</table>
