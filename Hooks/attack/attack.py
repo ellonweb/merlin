@@ -50,10 +50,10 @@ class attack(loadable):
         if attack is None:
             message.alert("No attack exists with id %d" %(id))
             return
-            
+        added = ""  
         for coord in re.findall(loadable.coord, params.group(2)):
             if not coord[4]:
-                print "galaxy"
+               
                 galaxy = Galaxy.load(coord[0],coord[2])
                 
                 if galaxy is None:
@@ -61,6 +61,8 @@ class attack(loadable):
                     return
             
                 attack.addGalaxy(galaxy)
+                
+                added += " %d:%d" %(galaxy.x,galaxy.y)
                     
             else:
                 planet = Planet.load(coord[0],coord[2],coord[4])
@@ -71,10 +73,11 @@ class attack(loadable):
                     
                 attack.planets.append(planet)
                 
+                added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
                 
         session.commit()
             
-        message.reply("Coords added to attack %d" %(attack.id))
+        message.reply("%s added to attack %d" %(added,attack.id))
             
     
     @route(r"(\d+)\s+([. :\-\d,]+)(?:\s*(.+))?", access = "member")
@@ -94,10 +97,10 @@ class attack(loadable):
         if when > 32767:
             when = 32767
             
-            
+        added = ""     
         for coord in re.findall(loadable.coord, params.group(2)):
             if not coord[4]:
-                print "galaxy"
+                
                 galaxy = Galaxy.load(coord[0],coord[2])
                 
                 if galaxy is None:
@@ -108,6 +111,8 @@ class attack(loadable):
                 session.add(attack)
         
                 attack.addGalaxy(galaxy)
+                
+                added += " %d:%d" %(galaxy.x,galaxy.y)
                     
             else:
                 planet = Planet.load(coord[0],coord[2],coord[4])
@@ -120,10 +125,12 @@ class attack(loadable):
                 session.add(attack)
             
                 attack.planets.append(planet)
+                
+                added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
 
         session.commit()
-            
-        message.reply("Attack %s created with id %d"%(comment,attack.id))        
+             
+        message.reply("Attack %s created with id %d for targets: %s"%(comment,attack.id,added))        
     
     @route(r"remove\s+(\d+)\s+([. :\-\d,]+)?", access = "member")
     def remove(self, message, user, params):
@@ -132,10 +139,10 @@ class attack(loadable):
         if attack is None:
             message.alert("No attack exists with id %d" %(id))
             return
-            
+        removed = ""    
         for coord in re.findall(loadable.coord, params.group(2)):
             if not coord[4]:
-                print "galaxy"
+                
                 galaxy = Galaxy.load(coord[0],coord[2])
                 
                 if galaxy is None:
@@ -143,17 +150,23 @@ class attack(loadable):
                     return
             
                 attack.removeGalaxy(galaxy)
-                    
+                
+                removed += " %d:%d" %(galaxy.x,galaxy.y)
+                
             else:
                 planet = Planet.load(coord[0],coord[2],coord[4])
                 
                 if planet is None:
                     message.alert("No planet with coords %s:%s:%s" %(coord[0],coord[2],coord[4]))
                     return
-                    
-                attack.planets.remove(planet)
+                try:    
+                    attack.planets.remove(planet)
+                except ValueError:
+                    message.alert("No planet with coords %s:%s:%s listed in attack %d" %(coord[0],coord[2],coord[4],attack.id))
+                    return
                 
+                removed += " %d:%d:%d" %(planet.x,planet.y,planet.z)
                 
         session.commit()
             
-        message.reply("Coords removed from attack %d" %(attack.id))
+        message.reply("%s removed from attack %d" %(removed,attack.id))
