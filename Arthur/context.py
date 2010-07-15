@@ -22,7 +22,7 @@
 from django.http import HttpResponse
 
 from Core.config import Config
-from Core.maps import Slogan
+from Core.maps import Updates, Slogan
 from Arthur.jinja import jinja
 
 class _menu(object):
@@ -72,6 +72,7 @@ def base_context(request):
             context["slogan"] = str(slogan)
         context["user"] = request.session.user
         context["menu"] = menu.generate(request.session.user)
+        context["tick"] = Updates.current_tick()
     return context
 
 def render(template, request, **context):

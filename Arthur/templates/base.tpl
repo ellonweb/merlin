@@ -58,6 +58,7 @@
         {% endfor %}
     </ul>
             </td>
+            <td>PT: {{ tick }}</td>
 <form method="post" action="/lookup/">
             <th>Lookup:</th>
             <td><input type="text" name="lookup" size="8" onkeyup="var val=this.value;this.value=val+' ';this.value=val; var tl=val.length; if(tl<8){this.size=8;return;} if(tl>80){ this.size=100;return;} this.size=tl+(tl/4);"/></td>
