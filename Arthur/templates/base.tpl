@@ -70,6 +70,7 @@
 
     <div style="clear: both; height: 2em"></div>
     {% block content %}{% endblock %}
+    <p />
     <div id="push"></div>
 </div>
 <div id="footer" align="center">

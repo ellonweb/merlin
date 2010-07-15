@@ -8,9 +8,9 @@
     
     <tr>
         <td class="one left" height="15" width="25%"> Score </td>
-        <td class="two left" height="15" width="25%"> {{ planet.score|intcomma }} </td>
+        <td class="two left" height="15" width="25%"> {{ planet.history(scan.tick).score|intcomma }} </td>
         <td class="one left" height="15" width="25%"> Value </td>
-        <td class="two left" height="15" width="25%"> {{ planet.value|intcomma }} </td>
+        <td class="two left" height="15" width="25%"> {{ planet.history(scan.tick).value|intcomma }} </td>
     </tr>
     
     <tr>
