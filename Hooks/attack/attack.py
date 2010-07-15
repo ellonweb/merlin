@@ -45,46 +45,47 @@ class attack(loadable):
 
     @route(r"add\s+(\d+)\s+([. :\-\d,]+)?", access = "member")
     def add(self, message, user, params):
+        error = ""
+        added = ""
+        
         id = int(params.group(1))
         attack = Attack.load(id)
         if attack is None:
             message.alert("No attack exists with id %d" %(id))
             return
-        added = ""  
+        
+
         for coord in re.findall(loadable.coord, params.group(2)):
             if not coord[4]:
                
                 galaxy = Galaxy.load(coord[0],coord[2])
                 
                 if galaxy is None:
-                    message.alert("No galaxy with coords %s:%s" % (coord[0],coord[2]))
-                    return
-            
-                attack.addGalaxy(galaxy)
-                
-                added += " %d:%d" %(galaxy.x,galaxy.y)
-                    
+                    error += " %s:%s" % (coord[0],coord[2])
+                else:
+                    errordetail,planetadded= attack.addGalaxy(galaxy)
+                    error += errordetail
+                    if planetadded:
+                        added += " %d:%d" %(galaxy.x,galaxy.y)
+
             else:
                 planet = Planet.load(coord[0],coord[2],coord[4])
                 
-                if planet is None:
-                    message.alert("No planet with coords %s:%s:%s" %(coord[0],coord[2],coord[4]))
-                    return
-                if planet in attack.planets:
-                    message.alert("Planet with coords %s:%s:%s already added to attack %d"%(coord[0],coord[2],coord[4],attack.id))    
-                    return
-                    
-                attack.planets.append(planet)
-                
-                added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
+                if planet is None or planet in attack.planets:
+                    error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
+                else:
+                    attack.planets.append(planet)
+                    added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
                 
         session.commit()
             
-        message.reply("%s added to attack %d" %(added,attack.id))
+        message.reply("%s added to attack %d. Coords not added: %s" %(added,attack.id,error))
             
     
     @route(r"(\d+)\s+([. :\-\d,]+)(?:\s*(.+))?", access = "member")
     def new(self, message, user, params):
+        error = ""
+        added = ""
         
         tick = Updates.current_tick()
         comment = params.group(3)
@@ -93,86 +94,80 @@ class attack(loadable):
             eta = when
             when += tick
         elif when <= tick:
-            message.alert("Can not create attacks in the past. You wanted tick %s, but current tick is %s." % (when, tick,))
+            error += "Can not create attacks in the past. You wanted tick %s, but current tick is %s." % (when, tick,)
             return
         else:
             eta = when - tick
         if when > 32767:
             when = 32767
-            
-        added = ""     
+
+
+        attack = Attack(landtick=when,comment=comment)
+        session.add(attack)
+        
+           
         for coord in re.findall(loadable.coord, params.group(2)):
             if not coord[4]:
                 
                 galaxy = Galaxy.load(coord[0],coord[2])
                 
                 if galaxy is None:
-                    message.alert("No galaxy with coords %s:%s" % (coord[0],coord[2]))
-                    return
-            
-                attack = Attack(landtick=when,comment=comment)
-                session.add(attack)
-        
-                attack.addGalaxy(galaxy)
-                
-                added += " %d:%d" %(galaxy.x,galaxy.y)
+                    error+= " %s:%s" % (coord[0],coord[2])
+                else:
+                    errordetail,planetadded = attack.addGalaxy(galaxy)
+                    error += errordetail
+                    if planetadded:                
+                        added += " %d:%d" %(galaxy.x,galaxy.y)
                     
             else:
                 planet = Planet.load(coord[0],coord[2],coord[4])
                 
-                if planet is None:
-                    message.alert("No planet with coords %s:%s:%s" %(coord[0],coord[2],coord[4]))
-                    return
-                    
-                attack = Attack(landtick=when,comment=comment)
-                session.add(attack)
-                if planet in attack.planets:
-                    message.alert("Planet with coords %s:%s:%s already added to attack %d"%(coord[0],coord[2],coord[4],attack.id))
-                    return
-                    
-                attack.planets.append(planet)
-                
-                added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
+                if planet is None or planet in attack.planets:
+                    error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
+                else:    
+                    attack.planets.append(planet)
+                    added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
 
         session.commit()
              
-        message.reply("Attack %s created with id %d for targets: %s"%(comment,attack.id,added))        
+        message.reply("Attack %s created with id %d for targets: %s. Targets not included( or doubles): %s"%(comment,attack.id,added,error))        
     
     @route(r"remove\s+(\d+)\s+([. :\-\d,]+)?", access = "member")
     def remove(self, message, user, params):
+        error = ""
+        removed = ""
         id = int(params.group(1))
         attack = Attack.load(id)
+      
         if attack is None:
             message.alert("No attack exists with id %d" %(id))
             return
-        removed = ""    
+        
         for coord in re.findall(loadable.coord, params.group(2)):
             if not coord[4]:
                 
                 galaxy = Galaxy.load(coord[0],coord[2])
                 
                 if galaxy is None:
-                    message.alert("No galaxy with coords %s:%s" % (coord[0],coord[2]))
-                    return
-            
-                attack.removeGalaxy(galaxy)
-                
-                removed += " %d:%d" %(galaxy.x,galaxy.y)
+                    error+=" %s:%s" % (coord[0],coord[2])
+                else:
+                    errordetail,planetremoved = attack.removeGalaxy(galaxy)
+                    error += errordetail
+                    if planetremoved:
+                        removed += " %d:%d" %(galaxy.x,galaxy.y)
                 
             else:
+                
                 planet = Planet.load(coord[0],coord[2],coord[4])
                 
                 if planet is None:
-                    message.alert("No planet with coords %s:%s:%s" %(coord[0],coord[2],coord[4]))
-                    return
-                try:    
+                    error += "No planet with coords %s:%s:%s" %(coord[0],coord[2],coord[4])
+                elif planet in attack.planets:    
                     attack.planets.remove(planet)
-                except ValueError:
-                    message.alert("No planet with coords %s:%s:%s listed in attack %d" %(coord[0],coord[2],coord[4],attack.id))
-                    return
-                
-                removed += " %d:%d:%d" %(planet.x,planet.y,planet.z)
+                    removed += " %d:%d:%d" %(planet.x,planet.y,planet.z)
+                else:
+                    error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
                 
         session.commit()
             
-        message.reply("%s removed from attack %d" %(removed,attack.id))
+        message.reply("%s removed from attack %d. Coords not removed: %s" %(removed,attack.id,error))

@@ -1040,16 +1040,33 @@ class Attack(Base):
     comment = Column(Text)
    
     def addGalaxy(self,galaxy):
+        oneplanetadded = False
+        error=""
         for planet in galaxy.planets:
             if planet.active and not planet in self.planets:  
                 self.planets.append(planet)
+                oneplanetadded = True
+            else:
+                error += " %d:%d:%d" %(planet.x,planet.y,planet.z)
+        if oneplanetadded:
+            return error,oneplanetadded
+        else:
+            return " %d:%d" %(galaxy.x,galaxy.y),oneplanetadded
+            
     def removeGalaxy(self,galaxy):
+        oneplanetremoved = False
+        error=""
         for planet in galaxy.planets:
-            if planet.active:  
-                try:
-                    self.planets.remove(planet)
-                except ValueError:
-                    return    
+            if planet.active and planet in self.planets:  
+                self.planets.remove(planet)
+                oneplanetremoved = True
+            else:
+                error += " %d:%d:%d" %(planet.x,planet.y,planet.z)
+        if oneplanetremoved:
+            return error,oneplanetremoved
+        else:
+            return " %d:%d" %(galaxy.x,galaxy.y),oneplanetremoved
+
     @staticmethod
     def load(id):
         Q = session.query(Attack)
