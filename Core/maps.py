@@ -1043,7 +1043,7 @@ class Attack(Base):
         oneplanetadded = False
         error=""
         for planet in galaxy.planets:
-            if planet.active and not planet in self.planets:  
+            if planet.active and not planet in self.planets and not (planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name")):  
                 self.planets.append(planet)
                 oneplanetadded = True
             else:
