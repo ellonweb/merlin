@@ -71,8 +71,8 @@
     <div style="clear: both; height: 2em"></div>
     <table cellspacing="1" cellpadding="3" width="100%"><tr><td><center>
     {% block content %}{% endblock %}
-    </center></td></tr></table>
     <p>&nbsp;</p>
+    </center></td></tr></table>
     <div id="push"></div>
 </div>
 <div id="footer" align="center">

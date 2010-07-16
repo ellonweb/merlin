@@ -640,7 +640,7 @@ class Scan(Base):
     scantype = Column(String(1))
     tick = Column(Integer)
     pa_id = Column(String(32), index=True)
-    group_id = Column(String(32))
+    group_id = Column(String(32), index=True)
     scanner_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     
     @property

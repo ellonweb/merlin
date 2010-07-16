@@ -19,22 +19,24 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from django.conf.urls.defaults import include, patterns, url
-from Core.paconf import PA
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from sqlalchemy.sql import asc
+from Core.db import session
+from Core.maps import Scan
+from Arthur.context import render
+from Arthur.loadable import loadable, load
 
-urlpatterns = patterns('Arthur.scans',
-    url(r'^$', 'list.scans', name="scans"),
-    url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/',
-        include(patterns('Arthur.scans.planet',
-            url(r'^$', 'planet', name="planet_scans"),
-            *[url(r'^'+type.lower()+'\w*/$', "scan", {"type":type}, name="planet_scan_"+type.lower()) for type in PA.options("scans")]
-        ))),
-    url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)/',
-        include(patterns('Arthur.scans.galaxy',
-            url(r'^$', 'galaxy', name="galaxy_scans"),
-            *[url(r'^'+type.lower()+'\w*/$', "scan", {"type":type}, name="galaxy_scans_"+type.lower()) for type in PA.options("scans")]
-        ))),
-    url('^(?P<tick>\d+)/$', 'list.tick'),
-    url('^(?P<tick>\d+)/(?P<id>\w+)/$', 'planet.id', name="scan_id"),
-    url('^group/(?P<id>\w+)/$', 'list.group', name="scan_group_id"),
-)
+@load
+class group(loadable):
+    access = "half"
+    
+    def execute(self, request, user, id):
+        Q = session.query(Scan)
+        Q = Q.filter(Scan.group_id.ilike("%"+id+"%"))
+        Q = Q.order_by(asc(Scan.id))
+        scans = Q.all()
+        if len(scans) == 0:
+            return HttpResponseRedirect(reverse("scans"))
+        
+        return render("scans/group.tpl", request, scans=scans, intel=user.is_member())
