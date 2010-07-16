@@ -60,7 +60,7 @@ class attack(loadable):
         else:
             comment = " '" + comment + "' "
         
-        message.reply("Attack%sLT: %d Url: http://www.my-url.com/attack/%d"%(comment,attack.landtick,attack.id)) 
+        message.reply("Attack%sLT: %d Url: %sattack/%d"%(comment,attack.landtick,Config.get("URL","arthur"),attack.id)) 
 
     @route(r"(\d+)\s+([. :\-\d,]+)(?:\s*(.+))?", access = "member")
     def new(self, message, user, params):
