@@ -28,7 +28,7 @@ from Core.maps import Updates, Planet, User, Attack, Galaxy, AttackTarget
 from Core.loadable import loadable, route, require_user
 
 class attack(loadable):
-    usage = " [ add attackID <coordlist>] | [ (eta|landingtick) <coordlist>] | [ remove attackID <coordlist>] | list"
+    usage = "[ (eta|landingtick) <coordlist>] | list"
     
     @route(r"list",access="member")
     def list(self,message,user,params):
@@ -43,48 +43,6 @@ class attack(loadable):
         
         message.reply(reply)
 
-    @route(r"add\s+(\d+)\s+([. :\-\d,]+)?", access = "member")
-    def add(self, message, user, params):
-        error = ""
-        added = ""
-        
-        id = int(params.group(1))
-        attack = Attack.load(id)
-        if attack is None:
-            message.alert("No attack exists with id %d" %(id))
-            return
-        
-
-        for coord in re.findall(loadable.coord, params.group(2)):
-            if not coord[4]:
-               
-                galaxy = Galaxy.load(coord[0],coord[2])
-                
-                if galaxy is None:
-                    error += " %s:%s" % (coord[0],coord[2])
-                else:
-                    errordetail,planetadded= attack.addGalaxy(galaxy)
-                    error += errordetail
-                    if planetadded:
-                        added += " %d:%d" %(galaxy.x,galaxy.y)
-
-            else:
-                planet = Planet.load(coord[0],coord[2],coord[4])
-                
-                if planet is None or planet in attack.planets or (planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name")):
-                    error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
-                else:
-                    attack.planets.append(planet)
-                    added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
-                
-        session.commit()
-        
-        if added == "":
-            added = "No coords "
-            
-        message.reply("%s added to attack %d. Coords not added: %s" %(added,attack.id,error))
-            
-    
     @route(r"(\d+)\s+([. :\-\d,]+)(?:\s*(.+))?", access = "member")
     def new(self, message, user, params):
         error = ""
@@ -104,11 +62,9 @@ class attack(loadable):
         if when > 32767:
             when = 32767
 
-
         attack = Attack(landtick=when,comment=comment)
         session.add(attack)
         
-           
         for coord in re.findall(loadable.coord, params.group(2)):
             if not coord[4]:
                 galaxy = Galaxy.load(coord[0],coord[2])
@@ -136,47 +92,4 @@ class attack(loadable):
         else:
             comment = " " + comment + " "
 
-        message.reply("Attack%screated with id %d for targets: %s. Targets not included( or doubles): %s"%(comment,attack.id,added,error))          
-    
-    @route(r"remove\s+(\d+)\s+([. :\-\d,]+)?", access = "member")
-    def remove(self, message, user, params):
-        error = ""
-        removed = ""
-        id = int(params.group(1))
-        attack = Attack.load(id)
-      
-        if attack is None:
-            message.alert("No attack exists with id %d" %(id))
-            return
-        
-        for coord in re.findall(loadable.coord, params.group(2)):
-            if not coord[4]:
-                
-                galaxy = Galaxy.load(coord[0],coord[2])
-                
-                if galaxy is None:
-                    error+=" %s:%s" % (coord[0],coord[2])
-                else:
-                    errordetail,planetremoved = attack.removeGalaxy(galaxy)
-                    error += errordetail
-                    if planetremoved:
-                        removed += " %d:%d" %(galaxy.x,galaxy.y)
-                
-            else:
-                
-                planet = Planet.load(coord[0],coord[2],coord[4])
-                
-                if planet is None:
-                    error += "No planet with coords %s:%s:%s" %(coord[0],coord[2],coord[4])
-                elif planet in attack.planets:    
-                    attack.planets.remove(planet)
-                    removed += " %d:%d:%d" %(planet.x,planet.y,planet.z)
-                else:
-                    error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
-                
-        session.commit()
-        
-        if removed == "":
-            removed = "No coords "
-            
-        message.reply("%s removed from attack %d. Coords not removed: %s" %(removed,attack.id,error))
+        message.reply("Attack%screated with id %d for targets: %s. Targets not included( or doubles): %s"%(comment,attack.id,added,error))
