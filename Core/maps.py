@@ -380,7 +380,7 @@ class User(Base):
     @level.setter
     def level(self, value):
         if value in (True, False,):
-            self.active = value
+            self.active = bool(value)
         else:
             self.access = Config.getint("Access", value)
     
