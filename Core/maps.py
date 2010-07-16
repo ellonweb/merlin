@@ -1004,6 +1004,18 @@ Kick.proposer = relation(User, primaryjoin=Kick.proposer_id==User.id)
 Kick.kicked = relation(User, primaryjoin=Kick.person_id==User.id)
 Kick.person = association_proxy("kicked", "name")
 
+class Suggestion(Base):
+    __tablename__ = 'suggestion_proposal'
+    id = Column(Integer, Sequence('proposal_id_seq'), primary_key=True, server_default=text("nextval('proposal_id_seq')"))
+    active = Column(Boolean, default=True)
+    proposer_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
+    created = Column(DateTime, default=current_timestamp())
+    closed = Column(DateTime)
+    vote_result = Column(String(7))
+    comment_text = Column(Text)
+    type = "suggestion"
+Suggestion.proposer = relation(User)
+
 class Vote(Base):
     __tablename__ = 'prop_vote'
     id = Column(Integer, primary_key=True)
@@ -1014,6 +1026,7 @@ class Vote(Base):
 User.votes = dynamic_loader(Vote, backref="voter")
 Invite.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Invite.id==Vote.prop_id)
 Kick.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Kick.id==Vote.prop_id)
+Suggestion.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Suggestion.id==Vote.prop_id)
 
 # ########################################################################### #
 # ################################    LOGS    ############################### #
