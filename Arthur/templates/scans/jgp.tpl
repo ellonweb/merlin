@@ -45,5 +45,36 @@
     {% endwith %}
     {% endfor %}
     
+    
+    
+    <tr height="20">
+        <td class="menuheader" colspan="6" align="center" height="25">Overview for each ETA with incoming</td>
+    </tr>
+    <tr height="20">
+        <td class="menuheader" height="25" width="10%"> </td>
+        <td class="menuheader" width="35%"> Combat Tick </td>
+        <td class="menuheader" width="5%"> </td>
+        <td class="menuheader" width="10%"> </td>
+        <td class="menuheader" width="5%"> ETA </td>
+        <td class="menuheader right" width="40%">
+        Ships <span class="attack">(H)</span>/<span class="defend">(F)</span>
+        </td>
+    </tr>
+    
+    {% for lt in scan.fleet_overview() %}
+    <tr>
+        <td class="one"> </td>
+        <td class="two"> Tick: {{ lt[0] }} </td>
+        <td class="one"> </td>
+        <td class="one"> </td>
+        <td class="one"> {{ lt[1] }} </td>
+        <td class="two right">
+            <span class="attack"> {{ lt[3] }} ({{ lt[2] }}) </span>
+            /
+            <span class="defend"> {{ lt[5] }} ({{ lt[4] }}) </span>
+        </td>
+    </tr>
+    {% endfor %}
+    
 {% endwith %}
 </table>

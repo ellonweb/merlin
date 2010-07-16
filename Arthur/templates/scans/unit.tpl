@@ -29,10 +29,10 @@
         
         <td class="one left"> {{ unit.ship.name }} </td>
         <td class="two left"> {{ unit.amount }} </td>
-        <td class="two"> {{ unit.ship.class_|slice_(":2")|upper }} </td>
-        <td class="two"> {{ unit.ship.t1|slice_(":2")|upper }} </td>
-        <td class="two"> {{ unit.ship.t2|default("-")|slice_(":2")|upper }} </td>
-        <td class="two"> {{ unit.ship.t3|default("-")|slice_(":2")|upper }} </td>
+        <td class="two"> {{ unit.ship.class_[:2]|upper }} </td>
+        <td class="two"> {{ unit.ship.t1[:2]|upper }} </td>
+        <td class="two"> {{ unit.ship.t2|default("-")[:2]|upper }} </td>
+        <td class="two"> {{ unit.ship.t3|default("-")[:2]|upper }} </td>
         
         {% if loop.last and loop.index is odd %}
             <td class="one left">  </td>

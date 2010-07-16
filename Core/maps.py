@@ -26,8 +26,8 @@ import re
 import sys
 from sqlalchemy import *
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import validates, relation, backref, dynamic_loader
-from sqlalchemy.sql.functions import current_timestamp, max as max_sql, random
+from sqlalchemy.orm import validates, relation, backref, dynamic_loader, aliased
+from sqlalchemy.sql.functions import coalesce, count, current_timestamp, random
 
 from Core.exceptions_ import LoadableError
 from Core.config import Config
@@ -49,7 +49,8 @@ class Updates(Base):
     
     @staticmethod
     def current_tick():
-        tick = session.query(max_sql(Updates.id)).scalar() or 0
+        from sqlalchemy.sql.functions import max
+        tick = session.query(max(Updates.id)).scalar() or 0
         return tick
     
     @staticmethod
@@ -718,6 +719,28 @@ class Scan(Base):
         if self.scantype not in ("J",):
             return
         return len([fleet for fleet in self.fleets if fleet.mission.lower() == "defend"])
+    
+    def fleet_overview(self):
+        if self.scantype not in ("J",):
+            return
+        
+        from sqlalchemy.sql.functions import min, sum
+        f=aliased(FleetScan)
+        a=aliased(FleetScan)
+        d=aliased(FleetScan)
+        
+        Q = session.query(f.landing_tick, f.landing_tick - min(Scan.tick),
+                            count(a.id), coalesce(sum(a.fleet_size),0),
+                            count(d.id), coalesce(sum(d.fleet_size),0))
+        Q = Q.join(f.scan)
+        Q = Q.filter(f.scan == self)
+        
+        Q = Q.outerjoin((a, and_(a.id==f.id, a.mission.ilike("Attack"))))
+        Q = Q.outerjoin((d, and_(d.id==f.id, d.mission.ilike("Defend"))))
+
+        Q = Q.group_by(f.landing_tick)
+        Q = Q.order_by(asc(f.landing_tick))
+        return Q.all()
     
     def __str__(self):
         p = self.planet

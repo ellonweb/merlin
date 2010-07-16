@@ -28,11 +28,10 @@ def filter(f):
     jinja.filters[f.__name__] = f
     return f
 
-from django.template.defaultfilters import default, force_escape, linebreaks, slice_
+from django.template.defaultfilters import default, force_escape, linebreaks
 filter(default)
 filter(force_escape)
 filter(linebreaks)
-filter(slice_)
 from django.contrib.humanize.templatetags.humanize import intcomma
 filter(intcomma)
 
