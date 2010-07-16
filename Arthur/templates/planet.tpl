@@ -2,7 +2,6 @@
 {% block content %}
 {% include "planet_list.tpl" %}
 <p>&nbsp;</p>
-<center>
 <table cellspacing="1" cellpadding="3" width="700" class="black">
 	<tr class="datahigh">
 		<th colspan="6">Outgoing fleets <a href="{% url "planet", planet.x, planet.y, planet.z %}fleets/">(Show all)</a></th>
@@ -50,5 +49,4 @@
 	</tr>
 	{% endfor %}
 </table>
-</center>
 {% endblock %}

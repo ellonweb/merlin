@@ -69,9 +69,9 @@
     {% endif %}
 
     <div style="clear: both; height: 2em"></div>
-    <table cellspacing="1" cellpadding="3" width="100%"><tr><td>
+    <table cellspacing="1" cellpadding="3" width="100%"><tr><td><center>
     {% block content %}{% endblock %}
-    </td></tr></table>
+    </center></td></tr></table>
     <p>&nbsp;</p>
     <div id="push"></div>
 </div>
