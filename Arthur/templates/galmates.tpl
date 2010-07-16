@@ -10,14 +10,14 @@
         </th>
     </tr>
     <tr class="header">
-        <th width="100"><a href="{% url galmates "name" %}">User (Alias)</a></th>
-        <th width="100"><a href="{% url galmates "sponsor" %}">Sponsor</a></th>
-        <th width="100"><a href="{% url galmates "access" %}">Access</a></th>
-        <th width="100"><a href="{% url galmates "planet" %}">Planet</a></th>
+        <th width="100"><a href="{% url "galmates", "name" %}">User (Alias)</a></th>
+        <th width="100"><a href="{% url "galmates", "sponsor" %}">Sponsor</a></th>
+        <th width="100"><a href="{% url "galmates", "access" %}">Access</a></th>
+        <th width="100"><a href="{% url "galmates", "planet" %}">Planet</a></th>
         <th width="100">Phone</th>
     </tr>
     {% for member, alias, sponsor, access, planet, phone, pubphone, phonefriend in members %}
-    <tr class="{% cycle 'odd' 'even' %}">
+    <tr class="{{ loop.cycle('odd', 'even') }}">
         <td>{{ member }}{% if alias %} ({{ alias }}){% endif %}</td>
         <td>{{ sponsor }}</td>
         <td>{{ access }}</td>

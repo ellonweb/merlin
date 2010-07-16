@@ -19,32 +19,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import time
+from jinja2 import Environment, FileSystemLoader
 
-from django.http import HttpResponseNotFound, HttpResponseServerError
+from Arthur.templatetags.url import URLReverserExtension
+jinja = Environment(extensions=["jinja2.ext.with_", URLReverserExtension], loader=FileSystemLoader('Arthur/templates'))
 
-from Core.config import Config
-from Core.string import log
-from Core.db import session
-from Arthur.context import render
+def filter(f):
+    jinja.filters[f.__name__] = f
+    return f
 
-class db(object):
-    def process_request(self, request):
-        session.remove()
-    
-    def process_response(self, request, response):
-        session.remove()
-        return response
-    
-    def process_exception(self, request, exception):
-        session.remove()
+from django.template.defaultfilters import default, force_escape, linebreaks, slice_
+filter(default)
+filter(force_escape)
+filter(linebreaks)
+filter(slice_)
+from django.contrib.humanize.templatetags.humanize import intcomma
+filter(intcomma)
 
-def page_not_found(request):
-    return HttpResponseNotFound(render("error.tpl", request, msg="Page not found"))
-
-def server_error(request):
-    return HttpResponseServerError(render("error.tpl", request, msg="Server error, please report the error to an admin as soon as possible"))
-
-class exceptions(object):
-    def process_exception(self, request, exception):
-        log(Config.get("Misc","arthurlog"), "%s - Arthur Error: %s\n" % (time.asctime(),str(exception),))
+from Arthur.templatetags import growth

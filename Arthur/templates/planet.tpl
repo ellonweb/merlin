@@ -7,7 +7,7 @@
 <td>
 <table cellspacing="1" cellpadding="3" width="100%">
 	<tr class="datahigh">
-		<th colspan="6">Outgoing fleets <a href="{% url planet planet.x planet.y planet.z %}fleets/">(Show all)</a></th>
+		<th colspan="6">Outgoing fleets <a href="{% url "planet", planet.x, planet.y, planet.z %}fleets/">(Show all)</a></th>
 	</tr>
 	<tr class="header">
 		<th>Target</th>
@@ -19,7 +19,7 @@
 	</tr>
     {% for fleet, planet, alliance in outgoing %}
 	<tr class="{{ fleet.mission|lower }}">
-		<td><a href="{% url planet planet.x planet.y planet.z %}" class="gray">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
+		<td><a href="{% url "planet", planet.x, planet.y, planet.z %}" class="gray">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
 		<td>{{ alliance.name }}</td>
 		<td>{{ fleet.fleet_name }}</td>
 		<td>{{ fleet.fleet_size }}</td>
@@ -37,7 +37,7 @@
 <td>
 <table cellspacing="1" cellpadding="3" width="100%">
 	<tr class="datahigh">
-		<th colspan="6">Incoming fleets <a href="{% url planet planet.x planet.y planet.z %}fleets/">(Show all)</a></th>
+		<th colspan="6">Incoming fleets <a href="{% url "planet", planet.x, planet.y, planet.z %}fleets/">(Show all)</a></th>
 	</tr>
 	<tr class="header">
 		<th>Origin</th>
@@ -49,7 +49,7 @@
 	</tr>
     {% for fleet, planet, alliance in incoming %}
 	<tr class="{{ fleet.mission|lower }}">
-		<td><a href="{% url planet planet.x planet.y planet.z %}" class="gray">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
+		<td><a href="{% url "planet", planet.x, planet.y, planet.z %}" class="gray">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
 		<td>{{ alliance.name }}</td>
 		<td>{{ fleet.fleet_name }}</td>
 		<td>{{ fleet.fleet_size }}</td>

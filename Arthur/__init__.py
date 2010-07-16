@@ -21,6 +21,7 @@
  
 from django.conf.urls.defaults import include, patterns, url
 from django.http import HttpResponseRedirect
+
 from Core.config import Config
 from Core.maps import Updates
 from Arthur.context import menu, render

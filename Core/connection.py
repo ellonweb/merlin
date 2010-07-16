@@ -27,8 +27,7 @@ import time
 
 from Core.exceptions_ import Reboot
 from Core.config import Config
-
-CRLF = "\r\n"
+from Core.string import decode, encode, CRLF
 
 class connection(object):
     # Socket/Connection handler
@@ -79,13 +78,13 @@ class connection(object):
         else:
             while self.last + 1 >= time.time():
                 time.sleep(0.5)
-            self.sock.send(line + CRLF)
+            self.sock.send(encode(line) + CRLF)
             self.last = time.time()
             print "%s >>> %s" % (time.asctime(),line,)
     
     def read(self):
         # Read from socket
-        line = self.file.readline()
+        line = decode(self.file.readline())
         if line:
             if line[-2:] == CRLF:
                 line = line[:-2]

@@ -19,32 +19,25 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import time
+from django.core.urlresolvers import reverse, NoReverseMatch
 
-from django.http import HttpResponseNotFound, HttpResponseServerError
+from jinja2 import nodes
+from jinja2.ext import Extension
 
-from Core.config import Config
-from Core.string import log
-from Core.db import session
-from Arthur.context import render
-
-class db(object):
-    def process_request(self, request):
-        session.remove()
+class URLReverserExtension(Extension):
+    tags = set(["url"])
     
-    def process_response(self, request, response):
-        session.remove()
-        return response
+    def parse(self, parser):
+        
+        lineno = parser.stream.next().lineno
+        args = [parser.parse_expression()]
+        
+        while parser.stream.current.type != 'block_end':
+            parser.stream.skip_if('comma')
+            args.append(parser.parse_expression())
+        node = nodes.Output([self.call_method('generate', args)])
+        node.set_lineno(lineno)
+        return node
     
-    def process_exception(self, request, exception):
-        session.remove()
-
-def page_not_found(request):
-    return HttpResponseNotFound(render("error.tpl", request, msg="Page not found"))
-
-def server_error(request):
-    return HttpResponseServerError(render("error.tpl", request, msg="Server error, please report the error to an admin as soon as possible"))
-
-class exceptions(object):
-    def process_exception(self, request, exception):
-        log(Config.get("Misc","arthurlog"), "%s - Arthur Error: %s\n" % (time.asctime(),str(exception),))
+    def generate(self, url, *args):
+        return reverse(url, args=args)

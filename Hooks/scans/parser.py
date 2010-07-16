@@ -28,6 +28,7 @@ from sqlalchemy.exc import IntegrityError
 from Core.exceptions_ import PNickParseError
 from Core.config import Config
 from Core.paconf import PA
+from Core.string import decode
 from Core.db import session
 from Core.maps import Updates, Planet, User, Intel, Ship, Scan, Request
 from Core.maps import PlanetScan, DevScan, UnitScan, FleetScan, CovOp
@@ -83,7 +84,7 @@ class parse(Thread):
     
     def scan(self, uid, pa_id, gid=None):
         page = urlopen(Config.get("URL","viewscan")%(pa_id,)).read()
-        page = unicode(page, encoding='latin-1') # Encode the page
+        page = decode(page)
         
         m = re.search('>([^>]+) on (\d+)\:(\d+)\:(\d+) in tick (\d+)', page)
         if not m:

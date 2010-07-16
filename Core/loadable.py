@@ -141,8 +141,6 @@ class loadable(object):
             session.commit()
             session.close()
             
-        except UnicodeEncodeError:
-            message.alert("Speak English, faggot.")
         except PNickParseError:
             message.alert(self.PParseError)
         except UserError:
