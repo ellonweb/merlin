@@ -37,11 +37,30 @@ class attack(loadable):
         Q = session.query(Attack)
         Q = Q.order_by(asc(Attack.landtick))
         
+        
         for attack in Q:
             if attack.active:
-                reply += " %d : %s LT: %d" %(attack.id,attack.comment,attack.landtick)
+                comment = attack.comment
+                if comment is None:
+                    comment= " "
+                else:
+                    comment = " '" + comment + "' "
+                reply += "  %d %sLT: %d |" %(attack.id,comment,attack.landtick)
         
         message.reply(reply)
+        
+    @route(r"show\s+(\d+)",access = "member")
+    def show(self,message,user,params):
+        id = params.group(1)
+        attack = Attack.load(id)
+        
+        comment = attack.comment
+        if comment is None:
+            comment= " "
+        else:
+            comment = " '" + comment + "' "
+        
+        message.reply("Attack%sLT: %d Url: http://www.my-url.com/attack/%d"%(comment,attack.landtick,attack.id)) 
 
     @route(r"(\d+)\s+([. :\-\d,]+)(?:\s*(.+))?", access = "member")
     def new(self, message, user, params):
