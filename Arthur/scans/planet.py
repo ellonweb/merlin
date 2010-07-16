@@ -26,6 +26,10 @@ from Arthur.context import render
 from Arthur.loadable import loadable, load
 
 @load
+class planet(loadable):
+    access = "half"
+
+@load
 class scan(loadable):
     access = "half"
     
@@ -38,4 +42,4 @@ class scan(loadable):
         if scan is None:
             return HttpResponseRedirect(reverse("planet_scans", kwargs={"x":planet.x, "y":planet.y, "z":planet.z}))
         
-        return render("scans/scan.tpl", request, scan=scan, intel=user.is_member())
+        return render("scans/base.tpl", request, scan=scan, intel=user.is_member())

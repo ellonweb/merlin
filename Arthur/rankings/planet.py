@@ -63,4 +63,6 @@ class planet(loadable):
             Q = Q.filter(FleetScan.landing_tick >= week)
         incoming = Q.all()
         
-        return render("planet.tpl", request, planet=planet, planets=planets, title="%s:%s:%s"%(planet.x, planet.y, planet.z), intel=user.is_member(), outgoing=outgoing, incoming=incoming)
+        scan = planet.scan("A") or planet.scan("U")
+        
+        return render("planet.tpl", request, planet=planet, planets=planets, title="%s:%s:%s"%(planet.x, planet.y, planet.z), intel=user.is_member(), scan=scan, outgoing=outgoing, incoming=incoming)

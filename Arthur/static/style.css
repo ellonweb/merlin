@@ -4,7 +4,7 @@ html {
 
 body {
 	font-family: Verdana, Arial, Helvetica;
-	font-size: 7pt;
+	font-size: 8pt;
 	color: white;
 	background-color: #0a0a13;
 	background-image: url(back.gif);
@@ -26,7 +26,7 @@ body {
 }
 
 table {
-	font-size: 7pt;
+	font-size: 8pt;
 }
 
 a {
