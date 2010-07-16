@@ -28,7 +28,7 @@ from Core.maps import Updates, Planet, User, Attack, Galaxy, AttackTarget
 from Core.loadable import loadable, route, require_user
 
 class attack(loadable):
-    usage = "[ (eta|landingtick) <coordlist>] | list"
+    usage = "[ (eta|landingtick) <coordlist>] | list | show <id>"
     
     @route(r"list",access="member")
     def list(self,message,user,params):
