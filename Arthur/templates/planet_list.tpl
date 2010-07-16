@@ -1,7 +1,4 @@
-<table cellspacing="0" cellpadding="0" width="100%" class="black">
-<tr>
-<td>
-<table cellspacing="1" cellpadding="3" width="100%">
+<table cellspacing="1" cellpadding="3" width="100%" class="black">
     <tr class="datahigh">
         <th colspan="{% if page and intel %}20{% else %}{% if intel %}19{% else %}18{% endif %}{% endif %}">
             {{ title }}
@@ -134,7 +131,4 @@
     </tr>
     {% endif %}
     
-</table>
-</td>
-</tr>
 </table>

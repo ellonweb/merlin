@@ -1,10 +1,7 @@
 {% extends "base.tpl" %}
 {% block content %}
 {% for level, members in accesslist %}
-<table cellspacing="0" cellpadding="0" width="100%" class="black">
-<tr>
-<td>
-<table cellspacing="1" cellpadding="3" width="100%">
+<table cellspacing="1" cellpadding="3" width="100%" class="black">
     <tr class="datahigh">
         <th colspan="7">
             {{ level|capitalize }}s
@@ -31,12 +28,6 @@
     </tr>
     {% endfor %}
 </table>
-</td>
-</tr>
-</table>
-{% if loop.last %}
-{% else %}
-<p />
-{% endif %}
+{% if not loop.last %}<p>&nbsp;</p>{% endif %}
 {% endfor %}
 {% endblock %}

@@ -69,8 +69,10 @@
     {% endif %}
 
     <div style="clear: both; height: 2em"></div>
+    <table cellspacing="1" cellpadding="3" width="100%"><tr><td>
     {% block content %}{% endblock %}
-    <p />
+    </td></tr></table>
+    <p>&nbsp;</p>
     <div id="push"></div>
 </div>
 <div id="footer" align="center">
