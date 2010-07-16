@@ -71,13 +71,16 @@ class attack(loadable):
             else:
                 planet = Planet.load(coord[0],coord[2],coord[4])
                 
-                if planet is None or planet in attack.planets:
+                if planet is None or planet in attack.planets or (planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name")):
                     error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
                 else:
                     attack.planets.append(planet)
                     added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
                 
         session.commit()
+        
+        if added == "":
+            added = "No coords "
             
         message.reply("%s added to attack %d. Coords not added: %s" %(added,attack.id,error))
             
@@ -86,7 +89,7 @@ class attack(loadable):
     def new(self, message, user, params):
         error = ""
         added = ""
-        
+
         tick = Updates.current_tick()
         comment = params.group(3)
         when = int(params.group(1))
@@ -108,7 +111,6 @@ class attack(loadable):
            
         for coord in re.findall(loadable.coord, params.group(2)):
             if not coord[4]:
-                
                 galaxy = Galaxy.load(coord[0],coord[2])
                 
                 if galaxy is None:
@@ -122,15 +124,19 @@ class attack(loadable):
             else:
                 planet = Planet.load(coord[0],coord[2],coord[4])
                 
-                if planet is None or planet in attack.planets:
+                if planet is None or planet in attack.planets or (planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name")):
                     error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
                 else:    
                     attack.planets.append(planet)
                     added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
 
         session.commit()
-             
-        message.reply("Attack %s created with id %d for targets: %s. Targets not included( or doubles): %s"%(comment,attack.id,added,error))        
+        if comment is None:  
+            comment= " "
+        else:
+            comment = " " + comment + " "
+
+        message.reply("Attack%screated with id %d for targets: %s. Targets not included( or doubles): %s"%(comment,attack.id,added,error))          
     
     @route(r"remove\s+(\d+)\s+([. :\-\d,]+)?", access = "member")
     def remove(self, message, user, params):
@@ -169,5 +175,8 @@ class attack(loadable):
                     error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
                 
         session.commit()
+        
+        if removed == "":
+            removed = "No coords "
             
         message.reply("%s removed from attack %d. Coords not removed: %s" %(removed,attack.id,error))
