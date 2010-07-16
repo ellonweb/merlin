@@ -23,7 +23,7 @@ from django.conf.urls.defaults import include, patterns, url
 from Core.paconf import PA
 
 urlpatterns = patterns('Arthur.scans',
-    url(r'^$', 'list.scans'),
+    url(r'^$', 'list.scans', name="scans"),
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/',
         include(patterns('Arthur.scans.planet',
             url(r'^$', 'planet', name="planet_scans"),
@@ -35,6 +35,6 @@ urlpatterns = patterns('Arthur.scans',
             *[url(r'^'+type.lower()+'\w*/$', "scan", {"type":type}, name="galaxy_scans_"+type.lower()) for type in PA.options("scans")]
         ))),
     url('^(?P<tick>\d+)/$', 'list.tick'),
-    url('^(?P<tick>\d+)/(?P<id>\w+)/$', 'planet.scan_id', name="scan_id"),
+    url('^(?P<tick>\d+)/(?P<id>\w+)/$', 'planet.id', name="scan_id"),
     url('^group/(?P<id>\w+)/$', 'group.group_id', name="scan_group_id"),
 )

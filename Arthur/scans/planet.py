@@ -21,13 +21,30 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from Core.maps import Planet
+from sqlalchemy.sql import desc
+from Core.db import session
+from Core.maps import Planet, Scan
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
 @load
 class planet(loadable):
     access = "half"
+
+@load
+class id(loadable):
+    access = "half"
+    
+    def execute(self, request, user, tick, id):
+        Q = session.query(Scan)
+        Q = Q.filter(Scan.tick == tick)
+        Q = Q.filter(Scan.pa_id.ilike("%"+id+"%"))
+        Q = Q.order_by(desc(Scan.id))
+        scan = Q.first()
+        if scan is None:
+            return HttpResponseRedirect(reverse("scans"))
+        
+        return render("scans/base.tpl", request, scan=scan, intel=user.is_member())
 
 @load
 class scan(loadable):
