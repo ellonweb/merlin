@@ -39,6 +39,6 @@ __all__ = ["system",
            "scans",
            "ships",
            "quotes",
-           "bcalc",
+           "links",
 #           "galstatus",
            ]

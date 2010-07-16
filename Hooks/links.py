@@ -20,17 +20,16 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from Core.loadable import loadable, route
+from Core.config import Config
 
-class bcalc(loadable):
+class links(loadable):
     
     @route()
     def execute(self, message, user, params):
         
-        bcalc = ["http://sandmans.co.uk",
-                 "http://parser.5th-element.org/",
-                 "http://parser.vision-hq.com",
+        links = [Config.get("URL","arthur"),
+	          "http://sandmans.co.uk",
                  "http://game.planetarion.com/bcalc.pl",
-                 "http://www.lch-hq.org/pilkara/",
                 ]
         
-        message.reply("Bcalcs: "+" | ".join(bcalc))
+        message.reply("Links: "+" | ".join(links))
