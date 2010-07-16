@@ -28,7 +28,7 @@ from Core.maps import Updates, Planet, User, Attack, Galaxy, AttackTarget
 from Core.loadable import loadable, route, require_user
 
 class editattack(loadable):
-    usage = " attackID (add|remove) <coordlist>"
+    usage = " attackID (add|remove) <coordlist> | attackID land (tick|eta)"
     
     @route(r"(\d+)\s+add\s+([. :\-\d,]+)?", access = "member")
     def add(self, message, user, params):
@@ -113,4 +113,33 @@ class editattack(loadable):
             removed = "No coords "
             
         message.reply("%s removed from attack %d. Coords not removed: %s" %(removed,attack.id,error))    
-    
+
+    @route(r"(\d+)\s+land\s+(\d+)",access="member")
+    def land(self, message, user, params):
+        id = int(params.group(1))
+        attack = Attack.load(id) 
+        
+        if attack is None:
+            message.alert("No attack exists with id %d" %(id))
+            
+        tick = Updates.current_tick()
+        when = int(params.group(2))
+        if when < PA.getint("numbers", "protection"):
+            eta = when
+            when += tick
+        elif when <= tick:
+            message.alert("Can not create attacks in the past. You wanted tick %s, but current tick is %s." % (when, tick,))
+            return
+        else:
+            eta = when - tick
+        if when > 32767:
+            when = 32767
+            
+        old = attack.landtick
+        
+        attack.landtick = when
+        
+        session.commit()
+        
+        message.reply("Changed LT for attack %d from %d to %d"%(id,old,when))
+        
