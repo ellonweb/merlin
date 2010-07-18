@@ -27,6 +27,7 @@ urlpatterns = patterns('Arthur.scans',
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/',
         include(patterns('Arthur.scans.planet',
             url(r'^$', 'planet', name="planet_scans"),
+            url(r'^(?P<types>['+"".join([type.lower() for type in PA.options("scans")])+']+)/$', "types"),
             *[url(r'^'+type.lower()+'\w*/$', "scan", {"type":type}, name="planet_scan_"+type.lower()) for type in PA.options("scans")]
         ))),
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)/',

@@ -22,6 +22,7 @@
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy.sql import asc, desc
+from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, Scan
 from Arthur.context import render
@@ -88,3 +89,23 @@ class scan(loadable):
             return HttpResponseRedirect(reverse("planet_scans", kwargs={"x":planet.x, "y":planet.y, "z":planet.z}))
         
         return render("scans/base.tpl", request, scan=scan, intel=user.is_member())
+
+@load
+class types(loadable):
+    access = "half"
+    
+    def execute(self, request, user, x, y, z, types):
+        types = types.upper()
+        
+        planet = Planet.load(x,y,z)
+        if planet is None:
+            return HttpResponseRedirect(reverse("planet_ranks"))
+        
+        group = [(planet, [],)]
+        scans = []
+        for type in PA.options("scans"):
+            if type in types:
+                group[-1][1].append(planet.scan(type))
+                scans.append(planet.scan(type))
+        
+        return render("scans/planet_types.tpl", request, planet=planet, group=group, scans=scans, intel=user.is_member())
