@@ -28,7 +28,7 @@
         {% endif %}
         
         <td class="one left"> {{ unit.ship.name }} </td>
-        <td class="two left"> {{ unit.amount }} </td>
+        <td class="two left"> {{ unit.amount|intcomma }} </td>
         <td class="two"> {{ unit.ship.class_[:2]|upper }} </td>
         <td class="two"> {{ unit.ship.t1[:2]|upper }} </td>
         <td class="two"> {{ unit.ship.t2|default("-")[:2]|upper }} </td>

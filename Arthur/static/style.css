@@ -102,22 +102,27 @@ tr.unknown {
 }
 
 .Cat {
-	color: #6699cc;
+	color: #6699cc !important;
 	font-weight: bold;
 }
 
 .Ter {
-	color: #aa7744;
+	color: #aa7744 !important;
 	font-weight: bold;
 }
 
 .Xan {
-	color: #00cc00;
+	color: #00cc00 !important;
 	font-weight: bold;
 }
 
 .Zik {
-	color: #cccc00;
+	color: #cccc00 !important;
+	font-weight: bold;
+}
+
+.Etd {
+	color: #cccccc !important;
 	font-weight: bold;
 }
 

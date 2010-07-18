@@ -23,7 +23,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy.sql import asc
 from Core.db import session
-from Core.maps import Scan
+from Core.maps import Planet, Scan
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
@@ -32,11 +32,21 @@ class group(loadable):
     access = "half"
     
     def execute(self, request, user, id):
-        Q = session.query(Scan)
+        Q = session.query(Planet, Scan)
+        Q = Q.join(Scan.planet)
         Q = Q.filter(Scan.group_id.ilike("%"+id+"%"))
-        Q = Q.order_by(asc(Scan.id))
-        scans = Q.all()
-        if len(scans) == 0:
+        Q = Q.order_by(asc(Planet.x), asc(Planet.y), asc(Planet.z), asc(Scan.scantype), asc(Scan.tick))
+        result = Q.all()
+        if len(result) == 0:
             return HttpResponseRedirect(reverse("scans"))
         
-        return render("scans/group.tpl", request, scans=scans, intel=user.is_member())
+        group = []
+        scans = []
+        for planet, scan in result:
+            if len(group) < 1 or group[-1][0] is not planet:
+                group.append((planet, [scan],))
+            else:
+                group[-1][1].append(scan)
+            scans.append(scan)
+        
+        return render("scans/group.tpl", request, group=group, scans=scans, intel=user.is_member())
