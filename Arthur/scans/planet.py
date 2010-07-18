@@ -21,15 +21,43 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from sqlalchemy.sql import desc
+from sqlalchemy.sql import asc, desc
 from Core.db import session
-from Core.maps import Planet, Scan
+from Core.maps import Updates, Planet, Scan
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
 @load
 class planet(loadable):
     access = "half"
+    
+    def execute(self, request, user, x, y, z):
+        tick = Updates.midnight_tick()
+        
+        planet = Planet.load(x,y,z)
+        if planet is None:
+            return HttpResponseRedirect(reverse("planet_ranks"))
+        ph = planet.history(tick)
+        if planet.intel and planet.alliance:
+            planets = (planet, ph, planet.intel.nick, planet.alliance.name),
+        elif planet.intel:
+            planets = (planet, ph, planet.intel.nick, None),
+        else:
+            planets = (planet, ph, None, None),
+        
+        Q = session.query(Scan)
+        Q = Q.filter(Scan.planet == planet)
+        Q = Q.order_by(desc(Scan.tick), asc(Scan.scantype))
+        result = Q.all()
+        
+        group = []
+        for scan in result:
+            if len(group) < 1 or group[-1][0] != scan.tick:
+                group.append((scan.tick, [scan],))
+            else:
+                group[-1][1].append(scan)
+        
+        return render("scans/planet.tpl", request, planet=planet, planets=planets, title="%s:%s:%s"%(planet.x, planet.y, planet.z), group=group, intel=user.is_member())
 
 @load
 class id(loadable):
