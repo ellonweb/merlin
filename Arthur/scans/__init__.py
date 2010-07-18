@@ -34,7 +34,7 @@ urlpatterns = patterns('Arthur.scans',
             url(r'^$', 'galaxy', name="galaxy_scans"),
             *[url(r'^'+type.lower()+'\w*/$', "scan", {"type":type}, name="galaxy_scans_"+type.lower()) for type in PA.options("scans")]
         ))),
-    url('^(?P<tick>\d+)/$', 'list.tick'),
+    url('^(?P<tick>\d+)/$', 'list.tick', name="scan_tick"),
     url('^(?P<tick>\d+)/(?P<id>\w+)/$', 'planet.id', name="scan_id"),
     url('^group/(?P<id>\w+)/$', 'list.group', name="scan_group_id"),
 )

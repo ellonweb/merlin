@@ -50,3 +50,23 @@ class group(loadable):
             scans.append(scan)
         
         return render("scans/group.tpl", request, group=group, scans=scans, intel=user.is_member())
+
+@load
+class tick(loadable):
+    access = "half"
+    
+    def execute(self, request, user, tick):
+        Q = session.query(Planet, Scan)
+        Q = Q.join(Scan.planet)
+        Q = Q.filter(Scan.tick == tick)
+        Q = Q.order_by(asc(Planet.x), asc(Planet.y), asc(Planet.z), asc(Scan.scantype), asc(Scan.tick))
+        result = Q.all()
+        
+        group = []
+        for planet, scan in result:
+            if len(group) < 1 or group[-1][0] is not planet:
+                group.append((planet, [scan],))
+            else:
+                group[-1][1].append(scan)
+        
+        return render("scans/tick.tpl", request, tick=tick, group=group)
