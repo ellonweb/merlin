@@ -13,3 +13,7 @@
     {% if scan.scantype == "A" %}
         {% include "scans/unit.tpl" %}
     {% endif %}
+    
+    {% if scan.scantype in ("L", "N", "I",) %}
+        {% include "scans/lni.tpl" %}
+    {% endif %}
