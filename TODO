@@ -1,7 +1,4 @@
 http://www.sqlalchemy.org/trac/ticket/1529 (reloading/err)
-http://www.sqlalchemy.org/trac/ticket/1537 (alias/join0.6)
-http://www.sqlalchemy.org/trac/ticket/1565 (sequences 0.6)
-http://www.sqlalchemy.org/trac/ticket/1638 (unicode/noerr)
 
 |       Known Bugs       |   Occurrence   |     Effect     |
 | SQLA map reload (1529) | ext. rare      | recoverable    |

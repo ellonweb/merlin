@@ -635,9 +635,10 @@ class Ship(Base):
 class Scan(Base):
     __tablename__ = 'scan'
     __table_args__ = (UniqueConstraint('pa_id','tick'), {})
+    _scan_types = sorted(PA.options("scans"), cmp=lambda x,y: cmp(PA.getint(x, "type"), PA.getint(y, "type")))
     id = Column(Integer, primary_key=True)
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), index=True)
-    scantype = Column(String(1))
+    scantype = Column(Enum(*_scan_types, name="scantype"))
     tick = Column(Integer)
     pa_id = Column(String(32), index=True)
     group_id = Column(String(32), index=True)
@@ -771,7 +772,7 @@ class Request(Base):
     id = Column(Integer, primary_key=True)
     requester_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), index=True)
-    scantype = Column(String(1))
+    scantype = Column(Enum(*Scan._scan_types, name="scantype"))
     dists = Column(Integer)
     scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='set null'))
     active = Column(Boolean, default=True)
