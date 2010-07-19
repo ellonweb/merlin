@@ -22,7 +22,7 @@
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from Core.paconf import PA
-from Core.maps import Galaxy
+from Core.maps import Galaxy, Scan
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
@@ -73,7 +73,7 @@ class types(loadable):
                 continue
             group.append((planet, [],))
             
-            for type in PA.options("scans"):
+            for type in Scan._scan_types:
                 if type in types:
                     group[-1][1].append(planet.scan(type))
                     scans.append(planet.scan(type))

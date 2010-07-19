@@ -103,7 +103,7 @@ class types(loadable):
         
         group = [(planet, [],)]
         scans = []
-        for type in PA.options("scans"):
+        for type in Scan._scan_types:
             if type in types:
                 group[-1][1].append(planet.scan(type))
                 scans.append(planet.scan(type))
