@@ -28,6 +28,13 @@ from Arthur.context import render
 from Arthur.loadable import loadable, load
 
 @load
+class scans(loadable):
+    access = "half"
+    
+    def execute(self, request, user):
+        return HttpResponseRedirect("/")
+
+@load
 class group(loadable):
     access = "half"
     

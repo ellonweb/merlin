@@ -56,7 +56,6 @@ class home(loadable):
         return render("index.tpl", request, planets=planets, title="Your planet")
 
 @menu(name,          "Intel",       suffix = name)
-@menu("Planetarion", "Parser",      suffix = "parser")
 @menu("Planetarion", "BCalc",       suffix = "bcalc")
 @menu("Planetarion", "Sandmans",    suffix = "sandmans")
 @menu("Planetarion", "Forums",      suffix = "forums")
@@ -67,7 +66,6 @@ class links(loadable):
              "forums"      : "http://pirate.planetarion.com",
              "sandmans"    : "http://sandmans.co.uk",
              "bcalc"       : "http://game.planetarion.com/bcalc.pl",
-             "parser"      : "http://parser.5th-element.org/",
              name          : "/alliance/%s/" % (name,),
             }
     def execute(self, request, user, link):
@@ -84,3 +82,4 @@ class guide(loadable):
 
 from Arthur import alliance
 from Arthur import rankings
+from Arthur import scans

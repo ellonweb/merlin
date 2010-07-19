@@ -49,14 +49,6 @@ Arthur scan request interface
     shows incoming/outgoing fleets (froglet)
     links to /scans/x:y:z/
 
-/scans/x:y:z/
-    table of latest scans etc
-    click shows scan info in webby where possible /scan/id/
-    shift+click opens PA link
-    
-/scan/type/x:y:z/
-    shows latest of specific type
-
 /user/name/
     access=member
     forward to /planet/ ?

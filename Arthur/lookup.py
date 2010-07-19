@@ -45,14 +45,14 @@ class lookup(loadable):
             for url in groups:
                 parse(user.id, "group", url).start()
             
-            return HttpResponseRedirect("/scans/")
+            return HttpResponseRedirect(reverse("scans"))
         
         m = self.coord.match(lookup)
         
         if m is None:
             alliance = Alliance.load(lookup) if lookup else None
             if alliance:
-                return HttpResponseRedirect("/alliance/%s/" %(alliance.name,))
+                return HttpResponseRedirect(reverse("alliance_members", kwargs={"name":alliance.name}))
             
             elif not user.is_member():
                 return HttpResponseRedirect(reverse("alliance_ranks"))
