@@ -28,7 +28,7 @@ class links(loadable):
     def execute(self, message, user, params):
         
         links = [Config.get("URL","arthur"),
-	          "http://sandmans.co.uk",
+                 "http://sandmans.co.uk",
                  "http://game.planetarion.com/bcalc.pl",
                 ]
         
