@@ -33,6 +33,9 @@ class getanewdaddy(loadable):
     def execute(self, message, user, params):
 
         # do stuff here
+        if params.group(1).lower() == Config.get("Connection","nick").lower():
+            message.reply("I'll peck your eyes out, cunt.")
+            return
         idiot = User.load(name=params.group(1), access="member")
         if idiot is None:
             message.reply("That idiot isn't a member!")
