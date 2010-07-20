@@ -339,7 +339,7 @@ class prop(loadable):
         yes = session.query(sum(Vote.carebears)).filter_by(prop_id=prop.id, vote="yes").scalar()
         no = session.query(sum(Vote.carebears)).filter_by(prop_id=prop.id, vote="no").scalar()
         veto = session.query(Vote).filter_by(prop_id=prop.id, vote="veto").count()
-        return yes, no, veto
+        return yes or 0, no or 0, veto or 0
     
     def text_result(self, vote_result, yes, no, veto):
         reply = "The prop"
