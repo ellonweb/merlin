@@ -41,6 +41,7 @@ urlpatterns = patterns('',
     (r'^lookup/$', 'Arthur.lookup.lookup'),
     (r'', include('Arthur.alliance')),
     (r'', include('Arthur.rankings')),
+    (r'', include('Arthur.attack')),
     (r'^scans/', include('Arthur.scans')),
 )
 
@@ -82,4 +83,5 @@ class guide(loadable):
 
 from Arthur import alliance
 from Arthur import rankings
+from Arthur import attack
 from Arthur import scans
