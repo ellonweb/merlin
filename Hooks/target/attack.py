@@ -28,7 +28,7 @@ from Core.loadable import loadable, route
 
 class attack(loadable):
     """Create an attack page on the webby with automatic parsed scans"""
-    usage = " [<eta|landingtick> <coordlist>] | [list] | [show <id>]"
+    usage = " [<eta|landingtick> <coordlist> [comment]] | [list] | [show <id>]"
     
     @route(r"list",access="member")
     def list(self,message,user,params):
@@ -42,7 +42,7 @@ class attack(loadable):
         reply = "Open attacks: " + " ".join(replies)
         message.reply(reply)
     
-    @route(r"show\s+(\d+)",access = "member")
+    @route(r"(?:show\s+)?(\d+)",access = "member")
     def show(self,message,user,params):
         id = params.group(1)
         attack = Attack.load(id)
@@ -53,7 +53,7 @@ class attack(loadable):
         
         message.reply(str(attack))
     
-    @route(r"(\d+)\s+([. :\-\d,]+)(?:\s*(.+))?", access = "member")
+    @route(r"(?:new\s+)?(\d+)\s+([. :\-\d,]+)(?:\s*(.+))?", access = "member")
     def new(self, message, user, params):
         tick = Updates.current_tick()
         comment = params.group(3) or ""

@@ -26,7 +26,7 @@ from Core.maps import Updates, Galaxy, Planet, Attack
 from Core.loadable import loadable, route
 
 class editattack(loadable):
-    usage = " [<id> add|remove <coordlist>] | [<id> land <tick|eta>]"
+    usage = " [<id> add|remove <coordlist>] | [<id> land <tick|eta>] | [<id> comment <comment>]"
     
     @route(r"(\d+)\s+add\s+([. :\-\d,]+)?", access = "member")
     def add(self, message, user, params):
@@ -75,7 +75,7 @@ class editattack(loadable):
     @route(r"(\d+)\s+land\s+(\d+)",access="member")
     def land(self, message, user, params):
         id = int(params.group(1))
-        attack = Attack.load(id) 
+        attack = Attack.load(id)
         if attack is None:
             message.alert("No attack exists with id %d" %(id))
             return
@@ -98,3 +98,19 @@ class editattack(loadable):
         
         session.commit()
         message.reply("Changed LT for attack %d from %d to %d"%(id,old,when))
+    
+    @route(r"(\d+)\s+comment\s+(\S.*)",access="member")
+    def comment(self, message, user, params):
+        id = int(params.group(1))
+        attack = Attack.load(id)
+        if attack is None:
+            message.alert("No attack exists with id %d" %(id))
+            return
+        
+        if params.group(2) in self.nulls:
+            attack.comment = ""
+        else:
+            attack.comment = params.group(2)
+        
+        session.commit()
+        message.reply("Updated comment for attack %d: %s"%(id,attack.comment,))
