@@ -1,6 +1,5 @@
 {% extends "base.tpl" %}
 {% block content %}
-<center>
 <table cellspacing="0" cellpadding="0" width="70%" class="black">
 <tr class="datahigh"><th>
 Introduction to {{ bot }}
@@ -182,5 +181,4 @@ Misc
 {% endfilter %}</td>
 </th></tr>
 </table>
-</center>
 {% endblock %}

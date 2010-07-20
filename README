@@ -6,7 +6,7 @@ Requirements:
     Python 2.6
     PostgreSQL 8.4
     psycopg2
-    SQLAlchemy 0.5.8
+    SQLAlchemy 0.6.3
 
 Additional Arthur requirements:
     Apache 2.2

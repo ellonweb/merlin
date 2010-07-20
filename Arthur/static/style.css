@@ -4,7 +4,7 @@ html {
 
 body {
 	font-family: Verdana, Arial, Helvetica;
-	font-size: 7pt;
+	font-size: 8pt;
 	color: white;
 	background-color: #0a0a13;
 	background-image: url(back.gif);
@@ -26,7 +26,7 @@ body {
 }
 
 table {
-	font-size: 7pt;
+	font-size: 8pt;
 }
 
 a {
@@ -102,22 +102,27 @@ tr.unknown {
 }
 
 .Cat {
-	color: #6699cc;
+	color: #6699cc !important;
 	font-weight: bold;
 }
 
 .Ter {
-	color: #aa7744;
+	color: #aa7744 !important;
 	font-weight: bold;
 }
 
 .Xan {
-	color: #00cc00;
+	color: #00cc00 !important;
 	font-weight: bold;
 }
 
 .Zik {
-	color: #cccc00;
+	color: #cccc00 !important;
+	font-weight: bold;
+}
+
+.Etd {
+	color: #cccccc !important;
 	font-weight: bold;
 }
 

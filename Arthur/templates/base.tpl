@@ -5,6 +5,7 @@
 <head>
     <title>{{ name }}</title>
     <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/scans.css" />
 
     {% if menu %}
     <!-- FreeStyle Menu v1.0RC by Angus Turnbull http://www.twinhelix.com -->
@@ -14,6 +15,18 @@
     <noscript><link rel="stylesheet" type="text/css" href="/static/listmenu_fallback.css" /></noscript>
     <script type="text/javascript" src="/static/anim.js"></script>
     {% endif %}
+
+    <script type="text/javascript">
+        function linkshift(event, link) {
+            if (event.ctrlKey==1 || event.shiftKey==1 || event.altKey==1) {
+                window.open(link);
+                return false;
+            }
+            else {
+              return true;
+            }
+        }
+    </script>
 
 </head>
 
@@ -45,6 +58,7 @@
         {% endfor %}
     </ul>
             </td>
+            <td>PT: {{ tick }}</td>
 <form method="post" action="/lookup/">
             <th>Lookup:</th>
             <td><input type="text" name="lookup" size="8" onkeyup="var val=this.value;this.value=val+' ';this.value=val; var tl=val.length; if(tl<8){this.size=8;return;} if(tl>80){ this.size=100;return;} this.size=tl+(tl/4);"/></td>
@@ -55,7 +69,10 @@
     {% endif %}
 
     <div style="clear: both; height: 2em"></div>
+    <table cellspacing="1" cellpadding="3" width="100%"><tr><td><center>
     {% block content %}{% endblock %}
+    <p>&nbsp;</p>
+    </center></td></tr></table>
     <div id="push"></div>
 </div>
 <div id="footer" align="center">

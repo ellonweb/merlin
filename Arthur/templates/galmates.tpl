@@ -1,9 +1,6 @@
 {% extends "base.tpl" %}
 {% block content %}
-<table cellspacing="0" cellpadding="0" width="100%" class="black">
-<tr>
-<td>
-<table cellspacing="1" cellpadding="3" width="100%">
+<table cellspacing="1" cellpadding="3" width="100%" class="black">
     <tr class="datahigh">
         <th colspan="5">
             Galmates
@@ -25,8 +22,5 @@
         <td>{% if pubphone or phonefriend %}{{ phone }}{% else %}Hidden{% endif %}</td>
     </tr>
     {% endfor %}
-</table>
-</td>
-</tr>
 </table>
 {% endblock %}
