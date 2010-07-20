@@ -21,6 +21,7 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from Core.maps import Attack
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
@@ -29,5 +30,32 @@ from Arthur.loadable import loadable, load
 class attack(loadable):
     access = "half"
     
-    def execute(self, request, user):
+    def execute(self, request, user, message=None):
         return HttpResponseRedirect("/")
+
+@load
+class view(loadable):
+    access = "half"
+    
+    def execute(self, request, user, id, message=None):
+        attack = Attack.load(id)
+        if attack is None or not attack.active:
+            return HttpResponseRedirect(reverse("attacks"))
+        
+        group = []
+        scans = []
+        for planet in attack.planets:
+            group.append((planet, [],))
+            if planet.scan("P"):
+                group[-1][1].append(planet.scan("P"))
+                scans.append(planet.scan("P"))
+            
+            if planet.scan("D"):
+                group[-1][1].append(planet.scan("D"))
+                scans.append(planet.scan("D"))
+            
+            if planet.scan("A") or planet.scan("U"):
+                group[-1][1].append(planet.scan("A") or planet.scan("U"))
+                scans.append(planet.scan("A") or planet.scan("U"))
+        
+        return render("attack.tpl", request, attack=attack, message=message, group=group, scans=scans, intel=user.is_member())
