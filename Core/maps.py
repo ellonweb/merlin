@@ -571,13 +571,28 @@ class Attack(Base):
     id = Column(Integer, primary_key=True)
     landtick = Column(Integer)
     comment = Column(Text)
+    _active_ticks = 12
     
-    def addGalaxy(self,galaxy):
+    def addPlanet(self, planet):
+        if planet in self.planets:
+            return
+        if planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name"):
+            return
+        self.planets.append(planet)
+        return True
+    
+    def removePlanet(self, planet):
+        if planet in self.planets:
+            self.planets.remove(planet)
+            return True
+    
+    def addGalaxy(self, galaxy):
         oneplanetadded = False
         error=""
         for planet in galaxy.planets:
-            if planet.active and not planet in self.planets and not (planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name")):
-                self.planets.append(planet)
+            if not planet.active: continue
+            
+            if self.addPlanet(planet):
                 oneplanetadded = True
             else:
                 error += " %d:%d:%d" %(planet.x,planet.y,planet.z)
@@ -586,12 +601,13 @@ class Attack(Base):
         else:
             return " %d:%d" %(galaxy.x,galaxy.y),oneplanetadded
     
-    def removeGalaxy(self,galaxy):
+    def removeGalaxy(self, galaxy):
         oneplanetremoved = False
         error=""
         for planet in galaxy.planets:
-            if planet.active and planet in self.planets:
-                self.planets.remove(planet)
+            if not planet.active: continue
+            
+            if self.removePlanet(planet):
                 oneplanetremoved = True
             else:
                 error += " %d:%d:%d" %(planet.x,planet.y,planet.z)
@@ -608,8 +624,18 @@ class Attack(Base):
         return attack
     
     @property
+    def link(self):
+        return "%sattack/%d/" %(Config.get("URL","arthur"), self.id,)
+    
+    @property
     def active(self):
-        return Updates.current_tick() <= self.landtick + 12
+        return self.landtick >= Updates.current_tick() - Attack._active_ticks
+    
+    def __str__(self):
+        reply = "Attack %s LT: %s | '%s' | %s"%(self.id,self.landtick,self.comment,self.link,)
+        return encode(reply)
+        return reply
+    
 
 class AttackTarget(Base):
     __tablename__ = 'attack_target'

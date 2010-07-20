@@ -32,25 +32,27 @@ class attack(loadable):
     
     @route(r"list",access="member")
     def list(self,message,user,params):
-        reply = "Open attacks:"
-        
         Q = session.query(Attack)
-        Q = Q.order_by(asc(Attack.landtick))
+        Q = Q.filter(Attack.landtick >= Updates.current_tick() - Attack._active_ticks)
         
+        replies = []
         for attack in Q:
-            if attack.active:
-                comment = attack.comment
-                reply += "  %d '%s' LT: %d |" %(attack.id,comment,attack.landtick)
+            replies.append("%d '%s' LT: %d" %(attack.id,attack.comment,attack.landtick,))
         
+        reply = "Open attacks: " + " | ".join(replies)
         message.reply(reply)
-        
+    
     @route(r"show\s+(\d+)",access = "member")
     def show(self,message,user,params):
         id = params.group(1)
         attack = Attack.load(id)
         
-        message.reply("Attack %s LT: %d Url: %sattack/%d/"%(attack.comment,attack.landtick,Config.get("URL","arthur"),attack.id)) 
-
+        if attack is None:
+            message.alert("No attack exists with id %s" %(id))
+            return
+        
+        message.reply(str(attack))
+    
     @route(r"(\d+)\s+([. :\-\d,]+)(?:\s*(.+))?", access = "member")
     def new(self, message, user, params):
         error = ""
@@ -88,11 +90,10 @@ class attack(loadable):
             else:
                 planet = Planet.load(coord[0],coord[2],coord[4])
                 
-                if planet is None or planet in attack.planets or (planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name")):
-                    error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
-                else:    
-                    attack.planets.append(planet)
+                if planet and attack.addPlanet(planet):
                     added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
+                else:
+                    error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
 
         session.commit()
 

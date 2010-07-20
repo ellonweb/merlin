@@ -40,10 +40,9 @@ class editattack(loadable):
             message.alert("No attack exists with id %d" %(id))
             return
         
-
         for coord in re.findall(loadable.coord, params.group(2)):
             if not coord[4]:
-               
+                
                 galaxy = Galaxy.load(coord[0],coord[2])
                 
                 if galaxy is None:
@@ -57,11 +56,10 @@ class editattack(loadable):
             else:
                 planet = Planet.load(coord[0],coord[2],coord[4])
                 
-                if planet is None or planet in attack.planets or (planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name")):
-                    error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
-                else:
-                    attack.planets.append(planet)
+                if planet and attack.addPlanet(planet):
                     added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
+                else:
+                    error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
                 
         session.commit()
         
@@ -98,10 +96,7 @@ class editattack(loadable):
                 
                 planet = Planet.load(coord[0],coord[2],coord[4])
                 
-                if planet is None:
-                    error += "No planet with coords %s:%s:%s" %(coord[0],coord[2],coord[4])
-                elif planet in attack.planets:    
-                    attack.planets.remove(planet)
+                if planet and attack.removePlanet(planet):
                     removed += " %d:%d:%d" %(planet.x,planet.y,planet.z)
                 else:
                     error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
