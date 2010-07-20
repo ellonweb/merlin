@@ -50,7 +50,7 @@ class editattack(loadable):
         session.commit()
         message.reply(str(attack))
     
-    @route(r"(\d+)\s+remove\s+([. :\-\d,]+)?", access = "member")
+    @route(r"(\d+)\s+rem(?:ove)?\s+([. :\-\d,]+)?", access = "member")
     def remove(self, message, user, params):
         id = int(params.group(1))
         attack = Attack.load(id)

@@ -27,6 +27,7 @@ from Core.maps import Updates, Galaxy, Planet, Attack
 from Core.loadable import loadable, route
 
 class attack(loadable):
+    """Create an attack page on the webby with automatic parsed scans"""
     usage = " [<eta|landingtick> <coordlist>] | [list] | [show <id>]"
     
     @route(r"list",access="member")
@@ -36,9 +37,9 @@ class attack(loadable):
         
         replies = []
         for attack in Q:
-            replies.append("%d '%s' LT: %d" %(attack.id,attack.comment,attack.landtick,))
+            replies.append("(%d LT: %d %s)" %(attack.id,attack.landtick,attack.comment,))
         
-        reply = "Open attacks: " + " | ".join(replies)
+        reply = "Open attacks: " + " ".join(replies)
         message.reply(reply)
     
     @route(r"show\s+(\d+)",access = "member")

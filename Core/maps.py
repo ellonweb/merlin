@@ -612,7 +612,7 @@ class Attack(Base):
         return self.landtick >= Updates.current_tick() - Attack._active_ticks
     
     def __str__(self):
-        reply = "Attack %s LT: %s | '%s' | %s | Planets: "%(self.id,self.landtick,self.comment,self.link,)
+        reply = "Attack %d LT: %d %s | %s | Planets: "%(self.id,self.landtick,self.comment,self.link,)
         reply+= ", ".join(map(lambda p: "%s:%s:%s" %(p.x,p.y,p.z,), self.planets))
         return encode(reply)
         return reply
