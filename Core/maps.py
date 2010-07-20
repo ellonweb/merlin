@@ -566,6 +566,60 @@ Planet.bookings = dynamic_loader(Target, backref="planet")
 Galaxy.bookings = dynamic_loader(Target, Planet.__table__)
 #Alliance.bookings = dynamic_loader(Target, Intel.__table__)
 
+class Attack(Base):
+    __tablename__ = 'attack'
+    id = Column(Integer, primary_key=True)
+    landtick = Column(Integer)
+    comment = Column(Text)
+    
+    def addGalaxy(self,galaxy):
+        oneplanetadded = False
+        error=""
+        for planet in galaxy.planets:
+            if planet.active and not planet in self.planets and not (planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name")):
+                self.planets.append(planet)
+                oneplanetadded = True
+            else:
+                error += " %d:%d:%d" %(planet.x,planet.y,planet.z)
+        if oneplanetadded:
+            return error,oneplanetadded
+        else:
+            return " %d:%d" %(galaxy.x,galaxy.y),oneplanetadded
+    
+    def removeGalaxy(self,galaxy):
+        oneplanetremoved = False
+        error=""
+        for planet in galaxy.planets:
+            if planet.active and planet in self.planets:
+                self.planets.remove(planet)
+                oneplanetremoved = True
+            else:
+                error += " %d:%d:%d" %(planet.x,planet.y,planet.z)
+        if oneplanetremoved:
+            return error,oneplanetremoved
+        else:
+            return " %d:%d" %(galaxy.x,galaxy.y),oneplanetremoved
+    
+    @staticmethod
+    def load(id):
+        Q = session.query(Attack)
+        Q = Q.filter_by(id=id)
+        attack = Q.first()
+        return attack
+    
+    @property
+    def active(self):
+        return Updates.current_tick() <= self.landtick + 12
+
+class AttackTarget(Base):
+    __tablename__ = 'attack_target'
+    id = Column(Integer, primary_key=True)
+    attack_id = Column(Integer, ForeignKey(Attack.id, ondelete='cascade'))
+    planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'))
+Attack.planets = relation(Planet, secondary=AttackTarget.__table__,
+                                primaryjoin=AttackTarget.attack_id==Attack.id,
+                              secondaryjoin=AttackTarget.planet_id==Planet.id, order_by=(asc(Planet.x), asc(Planet.y), asc(Planet.z)))
+
 # ########################################################################### #
 # #############################    SHIP TABLE    ############################ #
 # ########################################################################### #
@@ -1036,61 +1090,6 @@ Invite.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=In
 Kick.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Kick.id==Vote.prop_id)
 Suggestion.votes = dynamic_loader(Vote, foreign_keys=(Vote.prop_id,), primaryjoin=Suggestion.id==Vote.prop_id)
 
-
-# ########################################################################### #
-# ################################  Attacks   ############################### #
-# ########################################################################### #
-
-class Attack(Base):
-    __tablename__ = 'attack'
-    id = Column(Integer,primary_key=True)
-    landtick = Column(Integer)
-    comment = Column(Text)
-   
-    def addGalaxy(self,galaxy):
-        oneplanetadded = False
-        error=""
-        for planet in galaxy.planets:
-            if planet.active and not planet in self.planets and not (planet.intel and planet.alliance and planet.alliance.name == Config.get("Alliance","name")):  
-                self.planets.append(planet)
-                oneplanetadded = True
-            else:
-                error += " %d:%d:%d" %(planet.x,planet.y,planet.z)
-        if oneplanetadded:
-            return error,oneplanetadded
-        else:
-            return " %d:%d" %(galaxy.x,galaxy.y),oneplanetadded
-            
-    def removeGalaxy(self,galaxy):
-        oneplanetremoved = False
-        error=""
-        for planet in galaxy.planets:
-            if planet.active and planet in self.planets:  
-                self.planets.remove(planet)
-                oneplanetremoved = True
-            else:
-                error += " %d:%d:%d" %(planet.x,planet.y,planet.z)
-        if oneplanetremoved:
-            return error,oneplanetremoved
-        else:
-            return " %d:%d" %(galaxy.x,galaxy.y),oneplanetremoved
-
-    @staticmethod
-    def load(id):
-        Q = session.query(Attack)
-        Q = Q.filter_by(id=id)
-        attack = Q.first()
-        return attack
-    @property    
-    def active(self):
-        return Updates.current_tick() <= self.landtick + 12
-                
-class AttackTarget(Base):
-    __tablename__ = 'attack_target'
-    id = Column(Integer,primary_key=True)
-    attack_id = Column(Integer,ForeignKey(Attack.id,ondelete='cascade'))
-    planet_id = Column(Integer,ForeignKey(Planet.id,ondelete='cascade'))
-Attack.planets = relation(Planet, secondary=AttackTarget.__table__, primaryjoin=AttackTarget.attack_id==Attack.id, secondaryjoin=AttackTarget.planet_id==Planet.id, order_by=(asc(Planet.x), asc(Planet.y), asc(Planet.z)))   
 # ########################################################################### #
 # ################################    LOGS    ############################### #
 # ########################################################################### #

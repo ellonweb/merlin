@@ -18,9 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ 
 import re
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.sql import asc
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
@@ -28,7 +27,7 @@ from Core.maps import Updates, Planet, User, Attack, Galaxy, AttackTarget
 from Core.loadable import loadable, route, require_user
 
 class editattack(loadable):
-    usage = " attackID (add|remove) <coordlist> | attackID land (tick|eta)"
+    usage = " [<id> add|remove <coordlist>] | [<id> land <tick|eta>]"
     
     @route(r"(\d+)\s+add\s+([. :\-\d,]+)?", access = "member")
     def add(self, message, user, params):
@@ -142,4 +141,3 @@ class editattack(loadable):
         session.commit()
         
         message.reply("Changed LT for attack %d from %d to %d"%(id,old,when))
-        
