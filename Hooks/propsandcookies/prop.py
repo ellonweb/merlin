@@ -145,6 +145,9 @@ class prop(loadable):
     @require_user
     def invite(self, message, user, params):
         person = params.group(1)
+        if person.lower() == Config.get("Connection","nick").lower():
+            message.reply("I am already here, shitface.")
+            return
         u = User.load(name=person,access="member")
         if u is not None:
             message.reply("Stupid %s, that wanker %s is already a member."%(user.name,person))

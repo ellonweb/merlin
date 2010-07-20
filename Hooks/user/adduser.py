@@ -51,6 +51,9 @@ class adduser(loadable):
         added = []
         exists = []
         for pnick in pnicks.split():
+            if pnick.lower() == Config.get("Connection","nick").lower():
+                message.reply("I am already here, shitface.")
+                continue
             member = User.load(name=pnick, active=False)
             if member is None:
                 member = User(name=pnick, access=access, sponsor=user.name)
