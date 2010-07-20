@@ -587,34 +587,14 @@ class Attack(Base):
             return True
     
     def addGalaxy(self, galaxy):
-        oneplanetadded = False
-        error=""
         for planet in galaxy.planets:
-            if not planet.active: continue
-            
-            if self.addPlanet(planet):
-                oneplanetadded = True
-            else:
-                error += " %d:%d:%d" %(planet.x,planet.y,planet.z)
-        if oneplanetadded:
-            return error,oneplanetadded
-        else:
-            return " %d:%d" %(galaxy.x,galaxy.y),oneplanetadded
+            if planet.active:
+                self.addPlanet(planet)
     
     def removeGalaxy(self, galaxy):
-        oneplanetremoved = False
-        error=""
         for planet in galaxy.planets:
-            if not planet.active: continue
-            
-            if self.removePlanet(planet):
-                oneplanetremoved = True
-            else:
-                error += " %d:%d:%d" %(planet.x,planet.y,planet.z)
-        if oneplanetremoved:
-            return error,oneplanetremoved
-        else:
-            return " %d:%d" %(galaxy.x,galaxy.y),oneplanetremoved
+            if planet.active:
+                self.removePlanet(planet)
     
     @staticmethod
     def load(id):
@@ -632,7 +612,8 @@ class Attack(Base):
         return self.landtick >= Updates.current_tick() - Attack._active_ticks
     
     def __str__(self):
-        reply = "Attack %s LT: %s | '%s' | %s"%(self.id,self.landtick,self.comment,self.link,)
+        reply = "Attack %s LT: %s | '%s' | %s | Planets: "%(self.id,self.landtick,self.comment,self.link,)
+        reply+= ", ".join(map(lambda p: "%s:%s:%s" %(p.x,p.y,p.z,), self.planets))
         return encode(reply)
         return reply
     

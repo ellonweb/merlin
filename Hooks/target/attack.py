@@ -21,11 +21,10 @@
  
 import re
 from sqlalchemy.sql import asc
-from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Updates, Planet, User, Attack, Galaxy, AttackTarget
-from Core.loadable import loadable, route, require_user
+from Core.maps import Updates, Galaxy, Planet, Attack
+from Core.loadable import loadable, route
 
 class attack(loadable):
     usage = " [<eta|landingtick> <coordlist>] | [list] | [show <id>]"
@@ -55,9 +54,6 @@ class attack(loadable):
     
     @route(r"(\d+)\s+([. :\-\d,]+)(?:\s*(.+))?", access = "member")
     def new(self, message, user, params):
-        error = ""
-        added = ""
-
         tick = Updates.current_tick()
         comment = params.group(3) or ""
         when = int(params.group(1))
@@ -71,30 +67,20 @@ class attack(loadable):
             eta = when - tick
         if when > 32767:
             when = 32767
-
+        
         attack = Attack(landtick=when,comment=comment)
         session.add(attack)
         
         for coord in re.findall(loadable.coord, params.group(2)):
             if not coord[4]:
                 galaxy = Galaxy.load(coord[0],coord[2])
-                
-                if galaxy is None:
-                    error+= " %s:%s" % (coord[0],coord[2])
-                else:
-                    errordetail,planetadded = attack.addGalaxy(galaxy)
-                    error += errordetail
-                    if planetadded:                
-                        added += " %d:%d" %(galaxy.x,galaxy.y)
-                    
+                if galaxy:
+                    attack.addGalaxy(galaxy)
+            
             else:
                 planet = Planet.load(coord[0],coord[2],coord[4])
-                
-                if planet and attack.addPlanet(planet):
-                    added += " %d:%d:%d" %(planet.x,planet.y,planet.z)
-                else:
-                    error += " %s:%s:%s" %(coord[0],coord[2],coord[4])
-
+                if planet:
+                    attack.addPlanet(planet)
+        
         session.commit()
-
-        message.reply("Attack %s created with id %d for targets: %s. Targets not included(or doubles): %s"%(comment,attack.id,added,error))
+        message.reply(str(attack))
