@@ -21,7 +21,7 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from Core.maps import Attack
+from Core.maps import Updates, Attack
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
@@ -42,6 +42,8 @@ class view(loadable):
         if attack is None or not attack.active:
             return HttpResponseRedirect(reverse("attacks"))
         
+        show_jgps = attack.landtick <= Updates.current_tick() + Attack._active_ticks/3
+        
         group = []
         scans = []
         for planet in attack.planets:
@@ -57,5 +59,9 @@ class view(loadable):
             if planet.scan("A") or planet.scan("U"):
                 group[-1][1].append(planet.scan("A") or planet.scan("U"))
                 scans.append(planet.scan("A") or planet.scan("U"))
+            
+            if show_jgps and planet.scan("J"):
+                group[-1][1].append(planet.scan("J"))
+                scans.append(planet.scan("J"))
         
         return render("attack.tpl", request, attack=attack, message=message, group=group, scans=scans, intel=user.is_member())
