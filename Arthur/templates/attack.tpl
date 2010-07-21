@@ -3,34 +3,34 @@
 {% if message %}
     <p>{{ message }}</p>
 {% endif %}
-    <table align="center" cellpadding="3" cellspacing="1" width="900">
-        <tr><td class="menuheader" colspan="7" align="center" height="15">
+    <table cellpadding="3" cellspacing="1" width="900" class="black">
+        <tr class="datahigh"><th colspan="7">
             Attack {{ attack.id }} LT: {{ attack.landtick }} {{ attack.comment }}
-        </td></tr>
-        <tr>
-            <td class="one" nowrap="nowrap" width="7%"><b>Coords</b></td>
-            <td class="one" nowrap="nowrap" width="5%"><b>Race</b></td>
-            <td class="one" nowrap="nowrap" width="5%"><b>Size</b></td>
-            <td class="one" nowrap="nowrap" width="8%"><b>Value</b></td>
-            <td class="one" nowrap="nowrap" width="8%"><b>Score</b></td>
-            <td class="one" nowrap="nowrap" width="6%"><b>Scans</b></td>
-            <td class="one" nowrap="nowrap" width="61%"><b>Bookings</b></td>
+        </th></tr>
+        <tr class="header">
+            <th width="7%">Coords</th>
+            <th width="5%">Race</th>
+            <th width="5%">Size</th>
+            <th width="8%">Value</th>
+            <th width="8%">Score</th>
+            <th width="6%">Scans</th>
+            <th width="61%">Bookings</th>
         </tr>
         
         {% for planet, scans, bookings in group %}
-        <tr>
-            <td class="two center"><a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
-            <td class="two {{ planet.race }}">{{ planet.race }}</td>
-            <td class="two right"> {{ planet.size }} </td>
-            <td class="two right"> {{ planet.value|intcomma }} </td>
-            <td class="two right"> {{ planet.score|intcomma }} </td>
-            <td class="two left">
+        <tr class="{{ loop.cycle('odd', 'even') }}">
+            <td class="center"><a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
+            <td class="center {{ planet.race }}">{{ planet.race }}</td>
+            <td class="right"> {{ planet.size|intcomma }} </td>
+            <td class="right"> {{ planet.value|intcomma }} </td>
+            <td class="right"> {{ planet.score|intcomma }} </td>
+            <td>
                 {% for scan in scans %}
                     <a href="#{{ scan.pa_id }}"
                     onclick="return linkshift(event, '{{ scan.link }}');">{{ scan.scantype }}</a>
                 {% endfor %}
             </td>
-            <td class="two left">
+            <td>
                 {% for lt, target in bookings %}
                     (
                     {{- lt - tick }}/{{ lt }}
