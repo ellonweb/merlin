@@ -26,5 +26,5 @@ urlpatterns = patterns('Arthur.attack',
     url(r'^attack/$', 'attack.attack', name="attacks"),
     url(r'^attack/(?P<id>\d+)/$', 'attack.view', name="attack"),
     url(r'^(?:attack/(?P<id>\d+)/)?book/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<when>\d+)/$', 'book.book', name="book"),
-    url(r'^(?:attack/(?P<id>\d+)/)?unbook/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<when>\d+)/$', 'book.unbook', name="unbook"),
+    url(r'^(?:attack/(?P<id>\d+)/)?unbook/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?:(?P<when>\d+)/)?$', 'book.unbook', name="unbook"),
 )

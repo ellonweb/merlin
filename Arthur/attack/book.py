@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import asc
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
@@ -31,7 +32,7 @@ from Arthur.loadable import loadable, load
 class book(loadable):
     access = "half"
     
-    def execute(self, request, user, x, y, z, when, id=None):
+    def execute(self, request, user, id, x, y, z, when):
         planet = Planet.load(x,y,z)
         if planet is None:
             return self.attack(request, user, id, "No planet with coords %s:%s:%s" %(x,y,z,))
@@ -63,6 +64,62 @@ class book(loadable):
             return self.attack(request, user, id, "Booked landing on %s:%s:%s tick %s (eta %s) for user %s" % (x,y,z, when, (when-tick), user.name,))
         
         return self.attack(request, user, id)
+    
+    def attack(self, request, user, id, message=None):
+        attack = Attack.load(id)
+        if attack and attack.active:
+            from Arthur.attack.attack import view
+            return view.execute(request, user, id, message)
+        else:
+            from Arthur.attack.attack import attack
+            return attack.execute(request, user, message)
+
+@load
+class unbook(loadable):
+    access = "half"
+    
+    def execute(self, request, user, id, x, y, z, when):
+        print when
+        planet = Planet.load(x,y,z)
+        if planet is None:
+            return self.attack(request, user, id, "No planet with coords %s:%s:%s" %(x,y,z,))
+        
+        tick = Updates.current_tick()
+        when = int(when or 0)
+        if 0 < when < PA.getint("numbers", "protection"):
+            eta = when
+            when += tick
+        elif 0 < when <= tick:
+            return self.attack(request, user, id, "Can not unbook targets in the past. You wanted tick %s, but current tick is %s." % (when, tick,))
+        else:
+            eta = when - tick
+        if when > 32767:
+            when = 32767        
+        
+        Q = session.query(Target)
+        Q = Q.join(Target.user)
+        Q = Q.filter(Target.planet == planet)
+        Q = Q.filter(Target.user == user)
+        Q = Q.filter(Target.tick == when) if when else Q.filter(Target.tick >= tick)
+        Q = Q.order_by(asc(Target.tick))
+        result = Q.all()
+        for target in result:
+            session.delete(target)
+        count = len(result)
+        session.commit()
+        
+        if count < 1:
+            reply="You have no bookings matching %s:%s:%s"%(planet.x,planet.y,planet.z,)
+            if when:
+                reply+= " for landing on tick %s"%(when,)
+        else:
+            reply = "You have unbooked %s:%s:%s"%(planet.x,planet.y,planet.z,)
+            if when:
+                reply+=" for landing pt %s"%(when,)
+            else:
+                reply+=" for %d booking(s)"%(count,)
+        
+        return self.attack(request, user, id, reply)
     
     def attack(self, request, user, id, message=None):
         attack = Attack.load(id)
