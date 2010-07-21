@@ -93,7 +93,7 @@ class prop(loadable):
         if prop.proposer == user:
             message.reply("Arbitrary %s rule #167: No voting on your own props."%(Config.get("Connection", "nick")))
             return
-        if prop.type != 'suggestion' and prop.person == user.name and vote == 'veto':
+        if prop.type == 'kick' and vote == 'veto' and prop.kicked == user:
             message.reply("You can't veto a vote to kick you.")
             return
         
