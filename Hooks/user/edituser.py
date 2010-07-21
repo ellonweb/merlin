@@ -35,22 +35,26 @@ class edituser(loadable):
         
         username = params.group(1)
         access = params.group(2).lower()
-        if not access.isdigit() and access not in self.true and access not in self.false:
-            try:
-                access = Config.getint("Access",access)
-            except Exception:
-                message.reply("Invalid access level '%s'" % (access,))
-                return
-        elif access.isdigit():
+        if access.isdigit():
             access = int(access)
         elif access in self.true:
             access = True
         elif access in self.false:
             access = False
+        else:
+            try:
+                access = Config.getint("Access",access)
+            except Exception:
+                message.reply("Invalid access level '%s'" % (access,))
+                return
         
-        member = User.load(name=username, exact=False, active=False)
+        member = User.load(name=username, active=False)
         if member is None:
             message.alert("No such user '%s'" % (username,))
+            return
+        
+        if type(access) is int and not member.active:
+            message.reply("You should first re-activate user %s" %(member.name,))
             return
         
         if access > user.access or member.access > user.access:
