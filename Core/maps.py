@@ -563,7 +563,7 @@ class Target(Base):
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), index=True)
     tick = Column(Integer)
 User.bookings = dynamic_loader(Target, backref="user")
-Planet.bookings = dynamic_loader(Target, backref="planet")
+Planet.bookings = dynamic_loader(Target, backref="planet", order_by=(asc(Target.tick)))
 Galaxy.bookings = dynamic_loader(Target, Planet.__table__)
 #Alliance.bookings = dynamic_loader(Target, Intel.__table__)
 
