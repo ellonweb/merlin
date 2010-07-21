@@ -34,6 +34,7 @@ class attack(loadable):
     def list(self,message,user,params):
         Q = session.query(Attack)
         Q = Q.filter(Attack.landtick >= Updates.current_tick() - Attack._active_ticks)
+        Q = Q.order_by(asc(Attack.id))
         
         replies = []
         for attack in Q:
