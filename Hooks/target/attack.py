@@ -62,7 +62,7 @@ class attack(loadable):
             eta = when
             when += tick
         elif when <= tick:
-            error += "Can not create attacks in the past. You wanted tick %s, but current tick is %s." % (when, tick,)
+            message.alert("Can not create attacks in the past. You wanted tick %s, but current tick is %s." % (when, tick,))
             return
         else:
             eta = when - tick
