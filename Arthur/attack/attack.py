@@ -21,7 +21,9 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from Core.maps import Updates, Target, Attack
+from sqlalchemy.sql import asc
+from Core.db import session
+from Core.maps import Updates, Planet, Target, Attack
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
@@ -31,7 +33,23 @@ class attack(loadable):
     access = "half"
     
     def execute(self, request, user, message=None):
-        return HttpResponseRedirect("/")
+        tick = Updates.current_tick()
+        
+        Q = session.query(Attack)
+        Q = Q.filter(Attack.landtick >= tick - Attack._active_ticks)
+        Q = Q.order_by(asc(Attack.id))
+        attacks = Q.all()
+        
+        Q = session.query(Planet, Target.tick)
+        Q = Q.join(Target.planet)
+        Q = Q.join(Target.user)
+        Q = Q.filter(Planet.active == True)
+        Q = Q.filter(Target.user == user)
+        Q = Q.filter(Target.tick > tick)
+        Q = Q.order_by(asc(Target.tick), asc(Planet.x), asc(Planet.y), asc(Planet.z))
+        bookings = Q.all()
+        
+        return render("attacks.tpl", request, message=message, attacks=attacks, bookings=bookings, intel=user.is_member())
 
 @load
 class view(loadable):
