@@ -30,9 +30,10 @@ class _menu(object):
     content = {}
     
     def __call__(self, head, sub=None, prefix=False, suffix=""):
-        prefix = head if prefix else ""
+        pre = prefix
         
         def wrapper(hook):
+            prefix = hook.__module__.split(".")[1] if pre else ""
             url = ("/%s/%s/%s/"%(prefix,hook.name,suffix,)).replace("//","/")
             
             if head not in self.heads:
