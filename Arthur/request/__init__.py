@@ -1,5 +1,5 @@
-# This file is part of Merlin.
-# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# This file is part of Merlin/Arthur.
+# Merlin/Arthur is the Copyright (C)2009,2010 of Elliot Rosemarine.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,10 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# List of package modules
-__all__ = [
-           "scan",
-           "scans",
-           "request",
-           "parser",
-           ]
+from django.conf.urls.defaults import include, patterns, url
+from Core.paconf import PA
+
+urlpatterns = patterns('Arthur.request',
+    url(r'^$','request.request'),
+    url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<scantype>['+"".join([type.lower() for type in PA.options("scans")])+'])/$', 'makerequest.makerequest',name="request_planet"),
+    url(r'^open/','requests.requests'),
+)

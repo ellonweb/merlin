@@ -776,12 +776,35 @@ class Request(Base):
     dists = Column(Integer)
     scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='set null'))
     active = Column(Boolean, default=True)
+    tick = Column(Integer,default=Updates.current_tick)
     
     @staticmethod
     def load(id):
         Q = session.query(Request)
         request = Q.filter_by(id = id, active = True).first()
         return request
+        
+    @staticmethod
+    def load_active():
+        Q = session.query(Request)
+        Q = Q.filter(Request.tick > Updates.current_tick() - 5)
+        Q =  Q.filter(Request.active == True)
+        return Q.all()
+    
+    @staticmethod
+    def load_foruser(user):
+        Q = session.query(Request)
+        Q = Q.filter(Request.user == user)
+        return Q.all()
+
+    @property    
+    def paurl(self):    
+        return Config.get("URL", "reqscan") % (PA.get(self.scantype, "type"), self.target.x, self.target.y, self.target.z,)    
+        
+    @property
+    def scanname(self):
+        return PA.get(self.scantype,"name")
+        
 Request.user = relation(User, backref="requests")
 Request.target = relation(Planet)
 Request.scan = relation(Scan)

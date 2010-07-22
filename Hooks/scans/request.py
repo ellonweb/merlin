@@ -46,10 +46,8 @@ class request(loadable):
         message.reply("Requested a %s Scan of %s:%s:%s. !request cancel %s to cancel the request." % (PA.get(scan, "name"), planet.x, planet.y, planet.z, request.id,))
     
     @robohci
-    def robocop(self, message, user_id, x,y,z, scan, dists):
-        user = User.load(id=user_id)
-        planet = Planet.load(x,y,z)
-        self.request(message, user, planet, scan, dists)
+    def robocop(self, message, user_name, x,y,z, scan, dists,request_id):
+        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s) %s" % (request_id, user_name, PA.get(scan, "name"), x,y,z, dists,Config.get("URL", "reqscan") % (PA.get(scan, "type"), x,y,z,)), self.scanchan())
     
     def request(self, message, user, planet, scan, dists):
         request = Request(target=planet, scantype=scan, dists=dists)
@@ -111,4 +109,4 @@ class request(loadable):
         return Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")
     
     def link(self, request):
-        return Config.get("URL", "reqscan") % (PA.get(request.scantype, "type"), request.target.x, request.target.y, request.target.z,)
+        return request.paurl
