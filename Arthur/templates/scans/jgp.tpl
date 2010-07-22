@@ -1,10 +1,6 @@
 <table width="700" class="scan">
 {% with planet = scan.planet %}
-    <tr>
-        <td class="menuheader" colspan=12 height=15>
-            {% include "scans/header.tpl" %}
-        </td>
-    </tr>
+    {% include "scans/header.tpl" %}
     
     <tr height="20">
         <td class="menuheader" height="25" width="10%">Target</td>
