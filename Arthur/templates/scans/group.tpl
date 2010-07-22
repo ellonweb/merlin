@@ -1,26 +1,26 @@
 {% extends "base.tpl" %}
 {% block content %}
-    <table align="center" cellpadding="3" cellspacing="1" width="600">
-        <tr><td class="menuheader" colspan="6" align="center" height="15">
+    <table cellspacing="1" cellpadding="3" width="600" class="black">
+        <tr class="datahigh"><th colspan="6">
             {% block title scoped %}Scans belonging to this group:{% endblock %}
-        </td></tr>
-        <tr>
-            <td class="one" nowrap="nowrap" width="10%"><b>Coords</b></td>
-            <td class="one" nowrap="nowrap" width="10%"><b>Race</b></td>
-            <td class="one" nowrap="nowrap" width="10%"><b>Size</b></td>
-            <td class="one" nowrap="nowrap" width="20%"><b>Value</b></td>
-            <td class="one" nowrap="nowrap" width="20%"><b>Score</b></td>
-            <td class="one" nowrap="nowrap" width="30%"><b>Scans</b></td>
+        </th></tr>
+        <tr class="header">
+            <th width="10%">Coords</th>
+            <th width="10%">Race</th>
+            <th width="10%">Size</th>
+            <th width="20%">Value</th>
+            <th width="20%">Score</th>
+            <th width="30%">Scans</th>
         </tr>
         
         {% for planet, scans in group %}
-        <tr>
-            <td class="two center"><a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
-            <td class="two {{ planet.race }}">{{ planet.race }}</td>
-            <td class="two right"> {{ planet.size }} </td>
-            <td class="two right"> {{ planet.value|intcomma }} </td>
-            <td class="two right"> {{ planet.score|intcomma }} </td>
-            <td class="two left">
+        <tr class="{{ loop.cycle('odd', 'even') }}">
+            <td class="center"><a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
+            <td class="center {{ planet.race }}">{{ planet.race }}</td>
+            <td class="right"> {{ planet.size|intcomma }} </td>
+            <td class="right"> {{ planet.value|intcomma }} </td>
+            <td class="right"> {{ planet.score|intcomma }} </td>
+            <td>
                 {% for scan in scans %}
                     <a href="{% block url scoped %}#{{ scan.pa_id }}{% endblock %}"
                     onclick="return linkshift(event, '{{ scan.link }}');">{{ scan.scantype }}</a>

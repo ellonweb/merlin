@@ -5,7 +5,6 @@
 <head>
     <title>{{ name }}</title>
     <link rel="stylesheet" href="/static/style.css" />
-    <link rel="stylesheet" href="/static/scans.css" />
 
     {% if menu %}
     <!-- FreeStyle Menu v1.0RC by Angus Turnbull http://www.twinhelix.com -->

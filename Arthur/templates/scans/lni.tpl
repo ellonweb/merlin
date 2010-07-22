@@ -1,13 +1,9 @@
-<table width="500" class="scan">
+<table cellspacing="1" cellpadding="3" width="500" class="black">
 {% with planet = scan.planet %}
-    <tr>
-        <td class="menuheader" height=15>
-            {% include "scans/header.tpl" %}
-        </td>
-    </tr>
+    {% include "scans/header.tpl" %}
     
-    <tr>
-        <td class="two">(Shift, Ctrl or Alt + Click to Open PA Link)</td>
+    <tr class="header center">
+        <td>(Shift, Ctrl or Alt + Click to Open PA Link)</td>
     </tr>
     
 {% endwith %}
