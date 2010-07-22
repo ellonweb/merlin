@@ -69,11 +69,23 @@ tr.datahigh {
  background-color: #181C29;
 }
 
+td.datahigh {
+ background-color: #181C29;
+}
+
 tr.odd {
 	background-color: #292d3a;
 }
 
 tr.even {
+	background-color: #252936;
+}
+
+td.odd {
+	background-color: #292d3a;
+}
+
+td.even {
 	background-color: #252936;
 }
 
@@ -185,4 +197,16 @@ tr.unknown {
 
 .Nodef {
 	background-color: #717157;
+}
+
+.center {
+	text-align: center;
+}
+
+.right {
+	text-align: right;
+}
+
+.left {
+	text-align: left;
 }

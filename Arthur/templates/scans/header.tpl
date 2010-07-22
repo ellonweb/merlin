@@ -1,3 +1,6 @@
+<tr class="datahigh">
+    <th colspan=12 height=15>
+
 <a id="{{ scan.pa_id }}"></a>
 <a href="{% url "planet_scan_" + scan.scantype|lower, planet.x, planet.y, planet.z %}"
 onclick="return linkshift(event, '{{ scan.link }}');">{{ scan.type }} Scan</a>
@@ -14,3 +17,6 @@ in PT [{{ scan.tick }}]
         <i>{{ planet.alliance.name }}</i>
     {% endif %}
 {% endif %}
+
+    </th>
+</tr>
