@@ -378,10 +378,28 @@ class prop(loadable):
         session.commit()
     
     def base_props_selectable(self):
-        invites = session.query(Invite.id, Invite.person, Invite.vote_result, literal("invite").label("type"), Invite.active)
-        kicks = session.query(Kick.id, User.name, Kick.vote_result, literal("kick").label("type"), Kick.active).join(Kick.kicked)
-        suggestion = session.query(Suggestion.id,User.name,Suggestion.vote_result, literal("suggestion").label("type"),Suggestion.active).join(Suggestion.proposer)
-        props = union(invites, kicks,suggestion).alias("prop")
+        invites = session.query(    Invite.id               .label("id"),
+                                    Invite.person           .label("person"),
+                                    Invite.vote_result      .label("vote_result"),
+                                    literal("invite")       .label("type"),
+                                    Invite.active           .label("active")
+                                )
+        
+        kicks = session.query(      Kick.id                 .label("id"),
+                                    User.name               .label("person"),
+                                    Kick.vote_result        .label("vote_result"),
+                                    literal("kick")         .label("type"),
+                                    Kick.active             .label("active")
+                                ).join(Kick.kicked)
+        
+        suggestion = session.query( Suggestion.id           .label("id"),
+                                    User.name               .label("person"),
+                                    Suggestion.vote_result  .label("vote_result"),
+                                    literal("suggestion")   .label("type"),
+                                    Suggestion.active       .label("active")
+                                ).join(Suggestion.proposer)
+        
+        props = union(invites, kicks, suggestion).alias("prop")
         return props
     
     def get_open_props(self):
