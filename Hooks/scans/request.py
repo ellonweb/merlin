@@ -55,7 +55,8 @@ class request(loadable):
         session.commit()
         
         dists_intel = planet.intel.dists if planet.intel else 0
-        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (request.id, user.name, PA.get(scan, "name"), planet.x,planet.y,planet.z, dists_intel, request.dists,) + self.link(request), self.scanchan())
+        if message.get_chan() != self.scanchan():
+            message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (request.id, user.name, PA.get(scan, "name"), planet.x,planet.y,planet.z, dists_intel, request.dists,) + self.link(request), self.scanchan())
         
         return request
     
@@ -74,7 +75,8 @@ class request(loadable):
         request.active = False
         session.commit()
         message.reply("Cancelled scan request %s" % (id,))
-        message.privmsg("Cancelled scan request %s" % (id,), self.scanchan())
+        if message.get_chan() != self.scanchan():
+            message.privmsg("Cancelled scan request %s" % (id,), self.scanchan())
     
     @route(r"(\d+)\s+block(?:s|ed)?\s+(\d+)", access = "member")
     def blocks(self, message, user, params):
