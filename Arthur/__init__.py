@@ -84,3 +84,5 @@ class guide(loadable):
 from Arthur import alliance
 from Arthur import rankings
 from Arthur import scans
+from Arthur import request
+

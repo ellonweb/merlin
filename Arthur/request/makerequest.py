@@ -38,7 +38,7 @@ class makerequest(loadable):
         planet = Planet.load(x,y,z)
         if planet is None:
             return HttpResponseRedirect(reverse("request"))
-        scantype = scantype.upper()    
+        scantype = scantype.upper()
         dists = planet.intel.dists if planet.intel else 0
         requestscan = Request(target=planet, scantype=scantype, dists=dists,tick=tick)
         user.requests.append(requestscan)

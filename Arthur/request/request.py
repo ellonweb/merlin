@@ -26,15 +26,15 @@ from Core.db import session
 from Core.maps import Updates, Planet, Request
 from Arthur.loadable import loadable, load
 from Core.paconf import PA
-from Arthur.context import render
+from Arthur.context import menu,render
 from Core.robocop import push
 
+@menu("Scan Requests", "Request", prefix=True)
 @load
-class request(loadable):
+class home(loadable):
     access = "member"
     def execute(self, request, user):
         requests = Request.load_active()
         userrequests = Request.load_foruser(user)
-        
 
         return render("request.tpl", request, title="", intel=user.is_member(), requests=requests,userrequests=userrequests)

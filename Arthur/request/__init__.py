@@ -21,9 +21,10 @@
  
 from django.conf.urls.defaults import include, patterns, url
 from Core.paconf import PA
+from Arthur.request import makerequest, request, requests
 
 urlpatterns = patterns('Arthur.request',
-    url(r'^$','request.request'),
+    url(r'^home/','request.home'),
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<scantype>['+"".join([type.lower() for type in PA.options("scans")])+'])/$', 'makerequest.makerequest',name="request_planet"),
-    url(r'^open/','requests.requests'),
+    url(r'^open/','requests.open'),
 )

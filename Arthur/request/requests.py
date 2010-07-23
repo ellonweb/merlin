@@ -23,15 +23,13 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy.sql import desc
 from Core.db import session
-from Core.maps import Updates, Planet, Request
+from Core.maps import Request
 from Arthur.loadable import loadable, load
-from Core.paconf import PA
 from Arthur.context import menu,render
-from Core.config import Config
 
-@menu(Config.get("Connection","nick"), "Scan Requests")
+@menu("Scan Requests", "Open requests", prefix=True)
 @load
-class requests(loadable):
+class open(loadable):
     access = "member"
     def execute(self, request, user):
         requests = Request.load_active()
