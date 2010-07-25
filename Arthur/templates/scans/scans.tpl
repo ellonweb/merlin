@@ -59,8 +59,8 @@ return false;
 {% for req in requests %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
         <td class="center">{{ req.target.x }}:{{ req.target.y }}:{{ req.target.z }}</td>
-        <td><a href="{{ req.paurl }}">{{ req.scanname }}</a></td>
-        <td>{{ req.dists or "&nbsp;" }}</td>
+        <td><a href="{{ req.link }}">{{ req.type }}</a></td>
+        <td>i:{{ req.target.intel.dists }}/r:{{ req.dists }}</td>
         <td class="center">{{ req.user.name }}</td>
     </tr>
     {% endfor %}
@@ -94,7 +94,7 @@ return false;
     {% for req in userrequests %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
         <td class="center">{{ req.target.x }}:{{ req.target.y }}:{{ req.target.z }}</td>
-        <td><a href="{{ req.paurl }}">{{ req.scanname }}</a></td>
+        <td><a href="{{ req.link }}">{{ req.type }}</a></td>
         {% if req.scan %}
           <td class="center"><a href="{% url "scan_id", req.scan.tick, req.scan.pa_id %}"
                     onclick="return linkshift(event, '{{ req.scan.link }}');">{{ req.scan.scantype }}</a></td>

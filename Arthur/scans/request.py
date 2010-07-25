@@ -28,26 +28,26 @@ from Arthur.context import render
 from Arthur.loadable import loadable, load
 
 urlpatterns = patterns('Arthur.scans.request',
-    url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<scantype>['+"".join([type.lower() for type in PA.options("scans")])+'])/$', 'request', name="request_planet"),
+    url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<type>['+"".join([type.lower() for type in PA.options("scans")])+'])/(?:(?P<dists>\d+)/)?$', 'request', name="request_planet"),
 )
 
 @load
 class request(loadable):
     access = "half"
-    def execute(self, request, user, x, y, z, scantype):
+    def execute(self, request, user, x, y, z, type, dists):
         from Arthur.scans.list import scans
         tick = Updates.current_tick()
+        type = type.upper()
         
         planet = Planet.load(x,y,z)
         if planet is None:
             return scans.execute(request, user, message="No planet with coords %s:%s:%s" %(x,y,z,))
             
-        scantype = scantype.upper()
-        dists = planet.intel.dists if planet.intel else 0
-        requestscan = Request(target=planet, scantype=scantype, dists=dists)
-        user.requests.append(requestscan)
+        dists = int(dists or 0)
+        request = Request(target=planet, scantype=type, dists=dists)
+        user.requests.append(request)
         session.commit()
         
-        push("request", user_name=user.name, x=x,y=y,z=z, scan=scantype, dists=dists,request_id=requestscan.id)
+        push("request", request_id=request.id)
         
-        return scans.execute(request, user, message="Requested %s-scan on %s:%s:%s"%(scantype,planet.x, planet.y, planet.z), planet=planet)
+        return scans.execute(request, user, message="Requested a %s Scan of %s:%s:%s"%(request.type, x,y,z,), planet=planet)

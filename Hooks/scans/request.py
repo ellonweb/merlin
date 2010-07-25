@@ -24,7 +24,7 @@
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Planet, User, Request,Updates
+from Core.maps import Planet, User, Request
 from Core.loadable import loadable, route, require_user, robohci
 
 class request(loadable):
@@ -43,11 +43,16 @@ class request(loadable):
         dists = int(params.group(7) or 0)
         
         request = self.request(message, user, planet, scan, dists)
-        message.reply("Requested a %s Scan of %s:%s:%s. !request cancel %s to cancel the request." % (PA.get(scan, "name"), planet.x, planet.y, planet.z, request.id,))
+        if message.get_chan() != self.scanchan():
+            message.reply("Requested a %s Scan of %s:%s:%s. !request cancel %s to cancel the request." % (request.type, planet.x, planet.y, planet.z, request.id,))
     
     @robohci
-    def robocop(self, message, user_name, x,y,z, scan, dists,request_id):
-        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s) %s" % (request_id, user_name, PA.get(scan, "name"), x,y,z, dists,Config.get("URL", "reqscan") % (PA.get(scan, "type"), x,y,z,)), self.scanchan())
+    def robocop(self, message, request_id):
+        request = Request.load(request_id)
+        user = request.user
+        planet = request.target
+        dists_intel = planet.intel.dists if planet.intel else 0
+        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (request.id, user.name, request.type, planet.x,planet.y,planet.z, dists_intel, request.dists,) + request.link, self.scanchan())
     
     def request(self, message, user, planet, scan, dists):
         request = Request(target=planet, scantype=scan, dists=dists)
@@ -55,8 +60,7 @@ class request(loadable):
         session.commit()
         
         dists_intel = planet.intel.dists if planet.intel else 0
-        if message.get_chan() != self.scanchan():
-            message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (request.id, user.name, PA.get(scan, "name"), planet.x,planet.y,planet.z, dists_intel, request.dists,) + self.link(request), self.scanchan())
+        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (request.id, user.name, request.type, planet.x,planet.y,planet.z, dists_intel, request.dists,) + request.link, self.scanchan())
         
         return request
     
@@ -97,10 +101,7 @@ class request(loadable):
     
     @route(r"links", access = "member")
     def links(self, message, user, params):
-        message.reply(" ".join(map(lambda request: "[%s: %s]" % (request.id, self.link(request),), Request.load_active(5))))
+        message.reply(" ".join(map(lambda request: "[%s: %s]" % (request.id, request.link,), Request.load_active(5))))
     
     def scanchan(self):
         return Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")
-    
-    def link(self, request):
-        return request.paurl

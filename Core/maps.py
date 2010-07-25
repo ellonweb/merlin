@@ -510,7 +510,7 @@ class Intel(Base):
     defwhore = Column(Boolean, default=False)
     covop = Column(Boolean, default=False)
     scanner = Column(Boolean, default=False)
-    dists = Column(Integer)
+    dists = Column(Integer, default=0)
     bg = Column(String(25))
     gov = Column(String(20))
     relay = Column(Boolean, default=False)
@@ -797,13 +797,13 @@ class Request(Base):
         Q = session.query(Request)
         Q = Q.filter(Request.user == user)
         return Q.all()
-
-    @property    
-    def paurl(self):    
-        return Config.get("URL", "reqscan") % (PA.get(self.scantype, "type"), self.target.x, self.target.y, self.target.z,)    
+    
+    @property
+    def link(self):
+        return Config.get("URL", "reqscan") % (PA.get(self.scantype, "type"), self.target.x, self.target.y, self.target.z,)
         
     @property
-    def scanname(self):
+    def type(self):
         return PA.get(self.scantype,"name")
         
 Request.user = relation(User, backref="requests")
