@@ -8,7 +8,13 @@
 
 <p>&nbsp;</p>
 
-{% with title = "Open Requests", requests = open %}
+{% with title = "Your Open Requests", requests = mine %}
+{% include "scans/open.tpl" %}
+{% endwith %}
+
+<p>&nbsp;</p>
+
+{% with title = "All Open Requests", requests = everyone %}
 {% include "scans/open.tpl" %}
 {% endwith %}
 

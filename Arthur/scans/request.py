@@ -30,6 +30,7 @@ from Arthur.loadable import loadable, load
 
 urlpatterns = patterns('Arthur.scans.request',
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<type>['+"".join([type.lower() for type in PA.options("scans")])+'])/(?:(?P<dists>\d+)/)?$', 'request', name="request_planet"),
+    url(r'^cancel/(?P<id>\d+)/$', 'cancel', name="request_cancel"),
 )
 
 @load
@@ -45,13 +46,27 @@ class request(loadable):
             return scans.execute(request, user, message="No planet with coords %s:%s:%s" %(x,y,z,))
             
         dists = int(dists or 0)
-        request = Request(target=planet, scantype=type, dists=dists)
-        user.requests.append(request)
+        req = Request(target=planet, scantype=type, dists=dists)
+        user.requests.append(req)
         session.commit()
         
-        push("request", request_id=request.id)
+        push("request", request_id=req.id)
         
-        return scans.execute(request, user, message="Requested a %s Scan of %s:%s:%s"%(request.type, x,y,z,), planet=planet)
+        return scans.execute(request, user, message="Requested a %s Scan of %s:%s:%s"%(req.type, x,y,z,), planet=planet)
+
+@load
+class cancel(loadable):
+    access = "half"
+    def execute(self, request, user, id):
+        req = Request.load(id)
+        if req is None:
+            return requests.execute(request, user, message="No open request number %s exists (idiot)."%(id,))
+        if req.user is not user and not user.is_admin():
+            return requests.execute(request, user, message="Only %s may cancel request %s."%(req.user.name,id))
+        
+        req.active = False
+        session.commit()
+        return requests.execute(request, user, message="Cancelled scan request %s" % (id,))
 
 @menu("Scans", "Requests", prefix=True)
 @load
@@ -61,9 +76,16 @@ class requests(loadable):
         tick = Updates.current_tick()
         
         Q = session.query(Request)
+        Q = Q.filter(Request.user == user)
         Q = Q.filter(Request.tick > tick - 5)
         Q = Q.filter(Request.active == True)
         Q = Q.order_by(asc(Request.id))
-        open = Q.all()
+        mine = Q.all()
         
-        return render("scans/requests.tpl", request, types=Request._requestable, open=open, message=message)
+        Q = session.query(Request)
+        Q = Q.filter(Request.tick > tick - 5)
+        Q = Q.filter(Request.active == True)
+        Q = Q.order_by(asc(Request.id))
+        everyone = Q.all()
+        
+        return render("scans/requests.tpl", request, types=Request._requestable, mine=mine, everyone=everyone, message=message)
