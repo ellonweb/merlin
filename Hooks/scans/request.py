@@ -24,7 +24,7 @@
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Planet, User, Request
+from Core.maps import Planet, User, Request,Updates
 from Core.loadable import loadable, route, require_user, robohci
 
 class request(loadable):
@@ -50,7 +50,7 @@ class request(loadable):
         message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s) %s" % (request_id, user_name, PA.get(scan, "name"), x,y,z, dists,Config.get("URL", "reqscan") % (PA.get(scan, "type"), x,y,z,)), self.scanchan())
     
     def request(self, message, user, planet, scan, dists):
-        request = Request(target=planet, scantype=scan, dists=dists)
+        request = Request(target=planet, scantype=scan, dists=dists,tick=Updates.current_tick())
         user.requests.append(request)
         session.commit()
         
@@ -93,19 +93,14 @@ class request(loadable):
     
     @route(r"list", access = "member")
     def list(self, message, user, params):
-        Q = session.query(Request)
-        Q = Q.filter(Request.scan==None)
-        Q = Q.filter(Request.active==True)
+      
         
-        message.reply(" ".join(map(lambda request: "[%s: %s %s:%s:%s]" % (request.id, request.scantype, request.target.x, request.target.y, request.target.z,), Q.all())))
+        message.reply(" ".join(map(lambda request: "[%s: %s %s:%s:%s]" % (request.id, request.scantype, request.target.x, request.target.y, request.target.z,), Request.load_active())))
     
     @route(r"links", access = "member")
     def links(self, message, user, params):
-        Q = session.query(Request)
-        Q = Q.filter(Request.scan==None)
-        Q = Q.filter(Request.active==True)
-        
-        message.reply(" ".join(map(lambda request: "[%s: %s]" % (request.id, self.link(request),), Q.all())))
+            
+        message.reply(" ".join(map(lambda request: "[%s: %s]" % (request.id, self.link(request),), Request.load_active(5))))
     
     def scanchan(self):
         return Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")

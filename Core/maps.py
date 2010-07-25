@@ -785,11 +785,12 @@ class Request(Base):
         return request
         
     @staticmethod
-    def load_active():
+    def load_active( limit = None):
         Q = session.query(Request)
         Q = Q.filter(Request.tick > Updates.current_tick() - 5)
+        Q = Q.filter(Request.scan==None)
         Q =  Q.filter(Request.active == True)
-        return Q.all()
+        return Q[:limit] if limit else Q.all()
     
     @staticmethod
     def load_foruser(user):
