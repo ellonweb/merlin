@@ -4,43 +4,7 @@
     <p>{{ message }}</p>
 {% endif %}
 
-<table cellpadding="3" cellspacing="1" class="black">
-
-<tr class="datahigh">
-<th colspan="2">
-Request Scans
-</th>
-</tr>
-<tr class="header">
-<th>Coords</th>
-<td>
-<form onsubmit="return request_scan()">
-<input type="text" id="x" name="x" value="{% if planet %}{{ planet.x }}{% endif %}" size="2" />:
-<input type="text" id="y" name="y" value="{% if planet %}{{ planet.y }}{% endif %}" size="2" />:
-<input type="text" id="z" name="z" value="{% if planet %}{{ planet.z }}{% endif %}" size="2" />
-
-<select name="scan" id="scan">
-<option value="p">Planet</option>
-<option value="d">Development</option>
-<option value="u">Unit</option>
-<option value="n">News</option>
-<option value="j">Jumpgate probe</option>
-<option value="a">Advanced Unit</option>
-</select>
-
-<input type="submit" id="request" name="request" value="Request Scan" />
-<script type="text/javascript">
-function request_scan() {
-url = "/request/" + document.getElementById("x").value + "." + document.getElementById('y').value + "." + document.getElementById('z').value + "/" + document.getElementById('scan').value;
-document.location = url;
-return false;
-}
-</script>
-</form>
-</td>
-</tr>
-</table>
-
+{% include "scans/request.tpl" %}
 <p>&nbsp;</p>
 
 <table>

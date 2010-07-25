@@ -769,6 +769,7 @@ Scan.scanner = relation(User, backref="scans")
 
 class Request(Base):
     __tablename__ = 'request'
+    _requestable = [(type, PA.get(type, "name"),) for type in Scan._scan_types if PA.getboolean(type, "request")]
     id = Column(Integer, primary_key=True)
     requester_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), index=True)
@@ -801,11 +802,11 @@ class Request(Base):
     @property
     def link(self):
         return Config.get("URL", "reqscan") % (PA.get(self.scantype, "type"), self.target.x, self.target.y, self.target.z,)
-        
+    
     @property
     def type(self):
         return PA.get(self.scantype,"name")
-        
+    
 Request.user = relation(User, backref="requests")
 Request.target = relation(Planet)
 Request.scan = relation(Scan)

@@ -35,7 +35,7 @@ class scans(loadable):
     def execute(self, request, user, message=None, planet=None):
         requests = Request.load_active()
         userrequests = Request.load_foruser(user)
-        return render("scans/scans.tpl", request, requests=requests, userrequests=userrequests, message=message, planet=planet)
+        return render("scans/scans.tpl", request, types=Request._requestable, requests=requests, userrequests=userrequests, message=message, planet=planet)
 
 @load
 class group(loadable):
