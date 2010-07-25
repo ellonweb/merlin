@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
+from sqlalchemy.sql import asc
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, Request
@@ -57,5 +58,12 @@ class request(loadable):
 class requests(loadable):
     access = "half"
     def execute(self, request, user, message=None):
-        requests = Request.load_active()
-        return render("scans/requests.tpl", request, types=Request._requestable, requests=requests, message=message)
+        tick = Updates.current_tick()
+        
+        Q = session.query(Request)
+        Q = Q.filter(Request.tick > tick - 5)
+        Q = Q.filter(Request.active == True)
+        Q = Q.order_by(asc(Request.id))
+        open = Q.all()
+        
+        return render("scans/requests.tpl", request, types=Request._requestable, open=open, message=message)

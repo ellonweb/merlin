@@ -21,10 +21,11 @@
  
 # Request a scan
 
+from sqlalchemy.sql import asc
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Planet, User, Request
+from Core.maps import Updates, Planet, User, Request
 from Core.loadable import loadable, route, require_user, robohci
 
 class request(loadable):
@@ -97,11 +98,21 @@ class request(loadable):
     
     @route(r"list", access = "member")
     def list(self, message, user, params):
-        message.reply(" ".join(map(lambda request: "[%s: %s %s:%s:%s]" % (request.id, request.scantype, request.target.x, request.target.y, request.target.z,), Request.load_active())))
+        Q = session.query(Request)
+        Q = Q.filter(Request.tick > Updates.current_tick() - 5)
+        Q = Q.filter(Request.active == True)
+        Q = Q.order_by(asc(Request.id))
+        
+        message.reply(" ".join(map(lambda request: "[%s: %s %s:%s:%s]" % (request.id, request.scantype, request.target.x, request.target.y, request.target.z,), Q.all())))
     
     @route(r"links", access = "member")
     def links(self, message, user, params):
-        message.reply(" ".join(map(lambda request: "[%s: %s]" % (request.id, request.link,), Request.load_active(5))))
+        Q = session.query(Request)
+        Q = Q.filter(Request.tick > Updates.current_tick() - 5)
+        Q = Q.filter(Request.active == True)
+        Q = Q.order_by(asc(Request.id))
+        
+        message.reply(" ".join(map(lambda request: "[%s: %s]" % (request.id, request.link,), Q[:5])))
     
     def scanchan(self):
         return Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")

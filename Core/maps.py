@@ -785,20 +785,6 @@ class Request(Base):
         request = Q.filter_by(id = id, active = True).first()
         return request
         
-    @staticmethod
-    def load_active( limit = None):
-        Q = session.query(Request)
-        Q = Q.filter(Request.tick > Updates.current_tick() - 5)
-        Q = Q.filter(Request.scan==None)
-        Q =  Q.filter(Request.active == True)
-        return Q[:limit] if limit else Q.all()
-    
-    @staticmethod
-    def load_foruser(user):
-        Q = session.query(Request)
-        Q = Q.filter(Request.user == user)
-        return Q.all()
-    
     @property
     def link(self):
         return Config.get("URL", "reqscan") % (PA.get(self.scantype, "type"), self.target.x, self.target.y, self.target.z,)
