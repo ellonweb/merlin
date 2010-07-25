@@ -42,7 +42,7 @@ urlpatterns = patterns('',
     (r'', include('Arthur.alliance')),
     (r'', include('Arthur.rankings')),
     (r'^scans/', include('Arthur.scans')),
-    (r'^request/', include('Arthur.request')),
+    (r'^(?:scans/)?request/', include('Arthur.scans.request')),
 )
 
 @menu("Home")
@@ -84,5 +84,3 @@ class guide(loadable):
 from Arthur import alliance
 from Arthur import rankings
 from Arthur import scans
-from Arthur import request
-

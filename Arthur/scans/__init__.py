@@ -21,6 +21,7 @@
  
 from django.conf.urls.defaults import include, patterns, url
 from Core.paconf import PA
+from Arthur.scans import list
 
 urlpatterns = patterns('Arthur.scans',
     url(r'^$', 'list.scans', name="scans"),

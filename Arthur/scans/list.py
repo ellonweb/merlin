@@ -23,16 +23,19 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy.sql import asc
 from Core.db import session
-from Core.maps import Planet, Scan
-from Arthur.context import render
+from Core.maps import Planet, Scan, Request
+from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
+@menu("Scans")
 @load
 class scans(loadable):
     access = "half"
     
-    def execute(self, request, user):
-        return HttpResponseRedirect("/")
+    def execute(self, request, user, message=None, planet=None):
+        requests = Request.load_active()
+        userrequests = Request.load_foruser(user)
+        return render("scans/scans.tpl", request, requests=requests, userrequests=userrequests, message=message, planet=planet)
 
 @load
 class group(loadable):
