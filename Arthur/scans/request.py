@@ -24,7 +24,7 @@ from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, Request
 from Core.robocop import push
-from Arthur.context import render
+from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
 urlpatterns = patterns('Arthur.scans.request',
@@ -51,3 +51,11 @@ class request(loadable):
         push("request", request_id=request.id)
         
         return scans.execute(request, user, message="Requested a %s Scan of %s:%s:%s"%(request.type, x,y,z,), planet=planet)
+
+@menu("Scans", "Requests", prefix=True)
+@load
+class requests(loadable):
+    access = "half"
+    def execute(self, request, user, message=None):
+        requests = Request.load_active()
+        return render("scans/requests.tpl", request, types=Request._requestable, requests=requests, message=message)

@@ -22,6 +22,7 @@
 from django.conf.urls.defaults import include, patterns, url
 from Core.paconf import PA
 from Arthur.scans import list
+from Arthur.scans import request
 
 urlpatterns = patterns('Arthur.scans',
     url(r'^$', 'list.scans', name="scans"),
@@ -39,4 +40,5 @@ urlpatterns = patterns('Arthur.scans',
     url('^(?P<tick>\d+)/$', 'list.tick', name="scan_tick"),
     url('^(?P<tick>\d+)/(?P<id>\w+)/$', 'planet.id', name="scan_id"),
     url('^group/(?P<id>\w+)/$', 'list.group', name="scan_group_id"),
+    url('^requests/$', 'request.requests', name="requests"),
 )
