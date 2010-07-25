@@ -19,34 +19,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from sqlalchemy.sql import desc
 from Core.db import session
 from Core.maps import Updates, Planet, Request
-from Arthur.loadable import loadable, load
-from Core.paconf import PA
-from Arthur.context import render
 from Core.robocop import push
+from Arthur.context import render
+from Arthur.loadable import loadable, load
 
 @load
 class makerequest(loadable):
     access = "member"
     def execute(self, request, user, x, y, z, scantype):
+        from Arthur.request.request import home
         tick = Updates.current_tick()
         
         planet = Planet.load(x,y,z)
         if planet is None:
-            return HttpResponseRedirect(reverse("request"))
+            return home.execute(request, user, message="No planet with coords %s:%s:%s" %(x,y,z,))
+            
         scantype = scantype.upper()
         dists = planet.intel.dists if planet.intel else 0
-        requestscan = Request(target=planet, scantype=scantype, dists=dists,tick=tick)
+        requestscan = Request(target=planet, scantype=scantype, dists=dists)
         user.requests.append(requestscan)
         session.commit()
         
         push("request", user_name=user.name, x=x,y=y,z=z, scan=scantype, dists=dists,request_id=requestscan.id)
         
-        requests = Request.load_active()
-        userrequests = Request.load_foruser(user)
-        
-        return render("request.tpl", request, planet=planet, title="<br />Requested %s-scan on %s:%s:%s<br /><br />"%(scantype,planet.x, planet.y, planet.z), intel=user.is_member(), scantype=scantype,requests=requests,userrequests=userrequests)
+        return home.execute(request, user, message="Requested %s-scan on %s:%s:%s"%(scantype,planet.x, planet.y, planet.z), planet=planet)

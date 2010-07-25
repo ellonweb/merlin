@@ -19,22 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
-from sqlalchemy.sql import desc
-from Core.db import session
-from Core.maps import Updates, Planet, Request
+from Core.maps import Request
+from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
-from Core.paconf import PA
-from Arthur.context import menu,render
-from Core.robocop import push
 
 @menu("Scan Requests", "Request", prefix=True)
 @load
 class home(loadable):
     access = "member"
-    def execute(self, request, user):
+    def execute(self, request, user, message=None, planet=None):
         requests = Request.load_active()
         userrequests = Request.load_foruser(user)
 
-        return render("request.tpl", request, title="", intel=user.is_member(), requests=requests,userrequests=userrequests)
+        return render("request.tpl", request, requests=requests, userrequests=userrequests, message=message, planet=planet)

@@ -1,20 +1,20 @@
 {% extends "base.tpl" %}
 {% block content %}
-<p>&nbsp;</p>
+{% if message %}
+    <p>{{ message }}</p>
+{% endif %}
 
-{{ title }}
-
-
-<table>
+<table cellpadding="3" cellspacing="1" class="black">
 
 <tr class="datahigh">
 <th colspan="2">
 Request Scans
 </th>
 </tr>
-<tr>
+<tr class="header">
 <th>Coords</th>
 <td>
+<form onsubmit="return request_scan()">
 <input type="text" id="x" name="x" value="{% if planet %}{{ planet.x }}{% endif %}" size="2" />:
 <input type="text" id="y" name="y" value="{% if planet %}{{ planet.y }}{% endif %}" size="2" />:
 <input type="text" id="z" name="z" value="{% if planet %}{{ planet.z }}{% endif %}" size="2" />
@@ -28,18 +28,20 @@ Request Scans
 <option value="a">Advanced Unit</option>
 </select>
 
-<input type="button" id="request" name="request" value="Request scan" onclick="request_scan()"/>
+<input type="submit" id="request" name="request" value="Request Scan" />
 <script type="text/javascript">
 function request_scan() {
 url = "/request/" + document.getElementById("x").value + "." + document.getElementById('y').value + "." + document.getElementById('z').value + "/" + document.getElementById('scan').value;
 document.location = url;
+return false;
 }
 </script>
+</form>
 </td>
 </tr>
 </table>
-<br />
-<br />
+
+<p>&nbsp;</p>
 
 <table>
 
