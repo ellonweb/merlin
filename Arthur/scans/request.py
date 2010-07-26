@@ -51,7 +51,7 @@ class request(loadable):
         user.requests.append(req)
         session.commit()
         
-        push("request", request_id=req.id)
+        push("request", request_id=req.id, mode="request")
         
         return scans.execute(request, user, message="Requested a %s Scan of %s:%s:%s"%(req.type, x,y,z,), planet=planet)
 
@@ -67,6 +67,9 @@ class cancel(loadable):
         
         req.active = False
         session.commit()
+        
+        push("request", request_id=req.id, mode="cancel")
+        
         return requests.execute(request, user, message="Cancelled scan request %s" % (id,))
 
 @load

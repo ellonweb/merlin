@@ -48,8 +48,13 @@ class request(loadable):
             message.reply("Requested a %s Scan of %s:%s:%s. !request cancel %s to cancel the request." % (request.type, planet.x, planet.y, planet.z, request.id,))
     
     @robohci
-    def robocop(self, message, request_id):
+    def robocop(self, message, request_id, mode):
+        if mode == "cancel":
+            message.privmsg("Cancelled scan request %s" % (request_id,), self.scanchan())
+            return
         request = Request.load(request_id)
+        if request is None:
+            return
         user = request.user
         planet = request.target
         dists_intel = planet.intel.dists if planet.intel else 0
