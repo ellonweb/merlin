@@ -31,6 +31,7 @@ from Arthur.loadable import loadable, load
 urlpatterns = patterns('Arthur.scans.request',
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<type>['+"".join([type.lower() for type in PA.options("scans")])+'])/(?:(?P<dists>\d+)/)?$', 'request', name="request_planet"),
     url(r'^cancel/(?P<id>\d+)/$', 'cancel', name="request_cancel"),
+    url(r'^(?P<id>\d+)/blocks/(?P<dists>\d+)/$', 'blocks', name="request_blocks"),
 )
 
 @load
@@ -67,6 +68,18 @@ class cancel(loadable):
         req.active = False
         session.commit()
         return requests.execute(request, user, message="Cancelled scan request %s" % (id,))
+
+@load
+class blocks(loadable):
+    access = "half"
+    def execute(self, request, user, id, dists):
+        req = Request.load(id)
+        if req is None:
+            return requests.execute(request, user, message="No open request number %s exists (idiot)."%(id,))
+        
+        req.dists = max(req.dists, int(dists))
+        session.commit()
+        return requests.execute(request, user, message="Updated request %s dists to %s" % (id, req.dists,))
 
 @menu("Scans", "Requests", prefix=True)
 @load
