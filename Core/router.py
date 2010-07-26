@@ -26,6 +26,7 @@ import traceback
 
 from Core.exceptions_ import MerlinSystemCall, Reboot, Call999
 from Core.config import Config
+from Core.loader import Loader
 from Core.connection import Connection
 from Core.actions import Action
 from Core.robocop import RoboCop, EmergencyCall
@@ -37,7 +38,7 @@ class router(object):
     def run(self):
         
         # If we've been asked to reload, report if it didn't work
-        if self.message is not None:
+        if Loader.success is False and self.message is not None:
             self.message.alert("I detect a sudden weakness in the Morphing Grid.")
         
         # Operation loop

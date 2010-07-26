@@ -22,7 +22,7 @@
 # This module add functionality to authenticate with P
 
 import re
-from merlin import Merlin
+from Core import Merlin
 from Core.exceptions_ import PNickParseError
 from Core.db import session
 from Core.maps import Channel

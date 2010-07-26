@@ -23,7 +23,7 @@
 
 import re, time
 
-from merlin import Merlin
+from Core import Merlin
 from Core.exceptions_ import ParseError, ChanParseError, MsgParseError, PNickParseError
 
 PUBLIC_PREFIX  = ("!",)

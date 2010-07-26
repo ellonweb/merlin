@@ -21,7 +21,7 @@
  
 # This module interfaces with and updates the Core's tracker
 
-from merlin import Merlin
+from Core import Merlin
 from Core.exceptions_ import UserError
 from Core.config import Config
 from Core.chanusertracker import CUT
