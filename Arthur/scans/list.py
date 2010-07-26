@@ -21,18 +21,41 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from sqlalchemy.sql import asc
+from sqlalchemy.sql import asc, desc
 from Core.db import session
-from Core.maps import Planet, Scan
-from Arthur.context import render
+from Core.maps import Updates, Planet, Scan, Request
+from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
+@menu("Scans")
 @load
 class scans(loadable):
     access = "half"
     
-    def execute(self, request, user):
-        return HttpResponseRedirect("/")
+    def execute(self, request, user, message=None, planet=None):
+        tick = Updates.current_tick()
+        
+        Q = session.query(Request)
+        Q = Q.filter(Request.user == user)
+        Q = Q.filter(Request.tick > tick - 5)
+        Q = Q.filter(Request.active == True)
+        Q = Q.order_by(asc(Request.id))
+        open = Q.all()
+        
+        Q = session.query(Scan)
+        Q = Q.join(Request.scan)
+        Q = Q.filter(Request.user == user)
+        Q = Q.filter(Request.tick > tick - 24)
+        Q = Q.filter(Request.scan != None)
+        Q = Q.order_by(desc(Request.id))
+        completed = Q.all()
+        
+        Q = session.query(Scan)
+        Q = Q.filter(Scan.scanner == user)
+        Q = Q.order_by(desc(Scan.id))
+        scans = Q[:25]
+        
+        return render("scans/scans.tpl", request, types=Request._requestable, open=open, completed=completed, scans=scans, message=message, planet=planet)
 
 @load
 class group(loadable):

@@ -510,7 +510,7 @@ class Intel(Base):
     defwhore = Column(Boolean, default=False)
     covop = Column(Boolean, default=False)
     scanner = Column(Boolean, default=False)
-    dists = Column(Integer)
+    dists = Column(Integer, default=0)
     bg = Column(String(25))
     gov = Column(String(20))
     relay = Column(Boolean, default=False)
@@ -830,6 +830,7 @@ Scan.scanner = relation(User, backref="scans")
 
 class Request(Base):
     __tablename__ = 'request'
+    _requestable = [(type, PA.get(type, "name"),) for type in Scan._scan_types if PA.getboolean(type, "request")]
     id = Column(Integer, primary_key=True)
     requester_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='cascade'), index=True)
@@ -837,12 +838,22 @@ class Request(Base):
     dists = Column(Integer)
     scan_id = Column(Integer, ForeignKey(Scan.id, ondelete='set null'))
     active = Column(Boolean, default=True)
+    tick = Column(Integer,default=Updates.current_tick)
     
     @staticmethod
     def load(id):
         Q = session.query(Request)
         request = Q.filter_by(id = id, active = True).first()
         return request
+        
+    @property
+    def link(self):
+        return Config.get("URL", "reqscan") % (PA.get(self.scantype, "type"), self.target.x, self.target.y, self.target.z,)
+    
+    @property
+    def type(self):
+        return PA.get(self.scantype,"name")
+    
 Request.user = relation(User, backref="requests")
 Request.target = relation(Planet)
 Request.scan = relation(Scan)

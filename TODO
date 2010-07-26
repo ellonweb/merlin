@@ -26,8 +26,6 @@ email server and parsing with Lamson
 
 Arthur message object that can be pushed to merlin hooks?
 
-Arthur scan request interface
-
 /user/name/
     access=member
     forward to /planet/ ?

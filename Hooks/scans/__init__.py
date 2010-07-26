@@ -23,6 +23,6 @@
 __all__ = [
            "scan",
            "scans",
-#           "request",
+           "request",
            "parser",
            ]
