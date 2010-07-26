@@ -26,8 +26,6 @@ email server and parsing with Lamson
 
 Arthur message object that can be pushed to merlin hooks?
 
-Arthur scan request interface
-
 !attack command, creates arthur page with scans and ability to book in the web
     !attack x:y[:z] landtick
     !editattack id add x:y[:z]
