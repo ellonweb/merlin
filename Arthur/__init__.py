@@ -21,6 +21,7 @@
  
 from django.conf.urls.defaults import include, patterns, url
 from django.http import HttpResponseRedirect
+
 from Core.config import Config
 from Core.maps import Updates
 from Arthur.context import menu, render
@@ -40,6 +41,8 @@ urlpatterns = patterns('',
     (r'^lookup/$', 'Arthur.lookup.lookup'),
     (r'', include('Arthur.alliance')),
     (r'', include('Arthur.rankings')),
+    (r'', include('Arthur.attack')),
+    (r'^scans/', include('Arthur.scans')),
 )
 
 @menu("Home")
@@ -54,7 +57,6 @@ class home(loadable):
         return render("index.tpl", request, planets=planets, title="Your planet")
 
 @menu(name,          "Intel",       suffix = name)
-@menu("Planetarion", "Parser",      suffix = "parser")
 @menu("Planetarion", "BCalc",       suffix = "bcalc")
 @menu("Planetarion", "Sandmans",    suffix = "sandmans")
 @menu("Planetarion", "Forums",      suffix = "forums")
@@ -65,7 +67,6 @@ class links(loadable):
              "forums"      : "http://pirate.planetarion.com",
              "sandmans"    : "http://sandmans.co.uk",
              "bcalc"       : "http://game.planetarion.com/bcalc.pl",
-             "parser"      : "http://parser.5th-element.org/",
              name          : "/alliance/%s/" % (name,),
             }
     def execute(self, request, user, link):
@@ -82,3 +83,5 @@ class guide(loadable):
 
 from Arthur import alliance
 from Arthur import rankings
+from Arthur import attack
+from Arthur import scans

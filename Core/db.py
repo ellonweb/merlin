@@ -23,18 +23,22 @@
 
 import sys
 import sqlalchemy
-if not 5.7 <= float(sqlalchemy.__version__[2:5]) < 6.0:
-    sys.exit("SQLAlchemy 0.5.7+ Required")
+if not 6.3 <= float(sqlalchemy.__version__[2:5]) < 7.0:
+    sys.exit("SQLAlchemy 0.6.3+ Required")
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import text, bindparam
 
 from Core.config import Config
+from Core.string import encoding
 
-engine = create_engine(Config.get("DB", "URL"))#, echo='debug')
-if engine.name != "postgres" or "PostgreSQL 8.4" not in engine.connect().execute(text("SELECT version();")).scalar():
+engine = create_engine(Config.get("DB", "URL"), convert_unicode=True, encoding=encoding)#, echo='debug')
+if engine.name != "postgresql" or "PostgreSQL 8.4" not in engine.connect().execute(text("SELECT version();")).scalar():
     sys.exit("PostgreSQL 8.4+ Required.")
+
+if encoding != engine.connect().execute(text("SHOW client_encoding;")).scalar().lower():
+    sys.exit("Database client encoding needs to be %s." %(encoding,))
 
 # Some constants
 true = bindparam("true",True)

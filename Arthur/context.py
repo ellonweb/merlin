@@ -19,11 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.http import HttpResponse
 
 from Core.config import Config
-from Core.maps import Slogan
+from Core.maps import Updates, Slogan
+from Arthur.jinja import jinja
 
 class _menu(object):
     heads = []
@@ -63,7 +63,7 @@ class _menu(object):
 
 menu = _menu()
 
-def context(request):
+def base_context(request):
     context = {"name"   : Config.get("Alliance", "name"),
                "slogan" : Config.get("Alliance", "name")
                }
@@ -73,7 +73,9 @@ def context(request):
             context["slogan"] = str(slogan)
         context["user"] = request.session.user
         context["menu"] = menu.generate(request.session.user)
+        context["tick"] = Updates.current_tick()
     return context
 
-def render(tpl, request, **context):
-    return render_to_response(tpl, context, RequestContext(request))
+def render(template, request, **context):
+    context = dict(base_context(request).items() + context.items())
+    return HttpResponse(jinja.get_template(template).render(context))

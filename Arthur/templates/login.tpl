@@ -1,7 +1,6 @@
 {% extends "base.tpl" %}
 {% block content %}
-<form method="post"{% ifequal msg "Logged out." %} action="/"{% endifequal %}>
-<center>
+<form method="post"{% if msg == "Logged out." %} action="/"{% endif %}>
 <p>{{ msg }}</p>
 <table cellspacing="0" cellpadding="0" class="black">
 <tr>
@@ -25,6 +24,5 @@
 </td>
 </tr>
 </table>
-</center>
 </form>
 {% endblock %}

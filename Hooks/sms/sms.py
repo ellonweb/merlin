@@ -26,6 +26,7 @@ from urllib import urlencode
 from urllib2 import urlopen, Request, URLError
 from Core.exceptions_ import LoadableError
 from Core.config import Config
+from Core.string import encode
 from Core.db import session
 from Core.maps import User, SMS
 from Core.loadable import loadable, route, require_user
@@ -40,7 +41,7 @@ class sms(loadable):
         
         rec = params.group(1)
         public_text = params.group(2) + ' - %s' % (user.name,)
-        text = public_text.encode('latin-1') + '/%s' %(user.phone,)
+        text = encode(public_text + '/%s' %(user.phone,))
         receiver=User.load(name=rec,exact=False)
         if not receiver:
             message.reply("Who exactly is %s?" % (rec,))

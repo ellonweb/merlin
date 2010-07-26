@@ -23,7 +23,7 @@ import socket
 import time
 
 from Core.config import Config
-from Core.connection import CRLF
+from Core.string import CRLF
 from Core.actions import Action
 
 class server(object):

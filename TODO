@@ -1,7 +1,4 @@
 http://www.sqlalchemy.org/trac/ticket/1529 (reloading/err)
-http://www.sqlalchemy.org/trac/ticket/1537 (alias/join0.6)
-http://www.sqlalchemy.org/trac/ticket/1565 (sequences 0.6)
-http://www.sqlalchemy.org/trac/ticket/1638 (unicode/noerr)
 
 |       Known Bugs       |   Occurrence   |     Effect     |
 | SQLA map reload (1529) | ext. rare      | recoverable    |
@@ -30,35 +27,6 @@ email server and parsing with Lamson
 Arthur message object that can be pushed to merlin hooks?
 
 Arthur scan request interface
-
-!attack command, creates arthur page with scans and ability to book in the web
-    !attack x:y[:z] landtick
-    !editattack id add x:y[:z]
-    !editattack id rem x:y[:z]
-    !editattack id land tick
-/attack/id/
-    booking table
-    show latest P/A(U)/D for each, xvx style
-    link to /scans/ and /planet/ for each
-    if landtick - currenttick < 5, show latest jgp
-    if landtick + 12 < currenttick, remove attack
-    (/attack/id)?/book/x:y:z/
-    (/attack/id)?/unbook/x:y:z/
-        (possible to book without an attack)
-        forward to /attack/id/ or /user/name/
-
-/planet/x:y:z/
-    shows latest P/A(U)/D
-    shows incoming/outgoing fleets (froglet)
-    links to /scans/x:y:z/
-
-/scans/x:y:z/
-    table of latest scans etc
-    click shows scan info in webby where possible /scan/id/
-    shift+click opens PA link
-    
-/scan/type/x:y:z/
-    shows latest of specific type
 
 /user/name/
     access=member

@@ -1,5 +1,5 @@
-# This file is part of Merlin.
-# Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+# This file is part of Merlin/Arthur.
+# Merlin/Arthur is the Copyright (C)2009,2010 of Elliot Rosemarine.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -19,18 +19,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from Core.loadable import loadable, route
+from Arthur.jinja import filter
 
-class bcalc(loadable):
-    
-    @route()
-    def execute(self, message, user, params):
-        
-        bcalc = ["http://sandmans.co.uk",
-                 "http://parser.5th-element.org/",
-                 "http://parser.vision-hq.com",
-                 "http://game.planetarion.com/bcalc.pl",
-                 "http://www.lch-hq.org/pilkara/",
-                ]
-        
-        message.reply("Bcalcs: "+" | ".join(bcalc))
+@filter
+def percent(value, total):
+    return "%s%%" % (round(float(value) / total * 100, 1),)
+
+@filter
+def and_percent(value, total):
+    return "%s (%s%%)" % (value, round(float(value) / total * 100, 1),)

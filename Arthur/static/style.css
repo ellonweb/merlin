@@ -4,7 +4,7 @@ html {
 
 body {
 	font-family: Verdana, Arial, Helvetica;
-	font-size: 7pt;
+	font-size: 8pt;
 	color: white;
 	background-color: #0a0a13;
 	background-image: url(back.gif);
@@ -26,7 +26,7 @@ body {
 }
 
 table {
-	font-size: 7pt;
+	font-size: 8pt;
 }
 
 a {
@@ -69,11 +69,23 @@ tr.datahigh {
  background-color: #181C29;
 }
 
+td.datahigh {
+ background-color: #181C29;
+}
+
 tr.odd {
 	background-color: #292d3a;
 }
 
 tr.even {
+	background-color: #252936;
+}
+
+td.odd {
+	background-color: #292d3a;
+}
+
+td.even {
 	background-color: #252936;
 }
 
@@ -102,22 +114,27 @@ tr.unknown {
 }
 
 .Cat {
-	color: #6699cc;
+	color: #6699cc !important;
 	font-weight: bold;
 }
 
 .Ter {
-	color: #aa7744;
+	color: #aa7744 !important;
 	font-weight: bold;
 }
 
 .Xan {
-	color: #00cc00;
+	color: #00cc00 !important;
 	font-weight: bold;
 }
 
 .Zik {
-	color: #cccc00;
+	color: #cccc00 !important;
+	font-weight: bold;
+}
+
+.Etd {
+	color: #cccccc !important;
 	font-weight: bold;
 }
 
@@ -180,4 +197,16 @@ tr.unknown {
 
 .Nodef {
 	background-color: #717157;
+}
+
+.center {
+	text-align: center;
+}
+
+.right {
+	text-align: right;
+}
+
+.left {
+	text-align: left;
 }
