@@ -25,8 +25,12 @@ sys.stderr = sys.stdout
 if not 2.6 <= float(sys.version[:3]) < 2.7:
     sys.exit("Python 2.6.x Required")
 
-from Core import Merlin
-
 if __name__ == "__main__":
     # Start the bot here, if we're the main module.
-    Merlin.run()
+    state = ()
+    while True:
+        from Core.loader import Loader
+        from Core import Merlin
+        Merlin.attach(*state)
+        Merlin.run()
+        state = Merlin.detach()

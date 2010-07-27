@@ -28,9 +28,14 @@ from Core.exceptions_ import Quit, Reboot, Reload, Call999
 
 class merlin(object):
     # Main bot container
-    nick = None
-    irc = None
-    robocop = ()
+    
+    def attach(self, nick=None, irc=None, robocop=()):
+        self.nick = nick
+        self.irc = irc
+        self.robocop = robocop
+    
+    def detach(self):
+        return self.nick, self.irc, self.robocop
     
     def run(self):
         Connection = None
