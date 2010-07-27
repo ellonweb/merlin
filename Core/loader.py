@@ -22,7 +22,10 @@
 import sys
 import time
 
-mods = ["Core.paconf",
+mods = ["Core",
+        "Core.exceptions_",
+        "Core.config",
+        "Core.paconf",
         "Core.string",
         "Core.connection",
         "Core.db", "Core.maps",
@@ -39,7 +42,7 @@ class loader(object):
     
     def init(self):
         # First things first: backup ourselves
-        self.backup("Core.config", "Core.loader")
+        self.backup("Core.loader")
         try:
             # Load all the main modules, they will also be
             #  backed up if they're all loaded successfully.
@@ -59,7 +62,7 @@ class loader(object):
         try:
             # Reload this module, which will instantiate a new
             #  Loader, which in turn will do all the main loading.
-            self.load_module("Core.config", "Core.loader")
+            self.load_module("Core.loader")
             # Check the new loader has a successful status
             if sys.modules["Core.loader"].Loader.success is not True: raise ImportError
         except Exception, e:

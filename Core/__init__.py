@@ -24,8 +24,6 @@ import socket
 import sys
 import time
 
-from Core.exceptions_ import Quit, Reboot, Reload, Call999
-
 class merlin(object):
     # Main bot container
     
@@ -38,7 +36,9 @@ class merlin(object):
         return self.nick, self.irc, self.robocop
     
     def run(self):
+        from Core.exceptions_ import Quit, Reboot, Reload, Call999
         Connection = None
+        
         try: # break out with Quit exceptions
             
             # Connection loop
