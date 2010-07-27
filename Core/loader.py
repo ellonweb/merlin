@@ -54,7 +54,8 @@ class loader(object):
             print "%s Error in Loader initialization." % (time.asctime(),)
             raise
     
-    def reboot(self, Config):
+    def reboot(self):
+        from Core.config import Config
         from Core.string import log
         # If the reboot succeeds, this Loader instance will be
         #  replaced, so this .success is only tested if it fails.
@@ -71,7 +72,8 @@ class loader(object):
             log(Config.get("Misc","errorlog"), "%s - Loader Reboot Error: %s\n" % (time.asctime(),str(e),))
             self.restore(sys)
     
-    def reload(self, Config):
+    def reload(self):
+        from Core.config import Config
         from Core.string import log
         self.success = False
         try:

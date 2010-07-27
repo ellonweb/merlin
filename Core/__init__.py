@@ -27,86 +27,64 @@ import time
 class merlin(object):
     # Main bot container
     
-    def attach(self, nick=None, irc=None, robocop=()):
-        self.nick = nick
+    def attach(self, irc=(), robocop=()):
         self.irc = irc
         self.robocop = robocop
     
     def detach(self):
-        return self.nick, self.irc, self.robocop
+        return self.irc, self.robocop
+    
+    @property
+    def nick(self):
+        return self.irc[1]
+    @nick.setter
+    def nick(self, nick):
+        self.irc[1] = nick
     
     def run(self):
+        # Import elements of Core we need
+        # These will be refreshed each time the Loader reloads
+        from Core.loader import Loader
         from Core.exceptions_ import Quit, Reboot, Reload, Call999
-        Connection = None
+        from Core.connection import Connection
+        from Core.robocop import RoboCop
+        from Core.router import Router
         
-        try: # break out with Quit exceptions
+        # Collect any garbage remnants that might have been left behind
+        #  from an old loader or backup that wasn't properly dereferenced
+        gc.collect()
+        
+        try:
+            # Attach the IRC connection and configure
+            self.irc = Connection.attach(*self.irc)
+            # Attach the RoboCop/clients sockets and configure
+            self.robocop = RoboCop.attach(*self.robocop)
             
-            # Connection loop
-            #   Loop back to reset connection
-            while True:
-                
-                try: # break out with Reboot exceptions
-                    
-                    # Load up configuration
-                    from Core.config import Config
-                    self.nick = Config.get("Connection", "nick")
-                    
-                    # Import the Loader
-                    # In first run this will do the initial import
-                    # Later the import is done by a call to .reboot(),
-                    #  but we need to import each time to get the new Loader
-                    from Core.loader import Loader
-                    
-                    # System loop
-                    #   Loop back to reload modules
-                    while True:
-                        
-                        try: # break out with Reload exceptions
-                            
-                            # Collect any garbage remnants that might have been left behind
-                            #  from an old loader or backup that wasn't properly dereferenced
-                            gc.collect()
-                            
-                            # Import elements of Core we need
-                            # These will have been refreshed by a call to
-                            #  either Loader.reboot() or Loader.reload()
-                            from Core.db import session
-                            from Core.connection import Connection
-                            from Core.router import Router
-                            from Core.robocop import RoboCop
-                            
-                            # Attach the IRC connection and configure
-                            self.irc = Connection.attach(self.irc, self.nick)
-                            # Attach the RoboCop/clients sockets and configure
-                            self.robocop = RoboCop.attach(*self.robocop)
-                            
-                            # Operation loop
-                            Router.run()
-                            
-                        except Call999 as exc:
-                            # RoboCop server failed, restart it
-                            self.robocop = RoboCop.disconnect(str(exc))
-                            continue
-                        
-                        except Reload:
-                            print "%s Reloading..." % (time.asctime(),)
-                            # Reimport all the modules
-                            Loader.reload(Config)
-                            continue
-                    
-                except (Reboot, socket.error) as exc:
-                    # Reset the connection first
-                    self.irc = Connection.disconnect(str(exc) or "Rebooting")
-                    
-                    print "%s Rebooting..." % (time.asctime(),)
-                    # Reboot the Loader and reimport all the modules
-                    Loader.reboot(Config)
-                    continue
-            
+            # Operation loop
+            Router.run()
+        
+        except Call999 as exc:
+            # RoboCop server failed, restart it
+            self.robocop = RoboCop.disconnect(str(exc))
+            return
+        
+        except (Reboot, socket.error) as exc:
+            # Reset the connection first
+            self.irc = Connection.disconnect(str(exc) or "Rebooting")
+            print "%s Reloading..." % (time.asctime(),)
+            # Reimport all the modules
+            Loader.reload()
+            return
+        
+        except Reload:
+            print "%s Reloading..." % (time.asctime(),)
+            # Reimport all the modules
+            Loader.reload()
+            return
+        
         except (Quit, KeyboardInterrupt, SystemExit) as exc:
-            if Connection is None:
-                sys.exit(exc)
-            Connection.disconnect(str(exc) or "Bye!")
+            self.irc = Connection.disconnect(str(exc) or "Bye!")
+            self.robocop = RoboCop.disconnect(str(exc) or "Bye!")
             sys.exit("Bye!")
 
 Merlin = merlin()
