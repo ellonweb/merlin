@@ -211,10 +211,10 @@ class prop(loadable):
             message.reply("No proposition number %s exists (idiot)."%(id,))
             return
         if not prop.active:
-            message.reply("You can't expire on prop %s, it's already expired."%(id,))
+            message.reply("You can't expire prop %d, it's already expired."%(prop.id,))
             return
         if prop.proposer is not user and not user.is_admin():
-            message.reply("Only %s may expire proposition %d."%(prop.proposer.name,id))
+            message.reply("Only %s may expire proposition %d."%(prop.proposer.name,prop.id))
             return
         if prop.type == "invite" and not self.member_count_below_limit():
             message.reply("You have tried to invite somebody, but we have too many losers and I can't be bothered dealing with more than %s of you."%(Config.getint("Alliance", "members"),))
@@ -283,10 +283,10 @@ class prop(loadable):
             message.reply("No proposition number %s exists (idiot)."%(id,))
             return
         if not prop.active:
-            message.reply("You can't cancel on prop %s, it's already expired."%(id,))
+            message.reply("You can't cancel prop %d, it's already expired."%(prop.id,))
             return
         if prop.proposer is not user and not user.is_admin():
-            message.reply("Only %s may cancel proposition %d."%(prop.proposer.name,id))
+            message.reply("Only %s may cancel proposition %d."%(prop.proposer.name,prop.id))
             return
         
         self.recalculate_carebears(prop)
