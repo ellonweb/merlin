@@ -54,10 +54,10 @@ class loader(object):
             print "%s Error in Loader initialization." % (time.asctime(),)
             raise
     
-    def reboot(self):
+    def reload(self):
         from Core.config import Config
         from Core.string import log
-        # If the reboot succeeds, this Loader instance will be
+        # If the reload succeeds, this Loader instance will be
         #  replaced, so this .success is only tested if it fails.
         self.success = False
         try:
@@ -68,20 +68,6 @@ class loader(object):
             if sys.modules["Core.loader"].Loader.success is not True: raise ImportError
         except Exception, e:
             # If the new Loader fails, catch the error and restore everything
-            print "%s Reboot failed, reverting to previous." % (time.asctime(),)
-            log(Config.get("Misc","errorlog"), "%s - Loader Reboot Error: %s\n" % (time.asctime(),str(e),))
-            self.restore(sys)
-    
-    def reload(self):
-        from Core.config import Config
-        from Core.string import log
-        self.success = False
-        try:
-            # Load all the main modules, they will also be
-            #  backed up if they're all loaded successfully.
-            self._reload()
-        except Exception, e:
-            # If the reload fails, catch the error and restore everything
             print "%s Reload failed, reverting to previous." % (time.asctime(),)
             log(Config.get("Misc","errorlog"), "%s - Loader Reload Error: %s\n" % (time.asctime(),str(e),))
             self.restore(sys)

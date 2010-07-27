@@ -32,7 +32,7 @@ if __name__ == "__main__":
     while True:
         # Import the Loader
         # In first run this will do the initial import
-        # Later the import is done by a call to .reboot(),
+        # Later the import is done by a call to .reload(),
         #  but we need to import each time to get the new Loader
         from Core.loader import Loader
         
