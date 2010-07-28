@@ -1,5 +1,5 @@
 <tr class="datahigh">
-    <th colspan=12 height=15>
+    <th colspan="0">
 
 <a id="{{ scan.pa_id }}"></a>
 <a href="{% url "planet_scan_" + scan.scantype|lower, planet.x, planet.y, planet.z %}"

@@ -34,4 +34,7 @@
         </td>
     </tr>
     {% endfor %}
+    <tr class="header center">
+        <td colspan="8">(Paste the links of the completed scans in the Lookup bar)</td>
+    </tr>
 </table>
