@@ -108,7 +108,7 @@ class channels(loadable):
             levels = [("All", 0,),]
         
         order =  {"name"  : (asc(Channel.name),),
-                  "userlevel" : (asc(Channel.userlevel),),
+                  "userlevel" : (desc(Channel.userlevel),),
                   "maxlevel" : (desc(Channel.maxlevel),),
                   }
         if sort not in order.keys():
