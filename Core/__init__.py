@@ -39,7 +39,7 @@ class merlin(object):
         return self.irc[1]
     @nick.setter
     def nick(self, nick):
-        self.irc[1] = nick
+        self.irc = self.irc[0], nick
     
     def run(self):
         # Import elements of Core we need
