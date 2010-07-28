@@ -22,6 +22,7 @@
 import socket
 import time
 
+from Core.exceptions_ import Call999
 from Core.config import Config
 from Core.string import CRLF
 from Core.actions import Action
@@ -45,9 +46,13 @@ class server(object):
     
     def attach(self, sock=None, socks=[]):
         # Attach the sockets
-        self.sock = sock or self.connect()
-        self.socks = socks
-        self.clients = map(client, socks)
+        try:
+            self.sock = sock or self.connect()
+        except socket.error as exc:
+            raise Call999(exc)
+        else:
+            self.socks = socks
+            self.clients = map(client, socks)
         return self.sock, self.socks
     
     def extend(self, sock):
