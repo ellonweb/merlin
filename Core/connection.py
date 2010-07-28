@@ -54,8 +54,12 @@ class connection(object):
     def attach(self, sock=None, nick=None):
         # Attach the socket
         nick = nick or Config.get("Connection", "nick")
-        self.sock = sock or self.connect(nick)
-        self.file = self.sock.makefile('rb', 0)
+        try:
+            self.sock = sock or self.connect(nick)
+        except socket.error as exc:
+            raise Reboot(exc)
+        else:
+            self.file = self.sock.makefile('rb', 0)
 
         # WHOIS ourselves in order to setup the CUT
         self.write("WHOIS %s" % nick)

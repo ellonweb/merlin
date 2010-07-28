@@ -20,7 +20,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import gc
-import socket
 import sys
 import time
 
@@ -68,10 +67,9 @@ class merlin(object):
             self.robocop = RoboCop.disconnect(str(exc))
             return
         
-        except (Reboot, socket.error) as exc:
+        except Reboot as exc:
             # Reset the connection first
             self.irc = Connection.disconnect(str(exc) or "Rebooting")
-            self.robocop = RoboCop.disconnect(str(exc) or "Rebooting")
             print "%s Reloading..." % (time.asctime(),)
             # Reimport all the modules
             Loader.reload()
