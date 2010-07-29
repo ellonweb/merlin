@@ -55,7 +55,7 @@ class home(loadable):
             planets = (user.planet, user.planet.history(tick), None, None),
         else:
             planets = ()
-        return render("index.tpl", request, planets=planets, title="Your planet")
+        return render("index.tpl", request, planets=planets)
 
 @menu(name,          "Intel",       suffix = name)
 @menu("Planetarion", "BCalc",       suffix = "bcalc")

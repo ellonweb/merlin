@@ -1,6 +1,7 @@
-{% extends "base.tpl" %}
+{% extends "planets.tpl" %}
+{% block title %}{{ planet.x }}:{{ planet.y }}:{{ planet.z }}{% endblock %}
 {% block content %}
-{% include "planet_list.tpl" %}
+{{ super() }}
 <p>&nbsp;</p>
 
     <table cellspacing="1" cellpadding="3" width="240" class="black">

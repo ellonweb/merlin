@@ -65,4 +65,4 @@ class planet(loadable):
         
         scan = planet.scan("A") or planet.scan("U")
         
-        return render("planet.tpl", request, planet=planet, planets=planets, title="%s:%s:%s"%(planet.x, planet.y, planet.z), intel=user.is_member(), scan=scan, outgoing=outgoing, incoming=incoming)
+        return render("planet.tpl", request, planet=planet, planets=planets, intel=user.is_member(), scan=scan, outgoing=outgoing, incoming=incoming)

@@ -58,7 +58,7 @@ class planet(loadable):
             else:
                 group[-1][1].append(scan)
         
-        return render("scans/planet.tpl", request, planet=planet, planets=planets, title="%s:%s:%s"%(planet.x, planet.y, planet.z), group=group, intel=user.is_member())
+        return render("scans/planet.tpl", request, planet=planet, planets=planets, group=group, intel=user.is_member())
 
 @load
 class id(loadable):
