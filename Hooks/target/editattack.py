@@ -27,8 +27,9 @@ from Core.loadable import loadable, route
 
 class editattack(loadable):
     usage = " [<id> add|remove <coordlist>] | [<id> land <tick|eta>] | [<id> comment <comment>]"
+    access = "half"
     
-    @route(r"(\d+)\s+add\s+([. :\-\d,]+)?", access = "member")
+    @route(r"(\d+)\s+add\s+([. :\-\d,]+)?")
     def add(self, message, user, params):
         id = int(params.group(1))
         attack = Attack.load(id)
@@ -50,7 +51,7 @@ class editattack(loadable):
         session.commit()
         message.reply(str(attack))
     
-    @route(r"(\d+)\s+rem(?:ove)?\s+([. :\-\d,]+)?", access = "member")
+    @route(r"(\d+)\s+rem(?:ove)?\s+([. :\-\d,]+)?")
     def remove(self, message, user, params):
         id = int(params.group(1))
         attack = Attack.load(id)
@@ -72,7 +73,7 @@ class editattack(loadable):
         session.commit()
         message.reply(str(attack))
     
-    @route(r"(\d+)\s+land\s+(\d+)",access="member")
+    @route(r"(\d+)\s+land\s+(\d+)")
     def land(self, message, user, params):
         id = int(params.group(1))
         attack = Attack.load(id)
@@ -99,7 +100,7 @@ class editattack(loadable):
         session.commit()
         message.reply("Changed LT for attack %d from %d to %d"%(id,old,when))
     
-    @route(r"(\d+)\s+comment\s+(\S.*)",access="member")
+    @route(r"(\d+)\s+comment\s+(\S.*)")
     def comment(self, message, user, params):
         id = int(params.group(1))
         attack = Attack.load(id)
