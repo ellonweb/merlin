@@ -25,6 +25,7 @@ __all__ = [
            "galmate",
            "edituser",
            "getanewdaddy",
+           "remuser",
            "whois",
            "aids",
            "pref",
