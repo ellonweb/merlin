@@ -39,12 +39,6 @@ class planet(loadable):
         if planet is None:
             return HttpResponseRedirect(reverse("planet_ranks"))
         ph = planet.history(tick)
-        if planet.intel and planet.alliance:
-            planets = (planet, ph, planet.intel.nick, planet.alliance.name),
-        elif planet.intel:
-            planets = (planet, ph, planet.intel.nick, None),
-        else:
-            planets = (planet, ph, None, None),
         
         Q = session.query(Scan)
         Q = Q.filter(Scan.planet == planet)
@@ -58,7 +52,7 @@ class planet(loadable):
             else:
                 group[-1][1].append(scan)
         
-        return render("scans/planet.tpl", request, planet=planet, planets=planets, group=group, intel=user.is_member())
+        return render("scans/planet.tpl", request, planet=planet, ph=ph, group=group)
 
 @load
 class id(loadable):
@@ -73,7 +67,7 @@ class id(loadable):
         if scan is None:
             return HttpResponseRedirect(reverse("scans"))
         
-        return render("scans/base.tpl", request, scan=scan, intel=user.is_member())
+        return render("scans/base.tpl", request, scan=scan)
 
 @load
 class scan(loadable):
@@ -88,7 +82,7 @@ class scan(loadable):
         if scan is None:
             return HttpResponseRedirect(reverse("planet_scans", kwargs={"x":planet.x, "y":planet.y, "z":planet.z}))
         
-        return render("scans/base.tpl", request, scan=scan, intel=user.is_member())
+        return render("scans/base.tpl", request, scan=scan)
 
 @load
 class types(loadable):
@@ -108,4 +102,4 @@ class types(loadable):
                 group[-1][1].append(planet.scan(type))
                 scans.append(planet.scan(type))
         
-        return render("scans/planet_types.tpl", request, planet=planet, group=group, scans=scans, intel=user.is_member())
+        return render("scans/planet_types.tpl", request, planet=planet, group=group, scans=scans)

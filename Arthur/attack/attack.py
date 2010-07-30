@@ -49,7 +49,7 @@ class attack(loadable):
         Q = Q.order_by(asc(Target.tick), asc(Planet.x), asc(Planet.y), asc(Planet.z))
         bookings = Q.all()
         
-        return render("attacks.tpl", request, message=message, attacks=attacks, bookings=bookings, intel=user.is_member())
+        return render("attacks.tpl", request, message=message, attacks=attacks, bookings=bookings)
 
 @load
 class view(loadable):
@@ -86,4 +86,4 @@ class view(loadable):
             for tick in xrange(attack.landtick, attack.landtick+5):
                 group[-1][2].append((tick, bookings.get(tick) or (False if show_jgps else None),))
         
-        return render("attack.tpl", request, attack=attack, message=message, group=group, scans=scans, intel=user.is_member())
+        return render("attack.tpl", request, attack=attack, message=message, group=group, scans=scans)

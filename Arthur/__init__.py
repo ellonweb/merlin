@@ -52,10 +52,10 @@ class home(loadable):
     def execute(self, request, user):
         if user.planet is not None:
             tick = Updates.midnight_tick()
-            planets = (user.planet, user.planet.history(tick), None, None),
+            ph = user.planet.history(tick)
         else:
-            planets = ()
-        return render("index.tpl", request, planets=planets)
+            ph = None
+        return render("index.tpl", request, planet=user.planet, ph=ph)
 
 @menu(name,          "Intel",       suffix = name)
 @menu("Planetarion", "BCalc",       suffix = "bcalc")

@@ -6,7 +6,7 @@
 onclick="return linkshift(event, '{{ scan.link }}');">{{ scan.type }} Scan</a>
 on <a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a>
 in PT [{{ scan.tick }}]
-{% if intel %}
+{% if user|intel %}
     {% if planet.intel and planet.intel.nick %}
         <i>{{ planet.intel.nick }}</i>
         {% if planet.alliance %}

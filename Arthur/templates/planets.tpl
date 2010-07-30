@@ -2,17 +2,19 @@
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="100%" class="black">
     <tr class="datahigh">
-        <th colspan="{% if page and intel %}20{% else %}{% if intel %}19{% else %}18{% endif %}{% endif %}">
-            {% block title %}{{ title }}{% endblock %}
+        <th colspan="0">
+            {% block title %}Planet listing{% endblock %}
         </th>
     </tr>
     <tr class="header">
         <th colspan="{% if page %}5{% else %}4{% endif %}">Rank</th>
         <th colspan="10">&nbsp;</th>
         <th colspan="3">Growth</th>
-        {% if intel %}
+        {% block intel_head %}
+        {% if user|intel %}
         <th colspan="2">Intel</th>
         {% endif %}
+        {% endblock %}
     </tr>
     <tr class="header">
         {% if page %}<th>#</th>{% endif %}
@@ -58,11 +60,15 @@
         <th>Value</th>
         <th>Score</th>
         
-        {% if intel %}
+        {% block intel_subhead %}
+        {% if user|intel %}
         <th>Alliance</th>
         <th>Nick</th>
         {% endif %}
+        {% endblock %}
     </tr>
+    {% with %}
+    {% if planet and not planets %}{% set planets = ((planet, ph, planet.intel.nick, None,),) %}{% endif %}
     {% for planet, ph, nick, alliance in planets %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
         {% if page %}<td>{{ loop.index + offset }}</td>{% endif %}
@@ -86,12 +92,15 @@
         <td align="right">{% if ph %}{{ planet.value|growth(ph.value) }}{% endif %}</td>
         <td align="right">{% if ph %}{{ planet.score|growth(ph.score) }}{% endif %}</td>
         
-        {% if intel %}
-        <td>{%if alliance %}<a href="/alliance/{{ alliance }}/">{{ alliance }}</a>{% endif %}</td>
+        {% block intel_content scoped %}
+        {% if user|intel %}
+        <td>{%if alliance %}<a href="{% url "alliance_members", alliance %}">{{ alliance }}</a>{% endif %}</td>
         <td>{%if nick %}{{ nick }}{% endif %}</td>
         {% endif %}
+        {% endblock %}
     </tr>
     {% endfor %}
+    {% endwith %}
     
     {% if pages %}
     <tr class="datahigh">

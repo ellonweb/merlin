@@ -54,4 +54,4 @@ class galaxies(loadable):
         for o in order:
             Q = Q.order_by(o)
         Q = Q.limit(50).offset(offset)
-        return render("galaxies.tpl", request, galaxies=Q.all(), title="Galaxy listing", offset=offset, pages=pages, page=page, sort=sort)
+        return render("galaxies.tpl", request, galaxies=Q.all(), offset=offset, pages=pages, page=page, sort=sort)

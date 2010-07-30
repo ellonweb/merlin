@@ -53,7 +53,7 @@ class galaxy(loadable):
                 group[-1][1].append(planet.scan("A") or planet.scan("U"))
                 scans.append(planet.scan("A") or planet.scan("U"))
         
-        return render("scans/galaxy.tpl", request, galaxy=galaxy, group=group, scans=scans, intel=user.is_member())
+        return render("scans/galaxy.tpl", request, galaxy=galaxy, group=group, scans=scans)
 
 @load
 class types(loadable):
@@ -78,4 +78,4 @@ class types(loadable):
                     group[-1][1].append(planet.scan(type))
                     scans.append(planet.scan(type))
         
-        return render("scans/galaxy.tpl", request, galaxy=galaxy, group=group, scans=scans, intel=user.is_member())
+        return render("scans/galaxy.tpl", request, galaxy=galaxy, group=group, scans=scans)

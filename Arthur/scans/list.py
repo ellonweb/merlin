@@ -79,7 +79,7 @@ class group(loadable):
                 group[-1][1].append(scan)
             scans.append(scan)
         
-        return render("scans/group.tpl", request, group=group, scans=scans, intel=user.is_member())
+        return render("scans/group.tpl", request, group=group, scans=scans)
 
 @load
 class tick(loadable):

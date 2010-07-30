@@ -1,5 +1,4 @@
-{% extends "planets.tpl" %}
-{% block title %}{{ planet.x }}:{{ planet.y }}:{{ planet.z }}{% endblock %}
+{% extends "planet_intelintitle.tpl" %}
 {% block content %}
 {{ super() }}
 <p>&nbsp;</p>

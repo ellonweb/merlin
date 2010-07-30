@@ -38,12 +38,6 @@ class planet(loadable):
         if planet is None:
             return HttpResponseRedirect(reverse("planet_ranks"))
         ph = planet.history(tick)
-        if planet.intel and planet.alliance:
-            planets = (planet, ph, planet.intel.nick, planet.alliance.name),
-        elif planet.intel:
-            planets = (planet, ph, planet.intel.nick, None),
-        else:
-            planets = (planet, ph, None, None),
         
         Q = session.query(FleetScan, Planet, Alliance)
         Q = Q.join(FleetScan.target)
@@ -65,4 +59,4 @@ class planet(loadable):
         
         scan = planet.scan("A") or planet.scan("U")
         
-        return render("planet.tpl", request, planet=planet, planets=planets, intel=user.is_member(), scan=scan, outgoing=outgoing, incoming=incoming)
+        return render("planet.tpl", request, planet=planet, ph=ph, scan=scan, outgoing=outgoing, incoming=incoming)

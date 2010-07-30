@@ -22,6 +22,10 @@
 from Arthur.jinja import filter
 
 @filter
+def intel(user):
+    return user.is_member()
+
+@filter
 def percent(value, total):
     return "%s%%" % (round(float(value) / total * 100, 1),)
 
