@@ -98,5 +98,11 @@ if round:
     session.commit()
     session.close()
 
+if round == "temp":
+    print "Deleting temporary schema"
+    session.execute(text("DROP SCHEMA temp CASCADE;"))
+    session.commit()
+    session.close()
+
 print "Inserting ship stats"
 shipstats.main()
