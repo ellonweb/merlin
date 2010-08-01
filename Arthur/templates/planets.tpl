@@ -1,4 +1,5 @@
 {% extends "base.tpl" %}
+{% if planet and not planets %}{% set planets = ((planet, ph, planet.intel.nick, None,),) %}{% endif %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="100%" class="black">
     <tr class="datahigh">
@@ -7,7 +8,8 @@
         </th>
     </tr>
     <tr class="header">
-        <th colspan="{% if page %}5{% else %}4{% endif %}">Rank</th>
+        {% if page %}<th></th>{% endif %}
+        <th colspan="4">Rank</th>
         <th colspan="10">&nbsp;</th>
         <th colspan="3">Growth</th>
         {% block intel_head %}
@@ -18,43 +20,24 @@
     </tr>
     <tr class="header">
         {% if page %}<th>#</th>{% endif %}
-        {% if not alliance and not galaxy %}
-        <th><a href="{% url "planets", race|default("all"), "score", page|default(1) %}">Score</a></th>
-        <th><a href="{% url "planets", race|default("all"), "value", page|default(1) %}">Value</a></th>
-        <th><a href="{% url "planets", race|default("all"), "size", page|default(1) %}">Size</a></th>
-        <th><a href="{% url "planets", race|default("all"), "xp", page|default(1) %}">XP</a></th>
-        {% endif %}
-        {% if galaxy %}
+        
         <th>Score</th>
         <th>Value</th>
         <th>Size</th>
         <th>XP</th>
-        {% endif %}
-        {% if alliance %}
-        <th><a href="{% url "alliance", alliance.name, race|default("all"), "score", page|default(1) %}">Score</a></th>
-        <th><a href="{% url "alliance", alliance.name, race|default("all"), "value", page|default(1) %}">Value</a></th>
-        <th><a href="{% url "alliance", alliance.name, race|default("all"), "size", page|default(1) %}">Size</a></th>
-        <th><a href="{% url "alliance", alliance.name, race|default("all"), "xp", page|default(1) %}">XP</a></th>
-        {% endif %}
         
         <th>X</th>
         <th>Y</th>
         <th>Z</th>
         <th>Ruler</th>
         <th>Planet</th>
-        {% if not alliance and not galaxy %}
-        <th><a href="{% url "planets", race|default("all"), "race", page|default(1) %}">Race</a></th>
-        {% endif %}
-        {% if galaxy %}
-        <th>Race</th>
-        {% endif %}
-        {% if alliance %}
-        <th><a href="{% url "alliance", alliance.name, race|default("all"), "race", page|default(1) %}">Race</a></th>
-        {% endif %}
-        <th>Size</th>
-        <th>Value</th>
-        <th>Score</th>
-        <th>XP</th>
+        {% for order, width in (("Race",0), ("Size",0,), ("Value",0,), ("Score",0,), ("XP",0,),) -%}
+        <th width="{{ width }}">
+            {%- block sort scoped -%}
+                <a href="{% url "planets", race|default("all"), order|lower, page|default(1) %}">{{ order }}</a>
+            {%- endblock -%}
+        </th>
+        {% endfor %}
         
         <th>Size</th>
         <th>Value</th>
@@ -67,8 +50,7 @@
         {% endif %}
         {% endblock %}
     </tr>
-    {% with %}
-    {% if planet and not planets %}{% set planets = ((planet, ph, planet.intel.nick, None,),) %}{% endif %}
+    
     {% for planet, ph, nick, alliance in planets %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
         {% if page %}<td>{{ loop.index + offset }}</td>{% endif %}
@@ -100,15 +82,12 @@
         {% endblock %}
     </tr>
     {% endfor %}
-    {% endwith %}
     
     {% if pages %}
     <tr class="datahigh">
-        {% if not alliance %}
-        <td colspan="20">Pages:{% for p in pages %} {% if p != page %}<a href="{% url "planets", race, sort p %}">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}{% endfor %}</td>
-        {% else %}
-        <td colspan="20">Pages:{% for p in pages %} {% if p != page %}<a href="{% url "alliance", alliance.name, race, sort, p %}">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}{% endfor %}</td>
-        {% endif %}
+        <td colspan="20">Pages:{% for p in pages %} {% if p != page %}<a href="
+            {%- block page scoped %}{% url "planets", race, sort p %}{% endblock -%}
+            ">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}{% endfor %}</td>
     </tr>
     {% endif %}
     
