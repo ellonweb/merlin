@@ -21,7 +21,7 @@
  
 from sqlalchemy import and_
 from sqlalchemy.orm import aliased
-from sqlalchemy.sql import asc, desc, case
+from sqlalchemy.sql import asc, desc, case, literal_column
 from sqlalchemy.sql.functions import count, sum
 from Core.db import session
 from Core.maps import Planet, PlanetHistory, Alliance, Intel
@@ -37,18 +37,30 @@ class ialliancehistory(loadable):
             return HttpResponseRedirect(reverse("alliance_ranks"))
         
         ph = aliased(PlanetHistory)
-        pho = aliased(PlanetHistory)
         members = count().label("members")
         size = sum(ph.size).label("size")
         value = sum(ph.value).label("value")
         score = sum(ph.score).label("score")
-        sizeo = sum(pho.size).label("sizeo")
-        valueo = sum(pho.value).label("valueo")
-        scoreo = sum(pho.score).label("scoreo")
         avg_size = size.op("/")(members).label("avg_size")
         avg_value = value.op("/")(members).label("avg_value")
         t10v = count(case(whens=((ph.value_rank <= 10 ,1),), else_=None)).label("t10v")
         t100v = count(case(whens=((ph.value_rank <= 100 ,1),), else_=None)).label("t100v")
+        
+        pho = aliased(PlanetHistory)
+        sizeo = sum(pho.size).label("sizeo")
+        valueo = sum(pho.value).label("valueo")
+        scoreo = sum(pho.score).label("scoreo")
+        
+        Q = session.query(PlanetHistory.tick.label("tick"),
+                          Alliance.id.label("id"),
+                          literal_column("rank() OVER (PARTITION BY planet_history.tick ORDER BY sum(planet_history.size) DESC)").label("size_rank"),
+                          literal_column("rank() OVER (PARTITION BY planet_history.tick ORDER BY sum(planet_history.value) DESC)").label("value_rank"),
+                          )
+        Q = Q.join(PlanetHistory.current)
+        Q = Q.join(Planet.intel)
+        Q = Q.join(Intel.alliance)
+        Q = Q.group_by(PlanetHistory.tick, Alliance.id)
+        ranks = Q.subquery()
         
         Q = session.query(ph.tick, members,
                           size, value,
@@ -62,7 +74,11 @@ class ialliancehistory(loadable):
         Q = Q.outerjoin((pho, and_(ph.id==pho.id, ph.tick-1==pho.tick),))
         Q = Q.filter(Intel.alliance == alliance)
         Q = Q.group_by(ph.tick)
+        
+        Q = Q.from_self().add_columns(ranks.c.size_rank, ranks.c.value_rank)
+        Q = Q.outerjoin((ranks, and_(ph.tick == ranks.c.tick, alliance.id == ranks.c.id),))
         Q = Q.order_by(desc(ph.tick))
+        
         history = Q.all()
         
         members = history[0][1] if len(history) else 0

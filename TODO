@@ -1,4 +1,5 @@
 http://www.sqlalchemy.org/trac/ticket/1529 (reloading/err)
+http://www.sqlalchemy.org/trac/ticket/1844 (rank()/window)
 
 |       Known Bugs       |   Occurrence   |     Effect     |
 | SQLA map reload (1529) | ext. rare      | recoverable    |
