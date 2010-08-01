@@ -37,7 +37,7 @@
         <td align="right">{{ alliance.score_avg_rank }}{% if ah %} {{ alliance.score_avg_rank|growth_rank_image(ah.score_avg_rank) }}{% endif %}</td>
         <td align="right">{{ alliance.size_avg_rank }}{% if ah %} {{ alliance.size_avg_rank|growth_rank_image(ah.size_avg_rank) }}{% endif %}</td>
         
-        <td><a href="/alliance/{{ alliance.name }}/" class="gray">{{ alliance.name }}</a></td>
+        <td><a href="{% url "alliance_members", alliance.name %}" class="gray">{{ alliance.name }}</a></td>
         <td align="right">{{ alliance.members }}</td>
         <td align="right">{{ alliance.size_avg|intcomma }}</td>
         <td align="right">{{ alliance.score_avg|intcomma }}</td>
