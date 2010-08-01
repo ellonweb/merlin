@@ -44,9 +44,9 @@ class stop(loadable):
         if ship is not None:
             pass
         elif "asteroids".rfind(name.lower()) > -1:
-            ship = Ship(name="Asteroids",class_="Roids",armor=50,total_cost=20000)
+            ship = Ship(name="Asteroids",class_="Roids",armor=50,total_cost=PA.getint("numbers", "roid_value")*100)
         elif "constructions".rfind(name.lower()) > -1:
-            ship = Ship(name="Constructions",class_="Struct",armor=500,total_cost=150000)
+            ship = Ship(name="Constructions",class_="Struct",armor=500,total_cost=PA.getint("numbers", "cons_value")*100)
         else:
             message.alert("No Ship called: %s" % (name,))
             return

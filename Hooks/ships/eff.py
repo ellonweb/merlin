@@ -47,13 +47,13 @@ class eff(loadable):
             killed = total_damage/50
             message.reply("%s %s (%s) will capture Asteroid: %s (%s)" % (
                 num, ship.name, self.num2short(num*ship.total_cost/100),
-                killed, self.num2short(killed*200),))
+                killed, self.num2short(killed*PA.getint("numbers", "roid_value")),))
             return
         if ship.t1 == "Struct":
             killed = total_damage/500
             message.reply("%s %s (%s) will destroy Structure: %s (%s)" % (
                 num, ship.name, self.num2short(num*ship.total_cost/100),
-                killed, self.num2short(killed*1500),))
+                killed, self.num2short(killed*PA.getint("numbers", "cons_value")),))
             return
         targets = session.query(Ship).filter(Ship.class_ == target_class)
         if targets.count() == 0:
