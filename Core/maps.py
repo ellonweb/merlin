@@ -242,9 +242,11 @@ class Alliance(Base):
     size = Column(Integer)
     members = Column(Integer)
     score = Column(Integer)
+    points = Column(Integer)
     size_rank = Column(Integer)
     members_rank = Column(Integer)
     score_rank = Column(Integer)
+    points_rank = Column(Integer)
     size_avg = Column(Integer)
     score_avg = Column(Integer)
     size_avg_rank = Column(Integer)
@@ -269,6 +271,7 @@ class Alliance(Base):
     def __str__(self):
         retstr="'%s' Members: %s (%s) " % (self.name,self.members,self.members_rank)
         retstr+="Score: %s (%s) Avg: %s (%s) " % (self.score,self.score_rank,self.score_avg,self.score_avg_rank)
+        retstr+="Points: %s (%s) " % (self.points,self.points_rank)
         retstr+="Size: %s (%s) Avg: %s (%s)" % (self.size,self.size_rank,self.size_avg,self.size_avg_rank)
         return encode(retstr)
         return retstr
@@ -280,9 +283,11 @@ class AllianceHistory(Base):
     size = Column(Integer)
     members = Column(Integer)
     score = Column(Integer)
+    points = Column(Integer)
     size_rank = Column(Integer)
     members_rank = Column(Integer)
     score_rank = Column(Integer)
+    points_rank = Column(Integer)
     size_avg = Column(Integer)
     score_avg = Column(Integer)
     size_avg_rank = Column(Integer)
@@ -320,6 +325,7 @@ alliance_temp = Table('alliance_temp', Base.metadata,
     Column('size', Integer),
     Column('members', Integer),
     Column('score', Integer),
+    Column('points', Integer),
     Column('score_rank', Integer),
     Column('size_avg', Integer),
     Column('score_avg', Integer))
