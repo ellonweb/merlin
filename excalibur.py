@@ -144,7 +144,7 @@ while True:
 
         # As above
         alliance_insert = "INSERT INTO alliance_temp (score_rank, name, size, members, score, points, size_avg, score_avg) "
-        alliance_insert+= "VALUES (%s, '%s', %s, %s, %s, %s, %s);"
+        alliance_insert+= "VALUES (%s, '%s', %s, %s, %s, %s, %s, %s);"
         for line in alliances:
             a=decode(line).strip().split("\t")
             session.execute(text(alliance_insert % (a[0], a[1].strip("\""), a[2], a[3], a[4], a[5], int(a[2])/int(a[3]), int(a[4])/min(PA.getint("numbers", "tag_count"),int(a[3])),)))
