@@ -35,6 +35,7 @@ handler500 = 'Arthur.errors.server_error'
 
 urlpatterns = patterns('',
     (r'^(?:home/)?$', 'Arthur.home'),
+    url(r'^user/(?P<username>\S+)/$', 'Arthur.dashboard.dashboard', name="dashboard"),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
     (r'^guide/$', 'Arthur.guide'),
     (r'^links/(?P<link>\w+)/$', 'Arthur.links'),
@@ -50,6 +51,10 @@ urlpatterns = patterns('',
 @load
 class home(loadable):
     def execute(self, request, user):
+        from Arthur.dashboard import dashboard
+        if user.is_member():
+            return dashboard.execute(request, user, dashuser=user)
+        
         if user.planet is not None:
             tick = Updates.midnight_tick()
             ph = user.planet.history(tick)
