@@ -98,7 +98,9 @@ class prop(loadable):
             return
         
         old_vote = prop.votes.filter(Vote.voter==user).first()
-        session.expunge(old_vote)
+        if old_vote is not None:
+            session.expunge(old_vote)
+        
         prop.votes.filter(Vote.voter==user).delete()
         prop.votes.append(Vote(voter=user, vote=vote, carebears=user.carebears))
         session.commit()
