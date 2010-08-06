@@ -404,6 +404,16 @@ class User(Base):
     def gimps(self):
         return session.query(User.name).filter(User.sponsor == self.name).all()
     
+    @property
+    def mums(self):
+        from sqlalchemy.sql.functions import sum
+        Q = session.query(User.name, sum(Cookie.howmany).label("gac"))
+        Q = Q.join(Cookie.giver)
+        Q = Q.filter(Cookie.receiver == self)
+        Q = Q.group_by(User.name)
+        Q = Q.order_by(desc("gac"))
+        return Q.all()
+    
     @validates('passwd')
     def valid_passwd(self, key, passwd):
         return User.hasher(passwd)
