@@ -34,7 +34,7 @@ class lookup(loadable):
         lookup = (request.REQUEST.get("lookup") or "").strip()
         if not lookup:
             if user.is_member():
-                return HttpResponseRedirect("/user/%s/" %(user.name,))
+                return HttpResponseRedirect(reverse("dashboard", kwargs={"username":user.name}))
             return HttpResponseRedirect("/")
         
         scans = scanre.findall(lookup)
@@ -60,7 +60,7 @@ class lookup(loadable):
             else:
                 member = User.load(lookup, exact=False, access="member") if lookup else None
                 if member:
-                    return HttpResponseRedirect("/user/%s/" %(member.name,))
+                    return HttpResponseRedirect(reverse("dashboard", kwargs={"username":member.name}))
                 
                 else:
                     Q = session.query(Planet)
