@@ -22,14 +22,15 @@
 from Core.config import Config
 from Core.db import session
 from Core.maps import User
-from Core.loadable import loadable, route
+from Core.loadable import loadable, route, require_user
 
 class aids(loadable):
     """See who a user has sexed"""
     usage = " <pnick>"
+    access = "member"
     
-    @route(r"(\S+)", access = "member")
-    def execute(self, message, user, params):
+    @route(r"(\S+)")
+    def user(self, message, user, params):
 
         # assign param variables 
         search=params.group(1)
@@ -43,9 +44,16 @@ class aids(loadable):
         if whore is None:
             message.reply("No users matching '%s'"%(search,))
             return
-
-        Q=session.query(User.name).filter(User.sponsor == whore.name)
-        bitches = Q.all()
+        else:
+            self.execute(message, user, whore)
+    
+    @route(r"")
+    @require_user
+    def me(self, message, user, params):
+        self.execute(message, user, user)
+    
+    def execute(self, message, user, whore):
+        bitches = whore.gimps
 
         reply=""
         if whore == user:

@@ -400,6 +400,10 @@ class User(Base):
         if Config.get("Misc", "sms") == "combined" and self.googlevoice is not None:
             return ("Clickatell","Google",)[self.googlevoice]
     
+    @property
+    def gimps(self):
+        return session.query(User.name).filter(User.sponsor == self.name).all()
+    
     @validates('passwd')
     def valid_passwd(self, key, passwd):
         return User.hasher(passwd)
