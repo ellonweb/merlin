@@ -87,6 +87,7 @@
             <tr class="header"><th width="200">Phone</th></tr>
             <tr class="odd"><td>{% if dashuser.pubphone or phonefriend %}{{ dashuser.phone }}{% else %}Hidden{% endif %}</td></tr>
             <tr class="even"><td class="right">Public: {{ dashuser.pubphone }}</td></tr>
+            <tr class="odd"><td class="right">SMS mode: {% if user.smsmode %}{{ dashuser.smsmode }}{% else %}N/A{% endif %}</td></tr>
             <tr class="header"><th>{{ who }} PhoneFriends:</th></tr>
             {% for friend in dashuser.phonefriends %}
             <tr class="{{ loop.cycle('odd', 'even') }}">
