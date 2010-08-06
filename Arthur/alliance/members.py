@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from sqlalchemy import or_
 from sqlalchemy.sql import asc, desc
 from Core.config import Config
 from Core.db import session
@@ -52,7 +53,7 @@ class members(loadable):
         members = []
         for level in levels:
             Q = session.query(User.name, User.alias, User.sponsor, User.access, User.carebears, Planet, User.fleetupdated,
-                              User.phone, User.pubphone, User.id.in_(session.query(PhoneFriend.user_id).filter_by(friend=user)))
+                              User.phone, User.pubphone, or_(User.id == user.id, User.id.in_(session.query(PhoneFriend.user_id).filter_by(friend=user))))
             Q = Q.outerjoin(User.planet)
             Q = Q.filter(User.active == True)
             Q = Q.filter(User.access >= level[1])

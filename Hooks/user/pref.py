@@ -40,8 +40,8 @@ class pref(loadable):
             reply += " email=%s" % (user.email,)
         if user.phone:
             reply += " phone=%s pubphone=%s" % (user.phone, str(user.pubphone)[0],)
-            if Config.get("Misc", "sms") == "combined" and user.googlevoice is not None:
-                reply += " smsmode=%s" % ("G" if user.googlevoice else "C",)
+            if user.smsmode is not None:
+                reply += " smsmode=%s" % (user.smsmode[0],)
         if len(reply) > 0:
             message.reply("Your preferences are:" + reply)
         else:

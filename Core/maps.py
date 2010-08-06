@@ -395,6 +395,11 @@ class User(Base):
         else:
             self.access = Config.getint("Access", value)
     
+    @property
+    def smsmode(self):
+        if Config.get("Misc", "sms") == "combined" and self.googlevoice is not None:
+            return ("Clickatell","Google",)[self.googlevoice]
+    
     @validates('passwd')
     def valid_passwd(self, key, passwd):
         return User.hasher(passwd)
