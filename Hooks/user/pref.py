@@ -74,6 +74,9 @@ class pref(loadable):
                     user.planet = None
                     reply += " planet=None"
             if opt == "password":
+                if message.in_chan():
+                    message.reply("Don't set your password in public you shit")
+                    continue
                 user.passwd = val
                 reply += " password=%s"%(val)
             if opt == "email":
