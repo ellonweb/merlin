@@ -15,7 +15,7 @@
     {% for member, p, epenis in queens %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
         <td class="right">{{ epenis.rank }}</td>
-        <td class="center">{{ member.name }}</td>
+        <td class="center"><a href="{% url "dashboard", member.name %}">{{ member.name }}</a></td>
         <td class="center"><a href="{% url "planet", p.x, p.y, p.z %}">{{ p.x }}:{{ p.y }}:{{ p.z }}</a></td>
         <td class="right">{{ epenis.penis|intcomma }}</td>
     </tr>

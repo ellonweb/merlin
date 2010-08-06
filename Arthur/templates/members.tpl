@@ -18,8 +18,8 @@
     </tr>
     {% for member, alias, sponsor, access, carebears, p, fleetupdated, phone, pubphone, phonefriend in members %}
     <tr class="{{ loop.cycle('odd', 'even') }}">
-        <td class="center">{{ member }}{% if alias %} ({{ alias }}){% endif %}</td>
-        <td class="center">{{ sponsor }}</td>
+        <td class="center"><a href="{% url "dashboard", member %}">{{ member }}</a>{% if alias %} ({{ alias }}){% endif %}</td>
+        <td class="center"><a href="{% url "dashboard", sponsor %}">{{ sponsor }}</a></td>
         <td class="right">{{ access }}</td>
         <td class="right">{{ carebears }}</td>
         <td class="center">{% if p %}<a href="{% url "planet", p.x, p.y, p.z %}">{{ p.x }}:{{ p.y }}:{{ p.z }}</a>{% endif %}</td>
