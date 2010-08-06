@@ -23,7 +23,7 @@ from django.conf.urls.defaults import include, patterns, url
 from Arthur.alliance import members, equeens
 
 urlpatterns = patterns('Arthur.alliance',
-    url(r'^members/$', 'members.members'),
+    url(r'^members/$', 'members.members', name="memberlist"),
     url(r'^members/(?P<sort>\w+)/$', 'members.members', name="members"),
     url(r'^galmates/$', 'members.galmates'),
     url(r'^galmates/(?P<sort>\w+)/$', 'members.galmates', name="galmates"),

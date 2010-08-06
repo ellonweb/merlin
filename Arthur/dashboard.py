@@ -32,6 +32,8 @@ class dashboard(loadable):
     
     def execute(self, request, user, username="", dashuser=None):
         dashuser = dashuser or User.load(username, exact=False)
+        if dashuser is None:
+            return HttpResponseRedirect(reverse("memberlist"))
         
         if dashuser.planet is not None:
             tick = Updates.midnight_tick()
