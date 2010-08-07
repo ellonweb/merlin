@@ -94,7 +94,10 @@ class client(object):
         # Basic attach
         self.sock = sock
         self.file = self.sock.makefile('rb', 0)
-        self._host = (self.sock.getpeername()[1],self.fileno(),)
+        try:
+            self._host = (self.sock.getpeername()[1],self.fileno(),)
+        except socket.error:
+            self._host = (None,self.fileno(),)
     
     def host(self):
         return "RoboCop!%s/%s"%self._host
@@ -115,7 +118,10 @@ class client(object):
     
     def read(self):
         # Read from socket
-        line = self.file.readline()
+        try:
+            line = self.file.readline()
+        except socket.error:
+            line = None
         if line:
             if line[-2:] == CRLF:
                 line = line[:-2]
