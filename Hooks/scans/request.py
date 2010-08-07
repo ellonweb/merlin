@@ -108,6 +108,10 @@ class request(loadable):
         Q = Q.filter(Request.active == True)
         Q = Q.order_by(asc(Request.id))
         
+        if Q.count() < 1:
+            message.reply("There are no open scan requests")
+            return
+        
         message.reply(" ".join(map(lambda request: "[%s: %s %s:%s:%s]" % (request.id, request.scantype, request.target.x, request.target.y, request.target.z,), Q.all())))
     
     @route(r"links", access = "member")
@@ -116,6 +120,10 @@ class request(loadable):
         Q = Q.filter(Request.tick > Updates.current_tick() - 5)
         Q = Q.filter(Request.active == True)
         Q = Q.order_by(asc(Request.id))
+        
+        if Q.count() < 1:
+            message.reply("There are no open scan requests")
+            return
         
         message.reply(" ".join(map(lambda request: "[%s: %s]" % (request.id, request.link,), Q[:5])))
     
