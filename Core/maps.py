@@ -1001,7 +1001,7 @@ class DevScan(Base):
             return "Blow up strucs"
     
     def mining_str(self):
-        level = self.mining+1
+        level = self.mining
         if level==0:
             return "100 roids (scanner!)"
         if level==1:
