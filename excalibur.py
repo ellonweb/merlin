@@ -189,10 +189,9 @@ while True:
         # Any galaxies in the temp table without an id are new
         # Insert them to the current table and the id(serial/auto_increment)
         #  will be generated, and we can then copy it back to the temp table
-        # Galaxies with 8 or less planets are private, random
-        #  galaxies should start with a minimum of 12. (R36)
+        # Galaxies under a certain amount of planets are private
         session.execute(text("""INSERT INTO galaxy (x, y, active, private)
-                                SELECT g.x, g.y, :true, count(p) <= 8 OR (g.x = 1 AND g.y = 1)
+                                SELECT g.x, g.y, :true, count(p) <= :priv_gal OR (g.x = 1 AND g.y = 1)
                                 FROM
                                   galaxy_temp as g,
                                   (SELECT x, y FROM planet_temp) as p
@@ -201,7 +200,7 @@ while True:
                                   g.id IS NULL
                                 GROUP BY
                                   g.x, g.y
-                            ;""", bindparams=[true]))
+                            ;""", bindparams=[true, bindparam("priv_gal",PA.getint("numbers", "priv_gal"))]))
         session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y AND galaxy.active = :true ORDER BY galaxy.id DESC) WHERE id IS NULL;", bindparams=[true]))
 
         t2=time.time()-t1
