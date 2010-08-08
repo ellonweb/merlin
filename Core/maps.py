@@ -261,11 +261,15 @@ class Alliance(Base):
         alliance = Q.filter(Alliance.name.ilike(name)).first()
         if alliance is None:
             alliance = Q.filter(Alliance.name.ilike(name+"%")).first()
+        if alliance is None:
+            alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
         if alliance is None and active == False:
             Q = session.query(Alliance)
             alliance = Q.filter(Alliance.name.ilike(name)).first()
             if alliance is None:
                 alliance = Q.filter(Alliance.name.ilike(name+"%")).first()
+            if alliance is None:
+                alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
         return alliance
     
     def __str__(self):
