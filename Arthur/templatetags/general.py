@@ -27,11 +27,13 @@ def intel(user):
 
 @filter
 def percent(value, total):
-    return "%s%%" % (round(float(value) / total * 100, 1),)
+    fraction = float(value) / total if total else 0
+    return "%s%%" % (round(fraction * 100, 1),)
 
 @filter
 def and_percent(value, total):
-    return "%s (%s%%)" % (value, round(float(value) / total * 100, 1),)
+    fraction = float(value) / total if total else 0
+    return "%s (%s%%)" % (value, round(fraction * 100, 1),)
 
 @filter
 def change(diff):
