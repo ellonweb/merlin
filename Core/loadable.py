@@ -38,6 +38,7 @@ class loadable(object):
     # Base loadable class for callbacks
     ""
     usage = None
+    alias = None
     param = ""
     trigger = "PRIVMSG"
     routes = None # List of (name, regex, access,)
@@ -74,8 +75,9 @@ class loadable(object):
         return self
     
     def __init__(self):
-        self.commandre = re.compile(r"%s(\s+.*|$)" %(self.name,), re.I)
-        self.helpre = re.compile(r"help %s\s*$" % (self.name,), re.I)
+        cmd = self.name if self.alias is None else "%s|%s"%(self.name,self.alias,)
+        self.commandre = re.compile(r"(%s)(\s+.*|$)" %(cmd,), re.I)
+        self.helpre = re.compile(r"help %s\s*$" % (cmd,), re.I)
         self.usage = (self.name + self.usage) if self.usage else None
     
     def __call__(self, message):
@@ -122,7 +124,7 @@ class loadable(object):
             if self.match(message, self.helpre) is not None:
                 self.help(message)
             return
-        command = m.group(1)
+        command = m.group(2)
         
         try:
             route, subcommand, user, params = self.router(message, command)
@@ -133,7 +135,7 @@ class loadable(object):
             session.add(Command(command_prefix = message.get_prefix(),
                                 command = self.name,
                                 subcommand = subcommand,
-                                command_parameters = message.get_msg()[len(self.name)+1:].strip(),
+                                command_parameters = message.get_msg()[len(m.group(1))+1:].strip(),
                                 nick = message.get_nick(),
                                 username = "" if user is True else user.name,
                                 hostname = message.get_hostmask(),
