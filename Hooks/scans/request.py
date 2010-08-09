@@ -30,6 +30,7 @@ from Core.loadable import loadable, route, require_user, robohci
 
 class request(loadable):
     """Request a scan"""
+    alias = "req"
     usage = " <x.y.z> <scantype> [dists] | <id> blocks <amps> | cancel <id> | list | links"
     
     @route(loadable.planet_coord+"\s+("+"|".join(PA.options("scans"))+r")\w*(?:\s+(\d+))?", access = "member")
@@ -88,7 +89,7 @@ class request(loadable):
         if message.get_chan() != self.scanchan():
             message.privmsg("Cancelled scan request %s" % (id,), self.scanchan())
     
-    @route(r"(\d+)\s+block(?:s|ed)?\s+(\d+)", access = "member")
+    @route(r"(\d+)\s+b(?:lock(?:s|ed)?)?\s+(\d+)", access = "member")
     def blocks(self, message, user, params):
         id = params.group(1)
         dists = int(params.group(2))
@@ -101,7 +102,7 @@ class request(loadable):
         session.commit()
         message.reply("Updated request %s dists to %s" % (id, request.dists,))
     
-    @route(r"list", access = "member")
+    @route(r"l(?:ist)?", access = "member")
     def list(self, message, user, params):
         Q = session.query(Request)
         Q = Q.filter(Request.tick > Updates.current_tick() - 5)
@@ -114,7 +115,7 @@ class request(loadable):
         
         message.reply(" ".join(map(lambda request: "[%s: %s %s:%s:%s]" % (request.id, request.scantype, request.target.x, request.target.y, request.target.z,), Q.all())))
     
-    @route(r"links", access = "member")
+    @route(r"links?", access = "member")
     def links(self, message, user, params):
         Q = session.query(Request)
         Q = Q.filter(Request.tick > Updates.current_tick() - 5)
