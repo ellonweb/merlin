@@ -19,27 +19,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-# List of package modules
-__all__ = ["system",
-           "chanusertracker",
-           "auth",
-           "commandlog",
-           "help",
-           "user",
-           "propsandcookies",
-#           "sms",
-           "fuckthatnameusethis",
-           "lookup",
-           "details",
-           "intel",
-           "growth",
-           "target",
-           "mydef",
-           "victim",
-           "calcs",
-           "scans",
-           "ships",
-           "quotes",
-           "links",
-#           "galstatus",
-           ]
+from Core.db import session
+from Core.maps import Alliance
+from Core.loadable import loadable, route
+
+class fuckthatname(loadable):
+    usage = " <fucked tag> usethis <better name>"
+    
+    @route(r"(\S+)\s+use\s*this\s+(\S+)")
+    def execute(self, message, user, params):
+        alliance = Alliance.load(params.group(1), alias=False)
+        if alliance is None:
+            message.reply("There's no morons playing under the tag %s" % (params.group(1),))
+            return
+        
+        alliance.alias = params.group(2)
+        session.commit()
+        message.reply("That fucked up tag %s has been aliased to %s" % (alliance.name, alliance.alias,))

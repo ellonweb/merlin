@@ -50,7 +50,9 @@ class intel(loadable):
                     reply = "#%s"%(planet.z,)
                     if planet.intel.nick:
                         reply += " %s"%(planet.intel.nick,)
-                    if planet.alliance:
+                    if planet.alliance and planet.alliance.alias:
+                        reply += " [%s]"%(planet.alliance.alias[:3],)
+                    elif planet.alliance:
                         reply += " [%s]"%(planet.alliance.name[:3],)
                     prev.append(reply)
             if len(prev):

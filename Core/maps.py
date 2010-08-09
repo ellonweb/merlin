@@ -239,6 +239,7 @@ class Alliance(Base):
     id = Column(Integer, primary_key=True)
     active = Column(Boolean)
     name = Column(String(20), index=True)
+    alias = Column(String(20))
     size = Column(Integer)
     members = Column(Integer)
     score = Column(Integer)
@@ -256,20 +257,31 @@ class Alliance(Base):
         return self.history_loader.filter_by(tick=tick).first()
     
     @staticmethod
-    def load(name, active=True):
+    def load(name, alias=True, active=True):
+        filters = (
+                    Alliance.name.ilike(name),
+                    Alliance.name.ilike(name+"%"),
+                    Alliance.name.ilike("%"+name+"%"),
+                    Alliance.alias.ilike(name),
+                    Alliance.alias.ilike(name+"%"),
+                    Alliance.alias.ilike("%"+name+"%"),
+                    )
+        
         Q = session.query(Alliance).filter_by(active=True)
-        alliance = Q.filter(Alliance.name.ilike(name)).first()
-        if alliance is None:
-            alliance = Q.filter(Alliance.name.ilike(name+"%")).first()
-        if alliance is None:
-            alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
-        if alliance is None and active == False:
-            Q = session.query(Alliance)
-            alliance = Q.filter(Alliance.name.ilike(name)).first()
-            if alliance is None:
-                alliance = Q.filter(Alliance.name.ilike(name+"%")).first()
-            if alliance is None:
-                alliance = Q.filter(Alliance.name.ilike("%"+name+"%")).first()
+        for filter in filters:
+            alliance = Q.filter(filter).first()
+            if alliance is not None:
+                break
+        
+        if alliance is not None or active == True:
+            return alliance
+        
+        Q = session.query(Alliance)
+        for filter in filters:
+            alliance = Q.filter(filter).first()
+            if alliance is not None:
+                break
+        
         return alliance
     
     def __str__(self):
