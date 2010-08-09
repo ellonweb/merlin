@@ -58,7 +58,7 @@ class mydef(loadable):
     @require_user
     def showdef(self, message, user, params):
         from Hooks.mydef.showdef import showdef
-        showdef.execute(message, user)
+        showdef().execute(message, user)
     
     def reset_ships_and_comment(self,user,ships,fleetcount,comment,reset_ships):
         self.update_comment_and_fleetcount(user,fleetcount,comment)
