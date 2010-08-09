@@ -28,7 +28,7 @@ from Core.maps import User, Session
 from Arthur.context import render
 from Arthur.errors import server_error, exceptions
 
-SESSION_KEY = "%sSESSID" % (Config.get("Alliance", "name")[:3].upper(),)
+SESSION_KEY = "SESSION"
 LOGOUT = "/logout/"
 USER = "username"
 PASS = "password"

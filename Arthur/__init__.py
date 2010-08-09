@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
 from Core.config import Config
@@ -38,7 +39,7 @@ urlpatterns = patterns('',
     url(r'^user/(?P<username>\S+)/$', 'Arthur.dashboard.dashboard', name="dashboard"),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
     (r'^guide/$', 'Arthur.guide'),
-    (r'^links/(?P<link>\w+)/$', 'Arthur.links'),
+    (r'^links/(?P<link>[^/]+)/$', 'Arthur.links'),
     (r'^lookup/$', 'Arthur.lookup.lookup'),
     (r'', include('Arthur.alliance')),
     (r'', include('Arthur.rankings')),
@@ -69,14 +70,14 @@ class home(loadable):
 @menu("Planetarion", "Game",        suffix = "game")
 @load
 class links(loadable):
-    links = {"game"        : "http://game.planetarion.com",
-             "forums"      : "http://pirate.planetarion.com",
-             "sandmans"    : "http://sandmans.co.uk",
-             "bcalc"       : "http://game.planetarion.com/bcalc.pl",
-             name          : "/alliance/%s/" % (name,),
-            }
     def execute(self, request, user, link):
-        link = self.links.get(link)
+        link = {
+                "game"        : "http://game.planetarion.com",
+                "forums"      : "http://pirate.planetarion.com",
+                "sandmans"    : "http://sandmans.co.uk",
+                "bcalc"       : "http://game.planetarion.com/bcalc.pl",
+                name          : reverse("alliance_members", kwargs={"name":name}),
+               }.get(link)
         if link is None:
             return page_not_found(request)
         return HttpResponseRedirect(link)
