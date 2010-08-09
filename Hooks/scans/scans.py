@@ -56,14 +56,15 @@ class scans(loadable):
     
     @robohci
     def robocop(self, message, scantype, pa_id, x, y, z, names):
+        nicks = [nick for nick in [CUT.list_user_nicks(name) for name in names.split(",")]]
+        
         reply = "%s on %s:%s:%s " % (PA.get(scantype,"name"),x,y,z,)
         reply+= Config.get("URL","viewscan") % (pa_id,)
-        for name in names.split(","):
-            for nick in CUT.list_user_nicks(name):
-                message.privmsg(reply, nick)
+        for nick in nicks:
+            message.privmsg(reply, nick)
         
         reply = "%s on %s:%s:%s " % (PA.get(scantype,"name"),x,y,z,)
         reply+= "delivered to: "
-        reply+= ", ".join([nick for nick in CUT.list_user_nicks(name) for name in names.split(",")])
+        reply+= ", ".join(nicks)
         from Hooks.scans.request import request
         message.privmsg(reply, request().scanchan())
