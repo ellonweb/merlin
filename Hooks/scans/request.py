@@ -26,6 +26,7 @@ from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, User, Request
+from Core.chanusertracker import CUT
 from Core.loadable import loadable, route, require_user, robohci
 
 class request(loadable):
@@ -50,12 +51,26 @@ class request(loadable):
     
     @robohci
     def robocop(self, message, request_id, mode):
-        if mode == "cancel":
-            message.privmsg("Cancelled scan request %s" % (request_id,), self.scanchan())
-            return
-        request = Request.load(request_id)
+        request = Request.load(request_id, active=False)
         if request is None:
             return
+        
+        if mode == "cancel":
+            reply = "Cancelled scan request %s" % (request.id,)
+            message.privmsg(reply, self.scanchan())
+            nicks = CUT.list_user_nicks(request.user.name)
+            for nick in nicks:
+                message.privmsg(reply, nick)
+            return
+        
+        if mode == "block":
+            reply = "Updated request %s dists to %s" % (request.id, request.dists,)
+            message.privmsg(reply, self.scanchan())
+            nicks = CUT.list_user_nicks(request.user.name)
+            for nick in nicks:
+                message.privmsg(reply, nick)
+            return
+        
         user = request.user
         planet = request.target
         dists_intel = planet.intel.dists if planet.intel else 0
@@ -71,7 +86,7 @@ class request(loadable):
         
         return request
     
-    @route(r"cancel\s+(\d+)", access = "member")
+    @route(r"c(?:ancel)?\s+(\d+)", access = "member")
     @require_user
     def cancel(self, message, user, params):
         id = params.group(1)
@@ -85,9 +100,16 @@ class request(loadable):
         
         request.active = False
         session.commit()
-        message.reply("Cancelled scan request %s" % (id,))
+        
+        reply = "Cancelled scan request %s" % (id,)
+        message.reply(reply)
         if message.get_chan() != self.scanchan():
-            message.privmsg("Cancelled scan request %s" % (id,), self.scanchan())
+            message.privmsg(reply, self.scanchan())
+        
+        nicks = CUT.list_user_nicks(request.user.name)
+        if message.get_nick() not in nicks:
+            for nick in nicks:
+                message.privmsg(reply, nick)
     
     @route(r"(\d+)\s+b(?:lock(?:s|ed)?)?\s+(\d+)", access = "member")
     def blocks(self, message, user, params):
@@ -100,7 +122,16 @@ class request(loadable):
         
         request.dists = max(request.dists, dists)
         session.commit()
-        message.reply("Updated request %s dists to %s" % (id, request.dists,))
+        
+        reply = "Updated request %s dists to %s" % (id, request.dists,)
+        message.reply(reply)
+        if message.get_chan() != self.scanchan():
+            message.privmsg(reply, self.scanchan())
+        
+        nicks = CUT.list_user_nicks(request.user.name)
+        if message.get_nick() not in nicks:
+            for nick in nicks:
+                message.privmsg(reply, nick)
     
     @route(r"l(?:ist)?", access = "member")
     def list(self, message, user, params):

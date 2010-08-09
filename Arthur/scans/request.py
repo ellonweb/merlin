@@ -82,6 +82,9 @@ class blocks(loadable):
         
         req.dists = max(req.dists, int(dists))
         session.commit()
+        
+        push("request", request_id=req.id, mode="block")
+        
         return requests.execute(request, user, message="Updated request %s dists to %s" % (id, req.dists,))
 
 @menu("Scans", "Requests", prefix=True)

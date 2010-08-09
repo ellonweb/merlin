@@ -61,3 +61,9 @@ class scans(loadable):
         for name in names.split(","):
             for nick in CUT.list_user_nicks(name):
                 message.privmsg(reply, nick)
+        
+        reply = "%s on %s:%s:%s " % (PA.get(scantype,"name"),x,y,z,)
+        reply+= "delivered to: "
+        reply+= ", ".join([nick for nick in CUT.list_user_nicks(name) for name in names.split(",")])
+        from Hooks.scans.request import request
+        message.privmsg(reply, request().scanchan())

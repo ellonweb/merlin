@@ -882,9 +882,10 @@ class Request(Base):
     tick = Column(Integer,default=Updates.current_tick)
     
     @staticmethod
-    def load(id):
+    def load(id, active=True):
         Q = session.query(Request)
-        request = Q.filter_by(id = id, active = True).first()
+        Q = Q.filter_by(active = True) if active == True else Q
+        request = Q.filter_by(id = id).first()
         return request
         
     @property
