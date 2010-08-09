@@ -56,7 +56,8 @@ class scans(loadable):
     
     @robohci
     def robocop(self, message, scantype, pa_id, x, y, z, names):
-        nicks = [nick for nick in [CUT.list_user_nicks(name) for name in names.split(",")]]
+        nicks = []
+        [nicks.extend(nick) for nick in [CUT.list_user_nicks(name) for name in names.split(",")]]
         
         reply = "%s on %s:%s:%s " % (PA.get(scantype,"name"),x,y,z,)
         reply+= Config.get("URL","viewscan") % (pa_id,)
