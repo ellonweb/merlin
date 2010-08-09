@@ -40,6 +40,7 @@ class alliance(loadable):
                   "size"  : (asc(Planet.size_rank),),
                   "xp"    : (asc(Planet.xp_rank),),
                   "race"  : (asc(Planet.race), asc(Planet.size_rank),),
+                  "xyz"   : (asc(Planet.x), asc(Planet.y), asc(Planet.z),),
                   }
         if sort not in order.keys():
             sort = "score"

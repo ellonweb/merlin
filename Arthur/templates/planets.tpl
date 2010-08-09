@@ -10,7 +10,7 @@
     <tr class="header">
         {% if page %}<th></th>{% endif %}
         <th colspan="4">Rank</th>
-        <th colspan="10">&nbsp;</th>
+        <th colspan="8">&nbsp;</th>
         <th colspan="3">Growth</th>
         {% block intel_head %}
         {% if user|intel %}
@@ -26,9 +26,8 @@
         <th>Size</th>
         <th>XP</th>
         
-        <th>X</th>
-        <th>Y</th>
-        <th>Z</th>
+        <th>{% block xyz %}X:Y Z{% endblock %}</th>
+        
         <th>Ruler</th>
         <th>Planet</th>
         {% for order, width in (("Race",0), ("Size",0,), ("Value",0,), ("Score",0,), ("XP",0,),) -%}
@@ -59,9 +58,10 @@
         <td align="right">{{ planet.size_rank }}{% if ph %} {{ planet.size_rank|growth_rank_image(ph.size_rank) }}{% endif %}</td>
         <td align="right">{{ planet.xp_rank }}{% if ph %} {{ planet.xp_rank|growth_rank_image(ph.xp_rank) }}{% endif %}</td>
         
-        <td align="right"><a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}</a></td>
-        <td align="right"><a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.y }}</a></td>
-        <td align="right"><a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.z }}</a></td>
+        <td align="center">
+            <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
+            <a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.z }}</a>
+        </td>
         <td>{{ planet.rulername }}</td>
         <td>{{ planet.planetname }}</td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
