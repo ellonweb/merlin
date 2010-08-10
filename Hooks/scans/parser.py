@@ -21,7 +21,7 @@
  
 import re
 from threading import Thread
-from time import time
+from time import asctime, time
 from urllib2 import urlopen
 from sqlalchemy.exc import IntegrityError
 from Core.exceptions_ import PNickParseError
@@ -57,7 +57,9 @@ class parse(Thread):
         Thread.__init__(self)
     
     def run(self):
-        scanlog(str(time()))
+        scanlog(asctime())
+        t_start=time()
+        
         uid = self.uid
         type = self.type
         id = self.id
@@ -67,19 +69,23 @@ class parse(Thread):
             elif type == "group":
                 self.group(uid, id)
         except Exception, e:
-            scanlog("Exception in scan: %s"%(str(e),), True)
-        scanlog(str(time()))
+            scanlog("Exception in scan: %s"%(str(e),), traceback=True)
+        
+        t1=time()-t_start
+        scanlog("Total time taken: %.3f seconds" % (t1,), spacing=True)
         session.remove()
     
     def group(self, uid, gid):
+        scanlog("Group scan: %s" %(gid,))
         page = urlopen(Config.get("URL","viewgroup")%(gid,)).read()
         for m in re.finditer('scan_id=([0-9a-zA-Z]+)',page):
             try:
                 self.scan(uid, m.group(1), gid)
             except Exception, e:
-                scanlog("Exception in scan: %s"%(str(e),), True)
+                scanlog("Exception in scan: %s"%(str(e),), traceback=True)
     
     def scan(self, uid, pa_id, gid=None):
+        scanlog("Scan: %s (group: %s)" %(pa_id,gid,))
         page = urlopen(Config.get("URL","viewscan")%(pa_id,)).read()
         page = decode(page)
         
@@ -107,6 +113,8 @@ class parse(Thread):
             scanlog("Scan %s may already exist: %s" %(pa_id,str(e),))
             return
         
+        scanlog("%s %s:%s:%s" %(PA.get(scantype,"name"), x,y,z,))
+        
         parser = {
                   "P": self.parse_P,
                   "D": self.parse_D,
@@ -118,8 +126,6 @@ class parse(Thread):
         if parser is not None:
             parser(scan_id, scan, page)
         
-        scanlog(PA.get(scantype,"name"), "%s:%s:%s" % (x,y,z,))
-        
         Q = session.query(Request)
         Q = Q.filter(Request.scantype==scantype)
         Q = Q.filter(Request.target==planet)
@@ -129,6 +135,7 @@ class parse(Thread):
         
         users = []
         for request in result:
+            scanlog("Scan %s matches request %s for %s" %(pa_id, request.id, requester.user.name,))
             request.scan_id = scan_id
             request.active = False
             users.append(request.user.name)
@@ -247,7 +254,7 @@ class parse(Thread):
 
     def parse_U(self, scan_id, scan, page):
         for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+(?:,\d{3})*)</td>', page):
-            scanlog(m.groups())
+            scanlog("%s: %s"%m.groups())
 
             ship = Ship.load(name=m.group(1))
             if ship is None:
@@ -268,6 +275,8 @@ class parse(Thread):
         #<tr><td class="left">10:1:10</td><td class="left">Defend</td><td class="left">Pesticide IV</td><td class="right">1</td><td class="right">0</td></tr>
 
         for m in re.finditer('<td[^>]*>(\d+)\:(\d+)\:(\d+)</td><td[^>]*>([^<]+)</td><td[^>]*>([^<]+)</td><td[^>]*>(\d+)</td><td[^>]*>(\d+(?:,\d{3})*)</td>', page):
+            scanlog("%s:%s:%s %s %s %s %s" %m.groups())
+            
             fleetscan = FleetScan()
 
             originx = m.group(1)
@@ -282,8 +291,6 @@ class parse(Thread):
             fleetscan.fleet_name = fleet
             fleetscan.landing_tick = eta + scan.tick
             fleetscan.fleet_size = fleetsize
-
-            scanlog("JGP fleet ")
 
             attacker=Planet.load(originx,originy,originz)
             if attacker is None:
@@ -305,11 +312,11 @@ class parse(Thread):
                     session.commit()
                 except Exception, e:
                     session.rollback()
-                    scanlog("Exception trying to update jgp: %s"%(str(e),), True)
+                    scanlog("Exception trying to update jgp: %s"%(str(e),), traceback=True)
                     continue
             except Exception, e:
                 session.rollback()
-                scanlog("Exception in jgp: %s"%(str(e),), True)
+                scanlog("Exception in jgp: %s"%(str(e),), traceback=True)
                 continue
 
     def parse_N(self, scan_id, scan, page):
@@ -342,7 +349,7 @@ class parse(Thread):
                 session.commit()
             except Exception, e:
                 session.rollback()
-                scanlog("Exception in news: %s"%(str(e),), True)
+                scanlog("Exception in news: %s"%(str(e),), traceback=True)
                 continue
 
             scanlog('Incoming: ' + newstick + ':' + fleetname + '-' + originx + ':' + originy + ':' + originz + '-' + arrivaltick + '|' + numships)
@@ -375,7 +382,7 @@ class parse(Thread):
                 session.commit()
             except Exception, e:
                 session.rollback()
-                scanlog("Exception in news: %s"%(str(e),), True)
+                scanlog("Exception in news: %s"%(str(e),), traceback=True)
                 continue
 
             scanlog('Attack:' + newstick + ':' + fleetname + ':' + originx + ':' + originy + ':' + originz + ':' + arrivaltick)
@@ -408,7 +415,7 @@ class parse(Thread):
                 session.commit()
             except Exception, e:
                 session.rollback()
-                scanlog("Exception in news: %s"%(str(e),), True)
+                scanlog("Exception in news: %s"%(str(e),), traceback=True)
                 continue
 
             scanlog('Defend:' + newstick + ':' + fleetname + ':' + originx + ':' + originy + ':' + originz + ':' + arrivaltick)
@@ -443,7 +450,7 @@ class parse(Thread):
                 session.commit()
             except Exception, e:
                 session.rollback()
-                scanlog("Exception in unit: %s"%(str(e),), True)
+                scanlog("Exception in unit: %s"%(str(e),), traceback=True)
                 continue
 
             scanlog('Security:' + newstick + ':' + ruler + ':' + originx + ':' + originy + ':' + originz)

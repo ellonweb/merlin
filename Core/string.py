@@ -52,5 +52,5 @@ def log(file, log, traceback=True, spacing=True):
             file.write("\n\n")
 
 errorlog = lambda text, traceback=True: log(Config.get("Misc","errorlog"), text, traceback=traceback)
-scanlog = lambda text, traceback=False: log(Config.get("Misc","scanlog"), text, traceback=traceback, spacing=traceback)
+scanlog = lambda text, traceback=False, spacing=False: log(Config.get("Misc","scanlog"), text, traceback=traceback, spacing=spacing or traceback)
 arthurlog = lambda text, traceback=True: log(Config.get("Misc","arthurlog"), text, traceback=traceback)
