@@ -32,7 +32,7 @@ def decode(text):
     elif type(text) is str:
         return text.decode(encoding)
     else:
-        raise UnicodeDecodeError
+        raise UnicodeError
 
 def encode(text):
     # Converts Unicode to strings
@@ -41,7 +41,7 @@ def encode(text):
     elif type(text) is unicode:
         return text.encode(encoding)
     else:
-        raise UnicodeEncodeError
+        raise UnicodeError
 
 def log(file, log, traceback=True, spacing=True):
     with open(file, "a") as file:
