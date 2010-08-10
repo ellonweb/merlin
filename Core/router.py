@@ -24,9 +24,8 @@ import socket
 import time
 
 from Core.exceptions_ import MerlinSystemCall, Reboot, Call999
-from Core.config import Config
 from Core.loader import Loader
-from Core.string import log
+from Core.string import errorlog
 from Core.connection import Connection
 from Core.actions import Action
 from Core.robocop import RoboCop, EmergencyCall
@@ -67,7 +66,7 @@ class router(object):
                     raise
                 except Exception, e:
                     print "%s Routing error logged." % (time.asctime(),)
-                    log(Config.get("Misc","errorlog"), "%s - Routing Error: %s\n%s\n" % (time.asctime(),str(e),connection,))
+                    errorlog("%s - Routing Error: %s\n%s\n" % (time.asctime(),str(e),connection,))
     
     def irc(self):
         # Read, parse and evaluate an IRC line

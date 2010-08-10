@@ -22,13 +22,12 @@
 import re
 from threading import Thread
 from time import time
-import traceback
 from urllib2 import urlopen
 from sqlalchemy.exc import IntegrityError
 from Core.exceptions_ import PNickParseError
 from Core.config import Config
 from Core.paconf import PA
-from Core.string import decode, log
+from Core.string import decode, scanlog
 from Core.db import session
 from Core.maps import Updates, Planet, User, Intel, Ship, Scan, Request
 from Core.maps import PlanetScan, DevScan, UnitScan, FleetScan, CovOp
@@ -37,8 +36,6 @@ from Core.robocop import push
 
 scanre=re.compile("http://[^/]+/showscan.pl\?scan_id=([0-9a-zA-Z]+)")
 scangrpre=re.compile("http://[^/]+/showscan.pl\?scan_grp=([0-9a-zA-Z]+)")
-
-scanlog = lambda text, traceback=False: log(Config.get("Misc","scanlog"), text, traceback=traceback)
 
 @system('PRIVMSG')
 def catcher(message):

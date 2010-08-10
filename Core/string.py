@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from traceback import format_exc
+from Core.config import Config
 
 CRLF = "\r\n"
 encoding = "latin1"
@@ -42,9 +43,14 @@ def encode(text):
     else:
         raise UnicodeEncodeError
 
-def log(file, log, traceback=True):
+def log(file, log, traceback=True, spacing=True):
     with open(file, "a") as file:
         file.write(encode(log) + "\n")
         if traceback is True:
             file.write(format_exc() + "\n")
-        file.write("\n\n")
+        if spacing is True:
+            file.write("\n\n")
+
+errorlog = lambda text, traceback=True: log(Config.get("Misc","errorlog"), text, traceback=traceback)
+scanlog = lambda text, traceback=False: log(Config.get("Misc","scanlog"), text, traceback=traceback, spacing=traceback)
+arthurlog = lambda text, traceback=True: log(Config.get("Misc","arthurlog"), text, traceback=traceback)

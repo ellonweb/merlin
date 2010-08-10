@@ -55,8 +55,7 @@ class loader(object):
             raise
     
     def reload(self):
-        from Core.config import Config
-        from Core.string import log
+        from Core.string import errorlog
         # If the reload succeeds, this Loader instance will be
         #  replaced, so this .success is only tested if it fails.
         self.success = False
@@ -69,7 +68,7 @@ class loader(object):
         except Exception, e:
             # If the new Loader fails, catch the error and restore everything
             print "%s Reload failed, reverting to previous." % (time.asctime(),)
-            log(Config.get("Misc","errorlog"), "%s - Loader Reload Error: %s\n" % (time.asctime(),str(e),))
+            errorlog("%s - Loader Reload Error: %s\n" % (time.asctime(),str(e),))
             self.restore(sys)
     
     def _reload(self):

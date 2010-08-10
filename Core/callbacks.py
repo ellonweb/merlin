@@ -26,9 +26,8 @@ import socket
 import sys
 import time
 from Core.exceptions_ import MerlinSystemCall
-from Core.config import Config
 from Core.loader import Loader
-from Core.string import log
+from Core.string import errorlog
 from Core.db import session
 from Core.loadable import loadable
 
@@ -116,7 +115,7 @@ class callbacks(object):
                 except Exception, e:
                     # Error while executing a callback/mod/hook
                     message.alert("Error in module '%s'. Please report the command you used to the bot owner as soon as possible." % (callback.name,))
-                    log(Config.get("Misc","errorlog"), "%s - IRC Callback Error: %s\n%s\n" % (time.asctime(),str(e),message,))
+                    errorlog("%s - IRC Callback Error: %s\n%s\n" % (time.asctime(),str(e),message,))
                 finally:
                     # Remove any uncommitted or unrolled-back state
                     session.remove()
@@ -135,7 +134,7 @@ class callbacks(object):
             except Exception, e:
                 # Error while executing a callback/mod/hook
                 message.alert(False)
-                log(Config.get("Misc","errorlog"), "%s - RoboCop Callback Error: %s\n%s\n" % (time.asctime(),str(e),message,))
+                errorlog("%s - RoboCop Callback Error: %s\n%s\n" % (time.asctime(),str(e),message,))
             finally:
                 # Remove any uncommitted or unrolled-back state
                 session.remove()

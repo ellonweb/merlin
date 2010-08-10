@@ -23,8 +23,7 @@ import time
 
 from django.http import HttpResponseNotFound, HttpResponseServerError
 
-from Core.config import Config
-from Core.string import log
+from Core.string import arthurlog
 from Core.db import session
 from Arthur.context import render
 
@@ -47,4 +46,4 @@ def server_error(request):
 
 class exceptions(object):
     def process_exception(self, request, exception):
-        log(Config.get("Misc","arthurlog"), "%s - Arthur Error: %s\n" % (time.asctime(),str(exception),))
+        arthurlog("%s - Arthur Error: %s\n" % (time.asctime(),str(exception),))
