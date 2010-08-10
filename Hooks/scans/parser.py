@@ -28,7 +28,7 @@ from sqlalchemy.exc import IntegrityError
 from Core.exceptions_ import PNickParseError
 from Core.config import Config
 from Core.paconf import PA
-from Core.string import decode
+from Core.string import decode, log
 from Core.db import session
 from Core.maps import Updates, Planet, User, Intel, Ship, Scan, Request
 from Core.maps import PlanetScan, DevScan, UnitScan, FleetScan, CovOp
@@ -37,6 +37,8 @@ from Core.robocop import push
 
 scanre=re.compile("http://[^/]+/showscan.pl\?scan_id=([0-9a-zA-Z]+)")
 scangrpre=re.compile("http://[^/]+/showscan.pl\?scan_grp=([0-9a-zA-Z]+)")
+
+scanlog = lambda text, traceback=False: log(Config.get("Misc","scanlog"), text, traceback=traceback)
 
 @system('PRIVMSG')
 def catcher(message):
@@ -58,7 +60,7 @@ class parse(Thread):
         Thread.__init__(self)
     
     def run(self):
-        print time()
+        scanlog(str(time()))
         uid = self.uid
         type = self.type
         id = self.id
@@ -68,9 +70,8 @@ class parse(Thread):
             elif type == "group":
                 self.group(uid, id)
         except Exception, e:
-            print "Exception in scan: "+e.__str__()
-            traceback.print_exc()
-        print time()
+            scanlog("Exception in scan: %s"%(str(e),), True)
+        scanlog(str(time()))
         session.remove()
     
     def group(self, uid, gid):
@@ -79,8 +80,7 @@ class parse(Thread):
             try:
                 self.scan(uid, m.group(1), gid)
             except Exception, e:
-                print "Exception in scan: "+e.__str__()
-                traceback.print_exc()
+                scanlog("Exception in scan: %s"%(str(e),), True)
     
     def scan(self, uid, pa_id, gid=None):
         page = urlopen(Config.get("URL","viewscan")%(pa_id,)).read()
@@ -88,7 +88,7 @@ class parse(Thread):
         
         m = re.search('>([^>]+) on (\d+)\:(\d+)\:(\d+) in tick (\d+)', page)
         if not m:
-            print "Expired/non-matchinng scan (id: %s)" %(pa_id,)
+            scanlog("Expired/non-matchinng scan (id: %s)" %(pa_id,))
             return
         
         scantype = m.group(1)[0].upper()
@@ -107,8 +107,7 @@ class parse(Thread):
             scan_id = scan.id
         except IntegrityError, e:
             session.rollback()
-            print "Scan %s may already exist" %(pa_id,)
-            print e.__str__()
+            scanlog("Scan %s may already exist: %s" %(pa_id,str(e),))
             return
         
         parser = {
@@ -122,7 +121,7 @@ class parse(Thread):
         if parser is not None:
             parser(scan_id, scan, page)
         
-        print PA.get(scantype,"name"), "%s:%s:%s" % (x,y,z,)
+        scanlog(PA.get(scantype,"name"), "%s:%s:%s" % (x,y,z,))
         
         Q = session.query(Request)
         Q = Q.filter(Request.scantype==scantype)
@@ -247,15 +246,15 @@ class parse(Thread):
         if (scan.planet.intel.dists < devscan.wave_distorter) or (scan.tick == Updates.current_tick()):
             scan.planet.intel.dists = devscan.wave_distorter
             session.commit()
-            print "Updating planet-intel-dists"
+            scanlog("Updating planet-intel-dists")
 
     def parse_U(self, scan_id, scan, page):
         for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+(?:,\d{3})*)</td>', page):
-            print m.groups()
+            scanlog(m.groups())
 
             ship = Ship.load(name=m.group(1))
             if ship is None:
-                print "No such unit %s" % (m.group(1),)
+                scanlog("No such unit %s" % (m.group(1),))
                 continue
             scan.units.append(UnitScan(ship=ship, amount=m.group(2).replace(',', '')))
 
@@ -287,11 +286,11 @@ class parse(Thread):
             fleetscan.landing_tick = eta + scan.tick
             fleetscan.fleet_size = fleetsize
 
-            print "JGP fleet "
+            scanlog("JGP fleet ")
 
             attacker=Planet.load(originx,originy,originz)
             if attacker is None:
-                print "Can't find attacker in db: %s:%s:%s"%(originx,originy,originz)
+                scanlog("Can't find attacker in db: %s:%s:%s"%(originx,originy,originz))
                 continue
             fleetscan.owner = attacker
             fleetscan.target = scan.planet
@@ -301,21 +300,19 @@ class parse(Thread):
                 session.commit()
             except IntegrityError, e:
                 session.rollback()
-                print "Caught integrity exception in jgp: "+e.__str__()
-                print "Trying to update instead"
+                scanlog("Caught integrity exception in jgp: %s"%(str(e),))
+                scanlog("Trying to update instead")
                 query = session.query(FleetScan).filter_by(owner=attacker, target=scan.planet, fleet_size=fleetsize, fleet_name=fleet, landing_tick=eta+scan.tick, mission=mission)
                 try:
                     query.update({"scan_id": scan_id})
                     session.commit()
                 except Exception, e:
                     session.rollback()
-                    print "Exception trying to update jgp: "+e.__str__()
-                    traceback.print_exc()
+                    scanlog("Exception trying to update jgp: %s"%(str(e),), True)
                     continue
             except Exception, e:
                 session.rollback()
-                print "Exception in jgp: "+e.__str__()
-                traceback.print_exc()
+                scanlog("Exception in jgp: %s"%(str(e),), True)
                 continue
 
     def parse_N(self, scan_id, scan, page):
@@ -348,11 +345,10 @@ class parse(Thread):
                 session.commit()
             except Exception, e:
                 session.rollback()
-                print "Exception in news: "+e.__str__()
-                traceback.print_exc()
+                scanlog("Exception in news: %s"%(str(e),), True)
                 continue
 
-            print 'Incoming: ' + newstick + ':' + fleetname + '-' + originx + ':' + originy + ':' + originz + '-' + arrivaltick + '|' + numships
+            scanlog('Incoming: ' + newstick + ':' + fleetname + '-' + originx + ':' + originy + ':' + originz + '-' + arrivaltick + '|' + numships)
 
         #launched attacking fleets
         #<td class=left valign=top>Launch</td><td valign=top>848</td><td class=left valign=top>The Disposable Heroes fleet has been launched, heading for 15:9:8, on a mission to Attack. Arrival tick: 857</td>
@@ -382,11 +378,10 @@ class parse(Thread):
                 session.commit()
             except Exception, e:
                 session.rollback()
-                print "Exception in news: "+e.__str__()
-                traceback.print_exc()
+                scanlog("Exception in news: %s"%(str(e),), True)
                 continue
 
-            print 'Attack:' + newstick + ':' + fleetname + ':' + originx + ':' + originy + ':' + originz + ':' + arrivaltick
+            scanlog('Attack:' + newstick + ':' + fleetname + ':' + originx + ':' + originy + ':' + originz + ':' + arrivaltick)
 
         #launched defending fleets
         #<td class=left valign=top>Launch</td><td valign=top>847</td><td class=left valign=top>The Ship Collection fleet has been launched, heading for 2:9:14, on a mission to Defend. Arrival tick: 853</td>
@@ -416,11 +411,10 @@ class parse(Thread):
                 session.commit()
             except Exception, e:
                 session.rollback()
-                print "Exception in news: "+e.__str__()
-                traceback.print_exc()
+                scanlog("Exception in news: %s"%(str(e),), True)
                 continue
 
-            print 'Defend:' + newstick + ':' + fleetname + ':' + originx + ':' + originy + ':' + originz + ':' + arrivaltick
+            scanlog('Defend:' + newstick + ':' + fleetname + ':' + originx + ':' + originy + ':' + originz + ':' + arrivaltick)
 
         #tech report
         #<td class=left valign=top>Tech</td><td valign=top>838</td><td class=left valign=top>Our scientists report that Portable EMP emitters has been finished. Please drop by the Research area and choose the next area of interest.</td>
@@ -428,7 +422,7 @@ class parse(Thread):
             newstick = m.group(1)
             research = m.group(2)
 
-            print 'Tech:' + newstick + ':' + research
+            scanlog('Tech:' + newstick + ':' + research)
 
         #failed security report
         #<td class=left valign=top>Security</td><td valign=top>873</td><td class=left valign=top>A covert operation was attempted by Ikaris (2:5:5), but our agents were able to stop them from doing any harm.</td>
@@ -452,11 +446,10 @@ class parse(Thread):
                 session.commit()
             except Exception, e:
                 session.rollback()
-                print "Exception in unit: "+e.__str__()
-                traceback.print_exc()
+                scanlog("Exception in unit: %s"%(str(e),), True)
                 continue
 
-            print 'Security:' + newstick + ':' + ruler + ':' + originx + ':' + originy + ':' + originz
+            scanlog('Security:' + newstick + ':' + ruler + ':' + originx + ':' + originy + ':' + originz)
 
         #fleet report
         #<tr bgcolor=#2d2d2d><td class=left valign=top>Fleet</td><td valign=top>881</td><td class=left valign=top><table width=500><tr><th class=left colspan=3>Report of Losses from the Disposable Heroes fighting at 13:10:3</th></tr>
