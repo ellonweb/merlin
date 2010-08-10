@@ -79,7 +79,6 @@ class unbook(loadable):
     access = "half"
     
     def execute(self, request, user, id, x, y, z, when):
-        print when
         planet = Planet.load(x,y,z)
         if planet is None:
             return self.attack(request, user, id, "No planet with coords %s:%s:%s" %(x,y,z,))
