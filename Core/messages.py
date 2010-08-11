@@ -28,8 +28,9 @@ from Core.exceptions_ import ParseError, ChanParseError, MsgParseError, PNickPar
 from Core.string import encode
 
 PUBLIC_PREFIX  = ("!",)
-PRIVATE_PREFIX = ("@",)
-NOTICE_PREFIX  = (".","-","~",)
+QUERY_PREFIX   = ("@",)
+NOTICE_PREFIX  = ("~",)
+PRIVATE_PREFIX = (".","-",)
 PUBLIC_REPLY  = 1
 PRIVATE_REPLY = 2
 NOTICE_REPLY  = 3
@@ -119,17 +120,25 @@ class Message(object):
     
     def get_prefix(self):
         # Return the prefix used for commands
-        return self.get_msg()[0] if self.get_msg() and self.get_msg()[0] in PUBLIC_PREFIX+PRIVATE_PREFIX+NOTICE_PREFIX else None
+        return self.get_msg()[0] if self.get_msg() and self.get_msg()[0] in PUBLIC_PREFIX+QUERY_PREFIX+NOTICE_PREFIX+PRIVATE_PREFIX else None
     
     def reply_type(self):
         # Return the proper way to respond based on the command prefix used
         # Always reply to a PM with a PM, otherwise only ! replies with privmsg
         # Always reply to an @command with a PM
         p = self.get_prefix()
+        
         if p in PUBLIC_PREFIX and self.in_chan():
             return PUBLIC_REPLY
-        if p in PRIVATE_PREFIX or not self.in_chan():
+        
+        if p in QUERY_PREFIX:
             return PRIVATE_REPLY
-        if p in NOTICE_PREFIX and self.in_chan():
+        
+        if p in NOTICE_PREFIX:
             return NOTICE_REPLY
-    
+        
+        if p in PRIVATE_PREFIX and self.in_chan():
+            return NOTICE_REPLY
+        
+        if p in PUBLIC_PREFIX+PRIVATE_PREFIX and not self.in_chan():
+            return PRIVATE_REPLY
