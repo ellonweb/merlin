@@ -45,7 +45,7 @@ class lookup(loadable):
             for url in groups:
                 parse(user.id, "group", url).start()
             
-            return HttpResponseRedirect(reverse("scans"))
+            return HttpResponseRedirect(reverse("requests"))
         
         m = self.coord.match(lookup)
         
