@@ -36,7 +36,7 @@ def join(message):
     else:
         # Someone is joining a channel we're in
         CUT.join(message.get_chan(), message.get_nick())
-        if CUT.mode_is("rapid", "join"):
+        if CUT.mode_is("rapid", "join", "command"):
             # Set the user's pnick
             CUT.get_user(message.get_nick(), message.get_chan(), pnickf=message.get_pnick)
 
@@ -118,7 +118,7 @@ def channels(message):
             # Reset the channel and get a list of nicks
             CUT.new_chan(chan)
             CUT.opped(chan, opped)
-            if CUT.mode_is("rapid"):
+            if CUT.mode_is("rapid", "join"):
                 message.write("NAMES %s\nTOPIC %s" % (chan,chan,))
 
 @system('MODE')
