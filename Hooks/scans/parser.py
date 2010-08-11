@@ -135,7 +135,7 @@ class parse(Thread):
         
         users = []
         for request in result:
-            scanlog("Scan %s matches request %s for %s" %(pa_id, request.id, requester.user.name,))
+            scanlog("Scan %s matches request %s for %s" %(pa_id, request.id, request.user.name,))
             request.scan_id = scan_id
             request.active = False
             users.append(request.user.name)
