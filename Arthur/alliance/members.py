@@ -63,7 +63,7 @@ class members(loadable):
             
             members.append((level[0], Q.all(),))
         
-        return render("members.tpl", request, accesslist=members, tick=Updates.current_tick()*-1)
+        return render("members.tpl", request, accesslist=members)
 
 @menu(bot, "Galmates")
 @load

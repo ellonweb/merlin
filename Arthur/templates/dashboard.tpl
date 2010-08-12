@@ -65,7 +65,7 @@
                     Fleets: {{ dashuser.fleetcount }}
                 </td></tr>
                 <tr class="even"><td colspan="2">
-                    Updated: {{ dashuser.fleetupdated }} ({{ dashuser.fleetupdated - tick}})
+                    Updated: PT {{ dashuser.fleetupdated }} ({{ tick - dashuser.fleetupdated }} ticks old)
                 </td></tr>
                 <tr class="header"><td>Ship</td><td>Amount</td></tr>
             {% endif %}
