@@ -32,14 +32,26 @@ class phone(loadable):
     @require_user
     def list(self, message, user, params):
         # List of users than can see your phonenumber
+        message.reply(self.list_reply(user, True))
+    
+    @route(r"list\s+(\S+)", access = "member")
+    def list_other(self, message, user, params):
+        member = User.load(name=params.group(1), exact=False)
+        if member is None:
+            message.alert("%s is not a valid user."%(params.group(1),))
+            return
+        
+        message.reply(self.list_reply(member, user==member))
+    
+    def list_reply(self, user, isuser):
         friends = user.phonefriends
         if len(friends) < 1:
-            message.reply("You have no friends. How sad. Maybe you should go post on http://grouphug.us or something.")
-            return
-        reply="The following people can view your phone number:"
+            reply = "%s no friends. How sad. Maybe %s should go post on http://grouphug.us or something."
+            return reply % (("%s has"%(user.name,),user.name,), ("You have","you",),)[isuser]
+        reply = "The following people can view %s phone number:"
         for friend in friends:
             reply += " "+friend.name
-        message.reply(reply)
+        return reply % (("%s's"%(user.name,),), ("your",),)[isuser]
     
     @route(r"allow\s+(\S+)")
     @require_user
