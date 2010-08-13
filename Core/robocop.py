@@ -74,9 +74,12 @@ class server(object):
     
     def read(self):
         # Read from socket
-        sock, addr = self.sock.accept()
-        self.extend(sock)
-        print "%s <<< :%s CONNECT" % (time.asctime(),self.clients[-1].host(),)
+        try:
+            sock, addr = self.sock.accept()
+            self.extend(sock)
+            print "%s <<< :%s CONNECT" % (time.asctime(),self.clients[-1].host(),)
+        except socket.error as exc:
+            raise Call999(exc)
     
     def fileno(self):
         # Return act like a file
@@ -113,15 +116,19 @@ class client(object):
     
     def write(self, line):
         # Write to socket/server
-        self.sock.send(line + CRLF)
-        print "%s >>> %s :%s" % (time.asctime(),self.host(),line,)
+        try:
+            self.sock.send(line + CRLF)
+            print "%s >>> %s :%s" % (time.asctime(),self.host(),line,)
+        except socket.error as exc:
+            self.disconnect()
     
     def read(self):
         # Read from socket
         try:
             line = self.file.readline()
         except socket.error:
-            line = None
+            self.disconnect()
+            return
         if line:
             if line[-2:] == CRLF:
                 line = line[:-2]

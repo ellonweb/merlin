@@ -20,7 +20,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import select
-import socket
 import time
 
 from Core.exceptions_ import MerlinSystemCall, Reboot, Call999
@@ -69,18 +68,16 @@ class router(object):
                     errorlog("%s - Routing Error: %s\n%s\n" % (time.asctime(),str(e),connection,))
     
     def irc(self):
-        # Read, parse and evaluate an IRC line
+        # A line from IRC
+        # Create a new message object
+        self.message = Action()
+        # Read the line
+        line = Connection.read()
         try:
-            # Create a new message object
-            self.message = Action()
             # Parse the line
-            line = Connection.read()
             self.message.parse(line)
-            # Callbacks
+            # Callbacks process the line
             Callbacks.callback(self.message)
-        
-        except socket.error as exc:
-            raise Reboot(exc)
         except MerlinSystemCall:
             raise
         except Exception:
@@ -89,28 +86,22 @@ class router(object):
             raise
     
     def robocop(self):
+        # Delete the previous message object
+        self.message = None
         # Accept a new RoboCop client
-        try:
-            self.message = None
-            RoboCop.read()
-        except socket.error as exc:
-            raise Call999(exc)
+        RoboCop.read()
     
     def client(self, connection):
-        # Read, parse and evaluate a line from a RoboCop client
+        # A line from a RoboCop client
+        # Create a new message object
+        self.message = EmergencyCall(connection)
+        # Read the line
+        line = connection.read()
         try:
-            # Create a new message object
-            self.message = EmergencyCall(connection)
             # Parse the line
-            line = connection.read()
-            if line is None:
-                return
             self.message.parse(line)
-            # Callbacks
+            # Callbacks process the line
             Callbacks.robocop(self.message)
-        
-        except socket.error as exc:
-            connection.disconnect()
         except MerlinSystemCall:
             raise
         except Exception:

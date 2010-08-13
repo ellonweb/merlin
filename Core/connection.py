@@ -78,19 +78,25 @@ class connection(object):
     
     def write(self, line):
         # Write to socket/server
-        ponging = self.pong.match(line)
-        if ponging:
-            self.sock.send(line + CRLF)
-        else:
-            while self.last + 1 >= time.time():
-                time.sleep(0.5)
-            self.sock.send(encode(line) + CRLF)
-            self.last = time.time()
-            print "%s >>> %s" % (time.asctime(),line,)
+        try:
+            ponging = self.pong.match(line)
+            if ponging:
+                self.sock.send(line + CRLF)
+            else:
+                while self.last + 1 >= time.time():
+                    time.sleep(0.5)
+                self.sock.send(encode(line) + CRLF)
+                self.last = time.time()
+                print "%s >>> %s" % (time.asctime(),line,)
+        except socket.error as exc:
+            raise Reboot(exc)
     
     def read(self):
         # Read from socket
-        line = decode(self.file.readline())
+        try:
+            line = decode(self.file.readline())
+        except socket.error as exc:
+            raise Reboot(exc)
         if line:
             if line[-2:] == CRLF:
                 line = line[:-2]
