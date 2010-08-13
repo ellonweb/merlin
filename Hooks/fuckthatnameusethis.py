@@ -26,7 +26,7 @@ from Core.loadable import loadable, route
 class fuckthatname(loadable):
     usage = " <fucked tag> usethis <better name>"
     
-    @route(r"(\S+)\s+use\s*this\s+(\S+)")
+    @route(r"(.+)\s+use\s*this\s+(\S+)")
     def execute(self, message, user, params):
         alliance = Alliance.load(params.group(1), alias=False)
         if alliance is None:
