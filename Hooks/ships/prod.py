@@ -19,14 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import math
+from math import ceil, floor, e, log, sqrt
 from Core.paconf import PA
 from Core.maps import Ship
 from Core.loadable import loadable, route
 
 class prod(loadable):
-    """Calculate ticks it takes to produce <number> <ships> with <factories>. Specify race and/or government for bonuses."""
-    usage = " <number> <ship> <factories> [population] [race] [government]"
+    """Calculate ticks it takes to produce <number> <ships> with <factories>. Specify population and/or government for bonuses."""
+    usage = " <number> <ship> <factories> [population] [government]"
     
     @route(r"(\d+(?:\.\d+)?[km]?)\s+(\S+)\s+(\d+)(?:\s+(.*))?")
     def execute(self, message, user, params):
@@ -40,13 +40,12 @@ class prod(loadable):
         num = self.short2num(num)
         factories = int(factories)
 
-        race = gov = None
+        race = ship.race[:3].lower()
+        race = "etd" if race == "eit" else race
+
+        gov = None
         pop = 0
         for p in (params.group(4) or "").split():
-            m=self.racere.match(p)
-            if m and not race:
-                race=m.group(1).lower()
-                continue
             m=self.govre.match(p)
             if m and not gov:
                 gov=m.group(1).lower()
@@ -55,13 +54,19 @@ class prod(loadable):
                 pop = int(p)
                 continue
 
-        cost = ship.total_cost
+        m = ship.metal
+        c = ship.crystal
+        e = ship.eonium
         bonus = 1 + pop/100.0
         if gov:
-            cost *= (1+PA.getfloat(gov,"prodcost"))
+            m *= (1+PA.getfloat(gov,"prodcost"))
+            c *= (1+PA.getfloat(gov,"prodcost"))
+            e *= (1+PA.getfloat(gov,"prodcost"))
             bonus += PA.getfloat(gov,"prodtime")
         if race:
             bonus += PA.getfloat(race,"prodtime")
+        cost = floor(m)+floor(c)+floor(e)
+        print cost
 
         ticks = self.calc_ticks(cost, num, bonus, factories)
 
@@ -77,10 +82,10 @@ class prod(loadable):
     def calc_ticks(self, cost, num, bonus, factories):
         """Calculate the cost in ticks."""
 
-        ln = lambda x: math.log(x) / math.log(math.e)
+        ln = lambda x: log(x) / log(e)
         norm_cost = num * cost
-        norm_req = math.sqrt(norm_cost) * ln(norm_cost**2)
+        norm_req = sqrt(norm_cost) * ln(norm_cost**2)
         output = int(((4000 * factories) ** 0.98) * bonus)
-        norm_ticks = int(math.ceil((norm_req + 10000 * factories) / output))
+        norm_ticks = int(ceil((norm_req + 10000 * factories) / output))
 
         return norm_ticks

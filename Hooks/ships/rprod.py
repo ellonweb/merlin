@@ -19,14 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import math
+from math import floor, e, log, sqrt
 from Core.paconf import PA
 from Core.maps import Ship
 from Core.loadable import loadable, route
 
 class rprod(loadable):
-    """Calculate how many <ship> you can build in <ticks> with <factories>. Specify race and/or government for bonuses."""
-    usage = " <ship> <ticks> <factories> [population] [race] [government]"
+    """Calculate how many <ship> you can build in <ticks> with <factories>. Specify population and/or government for bonuses."""
+    usage = " <ship> <ticks> <factories> [population] [government]"
     dx = tolerance = 0.00001
     
     @route(r"(\S+)\s+(\d+)\s+(\d+)(?:\s+(.*))?")
@@ -41,13 +41,12 @@ class rprod(loadable):
         ticks = int(ticks)
         factories = int(factories)
 
-        race = gov = None
+        race = ship.race[:3].lower()
+        race = "etd" if race == "eit" else race
+
+        gov = None
         pop = 0
         for p in (params.group(4) or "").split():
-            m=self.racere.match(p)
-            if m and not race:
-                race=m.group(1).lower()
-                continue
             m=self.govre.match(p)
             if m and not gov:
                 gov=m.group(1).lower()
@@ -56,13 +55,18 @@ class rprod(loadable):
                 pop = int(p)
                 continue
 
-        cost = ship.total_cost
+        m = ship.metal
+        c = ship.crystal
+        e = ship.eonium
         bonus = 1 + pop/100.0
         if gov:
-            cost *= (1+PA.getfloat(gov,"prodcost"))
+            m *= (1+PA.getfloat(gov,"prodcost"))
+            c *= (1+PA.getfloat(gov,"prodcost"))
+            e *= (1+PA.getfloat(gov,"prodcost"))
             bonus += PA.getfloat(gov,"prodtime")
         if race:
             bonus += PA.getfloat(race,"prodtime")
+        cost = floor(m)+floor(c)+floor(e)
 
         res = int(self.revprod(ticks, factories, bonus))
         ships = int(res / cost)
@@ -104,14 +108,13 @@ class rprod(loadable):
         return self.fixed_point(self.newton_transform(f),
                                 guess)
 
-    def rpu(self, y, math):
+    def rpu(self, y):
         """Curry it."""
 
-        return lambda x: 2 * math.sqrt(x) * math.log(x, math.e) - y
+        return lambda x: 2 * sqrt(x) * log(x, e) - y
 
     def revprod(self, ticks, facs, bonus):
         """Reversed production formula."""
 
-        import math
         output = ((4000 * facs) ** 0.98) * bonus
-        return self.newton(self.rpu(ticks * output - 10000 * facs, math), 10)
+        return self.newton(self.rpu(ticks * output - 10000 * facs), 10)

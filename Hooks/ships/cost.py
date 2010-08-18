@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from math import floor
 from Core.paconf import PA
 from Core.maps import Ship
 from Core.loadable import loadable, route
@@ -50,9 +51,9 @@ class cost(loadable):
             
             reply += " %s: %s metal, %s crystal and %s eonium."%(
                         PA.get(gov, "name"),
-                        self.num2short(ship.metal*(1+bonus)*num),
-                        self.num2short(ship.crystal*(1+bonus)*num),
-                        self.num2short(ship.eonium*(1+bonus)*num))
+                        self.num2short(floor(ship.metal*(1+bonus))*num),
+                        self.num2short(floor(ship.crystal*(1+bonus))*num),
+                        self.num2short(floor(ship.eonium*(1+bonus))*num))
         
         reply+=" It will add %s value"%(self.num2short(ship.total_cost*num/100),)
         message.reply(reply)
