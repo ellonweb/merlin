@@ -70,7 +70,7 @@ class connection(object):
         print "%s Disconnecting IRC... (%s)" % (time.asctime(),line,)
         try:
             self.write("QUIT :%s" % (line,))
-        except socket.error:
+        except Reboot:
             pass
         finally:
             self.close()
