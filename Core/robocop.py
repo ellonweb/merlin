@@ -62,8 +62,9 @@ class server(object):
     
     def remove(self, client):
         # Remove the new client
-        self.socks.remove(client.sock)
-        self.clients.remove(client)
+        if client in self.clients:
+            self.socks.remove(client.sock)
+            self.clients.remove(client)
     
     def disconnect(self, line):
         # Cleanly close sockets
