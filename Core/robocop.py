@@ -127,9 +127,8 @@ class client(object):
         # Read from socket
         try:
             line = self.file.readline()
-        except socket.error:
-            self.disconnect()
-            return
+        except socket.error as exc:
+            raise Call999(exc)
         if line:
             if line[-2:] == CRLF:
                 line = line[:-2]
@@ -140,7 +139,7 @@ class client(object):
                                        " :"+" ".join(line.split(None,1)[1:]) if len(line.split())-1 else "",)
             return line
         else:
-            self.disconnect()
+            raise Call999
     
     def fileno(self):
         # Return act like a file

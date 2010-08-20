@@ -102,6 +102,8 @@ class router(object):
             self.message.parse(line)
             # Callbacks process the line
             Callbacks.robocop(self.message)
+        except Call999:
+            connection.disconnect()
         except MerlinSystemCall:
             raise
         except Exception:
