@@ -24,7 +24,7 @@ from Core.db import session
 from Core.maps import Galaxy, Planet, Alliance, Intel
 from Core.loadable import loadable, route
 
-options = ['alliance', 'nick', 'fakenick', 'defwhore', 'covop', 'scanner', 'dists', 'bg', 'gov', 'relay', 'reportchan', 'comment']
+options = ['alliance', 'nick', 'fakenick', 'defwhore', 'covop', 'amps', 'dists', 'bg', 'gov', 'relay', 'reportchan', 'comment']
 
 class intel(loadable):
     """View or set intel for a planet. Valid options: """
@@ -101,16 +101,14 @@ class intel(loadable):
                 continue
             if opt in ("nick","fakenick","bg","gov","reportchan"):
                 setattr(planet.intel, opt, val)
-            if opt in ("defwhore","covop","scanner","relay"):
+            if opt in ("defwhore","covop","relay"):
                 if val.lower() in self.true:
                     setattr(planet.intel, opt, True)
                 if val.lower() in self.false:
                     setattr(planet.intel, opt, False)
-            if opt == "dists":
-                try:
-                    planet.intel.dists = int(val)
-                except ValueError:
-                    pass
+            if opt in ("amps","dists"):
+                if val.isdigit():
+                    setattr(planet.intel, opt, int(val))
             if opt == "comment":
                 planet.intel.comment = message.get_msg().split("comment=")[1]
         session.commit()

@@ -550,7 +550,7 @@ class Intel(Base):
     fakenick = Column(String(20))
     defwhore = Column(Boolean, default=False)
     covop = Column(Boolean, default=False)
-    scanner = Column(Boolean, default=False)
+    amps = Column(Integer, default=0)
     dists = Column(Integer, default=0)
     bg = Column(String(25))
     gov = Column(String(20))
@@ -569,8 +569,8 @@ class Intel(Base):
             ret += " defwhore=%s"%(self.defwhore,)
         if self.covop:
             ret += " covop=%s"%(self.covop,)
-        if self.scanner:
-            ret += " scanner=%s"%(self.scanner,)
+        if self.amps:
+            ret += " amps=%s"%(self.amps,)
         if self.dists:
             ret += " dists=%s"%(self.dists,)
         if self.bg:

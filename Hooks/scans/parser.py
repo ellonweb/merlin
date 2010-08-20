@@ -251,6 +251,10 @@ class parse(Thread):
             scan.planet.intel.dists = devscan.wave_distorter
             session.commit()
             scanlog("Updating planet-intel-dists")
+        if (scan.planet.intel.amps < devscan.wave_amplifier) or (scan.tick == Updates.current_tick()):
+            scan.planet.intel.amps = devscan.wave_amplifier
+            session.commit()
+            scanlog("Updating planet-intel-amps")
 
     def parse_U(self, scan_id, scan, page):
         for m in re.finditer('(\w+\s?\w*\s?\w*)</td><td[^>]*>(\d+(?:,\d{3})*)</td>', page):
