@@ -8,16 +8,36 @@ exception model refactor
 rewrite CLI or integrate as an extra IO stream
 rewrite Connection.write and Action.write to use detached threaded system
 
-migrate googlevoice code to use /m/
-    /m/sendsms/
-    /m/i/sms/
+Core Stuff:
+    Break up mappings to seperate files, avoid singleton problem, sqla 1529
+    
+    @route params reverser
+        loadable.planet_coord x/y/z, planet_coord2 a/b/c
+        self.short2num
 
-@route params reverser
-    loadable.planet_coord x/y/z, planet_coord2 a/b/c
-    self.short2num
+Google stuff: (no rush now it's limited to USA)
+    migrate googlevoice code to use /m/
+        /m/sendsms/
+        /m/i/sms/
+    Google voice inbox parsing
+    OR push google voice inbox to email AND:
+    email server and parsing with Lamson
 
-command to search intel from previous rounds
+Lamson side project for integrating with PA alerts
 
-Google voice inbox parsing
-OR push google voice inbox to email AND:
-email server and parsing with Lamson
+General changes:
+    pref option for receiving scan links to webby or pa
+    pref mode to set prefered PA url (ip etc)
+        replaces output on irc and webby
+
+IRC commands
+    command to search intel from previous rounds
+    supersearch
+    anti
+
+Arthur additions:
+    mydef overview page
+        nick | x.y.z | fleets | ships | comment | phone | age
+    
+    bcalc add to last active
+        relies on Cin providing a service API
