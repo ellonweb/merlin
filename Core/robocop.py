@@ -22,7 +22,7 @@
 import socket
 import time
 
-from Core.exceptions_ import Call999
+from Core.exceptions_ import Call999, UnderArrest
 from Core.config import Config
 from Core.string import CRLF
 from Core.actions import Action
@@ -129,7 +129,7 @@ class client(object):
             line = self.file.readline()
         except socket.error:
             self.disconnect()
-            return
+            raise UnderArrest
         if line:
             if line[-2:] == CRLF:
                 line = line[:-2]
@@ -141,6 +141,7 @@ class client(object):
             return line
         else:
             self.disconnect()
+            raise UnderArrest
     
     def fileno(self):
         # Return act like a file

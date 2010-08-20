@@ -39,6 +39,9 @@ class Reload(MerlinSystemCall):
 class Call999(MerlinSystemCall):
     pass
 
+class UnderArrest(MerlinSystemCall):
+    pass
+
 class LoadableError(MerlinError):
     pass
 

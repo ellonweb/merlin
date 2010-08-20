@@ -22,7 +22,7 @@
 import select
 import time
 
-from Core.exceptions_ import MerlinSystemCall, Reboot, Call999
+from Core.exceptions_ import MerlinSystemCall, Reboot, Call999, UnderArrest
 from Core.loader import Loader
 from Core.string import errorlog
 from Core.connection import Connection
@@ -61,6 +61,8 @@ class router(object):
                         self.robocop()
                     if connection in RoboCop.clients:
                         self.client(connection)
+                except UnderArrest:
+                    pass
                 except MerlinSystemCall:
                     raise
                 except Exception, e:
