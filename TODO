@@ -29,11 +29,14 @@ General changes:
     pref option for receiving scan links to webby or pa
     pref mode to set prefered PA url (ip etc)
         replaces output on irc and webby
+    excalibur: add history of non existant gals? compensating for PA bug
 
 IRC commands
+    truncate lines at 300? chars instead of 450
     command to search intel from previous rounds
     supersearch
     anti
+    smsmode = email
 
 Arthur additions:
     mydef overview page
@@ -41,3 +44,7 @@ Arthur additions:
     
     bcalc add to last active
         relies on Cin providing a service API
+    
+    Do Scan in webby auto feeds id back from PA
+        link opens iframe to do scan
+        jscript parses page and extracts id
