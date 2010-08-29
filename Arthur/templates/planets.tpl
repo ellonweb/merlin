@@ -105,8 +105,6 @@
         <td>&nbsp;</td>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
-        <td>&nbsp;</td>
-        <td>&nbsp;</td>
         <td align="right">{{ galaxy.size|intcomma }}</td>
         <td align="right">{{ galaxy.value|intcomma }}</td>
         <td align="right">{{ galaxy.score|intcomma }}</td>
