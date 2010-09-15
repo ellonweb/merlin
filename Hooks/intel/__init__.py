@@ -23,6 +23,7 @@
 __all__ = [
            "intel",
            "search",
+           "supersearch",
            "bumchums",
            "info",
            "spam",
