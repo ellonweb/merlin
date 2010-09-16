@@ -46,12 +46,16 @@ class sms(loadable):
         if not receiver:
             message.reply("Who exactly is %s?" % (rec,))
             return
-        if receiver.name.lower() == 'valle':
-            message.reply("I refuse to talk to that Swedish clown. Use !phone show Valle and send it using your own phone.")
+        if receiver.smsmode == "Retard":
+            message.reply("I refuse to talk to that incompetent retard. Check %s's mydef comment and use !phone show to try sending it using your own phone." %(receiver.name,))
             return 
 
         if not receiver.pubphone and user not in receiver.phonefriends:
             message.reply("%s's phone number is private or they have not chosen to share their number with you. Supersecret message not sent." % (receiver.name,))
+            return
+
+        if receiver.smsmode == "Email":
+            message.reply("Emailing not yet implemented")
             return
 
         phone = self.prepare_phone_number(receiver.phone)
@@ -64,11 +68,7 @@ class sms(loadable):
             return
 
         mode = Config.get("Misc", "sms")
-        if mode == "combined":
-            if receiver.googlevoice == True:
-                mode = "googlevoice"
-            if receiver.googlevoice == False:
-                mode = "clickatell"
+        mode = receiver.smsmode.lower() or mode if mode == "combined" else mode
         error = ""
         
         if mode == "googlevoice" or mode == "combined":

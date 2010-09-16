@@ -373,6 +373,7 @@ planet_old_id_search = Table('planet_old_id_search', Base.metadata,
 
 class User(Base):
     __tablename__ = 'users'
+    _sms_modes = {"C":"Clickatell", "G":"GoogleVoice", "R":"Retard", "E":"Email",}
     id = Column(Integer, primary_key=True)
     name = Column(String(15)) # pnick
     alias = Column(String(15))
@@ -384,7 +385,7 @@ class User(Base):
     emailre = re.compile(r"^([\w.-]+@[\w.-]+)")
     phone = Column(String(48))
     pubphone = Column(Boolean, default=False) # Asc
-    googlevoice = Column(Boolean, default=None)
+    _smsmode = Column(Enum(*_sms_modes.keys(), name="smsmode"))
     sponsor = Column(String(15)) # Asc
     quits = Column(Integer, default=0) # Asc
     available_cookies = Column(Integer, default=0)
@@ -413,8 +414,14 @@ class User(Base):
     
     @property
     def smsmode(self):
-        if Config.get("Misc", "sms") == "combined" and self.googlevoice is not None:
-            return ("Clickatell","Google",)[self.googlevoice]
+        return User._sms_modes.get(self._smsmode)
+    @smsmode.setter
+    def smsmode(self, mode):
+        self._smsmode = mode[0].upper()
+    @validates('_smsmode')
+    def valid_smsmode(self, key, mode):
+        assert mode in User._sms_modes or mode is None
+        return mode
     
     @property
     def gimps(self):
