@@ -68,7 +68,8 @@ class sms(loadable):
             return
 
         mode = Config.get("Misc", "sms")
-        mode = receiver.smsmode.lower() or mode if mode == "combined" else mode
+        mode = receiver.smsmode or mode if mode == "combined" else mode
+        mode = mode.lower()
         error = ""
         
         if mode == "googlevoice" or mode == "combined":
