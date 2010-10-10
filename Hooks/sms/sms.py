@@ -26,7 +26,7 @@ from urllib import urlencode
 from urllib2 import urlopen, Request, URLError
 from Core.exceptions_ import LoadableError
 from Core.config import Config
-from Core.string import encode
+from Core.string import decode, encode
 from Core.db import session
 from Core.maps import User, SMS
 from Core.loadable import loadable, route, require_user
@@ -78,7 +78,7 @@ class sms(loadable):
             error = self.send_clickatell(user, receiver, public_text, phone, text)
         
         if error is None:
-            message.reply("Successfully processed To: %s Message: %s" % (receiver.name,text))
+            message.reply("Successfully processed To: %s Message: %s" % (receiver.name, decode(text)))
         else:
             message.reply(error or "That wasn't supposed to happen. I don't really know what went wrong. Maybe your mother dropped you.")
     
