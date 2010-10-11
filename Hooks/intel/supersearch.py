@@ -104,7 +104,7 @@ class supersearch(loadable):
                 if not sort:
                     sort = order["value"]
             
-            if opt == "race" and self.racere.match(val)
+            if opt == "race" and self.racere.match(val):
                 race = val
                 Q = Q.filter(Planet.race.ilike(race))
             
