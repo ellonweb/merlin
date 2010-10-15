@@ -104,7 +104,7 @@ class pref(loadable):
                 if Config.get("Misc", "sms") != "combined":
                     message.alert("Your alliance doesn't support SMS mode switching")
                     continue
-                if val[:1].upper() in User.sms_modes:
+                if val[:1].upper() in User._sms_modes:
                     user.smsmode = val
                     reply += " smsmode=%s" % (user.smsmode,)
                 elif val[:1].lower() == "b" or val in self.nulls:
