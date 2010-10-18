@@ -123,7 +123,7 @@ class supersearch(loadable):
             sort = order["score"]
         Q = Q.order_by(sort)
         
-        result = Q.limit(6).offset(offset)
+        result = Q.limit(6).offset(offset).all()
         
         if len(result) < 1:
             reply="No"
