@@ -203,7 +203,7 @@ class sms(loadable):
         regex+= r'('+message+')'
         regex+= r'</span>\s*'
         regex+= r'<span class="gc-message-sms-time">\s*'
-        regex+= r'(.*?)'
+        regex+= r'(.+?)\s*'
         regex+= r'</span>\s*'
         regex+= r'</div>\s*'
         regex+= r'(?:'
