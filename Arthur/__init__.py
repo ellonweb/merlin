@@ -27,7 +27,7 @@ from Core.config import Config
 from Core.maps import Updates
 from Arthur.context import menu, render
 from Arthur.errors import page_not_found
-from Arthur.loadable import loadable, load
+from Arthur.loadable import loadable, load, require_user
 bot = Config.get("Connection","nick")
 name = Config.get("Alliance", "name")
 
@@ -50,6 +50,7 @@ urlpatterns = patterns('',
 
 @menu("Home")
 @load
+@require_user
 class home(loadable):
     def execute(self, request, user):
         from Arthur.dashboard import dashboard

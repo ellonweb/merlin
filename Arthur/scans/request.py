@@ -26,7 +26,7 @@ from Core.db import session
 from Core.maps import Updates, Planet, Request
 from Core.robocop import push
 from Arthur.context import menu, render
-from Arthur.loadable import loadable, load
+from Arthur.loadable import loadable, load, require_user
 
 urlpatterns = patterns('Arthur.scans.request',
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<type>['+"".join([type.lower() for type in PA.options("scans")])+'])/(?:(?P<dists>\d+)/)?$', 'request', name="request_planet"),
@@ -35,6 +35,7 @@ urlpatterns = patterns('Arthur.scans.request',
 )
 
 @load
+@require_user
 class request(loadable):
     access = "half"
     def execute(self, request, user, x, y, z, type, dists):
@@ -56,6 +57,7 @@ class request(loadable):
         return scans.execute(request, user, message="Requested a %s Scan of %s:%s:%s"%(req.type, x,y,z,), planet=planet)
 
 @load
+@require_user
 class cancel(loadable):
     access = "half"
     def execute(self, request, user, id):

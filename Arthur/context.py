@@ -65,15 +65,15 @@ menu = _menu()
 
 def base_context(request):
     context = {"name"   : Config.get("Alliance", "name"),
-               "slogan" : Config.get("Alliance", "name")
+               "slogan" : Config.get("Alliance", "name"),
+               "tick"   : Updates.current_tick(),
+               "user"   : request.user,
                }
     if request.session is not None:
         slogan, count = Slogan.search("")
         if slogan is not None:
             context["slogan"] = str(slogan)
-        context["user"] = request.session.user
         context["menu"] = menu.generate(request.session.user)
-        context["tick"] = Updates.current_tick()
     return context
 
 def render(template, request, **context):

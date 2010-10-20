@@ -59,6 +59,7 @@ class loadable(_base):
     
     def authenticate(self, request):
         request.session = None
+        request.user = None
         key = request.COOKIES.get(SESSION_KEY)
         if key:
             auth = Arthur.load(key, datetime.now())
@@ -88,7 +89,14 @@ class loadable(_base):
     def router(self, request):
         user, cookie = self.authenticate(request)
         user = self.check_access(user)
+        request.user = user
+        
         planet_id = self.check_planet(request, user)
+        
+        if getattr(self, "_USER", False) is True:
+            if self.is_user(user) is False:
+                raise UserError("You need to be logged in to use this feature")
+        
         return user, cookie, planet_id
     
     def run(self, request, **kwargs):
@@ -100,7 +108,7 @@ class loadable(_base):
             session.add(PageView(page = self.name,
                                  full_request = request.get_full_path(),
                                  username = user.name,
-                                 session = request.session.key,
+                                 session = request.session.key if request.session else None,
                                  hostname = request.get_host(),))
             session.commit()
             
