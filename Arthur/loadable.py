@@ -23,14 +23,14 @@ from Core.exceptions_ import LoadableError, UserError
 from Core.config import Config
 from Core.db import Session
 from Core.maps import PageView
+from Core.loadable import _base, require_user, require_planet
 from Arthur.context import render
 
 # ########################################################################### #
 # ##############################    LOADABLE    ############################# #
 # ########################################################################### #
 
-class loadable(object):
-    access = 0
+class loadable(_base):
     
     def __new__(cls):
         self = super(loadable, cls).__new__(cls)
@@ -74,6 +74,8 @@ class loadable(object):
         pass
     
     def check_access(self, user):
+        if not Config.getboolean("Arthur", "public") and not self.is_user(user):
+            return False
         if user.access >= self.access:
             return True
         else:
