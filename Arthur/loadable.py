@@ -25,11 +25,12 @@ from random import randrange
 from Core.exceptions_ import LoadableError, UserError
 from Core.config import Config
 from Core.db import Session, session
-from Core.maps import User, Arthur, PageView
+from Core.maps import Planet, User, Arthur, PageView
 from Core.loadable import _base, require_user, require_planet
 from Arthur.context import render
 
 SESSION_KEY = "SESSION"
+PLANET_KEY = "PA_ID"
 LOGOUT = "/logout/"
 USER = "username"
 PASS = "password"
@@ -87,11 +88,12 @@ class loadable(_base):
     def router(self, request):
         user, cookie = self.authenticate(request)
         user = self.check_access(user)
-        return user, cookie
+        planet_id = self.check_planet(request, user)
+        return user, cookie, planet_id
     
     def run(self, request, **kwargs):
         try:
-            user, cookie = self.router(request)
+            user, cookie, planet_id = self.router(request)
             response = self.execute(request, user, **kwargs)
             
             session = Session()
@@ -104,6 +106,11 @@ class loadable(_base):
             
             if cookie is not None:
                 response.set_cookie(SESSION_KEY, cookie, expires=request.session.expire)
+            
+            if planet_id is False:
+                response.delete_cookie(PLANET_KEY)
+            elif planet_id is not True:
+                response.set_cookie(PLANET_KEY, planet_id, expires=datetime.now()+timedelta(days=65))
             
             return response
         
@@ -121,6 +128,30 @@ class loadable(_base):
             return user
         else:
             raise UserError("You don't have access to this page")
+    
+    def check_planet(self, request, user):
+        pa_id = request.COOKIES.get(PLANET_KEY)
+        if self.user_has_planet(user):
+            if pa_id == user.planet.id:
+                return True
+            else:
+                return user.planet.id
+        elif self.is_user(user):
+            if pa_id:
+                return False
+            else:
+                return True
+        else:
+            if pa_id:
+                planet = session.query(Planet).filter_by(id=pa_id).first()
+                if planet is None:
+                    return False
+                else:
+                    user.planet = planet
+                    session.expunge(user)
+                    return True
+            else:
+                return True
     
     def login_page(self, request, msg):
         response = render("login.tpl", request, msg=msg)
