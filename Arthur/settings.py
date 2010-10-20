@@ -15,7 +15,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'Arthur.errors.exceptions',
     'Arthur.errors.db',
-    'Arthur.auth.authentication',
 )
 
 APPEND_SLASH = True

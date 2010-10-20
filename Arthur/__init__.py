@@ -35,7 +35,7 @@ handler404 = 'Arthur.errors.page_not_found'
 handler500 = 'Arthur.errors.server_error'
 
 urlpatterns = patterns('',
-    (r'^(?:home/)?$', 'Arthur.home'),
+    (r'^(?:(?:home|logout|login)/)?$', 'Arthur.home'),
     url(r'^user/(?P<username>\S+)/$', 'Arthur.dashboard.dashboard', name="dashboard"),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
     (r'^guide/$', 'Arthur.guide'),

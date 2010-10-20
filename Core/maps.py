@@ -506,22 +506,22 @@ for lvl, num in Config.items("Access"):
     # Bind user access functions
     setattr(User, "is_"+lvl, user_access_function(int(num)))
 
-class Session(Base):
+class Arthur(Base):
     __tablename__ = 'session'
     key = Column(String(40), primary_key=True)
     user_id = Column(Integer, ForeignKey(User.id, ondelete='set null'))
     expire = Column(DateTime)
     @staticmethod
     def load(key, now=None):
-        Q = session.query(Session)
+        Q = session.query(Arthur)
         if now is not None:
-            Q = Q.filter(Session.expire > now)
-        auth = Q.filter(Session.key == key).first()
+            Q = Q.filter(Arthur.expire > now)
+        auth = Q.filter(Arthur.key == key).first()
         if auth is not None and auth.user is not None and auth.user.active == True:
             return auth
         else:
             return None
-Session.user = relation(User)
+Arthur.user = relation(User)
 
 class PhoneFriend(Base):
     __tablename__ = 'phonefriends'
