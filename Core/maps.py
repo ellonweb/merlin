@@ -396,6 +396,9 @@ class User(Base):
     fleetupdated = Column(Integer, default=0)
     levels = filter(lambda lev: not lev[0] == "galmate", sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True))
     
+    def is_user(self):
+        return self in session
+    
     @property
     def level(self):
         if not self.active:

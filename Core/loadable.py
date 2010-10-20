@@ -38,9 +38,7 @@ class _base(object):
     access = None
     
     def is_user(self, user):
-        if isinstance(user, User) and user in session:
-            return True
-        return False
+        return isinstance(user, User) and user.is_user()
     
     def user_has_planet(self, user):
         if not self.is_user(user):
