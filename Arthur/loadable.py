@@ -93,10 +93,6 @@ class loadable(_base):
         
         planet_id = self.check_planet(request, user)
         
-        if getattr(self, "_USER", False) is True:
-            if self.is_user(user) is False:
-                raise UserError("You need to be logged in to use this feature")
-        
         return user, cookie, planet_id
     
     def run(self, request, **kwargs):
@@ -133,6 +129,9 @@ class loadable(_base):
         user = user or User()
         if not Config.getboolean("Arthur", "public") and not self.is_user(user):
             raise UserError("Hi! Please login below:")
+        if getattr(self, "_USER", False) is True:
+            if self.is_user(user) is False:
+                raise UserError("You need to be logged in to use this feature")
         if user.access >= self.access:
             return user
         else:

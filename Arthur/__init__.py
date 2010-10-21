@@ -67,6 +67,7 @@ from Arthur.overview import home
 @menu("Planetarion", "Forums",      suffix = "forums")
 @menu("Planetarion", "Game",        suffix = "game")
 @load
+@require_user
 class links(loadable):
     def execute(self, request, user, link):
         link = {
@@ -82,6 +83,7 @@ class links(loadable):
 
 @menu(bot, "Guide to %s"%(Config.get("Connection","nick"),))
 @load
+@require_user
 class guide(loadable):
     def execute(self, request, user):
         return render("guide.tpl", request, bot=Config.get("Connection","nick"), alliance=name)
