@@ -21,6 +21,7 @@
  
 from django.http import HttpResponse
 
+from Core.exceptions_ import UserError
 from Core.config import Config
 from Core.maps import Updates, Slogan
 from Arthur.jinja import jinja
@@ -51,12 +52,18 @@ class _menu(object):
     def generate(self, user):
         menu = []
         for head in self.heads:
-            if self.content[head]["hook"].check_access(user):
-                menu.append([head, self.content[head]["url"], self.content[head]["link"], []])
-                
-                for sub in self.content[head]["subs"]:
-                    if self.content[head]["content"][sub]["hook"].check_access(user):
-                        menu[-1][3].append([sub, self.content[head]["content"][sub]["url"], self.content[head]["content"][sub]["link"]])
+            try:
+                if self.content[head]["hook"].check_access(user):
+                    menu.append([head, self.content[head]["url"], self.content[head]["link"], []])
+                    
+                    for sub in self.content[head]["subs"]:
+                        try:
+                            if self.content[head]["content"][sub]["hook"].check_access(user):
+                                menu[-1][3].append([sub, self.content[head]["content"][sub]["url"], self.content[head]["content"][sub]["link"]])
+                        except UserError:
+                            continue
+            except UserError:
+                continue
         
         menu.append(["Logout", "/logout/", []])
         return menu
