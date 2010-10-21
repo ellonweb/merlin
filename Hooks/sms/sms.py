@@ -26,7 +26,7 @@ from urllib import urlencode
 from urllib2 import urlopen, Request, URLError
 from Core.exceptions_ import LoadableError
 from Core.config import Config
-from Core.string import encode
+from Core.string import decode, encode
 from Core.db import session
 from Core.maps import User, SMS
 from Core.loadable import loadable, route, require_user
@@ -46,12 +46,16 @@ class sms(loadable):
         if not receiver:
             message.reply("Who exactly is %s?" % (rec,))
             return
-        if receiver.name.lower() == 'valle':
-            message.reply("I refuse to talk to that Swedish clown. Use !phone show Valle and send it using your own phone.")
+        if receiver.smsmode == "Retard":
+            message.reply("I refuse to talk to that incompetent retard. Check %s's mydef comment and use !phone show to try sending it using your own phone." %(receiver.name,))
             return 
 
         if not receiver.pubphone and user not in receiver.phonefriends:
             message.reply("%s's phone number is private or they have not chosen to share their number with you. Supersecret message not sent." % (receiver.name,))
+            return
+
+        if receiver.smsmode == "Email":
+            message.reply("Emailing not yet implemented")
             return
 
         phone = self.prepare_phone_number(receiver.phone)
@@ -64,11 +68,8 @@ class sms(loadable):
             return
 
         mode = Config.get("Misc", "sms")
-        if mode == "combined":
-            if receiver.googlevoice == True:
-                mode = "googlevoice"
-            if receiver.googlevoice == False:
-                mode = "clickatell"
+        mode = receiver.smsmode or mode if mode == "combined" else mode
+        mode = mode.lower()
         error = ""
         
         if mode == "googlevoice" or mode == "combined":
@@ -77,7 +78,7 @@ class sms(loadable):
             error = self.send_clickatell(user, receiver, public_text, phone, text)
         
         if error is None:
-            message.reply("Successfully processed To: %s Message: %s" % (receiver.name,text))
+            message.reply("Successfully processed To: %s Message: %s" % (receiver.name, decode(text)))
         else:
             message.reply(error or "That wasn't supposed to happen. I don't really know what went wrong. Maybe your mother dropped you.")
     
@@ -202,7 +203,7 @@ class sms(loadable):
         regex+= r'('+message+')'
         regex+= r'</span>\s*'
         regex+= r'<span class="gc-message-sms-time">\s*'
-        regex+= r'(.*?)'
+        regex+= r'(.+?)\s*'
         regex+= r'</span>\s*'
         regex+= r'</div>\s*'
         regex+= r'(?:'

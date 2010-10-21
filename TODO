@@ -34,9 +34,8 @@ General changes:
 IRC commands
     truncate lines at 300? chars instead of 450
     command to search intel from previous rounds
-    supersearch
     anti
-    smsmode = email
+    implement sms emailing
 
 Arthur additions:
     log pages for merlin and arthur

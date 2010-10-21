@@ -67,7 +67,7 @@ class connection(object):
     
     def disconnect(self, line):
         # Cleanly close sockets
-        print "%s Disconnecting IRC... (%s)" % (time.asctime(),line,)
+        print "%s Disconnecting IRC... (%s)" % (time.asctime(),encode(line),)
         try:
             self.write("QUIT :%s" % (line,))
         except Reboot:
@@ -87,7 +87,7 @@ class connection(object):
                     time.sleep(0.5)
                 self.sock.send(encode(line) + CRLF)
                 self.last = time.time()
-                print "%s >>> %s" % (time.asctime(),line,)
+                print "%s >>> %s" % (time.asctime(),encode(line),)
         except socket.error as exc:
             raise Reboot(exc)
     
@@ -107,7 +107,7 @@ class connection(object):
                 self.write("PONG :%s" % pinging.group(1))
                 #print "%s <<< PING? PONG!" % (time.asctime(),)
             else:
-                print "%s <<< %s" % (time.asctime(),line,)
+                print "%s <<< %s" % (time.asctime(),encode(line),)
             return line
         else:
             raise Reboot

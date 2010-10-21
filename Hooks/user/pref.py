@@ -41,7 +41,7 @@ class pref(loadable):
         if user.phone:
             reply += " phone=%s pubphone=%s" % (user.phone, str(user.pubphone)[0],)
             if user.smsmode is not None:
-                reply += " smsmode=%s" % (user.smsmode[0],)
+                reply += " smsmode=%s" % (user.smsmode,)
         if len(reply) > 0:
             message.reply("Your preferences are:" + reply)
         else:
@@ -104,14 +104,11 @@ class pref(loadable):
                 if Config.get("Misc", "sms") != "combined":
                     message.alert("Your alliance doesn't support SMS mode switching")
                     continue
-                if val[:1].lower() == "c":
-                    user.googlevoice = False
-                    reply += " smsmode=clickatell"
-                elif val[:1].lower() == "g":
-                    user.googlevoice = True
-                    reply += " smsmode=googlevoice"
+                if val[:1].upper() in User._sms_modes:
+                    user.smsmode = val
+                    reply += " smsmode=%s" % (user.smsmode,)
                 elif val[:1].lower() == "b" or val in self.nulls:
-                    user.googlevoice = None
+                    user._smsmode = None
                     reply += " smsmode=None"
         
         session.commit()

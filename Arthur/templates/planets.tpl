@@ -114,8 +114,10 @@
         <td align="right">{% if gh %}{{ galaxy.value|growth(gh.value) }}{% endif %}</td>
         <td align="right">{% if gh %}{{ galaxy.score|growth(gh.score) }}{% endif %}</td>
         
+        {% if user|intel %}
         <td>&nbsp;</td>
         <td>&nbsp;</td>
+        {% endif %}
     </tr>
     {% endif %}
     

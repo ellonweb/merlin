@@ -29,7 +29,7 @@ class editattack(loadable):
     usage = " [<id> add|remove <coordlist>] | [<id> land <tick|eta>] | [<id> comment <comment>]"
     access = "half"
     
-    @route(r"(\d+)\s+add\s+([. :\-\d,]+)?")
+    @route(r"(\d+)\s+add\s+([. :\-\d,]+)")
     def add(self, message, user, params):
         id = int(params.group(1))
         attack = Attack.load(id)
@@ -51,7 +51,7 @@ class editattack(loadable):
         session.commit()
         message.reply(str(attack))
     
-    @route(r"(\d+)\s+rem(?:ove)?\s+([. :\-\d,]+)?")
+    @route(r"(\d+)\s+rem(?:ove)?\s+([. :\-\d,]+)")
     def remove(self, message, user, params):
         id = int(params.group(1))
         attack = Attack.load(id)
