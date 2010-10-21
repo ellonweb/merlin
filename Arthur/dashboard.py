@@ -19,19 +19,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+from django.conf.urls.defaults import include, patterns, url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+
+from Core.config import Config
 from Core.db import session
 from Core.maps import Updates, User
-from Arthur.context import render
+from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
+name = Config.get("Alliance", "name")
 
+urlpatterns = patterns('Arthur.dashboard',
+    url(r'^dashboard/$', 'dashboard'),
+    url(r'^user/(?P<username>\S+)/$', 'dashboard', name="dashboard"),
+)
+
+@menu(name, "Dashboard")
 @load
 class dashboard(loadable):
     access = "member"
     
     def execute(self, request, user, username="", dashuser=None):
-        dashuser = dashuser or User.load(username, exact=False)
+        dashuser = dashuser or User.load(username or user.name, exact=False)
         if dashuser is None:
             return HttpResponseRedirect(reverse("memberlist"))
         

@@ -35,8 +35,9 @@ handler404 = 'Arthur.errors.page_not_found'
 handler500 = 'Arthur.errors.server_error'
 
 urlpatterns = patterns('',
-    (r'^(?:(?:home|logout|login)/)?$', 'Arthur.home'),
-    url(r'^user/(?P<username>\S+)/$', 'Arthur.dashboard.dashboard', name="dashboard"),
+    (r'^(?:home|logout)?/?$', 'Arthur.home'),
+    (r'^login/', 'Arthur.login'),
+    (r'', include('Arthur.dashboard')),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
     (r'^guide/$', 'Arthur.guide'),
     (r'^links/(?P<link>[^/]+)/$', 'Arthur.links'),
@@ -50,19 +51,24 @@ urlpatterns = patterns('',
 
 @menu("Home")
 @load
-@require_user
 class home(loadable):
     def execute(self, request, user):
-        from Arthur.dashboard import dashboard
-        if user.is_member():
-            return dashboard.execute(request, user, dashuser=user)
-        
         if user.planet is not None:
             tick = Updates.midnight_tick()
             ph = user.planet.history(tick)
         else:
             ph = None
         return render("index.tpl", request, planet=user.planet, ph=ph)
+
+@load
+@require_user
+class login(loadable):
+    def execute(self, request, user):
+        from Arthur.dashboard import dashboard
+        if user.is_member():
+            return dashboard.execute(request, user, dashuser=user)
+        else:
+            return home.execute(request, user)
 
 @menu(name,          "Intel",       suffix = name)
 @menu("Planetarion", "BCalc",       suffix = "bcalc")
@@ -89,6 +95,7 @@ class guide(loadable):
     def execute(self, request, user):
         return render("guide.tpl", request, bot=Config.get("Connection","nick"), alliance=name)
 
+from Arthur import dashboard
 from Arthur import alliance
 from Arthur import rankings
 from Arthur import attack
