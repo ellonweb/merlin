@@ -65,7 +65,10 @@ class _menu(object):
             except UserError:
                 continue
         
-        menu.append(["Logout", "/logout/", []])
+        if user.is_user():
+            menu.append(["Logout", "/logout/", []])
+        else:
+            menu.append(["Login", "/login/", []])
         return menu
 
 menu = _menu()
@@ -74,13 +77,14 @@ def base_context(request):
     context = {"name"   : Config.get("Alliance", "name"),
                "slogan" : Config.get("Alliance", "name"),
                "tick"   : Updates.current_tick(),
-               "user"   : request.user,
                }
-    if request.session is not None:
+    if getattr(request, "user", None) is not None:
+        context["user"] = request.user
+        context["menu"] = menu.generate(request.user)
+    if getattr(request, "session", None) is not None:
         slogan, count = Slogan.search("")
         if slogan is not None:
             context["slogan"] = str(slogan)
-        context["menu"] = menu.generate(request.session.user)
     return context
 
 def render(template, request, **context):
