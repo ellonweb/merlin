@@ -21,6 +21,7 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from Core.config import Config
 from Core.paconf import PA
 from Core.maps import Galaxy, Scan
 from Arthur.context import render
@@ -28,7 +29,7 @@ from Arthur.loadable import loadable, load
 
 @load
 class galaxy(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     
     def execute(self, request, user, x, y):
         galaxy = Galaxy.load(x,y)
@@ -57,7 +58,7 @@ class galaxy(loadable):
 
 @load
 class types(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     
     def execute(self, request, user, x, y, types):
         types = types.upper()
