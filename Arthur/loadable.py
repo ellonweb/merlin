@@ -109,6 +109,7 @@ class loadable(_base):
                                  full_request = request.get_full_path(),
                                  username = user.name,
                                  session = request.session.key if request.session else None,
+                                 planet_id = user.planet.id if user.planet else None,
                                  hostname = request.get_host(),))
             session.commit()
             

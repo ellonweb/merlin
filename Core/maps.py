@@ -1308,6 +1308,7 @@ class PageView(Base):
     full_request = Column(String(512))
     username = Column(String(15))
     session = Column(String(32))
+    planet_id = Column(Integer)
     hostname = Column(String(100))
     request_time = Column(DateTime, default=current_timestamp())
 
