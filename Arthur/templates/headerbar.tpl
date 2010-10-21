@@ -15,12 +15,14 @@
         Value: {{ planet.value|intcomma }}{% if ph %} {{ planet.value_rank|growth_rank_image(ph.value_rank) }}{% endif %} {{ planet.value_rank }}<br>
         Score: {{ planet.score|intcomma }}{% if ph %} {{ planet.score_rank|growth_rank_image(ph.score_rank) }}{% endif %} {{ planet.score_rank }}<br>
         XP: {{ planet.xp|intcomma }}{% if ph %} {{ planet.xp_rank|growth_rank_image(ph.xp_rank) }}{% endif %} {{ planet.xp_rank }}<br>
-        <a href="/clearplanet/">(Clear)</a>
+        <form method="post">
+            <input type="submit" name="planet" value="Clear"/>
+        </form>
     {% endwith %}
     {% else %}
-        <form action="/setplanet/" method="post">
+        <form method="post">
             My Coords:<br />
-            <input type="text" size="7" name="coords"/>
+            <input type="text" size="7" name="planet"/>
             <input type="submit" value="!"/>
         </form>
     {% endif %}

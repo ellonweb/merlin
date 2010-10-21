@@ -21,11 +21,12 @@
  
 from datetime import datetime, timedelta
 from random import randrange
+import re
 
 from Core.exceptions_ import LoadableError, UserError
 from Core.config import Config
 from Core.db import Session, session
-from Core.maps import Planet, User, Arthur, PageView
+from Core.maps import Planet, Alliance, User, Arthur, Intel, PageView
 from Core.loadable import _base, require_user, require_planet
 from Arthur.context import render
 
@@ -34,12 +35,14 @@ PLANET_KEY = "PA_ID"
 LOGOUT = "/logout/"
 USER = "username"
 PASS = "password"
+PLANET = "planet"
 
 # ########################################################################### #
 # ##############################    LOADABLE    ############################# #
 # ########################################################################### #
 
 class loadable(_base):
+    coord = re.compile(r"(\d+)([. :\-])(\d+)(\2(\d+))")
     
     def __new__(cls):
         self = super(loadable, cls).__new__(cls)
@@ -138,6 +141,36 @@ class loadable(_base):
             raise UserError("You don't have access to this page")
     
     def check_planet(self, request, user):
+        coords = request.REQUEST.get(PLANET) or ""
+        
+        if coords == "Clear":
+            if self.user_has_planet(user):
+                user.planet = None
+                session.commit()
+            return False
+        
+        m = self.coord.match(coords)
+        if m:
+            planet = Planet.load(*m.group(1,3,5))
+        else:
+            planet = None
+        
+        if planet is not None:
+            if self.is_user(user):
+                user.planet = planet
+                if user.is_member():
+                    alliance = Alliance.load(Config.get("Alliance","name"))
+                    if planet.intel is None:
+                        planet.intel = Intel(nick=user.name, alliance=alliance)
+                    else:
+                        planet.intel.nick = user.name
+                        planet.intel.alliance = alliance
+                session.commit()
+            else:
+                user.planet = planet
+                session.expunge(user)
+            return user.planet.id
+        
         pa_id = request.COOKIES.get(PLANET_KEY)
         if self.user_has_planet(user):
             if pa_id == user.planet.id:
