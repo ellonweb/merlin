@@ -30,7 +30,7 @@ from Arthur.loadable import loadable, load
 @menu("Home")
 @load
 class home(loadable):
-    def execute(self, request, user):
+    def execute(self, request, user, setplanet=None):
         
         tick = Updates.midnight_tick()
         
@@ -52,4 +52,9 @@ class home(loadable):
         Q = Q.order_by(asc(Alliance.score_rank))
         alliances = Q[:8]
         
-        return render("index.tpl", request, topplanets=planets, topgalaxies=galaxies, topalliances = alliances)
+        return render("index.tpl", request,
+                                    setplanet=setplanet,
+                                    topplanets=planets,
+                                    topgalaxies=galaxies,
+                                    topalliances = alliances,
+                            )

@@ -49,6 +49,7 @@ a.gray:hover {
 input {
 	font-family: Verdana, Arial, Helvetica;
 	font-size: x-small;
+	background-color: rgb(221, 221, 221);
 }
 
 select {
