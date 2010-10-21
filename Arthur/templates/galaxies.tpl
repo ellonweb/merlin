@@ -6,7 +6,7 @@
     </tr>
     <tr class="header">
         <th colspan="5">Rank</th>
-        <th colspan="7">&nbsp;</th>
+        <th colspan="6">&nbsp;</th>
         <th colspan="3">Growth</th>
     </tr>
     <tr class="header">
@@ -16,8 +16,7 @@
         <th><a href="{% url "galaxies", "size", page|default(1) %}">Size</a></th>
         <th><a href="{% url "galaxies", "xp", page|default(1) %}">XP</a></th>
         
-        <th>X</th>
-        <th>Y</th>
+        <th>X:Y</th>
         <th>Name</th>
         <th>Size</th>
         <th>Value</th>
@@ -37,8 +36,7 @@
         <td align="right">{{ galaxy.size_rank }}{% if gh %} {{ galaxy.size_rank|growth_rank_image(gh.size_rank) }}{% endif %}</td>
         <td align="right">{{ galaxy.xp_rank }}{% if gh %} {{ galaxy.xp_rank|growth_rank_image(gh.xp_rank) }}{% endif %}</td>
         
-        <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}</a></td>
-        <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.y }}</a></td>
+        <td align="center"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
         <td>{{ galaxy.name }}</td>
         <td align="right">{{ galaxy.size|intcomma }}</td>
         <td align="right">{{ galaxy.value|intcomma }}</td>

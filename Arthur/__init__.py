@@ -35,8 +35,8 @@ handler404 = 'Arthur.errors.page_not_found'
 handler500 = 'Arthur.errors.server_error'
 
 urlpatterns = patterns('',
-    (r'^(?:home|logout)?/?$', 'Arthur.home'),
     (r'^login/', 'Arthur.login'),
+    (r'^(?:home|logout)?/?$', 'Arthur.overview.home'),
     (r'', include('Arthur.dashboard')),
     (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
     (r'^guide/$', 'Arthur.guide'),
@@ -49,17 +49,6 @@ urlpatterns = patterns('',
     (r'^(?:scans/)?request/', include('Arthur.scans.request')),
 )
 
-@menu("Home")
-@load
-class home(loadable):
-    def execute(self, request, user):
-        if user.planet is not None:
-            tick = Updates.midnight_tick()
-            ph = user.planet.history(tick)
-        else:
-            ph = None
-        return render("index.tpl", request, planet=user.planet, ph=ph)
-
 @load
 @require_user
 class login(loadable):
@@ -69,6 +58,8 @@ class login(loadable):
             return dashboard.execute(request, user, dashuser=user)
         else:
             return home.execute(request, user)
+
+from Arthur.overview import home
 
 @menu(name,          "Intel",       suffix = name)
 @menu("Planetarion", "BCalc",       suffix = "bcalc")
