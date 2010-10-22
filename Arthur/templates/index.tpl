@@ -10,13 +10,15 @@
                 <th class="center" colspan="2">Growth</th>
             </tr>
              {% for planet, ph in topplanets %}
-            <tr class="{{ loop.cycle('odd', 'even') }}">
+    <tr class="{% if planet == user.planet %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ planet.score_rank }}{% if ph %} {{ planet.score_rank|growth_rank_image(ph.score_rank) }}{% endif %}</td>
         <td align="center">
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
             <a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.z }}</a>
         </td>
-        <td>{{ planet.planetname }}</td>
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+                {{ planet.planetname }}
+        </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
         <td align="right">{{ planet.size|intcomma }}</td>
         <td align="right">{{ planet.score|intcomma }}</td>
@@ -36,10 +38,12 @@
                 <th class="center" colspan="2">Growth</th>
             </tr>
              {% for galaxy, gh in topgalaxies %}
-            <tr class="{{ loop.cycle('odd', 'even') }}">
+    <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy.score_rank }}{% if gh %} {{ galaxy.score_rank|growth_rank_image(gh.score_rank) }}{% endif %}</td>
         <td align="center"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
-        <td>{{ galaxy.name }}</td>
+        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" href="{% url "galaxy", galaxy.x, galaxy.y %}">
+                {{ galaxy.name }}
+        </a></td>
         <td align="right">{{ galaxy.size|intcomma }}</td>
         <td align="right">{{ galaxy.score|intcomma }}</td>
         <td align="right">{% if gh %}{{ galaxy.size|growth_roid(gh.size) }}{% endif %}</td>
@@ -63,9 +67,11 @@
                 <th class="center" colspan="2">Growth</th>
             </tr>
              {% for alliance, ah in topalliances %}
-            <tr class="{{ loop.cycle('odd', 'even') }}">
+    <tr class="{% if user|intel and alliance.name == name %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ alliance.score_rank }}{% if ah %} {{ alliance.score_rank|growth_rank_image(ah.score_rank) }}{% endif %}</td>
-        <td><a href="{% url "alliance_members", alliance.name %}" class="gray">{{ alliance.name }}</a></td>
+        <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" href="{% url "alliance_members", alliance.name %}">
+            {{ alliance.name }}
+        </a></td>
         <td align="right">{{ alliance.members }}</td>
         <td align="right">{{ alliance.size_avg|intcomma }}</td>
         <td align="right">{{ alliance.score_avg|intcomma }}</td>

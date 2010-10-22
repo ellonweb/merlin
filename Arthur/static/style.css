@@ -39,20 +39,20 @@ a:hover {
 }
 
 a.myplanet {
-	color:#FFFF00;
+	color:#ffff00;
 	font-weight:bold;
 }
 a.myplanet:hover {
-	color:#CCCC00;
+	color:#cccc00;
 	font-weight:bold;
 }
 
 a.gray {
-	color: #cccccc;
+	color: #ffffff;
 }
 
 a.gray:hover {
-	color: #ffffff;
+	color: #cccccc;
 }
 
 input {

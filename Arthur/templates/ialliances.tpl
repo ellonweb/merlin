@@ -32,10 +32,12 @@
         <th><a href="{% url "ialliances", "t100v", page|default(1) %}">Top 100</a></th>
         <th><a href="{% url "ialliances", "t200v", page|default(1) %}">Top 200</a></th>
     </tr>
-    {% for name, members, size, value, score, asize, avalue, ascore, t10s, t50s, t100s, t200s, t10v, t50v, t100v, t200v, imembers, id in alliances %}
-    <tr class="{{ loop.cycle('odd', 'even') }}">
+    {% for aname, members, size, value, score, asize, avalue, ascore, t10s, t50s, t100s, t200s, t10v, t50v, t100v, t200v, imembers, id in alliances %}
+    <tr class="{% if user|intel and aname == name %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td>{{ loop.index + offset }}</td>
-        <td><a href="{% url "alliance_members", name %}" class="gray">{{ name }}</a></td>
+        <td><a class="{% if user|intel and aname == name %}myplanet{% else %}gray{% endif %}" href="{% url "alliance_members", aname %}">
+            {{ aname }}
+        </a></td>
         <td align="right">{{ imembers }} ({{ members }})</td>
         
         <td align="right">{{ asize|intcomma }}</td>

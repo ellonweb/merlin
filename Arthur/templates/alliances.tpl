@@ -30,14 +30,16 @@
         
     </tr>
     {% for alliance, ah in alliances %}
-    <tr class="{{ loop.cycle('odd', 'even') }}">
+    <tr class="{% if user|intel and alliance.name == name %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td>{{ loop.index + offset }}</td>
         <td align="right">{{ alliance.score_rank }}{% if ah %} {{ alliance.score_rank|growth_rank_image(ah.score_rank) }}{% endif %}</td>
         <td align="right">{{ alliance.size_rank }}{% if ah %} {{ alliance.size_rank|growth_rank_image(ah.size_rank) }}{% endif %}</td>
         <td align="right">{{ alliance.score_avg_rank }}{% if ah %} {{ alliance.score_avg_rank|growth_rank_image(ah.score_avg_rank) }}{% endif %}</td>
         <td align="right">{{ alliance.size_avg_rank }}{% if ah %} {{ alliance.size_avg_rank|growth_rank_image(ah.size_avg_rank) }}{% endif %}</td>
         
-        <td><a href="{% url "alliance_members", alliance.name %}" class="gray">{{ alliance.name }}</a></td>
+        <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" href="{% url "alliance_members", alliance.name %}">
+            {{ alliance.name }}
+        </a></td>
         <td align="right">{{ alliance.members }}</td>
         <td align="right">{{ alliance.size_avg|intcomma }}</td>
         <td align="right">{{ alliance.score_avg|intcomma }}</td>

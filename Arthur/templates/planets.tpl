@@ -51,7 +51,7 @@
     </tr>
     
     {% for planet, ph, nick, alliance in planets %}
-    <tr class="{{ loop.cycle('odd', 'even') }}">
+    <tr class="{% if planet == user.planet %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         {% if page %}<td>{{ loop.index + offset }}</td>{% endif %}
         <td align="right">{{ planet.score_rank }}{% if ph %} {{ planet.score_rank|growth_rank_image(ph.score_rank) }}{% endif %}</td>
         <td align="right">{{ planet.value_rank }}{% if ph %} {{ planet.value_rank|growth_rank_image(ph.value_rank) }}{% endif %}</td>
@@ -62,8 +62,12 @@
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
             <a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.z }}</a>
         </td>
-        <td>{{ planet.rulername }}</td>
-        <td>{{ planet.planetname }}</td>
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+                {{ planet.rulername }}
+        </a></td>
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+                {{ planet.planetname }}
+        </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
         <td align="right">{{ planet.size|intcomma }}</td>
         <td align="right">{{ planet.value|intcomma }}</td>
