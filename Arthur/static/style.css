@@ -38,6 +38,15 @@ a:hover {
 	color: #ccccfc;
 }
 
+a.myplanet {
+	color:#FFFF00;
+	font-weight:bold;
+}
+a.myplanet:hover {
+	color:#CCCC00;
+	font-weight:bold;
+}
+
 a.gray {
 	color: #cccccc;
 }

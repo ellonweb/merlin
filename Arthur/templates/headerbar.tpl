@@ -3,21 +3,41 @@
     <td width="33%" align="left">
     </td>
     <td width="34%" valign="middle" align="center">
-    {% if setplanet %}
-        <p>{{ setplanet }}</p>
-    {% endif %}
     {% if user.planet %}{% with planet = user.planet, ph = user.planet.history(night) %}
-        You are: {{ planet.rulername }} of {{ planet.planetname }}
+    
+<table cellspacing="0" cellpadding="1">
+    <tr>
+        <td align="center" colspan="3">
+        <form method="post">
+        You are: <a class="myplanet" href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.rulername }}</a>
             (<a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
             <a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.z }}</a>)
-            <span class="{{ planet.race }}">{{ planet.race }}</span><br>
-        Size: {{ planet.size|intcomma }}{% if ph %} {{ planet.size_rank|growth_rank_image(ph.size_rank) }}{% endif %} {{ planet.size_rank }}<br>
-        Value: {{ planet.value|intcomma }}{% if ph %} {{ planet.value_rank|growth_rank_image(ph.value_rank) }}{% endif %} {{ planet.value_rank }}<br>
-        Score: {{ planet.score|intcomma }}{% if ph %} {{ planet.score_rank|growth_rank_image(ph.score_rank) }}{% endif %} {{ planet.score_rank }}<br>
-        XP: {{ planet.xp|intcomma }}{% if ph %} {{ planet.xp_rank|growth_rank_image(ph.xp_rank) }}{% endif %} {{ planet.xp_rank }}<br>
-        <form method="post">
+            <span class="{{ planet.race }}">{{ planet.race }}</span>
             <input type="submit" name="planet" value="Clear"/>
         </form>
+        </td>
+    </tr>
+    <tr>
+        <td width="33%" align="left">Size:</td>
+        <td width="34%" align="center">{{ planet.size|intcomma }}</td>
+        <td width="33%" align="right">{{ planet.size_rank }}{% if ph %} {{ planet.size_rank|growth_rank_image(ph.size_rank) }}{% endif %}</td>
+    </tr>
+    <tr>
+        <td width="33%" align="left">Value:</td>
+        <td width="34%" align="center">{{ planet.value|intcomma }}</td>
+        <td width="33%" align="right">{{ planet.value_rank }}{% if ph %} {{ planet.value_rank|growth_rank_image(ph.value_rank) }}{% endif %}</td>
+    </tr>
+    <tr>
+        <td width="33%" align="left">Score:</td>
+        <td width="34%" align="center">{{ planet.score|intcomma }}</td>
+        <td width="33%" align="right">{{ planet.score_rank }}{% if ph %} {{ planet.score_rank|growth_rank_image(ph.score_rank) }}{% endif %}</td>
+    </tr>
+    <tr>
+        <td width="33%" align="left">XP:</td>
+        <td width="34%" align="center">{{ planet.xp|intcomma }}</td>
+        <td width="33%" align="right">{{ planet.xp_rank }}{% if ph %} {{ planet.xp_rank|growth_rank_image(ph.xp_rank) }}{% endif %}</td>
+    </tr>
+</table>
     {% endwith %}
     {% else %}
         <form method="post">
