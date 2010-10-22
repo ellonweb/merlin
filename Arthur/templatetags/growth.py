@@ -32,7 +32,7 @@ def growth(present, past):
     else:
         ret += '"yellow"'
     ret += ' title="' + str(diff) + ' points">'
-    ret += str(round((float(diff) / past * 100),2) if past else present)
+    ret += str(round((float(diff) / past * 100),1) if past else present)
     ret += '%</span>'
     return ret
 
@@ -47,7 +47,7 @@ def growth_roid(present, past):
     else:
         ret += '"yellow"'
     ret += ' title="' + str(diff) + ' roids">'
-    ret += str(round((float(diff) / past * 100),2) if past else present)
+    ret += str(round((float(diff) / past * 100),1) if past else present)
     ret += '%</span>'
     return ret
 
