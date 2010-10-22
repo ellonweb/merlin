@@ -52,6 +52,25 @@ def growth_roid(present, past):
     return ret
 
 @filter
+def growth_members(present, past, all=False):
+    diff = present - past
+    ret = '<span class='
+    if diff < 0:
+        ret += '"red"'
+    elif diff > 0:
+        ret += '"green"'
+    else:
+        ret += '"yellow"'
+    ret += ' title="' + str(diff) + ' members">'
+    if all and diff != 0:
+        ret += '<span class="white">(</span>'
+        ret += str(diff)
+        ret += '<span class="white">)</span> '
+    ret += str(present)
+    ret += '</span>'
+    return ret
+
+@filter
 def growth_rank_image(present, past):
     diff = present - past
     ret = '<img src='

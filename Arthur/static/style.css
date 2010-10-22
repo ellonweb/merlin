@@ -123,6 +123,10 @@ tr.unknown {
 	color: #ffff00;
 }
 
+.white {
+	color: #ffffff;
+}
+
 .Cat {
 	color: #6699cc !important;
 	font-weight: bold;

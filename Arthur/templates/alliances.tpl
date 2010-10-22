@@ -40,7 +40,7 @@
         <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" href="{% url "alliance_members", alliance.name %}">
             {{ alliance.name }}
         </a></td>
-        <td align="right">{{ alliance.members }}</td>
+        <td align="right">{% if ah %}{{ alliance.members|growth_members(ah.members, True) }}{% else %}{{ alliance.members }}{% endif %}</td>
         <td align="right">{{ alliance.size_avg|intcomma }}</td>
         <td align="right">{{ alliance.score_avg|intcomma }}</td>
         <td align="right">{{ alliance.size|intcomma }}</td>
