@@ -26,7 +26,7 @@
         <th>Size</th>
         <th>XP</th>
         
-        <th>{% block xyz %}X:Y Z{% endblock %}</th>
+        <th align="right">{% block xyz %}X:Y &nbsp;Z{% endblock %}</th>
         
         <th>Ruler</th>
         <th>Planet</th>
@@ -58,9 +58,9 @@
         <td align="right">{{ planet.size_rank }}{% if ph %} {{ planet.size_rank|growth_rank_image(ph.size_rank) }}{% endif %}</td>
         <td align="right">{{ planet.xp_rank }}{% if ph %} {{ planet.xp_rank|growth_rank_image(ph.xp_rank) }}{% endif %}</td>
         
-        <td align="center">
+        <td align="right">
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-            <a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.z }}</a>
+            <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
         </td>
         <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
                 {{ planet.rulername }}

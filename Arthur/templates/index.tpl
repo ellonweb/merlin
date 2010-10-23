@@ -14,9 +14,9 @@
 {% if loop.index > 20 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
     <tr class="{% if planet == user.planet %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ planet.score_rank }}{% if ph %} {{ planet.score_rank|growth_rank_image(ph.score_rank) }}{% endif %}</td>
-        <td align="center">
+        <td align="right">
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-            <a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.z }}</a>
+            <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
         </td>
         <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
                 {{ planet.planetname }}
@@ -44,7 +44,7 @@
 {% if loop.index > 10 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy.score_rank }}{% if gh %} {{ galaxy.score_rank|growth_rank_image(gh.score_rank) }}{% endif %}</td>
-        <td align="center"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
+        <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
         <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" href="{% url "galaxy", galaxy.x, galaxy.y %}">
                 {{ galaxy.name }}
         </a></td>
