@@ -9,7 +9,9 @@
                 <th class="right">Score</th>
                 <th class="center" colspan="2">Growth</th>
             </tr>
-             {% for planet, ph in topplanets %}
+{% if user.planet and user.planet.score_rank > 20 %}{% set topplanets = topplanets + [(user.planet, user.planet.history(night),)] %}{% endif %}
+            {% for planet, ph in topplanets %}
+{% if loop.index > 20 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
     <tr class="{% if planet == user.planet %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ planet.score_rank }}{% if ph %} {{ planet.score_rank|growth_rank_image(ph.score_rank) }}{% endif %}</td>
         <td align="center">
@@ -39,7 +41,9 @@
                 <th class="right">Score</th>
                 <th class="center" colspan="2">Growth</th>
             </tr>
-             {% for galaxy, gh in topgalaxies %}
+{% if user.planet.galaxy and user.planet.galaxy.score_rank > 10 %}{% set topgalaxies = topgalaxies + [(user.planet.galaxy, user.planet.galaxy.history(night),)] %}{% endif %}
+            {% for galaxy, gh in topgalaxies %}
+{% if loop.index > 10 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy.score_rank }}{% if gh %} {{ galaxy.score_rank|growth_rank_image(gh.score_rank) }}{% endif %}</td>
         <td align="center"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
@@ -68,7 +72,7 @@
                 <th class="right">Score</th>
                 <th class="center" colspan="2">Growth</th>
             </tr>
-             {% for alliance, ah in topalliances %}
+            {% for alliance, ah in topalliances %}
     <tr class="{% if user|intel and alliance.name == name %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ alliance.score_rank }}{% if ah %} {{ alliance.score_rank|growth_rank_image(ah.score_rank) }}{% endif %}</td>
         <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" href="{% url "alliance_members", alliance.name %}">
