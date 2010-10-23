@@ -121,7 +121,8 @@ class supersearch(loadable):
         
         if not sort:
             sort = order["score"]
-        Q = Q.order_by(sort)
+        for order in sort:
+            Q = Q.order_by(order)
         
         result = Q.limit(6).offset(offset).all()
         
