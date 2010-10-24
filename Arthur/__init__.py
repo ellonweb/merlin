@@ -47,6 +47,7 @@ urlpatterns = patterns('',
     (r'', include('Arthur.attack')),
     (r'^scans/', include('Arthur.scans')),
     (r'^(?:scans/)?request/', include('Arthur.scans.request')),
+    (r'^search/(?P<params>.*)/?$', 'Arthur.search.search'),
 )
 
 @load
@@ -91,5 +92,6 @@ class guide(loadable):
 from Arthur import dashboard
 from Arthur import alliance
 from Arthur import rankings
+from Arthur import search
 from Arthur import attack
 from Arthur import scans
