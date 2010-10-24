@@ -101,7 +101,7 @@ class search(loadable):
                 else:
                     one, two = val.split("|",1)
                     if one.isdigit() and two.isdigit():
-                        Q = Q.filter(filters[arg].between(max(one,two), min(one,two)))
+                        Q = Q.filter(filters[arg].between(min(one,two), max(one,two)))
             if arg in rankfilts:
                 if "|" not in val and val.isdigit():
                     Q = Q.filter(rankfilts[arg] == val)
@@ -112,7 +112,7 @@ class search(loadable):
                 else:
                     one, two = val.split("|",1)
                     if one.isdigit() and two.isdigit():
-                        Q = Q.filter(rankfilts[arg].between(max(one,two), min(one,two)))
+                        Q = Q.filter(rankfilts[arg].between(min(one,two), max(one,two)))
             if arg in wordfilts:
                 Q = Q.filter(wordfilts[arg].ilike("%"+val+"%"))
             if arg == "race":
