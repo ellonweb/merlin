@@ -53,7 +53,7 @@ class search(loadable):
         Q = Q.filter(Planet.active == True)
         Q = Q.filter(and_(subQ.c.x == Planet.x, subQ.c.y == Planet.y))
         
-        
+        page = 1
         
         filters = {
                     "score" : Planet.score,
@@ -136,5 +136,9 @@ class search(loadable):
                         Q = Q.order_by(f(rankfilts[sort[1:]]))
                     else:
                         continue
+            if arg == "page" and val.isdigit():
+                page = int(val)
+            
+        Q = Q.limit(50).offset((page - 1)*50)
         
         return render("planets.tpl", request, planets=Q.all())
