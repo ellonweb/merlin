@@ -30,6 +30,7 @@ from Core.maps import galaxy_temp, planet_temp, alliance_temp, planet_new_id_sea
 
 # Get the previous tick number!
 last_tick = Updates.current_tick()
+midnight = Updates.midnight_tick() == last_tick
 
 t_start=time.time()
 t1=t_start
@@ -182,6 +183,8 @@ while True:
         session.execute(text("""UPDATE galaxy SET
                                   active = :false,
                                   name = NULL, size = NULL, score = NULL, value = NULL, xp = NULL,
+                                  size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
+                                  size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
                                 WHERE id NOT IN (SELECT id FROM galaxy_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[false]))
@@ -212,6 +215,29 @@ while True:
         session.execute(text("""UPDATE galaxy AS g SET
                                   x = t.x, y = t.y,
                                   name = t.name, size = t.size, score = t.score, value = t.value, xp = t.xp,
+                             """ + (
+                             """
+                                  size_growth = t.size - COALESCE(g.size - g.size_growth, 0),
+                                  score_growth = t.score - COALESCE(g.score - g.score_growth, 0),
+                                  value_growth = t.value - COALESCE(g.value - g.value_growth, 0),
+                                  xp_growth = t.xp - COALESCE(g.xp - g.xp_growth, 0),
+                                  size_growth_pc = COALESCE((t.size - (g.size - g.size_growth)) / (g.size - g.size_growth) * 100, 0),
+                                  score_growth_pc = COALESCE((t.score - (g.score - g.score_growth)) / (g.score - g.score_growth) * 100, 0),
+                                  value_growth_pc = COALESCE((t.value - (g.value - g.value_growth)) / (g.value - g.value_growth) * 100, 0),
+                                  xp_growth_pc = COALESCE((t.xp - (g.xp - g.xp_growth)) / (g.xp - g.xp_growth) * 100, 0),
+                             """ if not midnight
+                         else
+                             """
+                                  size_growth = t.size - COALESCE(g.size, 0),
+                                  score_growth = t.score - COALESCE(g.score, 0),
+                                  value_growth = t.value - COALESCE(g.value, 0),
+                                  xp_growth = t.xp - COALESCE(g.xp, 0),
+                                  size_growth_pc = COALESCE((t.size - g.size) / g.size * 100, 0),
+                                  score_growth_pc = COALESCE((t.score - g.score) / g.score * 100, 0),
+                                  value_growth_pc = COALESCE((t.value - g.value) / g.value * 100, 0),
+                                  xp_growth_pc = COALESCE((t.xp - g.xp) / g.xp * 100, 0),
+                             """ ) +
+                             """
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank
                                 FROM (SELECT *,
                                   rank() OVER (ORDER BY size DESC) AS size_rank,
@@ -325,6 +351,8 @@ while True:
         session.execute(text("""UPDATE planet SET
                                   active = :false,
                                   size = NULL, score = NULL, value = NULL, xp = NULL,
+                                  size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
+                                  size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL,
                                   vdiff = NULL, idle = NULL
                                 WHERE id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL)
@@ -346,6 +374,29 @@ while True:
                                   x = t.x, y = t.y, z = t.z,
                                   planetname = t.planetname, rulername = t.rulername, race = t.race,
                                   size = t.size, score = t.score, value = t.value, xp = t.xp,
+                             """ + (
+                             """
+                                  size_growth = t.size - COALESCE(p.size - p.size_growth, 0),
+                                  score_growth = t.score - COALESCE(p.score - p.score_growth, 0),
+                                  value_growth = t.value - COALESCE(p.value - p.value_growth, 0),
+                                  xp_growth = t.xp - COALESCE(p.xp - p.xp_growth, 0),
+                                  size_growth_pc = COALESCE((t.size - (p.size - p.size_growth)) / (p.size - p.size_growth) * 100, 0),
+                                  score_growth_pc = COALESCE((t.score - (p.score - p.score_growth)) / (p.score - p.score_growth) * 100, 0),
+                                  value_growth_pc = COALESCE((t.value - (p.value - p.value_growth)) / (p.value - p.value_growth) * 100, 0),
+                                  xp_growth_pc = COALESCE((t.xp - (p.xp - p.xp_growth)) / (p.xp - p.xp_growth) * 100, 0),
+                             """ if not midnight
+                         else
+                             """
+                                  size_growth = t.size - COALESCE(p.size, 0),
+                                  score_growth = t.score - COALESCE(p.score, 0),
+                                  value_growth = t.value - COALESCE(p.value, 0),
+                                  xp_growth = t.xp - COALESCE(p.xp, 0),
+                                  size_growth_pc = COALESCE((t.size - p.size) / p.size * 100, 0),
+                                  score_growth_pc = COALESCE((t.score - p.score) / p.score * 100, 0),
+                                  value_growth_pc = COALESCE((t.value - p.value) / p.value * 100, 0),
+                                  xp_growth_pc = COALESCE((t.xp - p.xp) / p.xp * 100, 0),
+                             """ ) +
+                             """
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank,
                                   vdiff = t.value - p.value,
                                   idle = COALESCE(1 + (SELECT p.idle WHERE (t.value-p.value) BETWEEN (p.vdiff-1) AND (p.vdiff+1) AND (p.xp-t.xp=0) ), 0)
@@ -390,6 +441,8 @@ while True:
         session.execute(text("""UPDATE alliance SET
                                   active = :false,
                                   size = NULL, members = NULL, score = NULL, points = NULL, size_avg = NULL, score_avg = NULL,
+                                  size_growth = NULL, score_growth = NULL, points_growth = NULL, member_growth = NULL,
+                                  size_growth_pc = NULL, score_growth_pc = NULL, points_growth_pc = NULL,
                                   size_rank = NULL, members_rank = NULL, score_rank = NULL, size_avg_rank = NULL, score_avg_rank = NULL
                                 WHERE id NOT IN (SELECT id FROM alliance_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[false]))
@@ -409,6 +462,27 @@ while True:
         session.execute(text("""UPDATE alliance AS a SET
                                   size = t.size, members = t.members, score = t.score, points = t.points,
                                   size_avg = t.size_avg, score_avg = t.score_avg,
+                             """ + (
+                             """
+                                  size_growth = t.size - COALESCE(a.size - a.size_growth, 0),
+                                  score_growth = t.score - COALESCE(a.score - a.score_growth, 0),
+                                  points_growth = t.points - COALESCE(a.points - a.points_growth, 0),
+                                  member_growth = t.members - COALESCE(a.members - a.member_growth, 0),
+                                  size_growth_pc = COALESCE((t.size - (a.size - a.size_growth)) / (a.size - a.size_growth) * 100, 0),
+                                  score_growth_pc = COALESCE((t.score - (a.score - a.score_growth)) / (a.score - a.score_growth) * 100, 0),
+                                  points_growth_pc = COALESCE((t.points - (a.points - a.points_growth)) / (a.points - a.points_growth) * 100, 0),
+                             """ if not midnight
+                         else
+                             """
+                                  size_growth = t.size - COALESCE(a.size, 0),
+                                  score_growth = t.score - COALESCE(a.score, 0),
+                                  points_growth = t.points - COALESCE(a.points, 0),
+                                  member_growth = t.members - COALESCE(a.members, 0),
+                                  size_growth_pc = COALESCE((t.size - a.size) / a.size * 100, 0),
+                                  score_growth_pc = COALESCE((t.score - a.score) / a.score * 100, 0),
+                                  points_growth_pc = COALESCE((t.points - a.points) / a.points * 100, 0),
+                             """ ) +
+                             """
                                   size_rank = t.size_rank, members_rank = t.members_rank, score_rank = t.score_rank, points_rank = t.points_rank,
                                   size_avg_rank = t.size_avg_rank, score_avg_rank = t.score_avg_rank
                                 FROM (SELECT *,
