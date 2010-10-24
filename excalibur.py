@@ -183,6 +183,7 @@ while True:
         session.execute(text("""UPDATE galaxy SET
                                   active = :false,
                                   name = NULL, size = NULL, score = NULL, value = NULL, xp = NULL,
+                                  members = NULL, member_growth = NULL,
                                   size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
                                   size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
@@ -215,23 +216,26 @@ while True:
         session.execute(text("""UPDATE galaxy AS g SET
                                   x = t.x, y = t.y,
                                   name = t.name, size = t.size, score = t.score, value = t.value, xp = t.xp,
+                                  members = p.count,
                              """ + (
                              """
                                   size_growth = t.size - COALESCE(g.size - g.size_growth, 0),
                                   score_growth = t.score - COALESCE(g.score - g.score_growth, 0),
                                   value_growth = t.value - COALESCE(g.value - g.value_growth, 0),
                                   xp_growth = t.xp - COALESCE(g.xp - g.xp_growth, 0),
+                                  member_growth = p.count - COALESCE(g.members - g.member_growth, 0),
                                   size_growth_pc = CASE WHEN (g.size - g.size_growth != 0) THEN COALESCE((t.size - (g.size - g.size_growth)) / (g.size - g.size_growth) * 100, 0) ELSE 0 END,
                                   score_growth_pc = CASE WHEN (g.score - g.score_growth != 0) THEN COALESCE((t.score - (g.score - g.score_growth)) / (g.score - g.score_growth) * 100, 0) ELSE 0 END,
                                   value_growth_pc = CASE WHEN (g.value - g.value_growth != 0) THEN COALESCE((t.value - (g.value - g.value_growth)) / (g.value - g.value_growth) * 100, 0) ELSE 0 END,
                                   xp_growth_pc = CASE WHEN (g.xp - g.xp_growth != 0) THEN COALESCE((t.xp - (g.xp - g.xp_growth)) / (g.xp - g.xp_growth) * 100, 0) ELSE 0 END,
                              """ if not midnight
-                         else
+                                 else
                              """
                                   size_growth = t.size - COALESCE(g.size, 0),
                                   score_growth = t.score - COALESCE(g.score, 0),
                                   value_growth = t.value - COALESCE(g.value, 0),
                                   xp_growth = t.xp - COALESCE(g.xp, 0),
+                                  member_growth = p.count - COALESCE(g.members, 0),
                                   size_growth_pc = CASE WHEN (g.size != 0) THEN COALESCE((t.size - g.size) / g.size * 100, 0) ELSE 0 END,
                                   score_growth_pc = CASE WHEN (g.score != 0) THEN COALESCE((t.score - g.score) / g.score * 100, 0) ELSE 0 END,
                                   value_growth_pc = CASE WHEN (g.value != 0) THEN COALESCE((t.value - g.value) / g.value * 100, 0) ELSE 0 END,
@@ -244,8 +248,10 @@ while True:
                                   rank() OVER (ORDER BY score DESC) AS score_rank,
                                   rank() OVER (ORDER BY value DESC) AS value_rank,
                                   rank() OVER (ORDER BY xp DESC) AS xp_rank
-                                FROM galaxy_temp) AS t
+                                FROM galaxy_temp) AS t,
+                                  (SELECT count(*) AS count, x, y FROM planet_temp GROUP BY x, y) AS p
                                   WHERE g.id = t.id
+                                   AND g.x = p.x AND g.y = p.y
                                 AND g.active = :true
                             ;""", bindparams=[true]))
 
@@ -385,7 +391,7 @@ while True:
                                   value_growth_pc = CASE WHEN (p.value - p.value_growth != 0) THEN COALESCE((t.value - (p.value - p.value_growth)) / (p.value - p.value_growth) * 100, 0) ELSE 0 END,
                                   xp_growth_pc = CASE WHEN (p.xp - p.xp_growth != 0) THEN COALESCE((t.xp - (p.xp - p.xp_growth)) / (p.xp - p.xp_growth) * 100, 0) ELSE 0 END,
                              """ if not midnight
-                         else
+                                 else
                              """
                                   size_growth = t.size - COALESCE(p.size, 0),
                                   score_growth = t.score - COALESCE(p.score, 0),
@@ -472,7 +478,7 @@ while True:
                                   score_growth_pc = CASE WHEN (a.score - a.score_growth != 0) THEN COALESCE((t.score - (a.score - a.score_growth)) / (a.score - a.score_growth) * 100, 0) ELSE 0 END,
                                   points_growth_pc = CASE WHEN (a.points - a.points_growth != 0) THEN COALESCE((t.points - (a.points - a.points_growth)) / (a.points - a.points_growth) * 100, 0) ELSE 0 END,
                              """ if not midnight
-                         else
+                                 else
                              """
                                   size_growth = t.size - COALESCE(a.size, 0),
                                   score_growth = t.score - COALESCE(a.score, 0),
