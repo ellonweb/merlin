@@ -144,11 +144,11 @@ while True:
             session.execute(text(galaxy_insert % (g[0], g[1], g[2].strip("\""), g[3], g[4], g[5], g[6],)))
 
         # As above
-        alliance_insert = "INSERT INTO alliance_temp (score_rank, name, size, members, score, points, size_avg, score_avg) "
-        alliance_insert+= "VALUES (%s, '%s', %s, %s, %s, %s, %s, %s);"
+        alliance_insert = "INSERT INTO alliance_temp (score_rank, name, size, members, score, points, size_avg, score_avg, points_avg) "
+        alliance_insert+= "VALUES (%s, '%s', %s, %s, %s, %s, %s, %s, %s);"
         for line in alliances:
             a=decode(line).strip().split("\t")
-            session.execute(text(alliance_insert % (a[0], a[1].strip("\""), a[2], a[3], a[4], a[5], int(a[2])/int(a[3]), int(a[4])/min(PA.getint("numbers", "tag_count"),int(a[3])),)))
+            session.execute(text(alliance_insert % (a[0], a[1].strip("\""), a[2], a[3], a[4], a[5], int(a[2])/int(a[3]), int(a[4])/min(PA.getint("numbers", "tag_count"),int(a[3])), int(a[5])/int(a[3]),)))
 
         t2=time.time()-t1
         print "Inserted dumps in %.3f seconds" % (t2,)
@@ -186,6 +186,7 @@ while True:
                                   members = NULL, member_growth = NULL,
                                   size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
                                   size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
+                                  size_rank_change = NULL, score_rank_change = NULL, value_rank_change = NULL, xp_rank_change = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
                                 WHERE id NOT IN (SELECT id FROM galaxy_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[false]))
@@ -228,6 +229,10 @@ while True:
                                   score_growth_pc = CASE WHEN (g.score - g.score_growth != 0) THEN COALESCE((t.score - (g.score - g.score_growth)) * 100.0 / (g.score - g.score_growth), 0) ELSE 0 END,
                                   value_growth_pc = CASE WHEN (g.value - g.value_growth != 0) THEN COALESCE((t.value - (g.value - g.value_growth)) * 100.0 / (g.value - g.value_growth), 0) ELSE 0 END,
                                   xp_growth_pc = CASE WHEN (g.xp - g.xp_growth != 0) THEN COALESCE((t.xp - (g.xp - g.xp_growth)) * 100.0 / (g.xp - g.xp_growth), 0) ELSE 0 END,
+                                  size_rank_change = t.size_rank - COALESCE(g.size_rank - g.size_rank_change, 0),
+                                  score_rank_change = t.score_rank - COALESCE(g.score_rank - g.score_rank_change, 0),
+                                  value_rank_change = t.value_rank - COALESCE(g.value_rank - g.value_rank_change, 0),
+                                  xp_rank_change = t.xp_rank - COALESCE(g.xp_rank - g.xp_rank_change, 0),
                              """ if not midnight
                                  else
                              """
@@ -240,6 +245,10 @@ while True:
                                   score_growth_pc = CASE WHEN (g.score != 0) THEN COALESCE((t.score - g.score) * 100.0 / g.score * 100, 0) ELSE 0 END,
                                   value_growth_pc = CASE WHEN (g.value != 0) THEN COALESCE((t.value - g.value) * 100.0 / g.value, 0) ELSE 0 END,
                                   xp_growth_pc = CASE WHEN (g.xp != 0) THEN COALESCE((t.xp - g.xp) * 100.0 / g.xp, 0) ELSE 0 END,
+                                  size_rank_change = t.size_rank - COALESCE(g.size_rank, 0),
+                                  score_rank_change = t.score_rank - COALESCE(g.score_rank, 0),
+                                  value_rank_change = t.value_rank - COALESCE(g.value_rank, 0),
+                                  xp_rank_change = t.xp_rank - COALESCE(g.xp_rank, 0),
                              """ ) +
                              """
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank
@@ -359,6 +368,7 @@ while True:
                                   size = NULL, score = NULL, value = NULL, xp = NULL,
                                   size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
                                   size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
+                                  size_rank_change = NULL, score_rank_change = NULL, value_rank_change = NULL, xp_rank_change = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL,
                                   vdiff = NULL, idle = NULL
                                 WHERE id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL)
@@ -390,6 +400,10 @@ while True:
                                   score_growth_pc = CASE WHEN (p.score - p.score_growth != 0) THEN COALESCE((t.score - (p.score - p.score_growth)) * 100.0 / (p.score - p.score_growth), 0) ELSE 0 END,
                                   value_growth_pc = CASE WHEN (p.value - p.value_growth != 0) THEN COALESCE((t.value - (p.value - p.value_growth)) * 100.0 / (p.value - p.value_growth), 0) ELSE 0 END,
                                   xp_growth_pc = CASE WHEN (p.xp - p.xp_growth != 0) THEN COALESCE((t.xp - (p.xp - p.xp_growth)) * 100.0 / (p.xp - p.xp_growth), 0) ELSE 0 END,
+                                  size_rank_change = t.size_rank - COALESCE(p.size_rank - p.size_rank_change, 0),
+                                  score_rank_change = t.score_rank - COALESCE(p.score_rank - p.score_rank_change, 0),
+                                  value_rank_change = t.value_rank - COALESCE(p.value_rank - p.value_rank_change, 0),
+                                  xp_rank_change = t.xp_rank - COALESCE(p.xp_rank - p.xp_rank_change, 0),
                              """ if not midnight
                                  else
                              """
@@ -401,6 +415,10 @@ while True:
                                   score_growth_pc = CASE WHEN (p.score != 0) THEN COALESCE((t.score - p.score) * 100.0 / p.score, 0) ELSE 0 END,
                                   value_growth_pc = CASE WHEN (p.value != 0) THEN COALESCE((t.value - p.value) * 100.0 / p.value, 0) ELSE 0 END,
                                   xp_growth_pc = CASE WHEN (p.xp != 0) THEN COALESCE((t.xp - p.xp) * 100.0 / p.xp, 0) ELSE 0 END,
+                                  size_rank_change = t.size_rank - COALESCE(p.size_rank, 0),
+                                  score_rank_change = t.score_rank - COALESCE(p.score_rank, 0),
+                                  value_rank_change = t.value_rank - COALESCE(p.value_rank, 0),
+                                  xp_rank_change = t.xp_rank - COALESCE(p.xp_rank, 0),
                              """ ) +
                              """
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank,
@@ -446,10 +464,11 @@ while True:
         #  NULL all the data, leaving only the name and id for FKs
         session.execute(text("""UPDATE alliance SET
                                   active = :false,
-                                  size = NULL, members = NULL, score = NULL, points = NULL, size_avg = NULL, score_avg = NULL,
+                                  size = NULL, members = NULL, score = NULL, points = NULL, size_avg = NULL, score_avg = NULL, points_avg = NULL,
                                   size_growth = NULL, score_growth = NULL, points_growth = NULL, member_growth = NULL,
                                   size_growth_pc = NULL, score_growth_pc = NULL, points_growth_pc = NULL,
-                                  size_rank = NULL, members_rank = NULL, score_rank = NULL, size_avg_rank = NULL, score_avg_rank = NULL
+                                  size_rank_change = NULL, members_rank_change = NULL, score_rank_change = NULL, points_rank_change = NULL, size_avg_rank_change = NULL, score_avg_rank_change = NULL, points_avg_rank_change = NULL,
+                                  size_rank = NULL, members_rank = NULL, score_rank = NULL, points_rank = NULL, size_avg_rank = NULL, score_avg_rank = NULL, points_avg_rank = NULL
                                 WHERE id NOT IN (SELECT id FROM alliance_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[false]))
 
@@ -467,7 +486,7 @@ while True:
         # Deactivated items are untouched but NULLed earlier
         session.execute(text("""UPDATE alliance AS a SET
                                   size = t.size, members = t.members, score = t.score, points = t.points,
-                                  size_avg = t.size_avg, score_avg = t.score_avg,
+                                  size_avg = t.size_avg, score_avg = t.score_avg, points_avg = t.points_avg,
                              """ + (
                              """
                                   size_growth = t.size - COALESCE(a.size - a.size_growth, 0),
@@ -477,6 +496,13 @@ while True:
                                   size_growth_pc = CASE WHEN (a.size - a.size_growth != 0) THEN COALESCE((t.size - (a.size - a.size_growth)) * 100.0 / (a.size - a.size_growth), 0) ELSE 0 END,
                                   score_growth_pc = CASE WHEN (a.score - a.score_growth != 0) THEN COALESCE((t.score - (a.score - a.score_growth)) * 100.0 / (a.score - a.score_growth), 0) ELSE 0 END,
                                   points_growth_pc = CASE WHEN (a.points - a.points_growth != 0) THEN COALESCE((t.points - (a.points - a.points_growth)) * 100.0 / (a.points - a.points_growth), 0) ELSE 0 END,
+                                  size_rank_change = t.size_rank - COALESCE(a.size_rank - a.size_rank_change, 0),
+                                  members_rank_change = t.members_rank - COALESCE(a.members_rank - a.members_rank_change, 0),
+                                  score_rank_change = t.score_rank - COALESCE(a.score_rank - a.score_rank_change, 0),
+                                  points_rank_change = t.points_rank - COALESCE(a.points_rank - a.points_rank_change, 0),
+                                  size_avg_rank_change = t.size_avg_rank - COALESCE(a.size_avg_rank - a.size_avg_rank_change, 0),
+                                  score_avg_rank_change = t.score_avg_rank - COALESCE(a.score_avg_rank - a.score_avg_rank_change, 0),
+                                  points_avg_rank_change = t.points_avg_rank - COALESCE(a.points_avg_rank - a.points_avg_rank_change, 0),
                              """ if not midnight
                                  else
                              """
@@ -487,16 +513,24 @@ while True:
                                   size_growth_pc = CASE WHEN (a.size != 0) THEN COALESCE((t.size - a.size) * 100.0 / a.size, 0) ELSE 0 END,
                                   score_growth_pc = CASE WHEN (a.score != 0) THEN COALESCE((t.score - a.score) * 100.0 / a.score, 0) ELSE 0 END,
                                   points_growth_pc = CASE WHEN (a.points != 0) THEN COALESCE((t.points - a.points) * 100.0 / a.points, 0) ELSE 0 END,
+                                  size_rank_change = t.size_rank - COALESCE(a.size_rank, 0),
+                                  members_rank_change = t.members_rank - COALESCE(a.members_rank, 0),
+                                  score_rank_change = t.score_rank - COALESCE(a.score_rank, 0),
+                                  points_rank_change = t.points_rank - COALESCE(a.points_rank, 0),
+                                  size_avg_rank_change = t.size_avg_rank - COALESCE(a.size_avg_rank, 0),
+                                  score_avg_rank_change = t.score_avg_rank - COALESCE(a.score_avg_rank, 0),
+                                  points_avg_rank_change = t.points_avg_rank - COALESCE(a.points_avg_rank, 0),
                              """ ) +
                              """
                                   size_rank = t.size_rank, members_rank = t.members_rank, score_rank = t.score_rank, points_rank = t.points_rank,
-                                  size_avg_rank = t.size_avg_rank, score_avg_rank = t.score_avg_rank
+                                  size_avg_rank = t.size_avg_rank, score_avg_rank = t.score_avg_rank, points_avg_rank = t.points_avg_rank
                                 FROM (SELECT *,
                                   rank() OVER (ORDER BY size DESC) AS size_rank,
                                   rank() OVER (ORDER BY points DESC) AS points_rank,
                                   rank() OVER (ORDER BY members DESC) AS members_rank,
                                   rank() OVER (ORDER BY size_avg DESC) AS size_avg_rank,
-                                  rank() OVER (ORDER BY score_avg DESC) AS score_avg_rank
+                                  rank() OVER (ORDER BY score_avg DESC) AS score_avg_rank,
+                                  rank() OVER (ORDER BY points_avg DESC) AS points_avg_rank
                                 FROM alliance_temp) AS t
                                   WHERE a.id = t.id
                                 AND a.active = :true
@@ -528,7 +562,7 @@ while True:
         # Copy the dumps to their respective history tables
         session.execute(text("INSERT INTO galaxy_history (tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank) SELECT :tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank FROM galaxy WHERE galaxy.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
         session.execute(text("INSERT INTO planet_history (tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff) SELECT :tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff FROM planet WHERE planet.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
-        session.execute(text("INSERT INTO alliance_history (tick, id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank) SELECT :tick, id, name, size, members, score, size_avg, score_avg, size_rank, members_rank, score_rank, size_avg_rank, score_avg_rank FROM alliance WHERE alliance.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
+        session.execute(text("INSERT INTO alliance_history (tick, id, name, size, members, score, points, size_avg, score_avg, points_avg, size_rank, members_rank, score_rank, points_rank, size_avg_rank, score_avg_rank, points_avg_rank) SELECT :tick, id, name, size, members, score, points, size_avg, score_avg, points_avg, size_rank, members_rank, score_rank, points_rank, size_avg_rank, score_avg_rank, points_avg_rank FROM alliance WHERE alliance.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
 
         # Finally we can commit!
         session.commit()

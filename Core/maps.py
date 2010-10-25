@@ -90,6 +90,10 @@ class Galaxy(Base):
     score_growth_pc = Column(Float)
     value_growth_pc = Column(Float)
     xp_growth_pc = Column(Float)
+    size_rank_change = Column(Integer)
+    score_rank_change = Column(Integer)
+    value_rank_change = Column(Integer)
+    xp_rank_change = Column(Integer)
     private = Column(Boolean)
     
     def history(self, tick):
@@ -163,6 +167,10 @@ class Planet(Base):
     score_growth_pc = Column(Float)
     value_growth_pc = Column(Float)
     xp_growth_pc = Column(Float)
+    size_rank_change = Column(Integer)
+    score_rank_change = Column(Integer)
+    value_rank_change = Column(Integer)
+    xp_rank_change = Column(Integer)
     vdiff = Column(Integer)
     idle = Column(Integer)
     
@@ -266,8 +274,10 @@ class Alliance(Base):
     points_rank = Column(Integer)
     size_avg = Column(Integer)
     score_avg = Column(Integer)
+    points_avg = Column(Integer)
     size_avg_rank = Column(Integer)
     score_avg_rank = Column(Integer)
+    points_avg_rank = Column(Integer)
     size_growth = Column(Integer)
     score_growth = Column(Integer)
     points_growth = Column(Integer)
@@ -275,6 +285,13 @@ class Alliance(Base):
     size_growth_pc = Column(Float)
     score_growth_pc = Column(Float)
     points_growth_pc = Column(Float)
+    size_rank_change = Column(Integer)
+    members_rank_change = Column(Integer)
+    score_rank_change = Column(Integer)
+    points_rank_change = Column(Integer)
+    size_avg_rank_change = Column(Integer)
+    score_avg_rank_change = Column(Integer)
+    points_avg_rank_change = Column(Integer)
     
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
@@ -329,8 +346,10 @@ class AllianceHistory(Base):
     points_rank = Column(Integer)
     size_avg = Column(Integer)
     score_avg = Column(Integer)
+    points_avg = Column(Integer)
     size_avg_rank = Column(Integer)
     score_avg_rank = Column(Integer)
+    points_avg_rank = Column(Integer)
 Alliance.history_loader = dynamic_loader(AllianceHistory, backref="current")
 
 # ########################################################################### #
@@ -367,7 +386,8 @@ alliance_temp = Table('alliance_temp', Base.metadata,
     Column('points', Integer),
     Column('score_rank', Integer),
     Column('size_avg', Integer),
-    Column('score_avg', Integer))
+    Column('score_avg', Integer),
+    Column('points_avg', Integer))
 planet_new_id_search = Table('planet_new_id_search', Base.metadata,
     Column('id', Integer),
     Column('x', Integer, primary_key=True),
