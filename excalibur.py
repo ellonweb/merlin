@@ -224,10 +224,10 @@ while True:
                                   value_growth = t.value - COALESCE(g.value - g.value_growth, 0),
                                   xp_growth = t.xp - COALESCE(g.xp - g.xp_growth, 0),
                                   member_growth = p.count - COALESCE(g.members - g.member_growth, 0),
-                                  size_growth_pc = CASE WHEN (g.size - g.size_growth != 0) THEN COALESCE((t.size - (g.size - g.size_growth)) / (g.size - g.size_growth) * 100, 0) ELSE 0 END,
-                                  score_growth_pc = CASE WHEN (g.score - g.score_growth != 0) THEN COALESCE((t.score - (g.score - g.score_growth)) / (g.score - g.score_growth) * 100, 0) ELSE 0 END,
-                                  value_growth_pc = CASE WHEN (g.value - g.value_growth != 0) THEN COALESCE((t.value - (g.value - g.value_growth)) / (g.value - g.value_growth) * 100, 0) ELSE 0 END,
-                                  xp_growth_pc = CASE WHEN (g.xp - g.xp_growth != 0) THEN COALESCE((t.xp - (g.xp - g.xp_growth)) / (g.xp - g.xp_growth) * 100, 0) ELSE 0 END,
+                                  size_growth_pc = CASE WHEN (g.size - g.size_growth != 0) THEN COALESCE((t.size - (g.size - g.size_growth)) * 100.0 / (g.size - g.size_growth), 0) ELSE 0 END,
+                                  score_growth_pc = CASE WHEN (g.score - g.score_growth != 0) THEN COALESCE((t.score - (g.score - g.score_growth)) * 100.0 / (g.score - g.score_growth), 0) ELSE 0 END,
+                                  value_growth_pc = CASE WHEN (g.value - g.value_growth != 0) THEN COALESCE((t.value - (g.value - g.value_growth)) * 100.0 / (g.value - g.value_growth), 0) ELSE 0 END,
+                                  xp_growth_pc = CASE WHEN (g.xp - g.xp_growth != 0) THEN COALESCE((t.xp - (g.xp - g.xp_growth)) * 100.0 / (g.xp - g.xp_growth), 0) ELSE 0 END,
                              """ if not midnight
                                  else
                              """
@@ -236,10 +236,10 @@ while True:
                                   value_growth = t.value - COALESCE(g.value, 0),
                                   xp_growth = t.xp - COALESCE(g.xp, 0),
                                   member_growth = p.count - COALESCE(g.members, 0),
-                                  size_growth_pc = CASE WHEN (g.size != 0) THEN COALESCE((t.size - g.size) / g.size * 100, 0) ELSE 0 END,
-                                  score_growth_pc = CASE WHEN (g.score != 0) THEN COALESCE((t.score - g.score) / g.score * 100, 0) ELSE 0 END,
-                                  value_growth_pc = CASE WHEN (g.value != 0) THEN COALESCE((t.value - g.value) / g.value * 100, 0) ELSE 0 END,
-                                  xp_growth_pc = CASE WHEN (g.xp != 0) THEN COALESCE((t.xp - g.xp) / g.xp * 100, 0) ELSE 0 END,
+                                  size_growth_pc = CASE WHEN (g.size != 0) THEN COALESCE((t.size - g.size) * 100.0 / g.size, 0) ELSE 0 END,
+                                  score_growth_pc = CASE WHEN (g.score != 0) THEN COALESCE((t.score - g.score) * 100.0 / g.score * 100, 0) ELSE 0 END,
+                                  value_growth_pc = CASE WHEN (g.value != 0) THEN COALESCE((t.value - g.value) * 100.0 / g.value, 0) ELSE 0 END,
+                                  xp_growth_pc = CASE WHEN (g.xp != 0) THEN COALESCE((t.xp - g.xp) * 100.0 / g.xp, 0) ELSE 0 END,
                              """ ) +
                              """
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank
@@ -386,10 +386,10 @@ while True:
                                   score_growth = t.score - COALESCE(p.score - p.score_growth, 0),
                                   value_growth = t.value - COALESCE(p.value - p.value_growth, 0),
                                   xp_growth = t.xp - COALESCE(p.xp - p.xp_growth, 0),
-                                  size_growth_pc = CASE WHEN (p.size - p.size_growth != 0) THEN COALESCE((t.size - (p.size - p.size_growth)) / (p.size - p.size_growth) * 100, 0) ELSE 0 END,
-                                  score_growth_pc = CASE WHEN (p.score - p.score_growth != 0) THEN COALESCE((t.score - (p.score - p.score_growth)) / (p.score - p.score_growth) * 100, 0) ELSE 0 END,
-                                  value_growth_pc = CASE WHEN (p.value - p.value_growth != 0) THEN COALESCE((t.value - (p.value - p.value_growth)) / (p.value - p.value_growth) * 100, 0) ELSE 0 END,
-                                  xp_growth_pc = CASE WHEN (p.xp - p.xp_growth != 0) THEN COALESCE((t.xp - (p.xp - p.xp_growth)) / (p.xp - p.xp_growth) * 100, 0) ELSE 0 END,
+                                  size_growth_pc = CASE WHEN (p.size - p.size_growth != 0) THEN COALESCE((t.size - (p.size - p.size_growth)) * 100.0 / (p.size - p.size_growth), 0) ELSE 0 END,
+                                  score_growth_pc = CASE WHEN (p.score - p.score_growth != 0) THEN COALESCE((t.score - (p.score - p.score_growth)) * 100.0 / (p.score - p.score_growth), 0) ELSE 0 END,
+                                  value_growth_pc = CASE WHEN (p.value - p.value_growth != 0) THEN COALESCE((t.value - (p.value - p.value_growth)) * 100.0 / (p.value - p.value_growth), 0) ELSE 0 END,
+                                  xp_growth_pc = CASE WHEN (p.xp - p.xp_growth != 0) THEN COALESCE((t.xp - (p.xp - p.xp_growth)) * 100.0 / (p.xp - p.xp_growth), 0) ELSE 0 END,
                              """ if not midnight
                                  else
                              """
@@ -397,10 +397,10 @@ while True:
                                   score_growth = t.score - COALESCE(p.score, 0),
                                   value_growth = t.value - COALESCE(p.value, 0),
                                   xp_growth = t.xp - COALESCE(p.xp, 0),
-                                  size_growth_pc = CASE WHEN (p.size != 0) THEN COALESCE((t.size - p.size) / p.size * 100, 0) ELSE 0 END,
-                                  score_growth_pc = CASE WHEN (p.score != 0) THEN COALESCE((t.score - p.score) / p.score * 100, 0) ELSE 0 END,
-                                  value_growth_pc = CASE WHEN (p.value != 0) THEN COALESCE((t.value - p.value) / p.value * 100, 0) ELSE 0 END,
-                                  xp_growth_pc = CASE WHEN (p.xp != 0) THEN COALESCE((t.xp - p.xp) / p.xp * 100, 0) ELSE 0 END,
+                                  size_growth_pc = CASE WHEN (p.size != 0) THEN COALESCE((t.size - p.size) * 100.0 / p.size, 0) ELSE 0 END,
+                                  score_growth_pc = CASE WHEN (p.score != 0) THEN COALESCE((t.score - p.score) * 100.0 / p.score, 0) ELSE 0 END,
+                                  value_growth_pc = CASE WHEN (p.value != 0) THEN COALESCE((t.value - p.value) * 100.0 / p.value, 0) ELSE 0 END,
+                                  xp_growth_pc = CASE WHEN (p.xp != 0) THEN COALESCE((t.xp - p.xp) * 100.0 / p.xp, 0) ELSE 0 END,
                              """ ) +
                              """
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank,
@@ -474,9 +474,9 @@ while True:
                                   score_growth = t.score - COALESCE(a.score - a.score_growth, 0),
                                   points_growth = t.points - COALESCE(a.points - a.points_growth, 0),
                                   member_growth = t.members - COALESCE(a.members - a.member_growth, 0),
-                                  size_growth_pc = CASE WHEN (a.size - a.size_growth != 0) THEN COALESCE((t.size - (a.size - a.size_growth)) / (a.size - a.size_growth) * 100, 0) ELSE 0 END,
-                                  score_growth_pc = CASE WHEN (a.score - a.score_growth != 0) THEN COALESCE((t.score - (a.score - a.score_growth)) / (a.score - a.score_growth) * 100, 0) ELSE 0 END,
-                                  points_growth_pc = CASE WHEN (a.points - a.points_growth != 0) THEN COALESCE((t.points - (a.points - a.points_growth)) / (a.points - a.points_growth) * 100, 0) ELSE 0 END,
+                                  size_growth_pc = CASE WHEN (a.size - a.size_growth != 0) THEN COALESCE((t.size - (a.size - a.size_growth)) * 100.0 / (a.size - a.size_growth), 0) ELSE 0 END,
+                                  score_growth_pc = CASE WHEN (a.score - a.score_growth != 0) THEN COALESCE((t.score - (a.score - a.score_growth)) * 100.0 / (a.score - a.score_growth), 0) ELSE 0 END,
+                                  points_growth_pc = CASE WHEN (a.points - a.points_growth != 0) THEN COALESCE((t.points - (a.points - a.points_growth)) * 100.0 / (a.points - a.points_growth), 0) ELSE 0 END,
                              """ if not midnight
                                  else
                              """
@@ -484,9 +484,9 @@ while True:
                                   score_growth = t.score - COALESCE(a.score, 0),
                                   points_growth = t.points - COALESCE(a.points, 0),
                                   member_growth = t.members - COALESCE(a.members, 0),
-                                  size_growth_pc = CASE WHEN (a.size != 0) THEN COALESCE((t.size - a.size) / a.size * 100, 0) ELSE 0 END,
-                                  score_growth_pc = CASE WHEN (a.score != 0) THEN COALESCE((t.score - a.score) / a.score * 100, 0) ELSE 0 END,
-                                  points_growth_pc = CASE WHEN (a.points != 0) THEN COALESCE((t.points - a.points) / a.points * 100, 0) ELSE 0 END,
+                                  size_growth_pc = CASE WHEN (a.size != 0) THEN COALESCE((t.size - a.size) * 100.0 / a.size, 0) ELSE 0 END,
+                                  score_growth_pc = CASE WHEN (a.score != 0) THEN COALESCE((t.score - a.score) * 100.0 / a.score, 0) ELSE 0 END,
+                                  points_growth_pc = CASE WHEN (a.points != 0) THEN COALESCE((t.points - a.points) * 100.0 / a.points, 0) ELSE 0 END,
                              """ ) +
                              """
                                   size_rank = t.size_rank, members_rank = t.members_rank, score_rank = t.score_rank, points_rank = t.points_rank,
