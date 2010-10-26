@@ -19,10 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.db import session
-from Core.maps import Updates, Galaxy, GalaxyHistory
+from Core.maps import Galaxy
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
@@ -36,15 +35,20 @@ class galaxies(loadable):
                   "value" : (asc(Galaxy.value_rank),),
                   "size"  : (asc(Galaxy.size_rank),),
                   "xp"    : (asc(Galaxy.xp_rank),),
+                  "score_growth" : (desc(Galaxy.score_growth),),
+                  "value_growth" : (desc(Galaxy.value_growth),),
+                  "size_growth"  : (desc(Galaxy.size_growth),),
+                  "xp_growth"    : (desc(Galaxy.xp_growth),),
+                  "score_growth_pc" : (desc(Galaxy.score_growth_pc),),
+                  "value_growth_pc" : (desc(Galaxy.value_growth_pc),),
+                  "size_growth_pc"  : (desc(Galaxy.size_growth_pc),),
+                  "xp_growth_pc"    : (desc(Galaxy.xp_growth_pc),),
                   }
         if sort not in order.keys():
             sort = "score"
         order = order.get(sort)
         
-        tick = Updates.midnight_tick()
-        
-        Q = session.query(Galaxy, GalaxyHistory)
-        Q = Q.outerjoin((GalaxyHistory, and_(Galaxy.id == GalaxyHistory.id, GalaxyHistory.tick == tick)))
+        Q = session.query(Galaxy)
         Q = Q.filter(Galaxy.active == True)
         
         count = Q.count()

@@ -18,7 +18,7 @@
     <script type="text/javascript">
         function linkshift(event, link) {
             if (event.ctrlKey==1 || event.shiftKey==1 || event.altKey==1) {
-                window.open(link);
+                window.location.assign(link);
                 return false;
             }
             else {

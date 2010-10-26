@@ -7,7 +7,7 @@
     <tr class="header">
         <th colspan="5">Rank</th>
         <th colspan="6">&nbsp;</th>
-        <th colspan="3">Growth</th>
+        <th class="center" colspan="3"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
     </tr>
     <tr class="header">
         <th>#</th>
@@ -23,18 +23,18 @@
         <th>Score</th>
         <th>XP</th>
         
-        <th>Size</th>
-        <th>Value</th>
-        <th>Score</th>
+        <th><a href="{% url "galaxies", "size_growth", page|default(1) %}" onclick="return linkshift(event, '{% url "galaxies", "size_growth_pc", page|default(1) %}');">Size</a></th>
+        <th><a href="{% url "galaxies", "value_growth", page|default(1) %}" onclick="return linkshift(event, '{% url "galaxies", "value_growth_pc", page|default(1) %}');">Value</a></th>
+        <th><a href="{% url "galaxies", "score_growth", page|default(1) %}" onclick="return linkshift(event, '{% url "galaxies", "score_growth_pc", page|default(1) %}');">Score</a></th>
         
     </tr>
-    {% for galaxy, gh in galaxies %}
+    {% for galaxy in galaxies %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td>{{ loop.index + offset }}</td>
-        <td align="right">{{ galaxy.score_rank }}{% if gh %} {{ galaxy.score_rank|growth_rank_image(gh.score_rank) }}{% endif %}</td>
-        <td align="right">{{ galaxy.value_rank }}{% if gh %} {{ galaxy.value_rank|growth_rank_image(gh.value_rank) }}{% endif %}</td>
-        <td align="right">{{ galaxy.size_rank }}{% if gh %} {{ galaxy.size_rank|growth_rank_image(gh.size_rank) }}{% endif %}</td>
-        <td align="right">{{ galaxy.xp_rank }}{% if gh %} {{ galaxy.xp_rank|growth_rank_image(gh.xp_rank) }}{% endif %}</td>
+        <td align="right">{{ galaxy|rank("score") }}</td>
+        <td align="right">{{ galaxy|rank("value") }}</td>
+        <td align="right">{{ galaxy|rank("size") }}</td>
+        <td align="right">{{ galaxy|rank("xp") }}</td>
         
         <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
         <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" href="{% url "galaxy", galaxy.x, galaxy.y %}">
@@ -45,9 +45,9 @@
         <td align="right">{{ galaxy.score|intcomma }}</td>
         <td align="right">{{ galaxy.xp|intcomma }}</td>
         
-        <td align="right">{% if gh %}{{ galaxy.size|growth_roid(gh.size) }}{% endif %}</td>
-        <td align="right">{% if gh %}{{ galaxy.value|growth(gh.value) }}{% endif %}</td>
-        <td align="right">{% if gh %}{{ galaxy.score|growth(gh.score) }}{% endif %}</td>
+        <td align="right">{{ galaxy|growth("size") }}</td>
+        <td align="right">{{ galaxy|growth("value") }}</td>
+        <td align="right">{{ galaxy|growth("score") }}</td>
         
     </tr>
     {% endfor %}
