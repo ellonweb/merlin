@@ -23,7 +23,7 @@ from sqlalchemy import and_
 from sqlalchemy.sql import asc
 from Core.config import Config
 from Core.db import session
-from Core.maps import Updates, Galaxy, GalaxyHistory, Planet, PlanetHistory, Alliance, AllianceHistory
+from Core.maps import Galaxy, Planet, Alliance
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
@@ -32,22 +32,17 @@ from Arthur.loadable import loadable, load
 class home(loadable):
     def execute(self, request, user):
         
-        tick = Updates.midnight_tick()
-        
-        Q = session.query(Planet, PlanetHistory)
-        Q = Q.outerjoin((PlanetHistory, and_(Planet.id == PlanetHistory.id, PlanetHistory.tick == tick)))
+        Q = session.query(Planet)
         Q = Q.filter(Planet.active == True)
         Q = Q.order_by(asc(Planet.score_rank))
         planets = Q[:20]
         
-        Q = session.query(Galaxy, GalaxyHistory)
-        Q = Q.outerjoin((GalaxyHistory, and_(Galaxy.id == GalaxyHistory.id, GalaxyHistory.tick == tick)))
+        Q = session.query(Galaxy)
         Q = Q.filter(Galaxy.active == True)
         Q = Q.order_by(asc(Galaxy.score_rank))
         galaxies = Q[:10]
         
-        Q = session.query(Alliance, AllianceHistory)
-        Q = Q.outerjoin((AllianceHistory, and_(Alliance.id == AllianceHistory.id, AllianceHistory.tick == tick)))
+        Q = session.query(Alliance)
         Q = Q.filter(Alliance.active == True)
         Q = Q.order_by(asc(Alliance.score_rank))
         alliances = Q[:8]

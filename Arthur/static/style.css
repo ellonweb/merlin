@@ -224,3 +224,11 @@ tr.unknown {
 .left {
 	text-align: left;
 }
+
+.growth_pc {
+	display: inline;
+}
+
+.growth_diff {
+	display: none;
+}

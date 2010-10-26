@@ -3,7 +3,7 @@
     <td width="33%" align="left">
     </td>
     <td width="34%" valign="middle" align="center">
-    {% if user.planet %}{% with planet = user.planet, ph = user.planet.history(night) %}
+    {% if user.planet %}{% with planet = user.planet %}
     
 <table cellspacing="0" cellpadding="1">
     <tr>
@@ -20,22 +20,22 @@
     <tr>
         <td width="33%" align="left">Size:</td>
         <td width="34%" align="center">{{ planet.size|intcomma }}</td>
-        <td width="33%" align="right">{{ planet.size_rank }}{% if ph %} {{ planet.size_rank|growth_rank_image(ph.size_rank) }}{% endif %}</td>
+        <td width="33%" align="right">{{ planet|rank("size") }}</td>
     </tr>
     <tr>
         <td width="33%" align="left">Value:</td>
         <td width="34%" align="center">{{ planet.value|intcomma }}</td>
-        <td width="33%" align="right">{{ planet.value_rank }}{% if ph %} {{ planet.value_rank|growth_rank_image(ph.value_rank) }}{% endif %}</td>
+        <td width="33%" align="right">{{ planet|rank("value") }}</td>
     </tr>
     <tr>
         <td width="33%" align="left">Score:</td>
         <td width="34%" align="center">{{ planet.score|intcomma }}</td>
-        <td width="33%" align="right">{{ planet.score_rank }}{% if ph %} {{ planet.score_rank|growth_rank_image(ph.score_rank) }}{% endif %}</td>
+        <td width="33%" align="right">{{ planet|rank("score") }}</td>
     </tr>
     <tr>
         <td width="33%" align="left">XP:</td>
         <td width="34%" align="center">{{ planet.xp|intcomma }}</td>
-        <td width="33%" align="right">{{ planet.xp_rank }}{% if ph %} {{ planet.xp_rank|growth_rank_image(ph.xp_rank) }}{% endif %}</td>
+        <td width="33%" align="right">{{ planet|rank("xp") }}</td>
     </tr>
 </table>
     {% endwith %}

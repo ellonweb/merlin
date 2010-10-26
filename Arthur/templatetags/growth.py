@@ -19,41 +19,30 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from django.contrib.humanize.templatetags.humanize import intcomma
+
 from Arthur.jinja import filter
 
 @filter
-def growth(present, past):
-    diff = present - past
-    ret = '<span class='
+def growth(object, attr):
+    word = " points" if attr[:4] != "size" else " roids"
+    diff = intcomma(getattr(object, attr+"_growth"))
+    pc = str(round(getattr(object, attr+"_growth_pc"),1)) + "%"
+    ret = '<div class="growth_%s"><span class='
     if diff < 0:
         ret += '"red"'
     elif diff > 0:
         ret += '"green"'
     else:
         ret += '"yellow"'
-    ret += ' title="' + str(diff) + ' points">'
-    ret += str(round((float(diff) / past * 100),1) if past else present)
-    ret += '%</span>'
+    ret += ' title="%s">%s</span></div>'
+    ret = ret*2 %("pc", diff+word, pc, "diff", pc, diff,)
     return ret
 
 @filter
-def growth_roid(present, past):
-    diff = present - past
-    ret = '<span class='
-    if diff < 0:
-        ret += '"red"'
-    elif diff > 0:
-        ret += '"green"'
-    else:
-        ret += '"yellow"'
-    ret += ' title="' + str(diff) + ' roids">'
-    ret += str(round((float(diff) / past * 100),1) if past else present)
-    ret += '%</span>'
-    return ret
-
-@filter
-def growth_members(present, past, all=False):
-    diff = present - past
+def members(object, all=False):
+    present = getattr(object, "members")
+    diff = getattr(object, "member_growth")
     ret = '<span class='
     if diff < 0:
         ret += '"red"'
@@ -71,9 +60,10 @@ def growth_members(present, past, all=False):
     return ret
 
 @filter
-def growth_rank_image(present, past):
-    diff = present - past
-    ret = '<img src='
+def rank(object, attr):
+    value = getattr(object, attr+"_rank")
+    diff = getattr(object, attr+"_rank_change")
+    ret = str(value) + ' <img src='
     if diff > 0:
         ret += '"/static/down.gif"'
     elif diff < 0:
