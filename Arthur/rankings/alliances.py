@@ -19,10 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.db import session
-from Core.maps import Updates, Alliance, AllianceHistory
+from Core.maps import Alliance
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
@@ -37,15 +36,20 @@ class alliances(loadable):
                   "avg_score" : (asc(Alliance.score_avg_rank),),
                   "avg_size"  : (asc(Alliance.size_avg_rank),),
                   "members"   : (asc(Alliance.members_rank),),
+                  "score_growth" : (desc(Alliance.score_growth),),
+                  "size_growth"  : (desc(Alliance.size_growth),),
+                  "avg_score_growth" : (desc(Alliance.score_avg_growth),),
+                  "avg_size_growth"  : (desc(Alliance.size_avg_growth),),
+                  "score_growth_pc" : (desc(Alliance.score_growth_pc),),
+                  "size_growth_pc"  : (desc(Alliance.size_growth_pc),),
+                  "avg_score_growth_pc" : (desc(Alliance.score_avg_growth_pc),),
+                  "avg_size_growth_pc"  : (desc(Alliance.size_avg_growth_pc),),
                   } 
         if sort not in order.keys():
             sort = "score"
         order = order.get(sort)
         
-        tick = Updates.midnight_tick()
-        
-        Q = session.query(Alliance, AllianceHistory)
-        Q = Q.outerjoin((AllianceHistory, and_(Alliance.id == AllianceHistory.id, AllianceHistory.tick == tick)))
+        Q = session.query(Alliance)
         Q = Q.filter(Alliance.active == True)
         
         count = Q.count()
