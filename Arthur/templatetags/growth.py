@@ -26,7 +26,7 @@ from Arthur.jinja import filter
 @filter
 def growth(object, attr):
     word = " points" if attr[:4] != "size" else " roids"
-    diff = intcomma(getattr(object, attr+"_growth"))
+    diff = getattr(object, attr+"_growth")
     pc = str(round(getattr(object, attr+"_growth_pc"),1)) + "%"
     ret = '<div class="growth_%s"><span class='
     if diff < 0:
@@ -36,7 +36,7 @@ def growth(object, attr):
     else:
         ret += '"yellow"'
     ret += ' title="%s">%s</span></div>'
-    ret = ret*2 %("pc", diff+word, pc, "diff", pc, diff,)
+    ret = ret*2 %("pc", intcomma(diff)+word, pc, "diff", pc, intcomma(diff),)
     return ret
 
 @filter
