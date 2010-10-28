@@ -25,7 +25,7 @@ from django.http import HttpResponseRedirect
 
 from Core.config import Config
 from Core.db import session
-from Core.maps import Updates, User
+from Core.maps import User
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 name = Config.get("Alliance", "name")
@@ -45,15 +45,9 @@ class dashboard(loadable):
         if dashuser is None:
             return HttpResponseRedirect(reverse("memberlist"))
         
-        if dashuser.planet is not None:
-            tick = Updates.midnight_tick()
-            ph = dashuser.planet.history(tick)
-        else:
-            ph = None
-        
         gimps = dashuser.gimps
         mums = dashuser.mums
         ships = dashuser.fleets.all()
         phonefriend = user == dashuser or user in dashuser.phonefriends
         
-        return render("dashboard.tpl", request, dashuser=dashuser, planet=dashuser.planet, ph=ph, gimps=gimps, mums=mums, ships=ships, phonefriend=phonefriend)
+        return render("dashboard.tpl", request, dashuser=dashuser, planet=dashuser.planet, gimps=gimps, mums=mums, ships=ships, phonefriend=phonefriend)

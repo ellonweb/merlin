@@ -5,4 +5,5 @@
 {% block intel_content %}<td>{%if nick %}{{ nick }}{% endif %}</td>{% endblock %}
 {% block xyz %}<a href="{% url "alliance", alliance.name, race|default("all"), "xyz", page|default(1) %}">{{ super() }}</a>{% endblock %}
 {% block sort %}<a href="{% url "alliance", alliance.name, race|default("all"), order|lower, page|default(1) %}">{{ order }}</a>{% endblock %}
+{% block sort_growth %}<a href="{% url "alliance", alliance.name, race|default("all"), order|lower + "_growth", page|default(1) %}" onclick="return linkshift(event, '{% url "alliance", alliance.name, race|default("all"), order|lower + "_growth_pc", page|default(1) %}');">{{ order }}</a>{% endblock %}
 {% block page %}{% url "alliance", alliance.name, race, sort, p %}{% endblock %}

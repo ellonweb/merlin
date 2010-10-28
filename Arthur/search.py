@@ -20,14 +20,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.http import HttpResponseRedirect
-from sqlalchemy import and_, or_
+from sqlalchemy import or_
 from sqlalchemy.sql import asc, desc
-from sqlalchemy.sql.functions import count
 
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Updates, Galaxy, Planet, PlanetHistory, Alliance, Intel
+from Core.maps import Galaxy, Planet, Alliance, Intel
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
@@ -36,22 +35,11 @@ from Arthur.loadable import loadable, load
 class search(loadable):
     def execute(self, request, user, params):
         
-        tick = Updates.midnight_tick()
-        
-        Q = session.query(Planet.x.label('x'), Planet.y.label('y'), count().label('planets'))
-        Q = Q.join(Planet.galaxy)
-        Q = Q.filter(Planet.active == True)
-        Q = Q.group_by(Planet.x, Planet.y)
-        Q = Q.order_by(desc(count()))
-        subQ = Q.subquery()
-        
-        Q = session.query(Planet, PlanetHistory, Intel.nick, Alliance.name)
+        Q = session.query(Planet, Intel.nick, Alliance.name)
         Q = Q.outerjoin(Planet.intel)
         Q = Q.outerjoin(Intel.alliance)
-        Q = Q.outerjoin((PlanetHistory, and_(Planet.id == PlanetHistory.id, PlanetHistory.tick == tick)))
         Q = Q.join(Planet.galaxy)
         Q = Q.filter(Planet.active == True)
-        Q = Q.filter(and_(subQ.c.x == Planet.x, subQ.c.y == Planet.y))
         
         page = 1
         
@@ -67,7 +55,7 @@ class search(loadable):
                     "idle" : Planet.idle,
                     "x" : Planet.x,
                     "y" : Planet.y,
-                    "planets" : subQ.c.planets,
+                    "planets" : Galaxy.members,
                     }
         
         rankfilts = {
@@ -79,6 +67,25 @@ class search(loadable):
                     "galvaluerank" : Galaxy.value_rank,
                     "galsizerank" : Galaxy.size_rank,
                     "galxprank" : Galaxy.xp_rank,
+                    }
+        
+        orders = {
+                    "score_growth" : Planet.score_growth,
+                    "value_growth" : Planet.value_growth,
+                    "size_growth"  : Planet.size_growth,
+                    "xp_growth"    : Planet.xp_growth,
+                    "score_growth_pc" : Planet.score_growth_pc,
+                    "value_growth_pc" : Planet.value_growth_pc,
+                    "size_growth_pc"  : Planet.size_growth_pc,
+                    "xp_growth_pc"    : Planet.xp_growth_pc,
+                    "galscore_growth" : Galaxy.score_growth,
+                    "galvalue_growth" : Galaxy.value_growth,
+                    "galsize_growth"  : Galaxy.size_growth,
+                    "galxp_growth"    : Galaxy.xp_growth,
+                    "galscore_growth_pc" : Galaxy.score_growth_pc,
+                    "galvalue_growth_pc" : Galaxy.value_growth_pc,
+                    "galsize_growth_pc"  : Galaxy.size_growth_pc,
+                    "galxp_growth_pc"    : Galaxy.xp_growth_pc,
                     }
         
         wordfilts = {
@@ -134,6 +141,8 @@ class search(loadable):
                         Q = Q.order_by(f(filters[sort[1:]]))
                     elif sort[1:] in rankfilts:
                         Q = Q.order_by(f(rankfilts[sort[1:]]))
+                    elif sort[1:] in orders:
+                        Q = Q.order_by(f(orders[sort[1:]]))
                     else:
                         continue
             if arg == "page" and val.isdigit():

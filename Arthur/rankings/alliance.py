@@ -21,12 +21,11 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Updates, Alliance, Planet, PlanetHistory, Alliance, Intel
+from Core.maps import Alliance, Planet, Alliance, Intel
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
@@ -42,21 +41,26 @@ class alliance(loadable):
                   "xp"    : (asc(Planet.xp_rank),),
                   "race"  : (asc(Planet.race), asc(Planet.size_rank),),
                   "xyz"   : (asc(Planet.x), asc(Planet.y), asc(Planet.z),),
+                  "score_growth" : (desc(Planet.score_growth),),
+                  "value_growth" : (desc(Planet.value_growth),),
+                  "size_growth"  : (desc(Planet.size_growth),),
+                  "xp_growth"    : (desc(Planet.xp_growth),),
+                  "score_growth_pc" : (desc(Planet.score_growth_pc),),
+                  "value_growth_pc" : (desc(Planet.value_growth_pc),),
+                  "size_growth_pc"  : (desc(Planet.size_growth_pc),),
+                  "xp_growth_pc"    : (desc(Planet.xp_growth_pc),),
                   }
         if sort not in order.keys():
             sort = "score"
         order = order.get(sort)
         
-        tick = Updates.midnight_tick()
-        
         alliance = Alliance.load(name)
         if alliance is None:
             return HttpResponseRedirect(reverse("alliance_ranks"))
         
-        Q = session.query(Planet, PlanetHistory, Intel.nick, Alliance.name)
+        Q = session.query(Planet, Intel.nick, Alliance.name)
         Q = Q.join(Planet.intel)
         Q = Q.join(Intel.alliance)
-        Q = Q.outerjoin((PlanetHistory, and_(Planet.id == PlanetHistory.id, PlanetHistory.tick == tick)))
         Q = Q.filter(Planet.active == True)
         Q = Q.filter(Intel.alliance == alliance)
         

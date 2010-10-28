@@ -19,11 +19,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Updates, Planet, PlanetHistory, Alliance, Intel
+from Core.maps import Planet, Alliance, Intel
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
@@ -38,17 +37,22 @@ class planets(loadable):
                   "size"  : (asc(Planet.size_rank),),
                   "xp"    : (asc(Planet.xp_rank),),
                   "race"  : (asc(Planet.race), asc(Planet.size_rank),),
+                  "score_growth" : (desc(Planet.score_growth),),
+                  "value_growth" : (desc(Planet.value_growth),),
+                  "size_growth"  : (desc(Planet.size_growth),),
+                  "xp_growth"    : (desc(Planet.xp_growth),),
+                  "score_growth_pc" : (desc(Planet.score_growth_pc),),
+                  "value_growth_pc" : (desc(Planet.value_growth_pc),),
+                  "size_growth_pc"  : (desc(Planet.size_growth_pc),),
+                  "xp_growth_pc"    : (desc(Planet.xp_growth_pc),),
                   }
         if sort not in order.keys():
             sort = "score"
         order = order.get(sort)
         
-        tick = Updates.midnight_tick()
-        
-        Q = session.query(Planet, PlanetHistory, Intel.nick, Alliance.name)
+        Q = session.query(Planet, Intel.nick, Alliance.name)
         Q = Q.outerjoin(Planet.intel)
         Q = Q.outerjoin(Intel.alliance)
-        Q = Q.outerjoin((PlanetHistory, and_(Planet.id == PlanetHistory.id, PlanetHistory.tick == tick)))
         Q = Q.filter(Planet.active == True)
         
         if race.lower() in PA.options("races"):
