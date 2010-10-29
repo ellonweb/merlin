@@ -46,5 +46,5 @@ def server_error(request):
 
 class exceptions(object):
     def process_exception(self, request, exception):
-        arthurlog("%s - Arthur Error: %s\n" % (time.asctime(),str(exception),))
+        arthurlog("%s - Arthur Error: %s\n%s\n" % (time.asctime(),str(exception),request.get_full_path(),))
         return server_error(request)
