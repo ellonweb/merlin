@@ -20,7 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from sqlalchemy import and_
-from sqlalchemy.sql import asc
+from sqlalchemy.sql import asc, desc
 from Core.config import Config
 from Core.db import session
 from Core.maps import Galaxy, Planet, Alliance
@@ -32,23 +32,36 @@ from Arthur.loadable import loadable, load
 class home(loadable):
     def execute(self, request, user):
         
-        Q = session.query(Planet)
-        Q = Q.filter(Planet.active == True)
-        Q = Q.order_by(asc(Planet.score_rank))
-        planets = Q[:20]
+        planet, galaxy = (user.planet, user.planet.galaxy,) if user.planet else (Planet(), Galaxy(),)
         
-        Q = session.query(Galaxy)
-        Q = Q.filter(Galaxy.active == True)
-        Q = Q.order_by(asc(Galaxy.score_rank))
-        galaxies = Q[:10]
+        planets = session.query(Planet).filter(Planet.active == True)
+        galaxies = session.query(Galaxy).filter(Galaxy.active == True)
+        alliances = session.query(Alliance).filter(Alliance.active == True)
         
-        Q = session.query(Alliance)
-        Q = Q.filter(Alliance.active == True)
-        Q = Q.order_by(asc(Alliance.score_rank))
-        alliances = Q[:8]
+        dup = lambda l,o,c=True: l+[o] if o in session and c and o not in l else l
         
         return render("index.tpl", request,
-                                    topplanets=planets,
-                                    topgalaxies=galaxies,
-                                    topalliances = alliances,
+                     topplanets = dup(planets.order_by(asc(Planet.score_rank))[:20], 
+                                      planet),
+                 roidingplanets = dup(planets.filter(Planet.size_growth > 0).order_by(desc(Planet.size_growth))[:5],
+                                      planet, planet.size_growth > 0),
+                  roidedplanets = dup(planets.filter(Planet.size_growth < 0).order_by(asc(Planet.size_growth))[:5],
+                                      planet, planet.size_growth < 0),
+                      xpplanets = dup(planets.filter(Planet.xp_growth > 0).order_by(desc(Planet.xp_growth))[:5],
+                                      planet, planet.xp_growth > 0),
+                  bashedplanets = dup(planets.filter(Planet.value_growth < 0).order_by(asc(Planet.value_growth))[:5],
+                                      planet, planet.value_growth < 0),
+                
+                    topgalaxies = dup(galaxies.order_by(asc(Galaxy.score_rank))[:10],
+                                      galaxy),
+                roidinggalaxies = dup(galaxies.filter(Galaxy.size_growth > 0).order_by(desc(Galaxy.size_growth))[:5],
+                                      galaxy, galaxy.size_growth > 0),
+                 roidedgalaxies = dup(galaxies.filter(Galaxy.size_growth < 0).order_by(asc(Galaxy.size_growth))[:5],
+                                      galaxy, galaxy.size_growth < 0),
+                     xpgalaxies = dup(galaxies.filter(Galaxy.xp_growth > 0).order_by(desc(Galaxy.xp_growth))[:5],
+                                      galaxy, galaxy.xp_growth > 0),
+                 bashedgalaxies = dup(galaxies.filter(Galaxy.value_growth < 0).order_by(asc(Galaxy.value_growth))[:5],
+                                      galaxy, galaxy.value_growth < 0),
+                
+                   topalliances =     alliances.order_by(asc(Alliance.score_rank))[:8],
                             )

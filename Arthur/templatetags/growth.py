@@ -40,6 +40,22 @@ def growth(object, attr):
     return ret
 
 @filter
+def absgrowth(object, attr):
+    present = getattr(object, attr)
+    diff = getattr(object, attr+"_growth")
+    pc = str(round(getattr(object, attr+"_growth_pc"),1)) + "%"
+    ret = '%s (<span class='
+    if diff < 0:
+        ret += '"red"'
+    elif diff > 0:
+        ret += '"green"'
+    else:
+        ret += '"yellow"'
+    ret += ' title="%s">%s</span>)'
+    ret = ret %(intcomma(present), pc, intcomma(diff),)
+    return ret
+
+@filter
 def members(object, all=False):
     present = getattr(object, "members")
     diff = getattr(object, "member_growth")
