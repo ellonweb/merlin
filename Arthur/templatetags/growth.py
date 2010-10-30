@@ -26,8 +26,8 @@ from Arthur.jinja import filter
 @filter
 def growth(object, attr):
     word = " points" if attr[:4] != "size" else " roids"
-    diff = getattr(object, attr+"_growth")
-    pc = str(round(getattr(object, attr+"_growth_pc"),1)) + "%"
+    diff = getattr(object, attr+"_growth") or 0
+    pc = str(round(getattr(object, attr+"_growth_pc") or 0,1)) + "%"
     ret = '<div class="growth_%s"><span class='
     if diff < 0:
         ret += '"red"'
@@ -42,8 +42,8 @@ def growth(object, attr):
 @filter
 def absgrowth(object, attr):
     present = getattr(object, attr)
-    diff = getattr(object, attr+"_growth")
-    pc = str(round(getattr(object, attr+"_growth_pc"),1)) + "%"
+    diff = getattr(object, attr+"_growth") or 0
+    pc = str(round(getattr(object, attr+"_growth_pc") or 0,1)) + "%"
     ret = '%s (<span class='
     if diff < 0:
         ret += '"red"'
@@ -58,7 +58,7 @@ def absgrowth(object, attr):
 @filter
 def members(object, all=False):
     present = getattr(object, "members")
-    diff = getattr(object, "member_growth")
+    diff = getattr(object, "member_growth") or 0
     ret = '<span class='
     if diff < 0:
         ret += '"red"'
@@ -78,7 +78,7 @@ def members(object, all=False):
 @filter
 def rank(object, attr):
     value = getattr(object, attr+"_rank")
-    diff = getattr(object, attr+"_rank_change")
+    diff = getattr(object, attr+"_rank_change") or 0
     ret = str(value) + ' <img src='
     if diff > 0:
         ret += '"/static/down.gif"'
