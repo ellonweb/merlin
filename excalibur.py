@@ -183,6 +183,7 @@ while True:
         session.execute(text("""UPDATE galaxy SET
                                   active = :false,
                                   name = NULL, size = NULL, score = NULL, value = NULL, xp = NULL,
+                                  ratio = NULL,
                                   members = NULL, member_growth = NULL,
                                   size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
                                   size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
@@ -217,6 +218,7 @@ while True:
         session.execute(text("""UPDATE galaxy AS g SET
                                   x = t.x, y = t.y,
                                   name = t.name, size = t.size, score = t.score, value = t.value, xp = t.xp,
+                                  ratio = 10000.0 * t.size / t.value,
                                   members = p.count,
                              """ + (
                              """
@@ -366,6 +368,7 @@ while True:
         session.execute(text("""UPDATE planet SET
                                   active = :false,
                                   size = NULL, score = NULL, value = NULL, xp = NULL,
+                                  ratio = NULL,
                                   size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
                                   size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
                                   size_rank_change = NULL, score_rank_change = NULL, value_rank_change = NULL, xp_rank_change = NULL,
@@ -390,6 +393,7 @@ while True:
                                   x = t.x, y = t.y, z = t.z,
                                   planetname = t.planetname, rulername = t.rulername, race = t.race,
                                   size = t.size, score = t.score, value = t.value, xp = t.xp,
+                                  ratio = 10000.0 * t.size / t.value,
                              """ + (
                              """
                                   size_growth = t.size - COALESCE(p.size - p.size_growth, 0),
