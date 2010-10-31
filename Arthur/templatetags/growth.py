@@ -20,7 +20,10 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.contrib.humanize.templatetags.humanize import intcomma
+from jinja2 import contextfilter
 
+from Core.paconf import PA
+from Core.maps import Planet
 from Arthur.jinja import filter
 
 @filter
@@ -40,8 +43,9 @@ def growth(object, attr):
     return ret
 
 @filter
-def absgrowth(object, attr):
-    present = getattr(object, attr)
+@contextfilter
+def absgrowth(context, object, attr):
+    present = bashcap(context, object, attr)
     diff = getattr(object, attr+"_growth") or 0
     pc = str(round(getattr(object, attr+"_growth_pc") or 0,1)) + "%"
     ret = '%s (<span class='
@@ -52,8 +56,35 @@ def absgrowth(object, attr):
     else:
         ret += '"yellow"'
     ret += ' title="%s">%s</span>)'
-    ret = ret %(intcomma(present), pc, intcomma(diff),)
+    ret = ret %(present, pc, intcomma(diff),)
     return ret
+
+@filter
+@contextfilter
+def bashcap(context, target, attr):
+    present = getattr(target, attr)
+    if not isinstance(target, Planet) or attr not in ("value","score","size",):
+        return intcomma(present)
+    attacker = context['user'].planet
+    if not attacker:
+        return intcomma(present)
+    
+    if attr == "size":
+        ret = '<span title="%s XP/roid * %s roids (%s%%) = %s XP">%s</span>'
+        return ret %(round(attacker.bravery(target),2),
+                     target.maxcap(attacker),
+                     round(target.caprate(attacker),2),
+                     intcomma(attacker.calc_xp(target)),
+                     intcomma(present),
+                     )
+    else:
+        ret = '<span class="%s" title="%s%%">%s</span>'
+        limit = PA.getfloat("bash", attr)
+        fraction = 1.0 * present / getattr(attacker, attr)
+        return ret %("white" if fraction >= limit else "orange",
+                     round(fraction*100,2),
+                     intcomma(present),
+                     )
 
 @filter
 def members(object, all=False):

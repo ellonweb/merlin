@@ -73,9 +73,9 @@
                 {{ planet.planetname }}
         </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
-        <td align="right">{{ planet.size|intcomma }}</td>
-        <td align="right">{{ planet.value|intcomma }}</td>
-        <td align="right">{{ planet.score|intcomma }}</td>
+        <td align="right">{{ planet|bashcap("size") }}</td>
+        <td align="right">{{ planet|bashcap("value") }}</td>
+        <td align="right">{{ planet|bashcap("score") }}</td>
         <td align="right">{{ planet.xp|intcomma }}</td>
         
         <td align="right">{{ planet|growth("size") }}</td>

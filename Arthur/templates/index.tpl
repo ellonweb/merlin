@@ -22,8 +22,8 @@
                 {{ planet.planetname }}
         </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
-        <td align="right">{{ planet.size|intcomma }}</td>
-        <td align="right">{{ planet.score|intcomma }}</td>
+        <td align="right">{{ planet|bashcap("size") }}</td>
+        <td align="right">{{ planet|bashcap("score") }}</td>
         <td align="right">{{ planet|growth("size") }}</td>
         <td align="right">{{ planet|growth("score") }}</td>
             </tr>
@@ -110,8 +110,8 @@
         </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
         <td align="right">{{ planet|absgrowth("size") }}</td>
-        <td align="right">{{ planet.value|intcomma }}</td>
-        <td align="right">{{ planet.score|intcomma }}</td>
+        <td align="right">{{ planet|bashcap("value") }}</td>
+        <td align="right">{{ planet|bashcap("score") }}</td>
             </tr>
             {% endfor %}
         </table>
@@ -165,8 +165,8 @@
         </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
         <td align="right">{{ planet|absgrowth("size") }}</td>
-        <td align="right">{{ planet.value|intcomma }}</td>
-        <td align="right">{{ planet.score|intcomma }}</td>
+        <td align="right">{{ planet|bashcap("value") }}</td>
+        <td align="right">{{ planet|bashcap("score") }}</td>
             </tr>
             {% endfor %}
         </table>
@@ -220,8 +220,8 @@
         </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
         <td align="right">{{ planet|absgrowth("xp") }}</td>
-        <td align="right">{{ planet.size|intcomma }}</td>
-        <td align="right">{{ planet.score|intcomma }}</td>
+        <td align="right">{{ planet|bashcap("size") }}</td>
+        <td align="right">{{ planet|bashcap("score") }}</td>
             </tr>
             {% endfor %}
         </table>
@@ -274,9 +274,9 @@
                 {{ planet.planetname }}
         </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
-        <td align="right">{{ planet.size|intcomma }}</td>
+        <td align="right">{{ planet|bashcap("size") }}</td>
         <td align="right">{{ planet|absgrowth("value") }}</td>
-        <td align="right">{{ planet.score|intcomma }}</td>
+        <td align="right">{{ planet|bashcap("score") }}</td>
             </tr>
             {% endfor %}
         </table>
