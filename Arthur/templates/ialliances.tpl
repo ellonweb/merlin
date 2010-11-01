@@ -46,7 +46,7 @@
         
         <td align="right">{{ size|intcomma }}</td>
         <td align="right">{{ value|intcomma }}</td>
-        <td align="right">{{ score|intcomma }}</td>
+        <td align="right" class="datahigh">{{ score|intcomma }}</td>
         
         <td align="right">{{ t10s }}</td>
         <td align="right">{{ t50s }}</td>

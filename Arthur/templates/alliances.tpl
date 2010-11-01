@@ -44,7 +44,7 @@
         <td align="right">{{ alliance.size_avg|intcomma }}</td>
         <td align="right">{{ alliance.score_avg|intcomma }}</td>
         <td align="right">{{ alliance.size|intcomma }}</td>
-        <td align="right">{{ alliance.score|intcomma }}</td>
+        <td align="right" class="datahigh">{{ alliance.score|intcomma }}</td>
         
         <td align="right">{{ alliance|growth("size_avg") }}</td>
         <td align="right">{{ alliance|growth("score_avg") }}</td>

@@ -42,7 +42,7 @@
         </a></td>
         <td align="right">{{ galaxy.size|intcomma }}</td>
         <td align="right">{{ galaxy.value|intcomma }}</td>
-        <td align="right">{{ galaxy.score|intcomma }}</td>
+        <td align="right" class="datahigh">{{ galaxy.score|intcomma }}</td>
         <td align="right">{{ galaxy.xp|intcomma }}</td>
         
         <td align="right">{{ galaxy|growth("size") }}</td>
