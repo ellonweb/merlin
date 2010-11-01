@@ -65,7 +65,6 @@ from Arthur.overview import home
 
 @menu(name,          "Intel",       suffix = name)
 @menu("Planetarion", "BCalc",       suffix = "bcalc")
-@menu("Planetarion", "Sandmans",    suffix = "sandmans")
 @menu("Planetarion", "Forums",      suffix = "forums")
 @menu("Planetarion", "Game",        suffix = "game")
 @load
