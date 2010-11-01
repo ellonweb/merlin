@@ -36,6 +36,7 @@ class planets(loadable):
                   "value" : (asc(Planet.value_rank),),
                   "size"  : (asc(Planet.size_rank),),
                   "xp"    : (asc(Planet.xp_rank),),
+                  "ratio" : (desc(Planet.ratio),),
                   "race"  : (asc(Planet.race), asc(Planet.size_rank),),
                   "score_growth" : (desc(Planet.score_growth),),
                   "value_growth" : (desc(Planet.value_growth),),

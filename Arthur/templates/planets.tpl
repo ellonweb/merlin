@@ -1,5 +1,5 @@
 {% extends "base.tpl" %}
-{% set cols = 15 %}
+{% set cols = 16 %}
 {% if page %}{% set cols = cols + 1 %}{% endif %}
 {% if user|intel %}{% set cols = cols + 2 %}{% endif %}
 {% if planet and not planets %}{% set planets = ((planet, planet.intel.nick, None,),) %}{% endif %}
@@ -13,7 +13,7 @@
     <tr class="header">
         {% if page %}<th></th>{% endif %}
         <th colspan="4">Rank</th>
-        <th colspan="8">&nbsp;</th>
+        <th colspan="9">&nbsp;</th>
         <th class="center" colspan="3"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
         {% block intel_head %}
         {% if user|intel %}
@@ -33,7 +33,7 @@
         
         <th>Ruler</th>
         <th>Planet</th>
-        {% for order, width in (("Race",0), ("Size",0,), ("Value",0,), ("Score",0,), ("XP",0,),) -%}
+        {% for order, width in (("Race",0), ("Size",0,), ("Value",0,), ("Score",0,), ("Ratio",0,), ("XP",0,),) -%}
         <th width="{{ width }}">
             {%- block sort scoped -%}
                 <a href="{% url "planets", race|default("all"), order|lower, page|default(1) %}">{{ order }}</a>
@@ -79,6 +79,7 @@
         <td align="right">{{ planet|bashcap("size") }}</td>
         <td align="right">{{ planet|bashcap("value") }}</td>
         <td align="right" class="datahigh">{{ planet|bashcap("score") }}</td>
+        <td align="right">{{ planet.ratio|round(1) }}</td>
         <td align="right">{{ planet.xp|intcomma }}</td>
         
         <td align="right">{{ planet|growth("size") }}</td>
@@ -96,7 +97,7 @@
     
     {% if pages %}
     <tr class="datahigh">
-        <td colspan="20">Pages:{% for p in pages %} {% if p != page %}<a href="
+        <td colspan="{{cols}}">Pages:{% for p in pages %} {% if p != page %}<a href="
             {%- block page scoped %}{% url "planets", race, sort p %}{% endblock -%}
             ">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}{% endfor %}</td>
     </tr>
@@ -104,7 +105,7 @@
     
     {% if galaxy %}
     <tr class="header">
-        <td colspan="19" height="6"/>
+        <td colspan="{{cols}}" height="6"/>
     </tr>
     <tr class="datahigh">
         <td align="right">{{ galaxy|rank("score") }}</td>

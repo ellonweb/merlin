@@ -2,11 +2,11 @@
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="100%" class="black">
     <tr class="datahigh">
-        <th colspan="14">Galaxy listing</th>
+        <th colspan="16">Galaxy listing</th>
     </tr>
     <tr class="header">
         <th colspan="5">Rank</th>
-        <th colspan="6">&nbsp;</th>
+        <th colspan="8">&nbsp;</th>
         <th class="center" colspan="3"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
     </tr>
     <tr class="header">
@@ -21,6 +21,8 @@
         <th>Size</th>
         <th>Value</th>
         <th>Score</th>
+        <th>Plan</th>
+        <th>Ratio</th>
         <th>XP</th>
         
         <th><a href="{% url "galaxies", "size_growth", page|default(1) %}" onclick="return linkshift(event, '{% url "galaxies", "size_growth_pc", page|default(1) %}');">Size</a></th>
@@ -43,6 +45,8 @@
         <td align="right">{{ galaxy.size|intcomma }}</td>
         <td align="right">{{ galaxy.value|intcomma }}</td>
         <td align="right" class="datahigh">{{ galaxy.score|intcomma }}</td>
+        <td align="right">{{ galaxy|members }}</td>
+        <td align="right">{{ galaxy.ratio|round(1) }}</td>
         <td align="right">{{ galaxy.xp|intcomma }}</td>
         
         <td align="right">{{ galaxy|growth("size") }}</td>
@@ -54,7 +58,7 @@
     
     {% if pages %}
     <tr class="datahigh">
-        <td colspan="15">Pages:{% for p in pages %} {% if p != page %}<a href="{% url "galaxies", sort, p %}">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}{% endfor %}</td>
+        <td colspan="16">Pages:{% for p in pages %} {% if p != page %}<a href="{% url "galaxies", sort, p %}">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}{% endfor %}</td>
     </tr>
     {% endif %}
     
