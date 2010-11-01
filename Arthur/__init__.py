@@ -47,6 +47,7 @@ urlpatterns = patterns('',
     (r'', include('Arthur.attack')),
     (r'^scans/', include('Arthur.scans')),
     (r'^(?:scans/)?request/', include('Arthur.scans.request')),
+    (r'^search/$', 'Arthur.search.search'),
     (r'^search/(?P<params>.*)/$', 'Arthur.search.search'),
 )
 
