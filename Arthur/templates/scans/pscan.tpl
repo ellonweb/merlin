@@ -1,6 +1,10 @@
 <table cellspacing="1" cellpadding="3" width="500" class="black">
 {% with planet = scan.planet, pscan = scan.planetscan %}
+<tr class="datahigh">
+    <th colspan="4">
     {% include "scans/header.tpl" %}
+      </th>
+</tr>
     
     <tr class="header right">
         <td> Ruler </td>

@@ -1,6 +1,10 @@
 <table cellspacing="1" cellpadding="3" width="700" class="black">
 {% with planet = scan.planet %}
+<tr class="datahigh">
+    <th colspan="6">
     {% include "scans/header.tpl" %}
+      </th>
+</tr>
     
     <tr class="header">
         <th width="8%">Target</th>

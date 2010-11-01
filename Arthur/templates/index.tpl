@@ -11,7 +11,7 @@
                 <th class="center" colspan="2"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
             </tr>
             {% for planet in topplanets %}
-{% if loop.index > 20 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
+{% if loop.index > 20 %}<tr class="header"><td colspan="8"></td></tr>{% endif %}
     <tr class="{% if planet == user.planet %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ planet|rank("score") }}</td>
         <td align="right">
@@ -40,7 +40,7 @@
                 <th class="center" colspan="2"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
             </tr>
             {% for galaxy in topgalaxies %}
-{% if loop.index > 10 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
+{% if loop.index > 10 %}<tr class="header"><td colspan="7"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy|rank("score") }}</td>
         <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
@@ -87,7 +87,7 @@
         </table>
     </center></td>
 </tr>
-<tr><td colspan="0"><center>&nbsp;</center></td></tr>
+<tr><td colspan="2"><center>&nbsp;</center></td></tr>
 <tr>
     <td width="50%" valign="top"><center>
         <table width="100%" cellspacing="1" cellpadding="3" class="black">
@@ -98,7 +98,7 @@
                 <th class="right">Score</th>
             </tr>
             {% for planet in roidingplanets %}
-{% if loop.index > 5 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
+{% if loop.index > 5 %}<tr class="header"><td colspan="7"></td></tr>{% endif %}
     <tr class="{% if planet == user.planet %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ planet|rank("score") }}</td>
         <td align="right">
@@ -126,7 +126,7 @@
                 <th class="right">Score</th>
             </tr>
             {% for galaxy in roidinggalaxies %}
-{% if loop.index > 5 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
+{% if loop.index > 5 %}<tr class="header"><td colspan="6"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy|rank("score") }}</td>
         <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
@@ -142,7 +142,7 @@
     </center></td>
 
 </tr>
-<tr><td colspan="0"><center>&nbsp;</center></td></tr>
+<tr><td colspan="2"><center>&nbsp;</center></td></tr>
 <tr>
     <td width="50%" valign="top"><center>
         <table width="100%" cellspacing="1" cellpadding="3" class="black">
@@ -153,7 +153,7 @@
                 <th class="right">Score</th>
             </tr>
             {% for planet in roidedplanets %}
-{% if loop.index > 5 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
+{% if loop.index > 5 %}<tr class="header"><td colspan="7"></td></tr>{% endif %}
     <tr class="{% if planet == user.planet %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ planet|rank("score") }}</td>
         <td align="right">
@@ -181,7 +181,7 @@
                 <th class="right">Score</th>
             </tr>
             {% for galaxy in roidedgalaxies %}
-{% if loop.index > 5 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
+{% if loop.index > 5 %}<tr class="header"><td colspan="6"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy|rank("score") }}</td>
         <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
@@ -197,7 +197,7 @@
     </center></td>
 
 </tr>
-<tr><td colspan="0"><center>&nbsp;</center></td></tr>
+<tr><td colspan="2"><center>&nbsp;</center></td></tr>
 <tr>
     <td width="50%" valign="top"><center>
         <table width="100%" cellspacing="1" cellpadding="3" class="black">
@@ -208,7 +208,7 @@
                 <th class="right">Score</th>
             </tr>
             {% for planet in xpplanets %}
-{% if loop.index > 5 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
+{% if loop.index > 5 %}<tr class="header"><td colspan="7"></td></tr>{% endif %}
     <tr class="{% if planet == user.planet %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ planet|rank("score") }}</td>
         <td align="right">
@@ -236,7 +236,7 @@
                 <th class="right">Score</th>
             </tr>
             {% for galaxy in xpgalaxies %}
-{% if loop.index > 5 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
+{% if loop.index > 5 %}<tr class="header"><td colspan="6"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy|rank("score") }}</td>
         <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
@@ -252,7 +252,7 @@
     </center></td>
 
 </tr>
-<tr><td colspan="0"><center>&nbsp;</center></td></tr>
+<tr><td colspan="2"><center>&nbsp;</center></td></tr>
 <tr>
     <td width="50%" valign="top"><center>
         <table width="100%" cellspacing="1" cellpadding="3" class="black">
@@ -263,7 +263,7 @@
                 <th class="right">Score</th>
             </tr>
             {% for planet in bashedplanets %}
-{% if loop.index > 5 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
+{% if loop.index > 5 %}<tr class="header"><td colspan="7"></td></tr>{% endif %}
     <tr class="{% if planet == user.planet %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ planet|rank("score") }}</td>
         <td align="right">
@@ -291,7 +291,7 @@
                 <th class="right">Score</th>
             </tr>
             {% for galaxy in bashedgalaxies %}
-{% if loop.index > 5 %}<tr class="header"><td colspan="0"></td></tr>{% endif %}
+{% if loop.index > 5 %}<tr class="header"><td colspan="6"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy|rank("score") }}</td>
         <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>

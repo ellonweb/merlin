@@ -2,7 +2,7 @@
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="100%" class="black">
     <tr class="datahigh">
-        <th colspan="0">Alliance listing</th>
+        <th colspan="15">Alliance listing</th>
     </tr>
     <tr class="header">
         <th colspan="5">Rank</th>

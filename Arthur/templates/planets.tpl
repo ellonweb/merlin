@@ -1,9 +1,12 @@
 {% extends "base.tpl" %}
+{% set cols = 15 %}
+{% if page %}{% set cols = cols + 1 %}{% endif %}
+{% if user|intel %}{% set cols = cols + 2 %}{% endif %}
 {% if planet and not planets %}{% set planets = ((planet, planet.intel.nick, None,),) %}{% endif %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="100%" class="black">
     <tr class="datahigh">
-        <th colspan="0">
+        <th colspan="{{cols}}">
             {% block title %}Planet listing{% endblock %}
         </th>
     </tr>

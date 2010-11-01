@@ -1,6 +1,10 @@
 <table cellspacing="1" cellpadding="3" width="500" class="black">
 {% with planet = scan.planet, dscan = scan.devscan %}
+<tr class="datahigh">
+    <th colspan="4">
     {% include "scans/header.tpl" %}
+      </th>
+</tr>
     
     <tr class="header center"><td colspan="4"> Constructions: ({{ dscan.total }} total) </td></tr>
     <tr class="odd">
