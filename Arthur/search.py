@@ -146,6 +146,13 @@ class search(loadable):
                 elif one and two:
                     search += "%s:%s|%s/" %(filt,one,two,)
             
+            races = []
+            for race in PA.options("races"):
+                if (r.get(race) or "").strip():
+                    races.append(race)
+            if len(races) != len(PA.options("races")):
+                search += "race:%s/" %("|".join(races),)
+            
             if (r.get("bash") or "").strip():
                 search += "bash/"
             
