@@ -274,18 +274,16 @@ class search(loadable):
             orders.append((desc, "score",))
         if len(orders) < 2:
             orders.append((desc, "score",))
+        search["order1"] = orders[0][1]
+        search["order1o"] = orders[0][0].__name__
+        search["order2"] = orders[1][1]
+        search["order2o"] = orders[1][0].__name__
         for d, os in orders:
             if type(os) is tuple:
                 for o in order[os]:
                     Q = Q.order_by(d(o))
             else:
                 Q = Q.order_by(d(order[os]))
-            if not search["order1"]:
-                search["order1"] = os
-                search["order1o"] = d.__name__
-            elif not search["order2"]:
-                search["order2"] = os
-                search["order2o"] = d.__name__
         
         count = Q.count()
         pages = count/50 + int(count%50 > 0)
