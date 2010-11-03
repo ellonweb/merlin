@@ -279,7 +279,7 @@ class search(loadable):
         search["order2"] = orders[1][1]
         search["order2o"] = orders[1][0].__name__
         for d, os in orders:
-            if type(os) is tuple:
+            if type(order[os]) is tuple:
                 for o in order[os]:
                     Q = Q.order_by(d(o))
             else:
