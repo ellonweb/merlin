@@ -373,6 +373,7 @@ while True:
                                   size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
                                   size_rank_change = NULL, score_rank_change = NULL, value_rank_change = NULL, xp_rank_change = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL,
+                                  totalroundroids = NULL, totallostroids = NULL, ticksroiding = NULL, ticksroided = NULL, tickroids = NULL, avroids = NULL,
                                   vdiff = NULL, idle = NULL
                                 WHERE id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[false]))
@@ -390,6 +391,7 @@ while True:
         # Update everything from the temp table and generate ranks
         # Deactivated items are untouched but NULLed earlier
         session.execute(text("""UPDATE planet AS p SET
+                                  age = p.age + 1,
                                   x = t.x, y = t.y, z = t.z,
                                   planetname = t.planetname, rulername = t.rulername, race = t.race,
                                   size = t.size, score = t.score, value = t.value, xp = t.xp,
@@ -426,6 +428,12 @@ while True:
                              """ ) +
                              """
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank,
+                                  totalroundroids = COALESCE(p.totalroundroids + (GREATEST(t.size - p.size, 0)), 0),
+                                  totallostroids = COALESCE(p.totallostroids + (GREATEST(p.size - t.size, 0)), 0),
+                                  ticksroiding = COALESCE(p.ticksroiding, 0) + CASE WHEN (t.size > p.size AND (t.size - p.size) != (t.xp - p.xp)) THEN 1 ELSE 0 END,
+                                  ticksroided = COALESCE(p.ticksroided, 0) + CASE WHEN (t.size < p.size) THEN 1 ELSE 0 END,
+                                  tickroids = COALESCE(p.tickroids, 0) + t.size,
+                                  avroids = COALESCE((p.tickroids + t.size) / (p.age + 1), t.size),
                                   vdiff = t.value - p.value,
                                   idle = COALESCE(1 + (SELECT p.idle WHERE (t.value-p.value) BETWEEN (p.vdiff-1) AND (p.vdiff+1) AND (p.xp-t.xp=0) ), 0)
                                 FROM (SELECT *,
