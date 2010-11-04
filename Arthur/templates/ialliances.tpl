@@ -38,25 +38,25 @@
         <td><a class="{% if user|intel and aname == name %}myplanet{% else %}gray{% endif %}" href="{% url "alliance_members", aname %}">
             {{ aname }}
         </a></td>
-        <td align="right">{{ imembers }} ({{ members }})</td>
+        <td align="right"{%if sort=="members"%} class="datahigh"{%endif%}>{{ imembers }} ({{ members }})</td>
         
-        <td align="right">{{ asize|intcomma }}</td>
-        <td align="right">{{ avalue|intcomma }}</td>
-        <td align="right">{{ ascore|intcomma }}</td>
+        <td align="right"{%if sort=="avg_size"%} class="datahigh"{%endif%}>{{ asize|intcomma }}</td>
+        <td align="right"{%if sort=="avg_value"%} class="datahigh"{%endif%}>{{ avalue|intcomma }}</td>
+        <td align="right"{%if sort=="avg_score"%} class="datahigh"{%endif%}>{{ ascore|intcomma }}</td>
         
-        <td align="right">{{ size|intcomma }}</td>
-        <td align="right">{{ value|intcomma }}</td>
-        <td align="right" class="datahigh">{{ score|intcomma }}</td>
+        <td align="right"{%if sort=="size"%} class="datahigh"{%endif%}>{{ size|intcomma }}</td>
+        <td align="right"{%if sort=="value"%} class="datahigh"{%endif%}>{{ value|intcomma }}</td>
+        <td align="right"{%if sort=="score"%} class="datahigh"{%endif%}>{{ score|intcomma }}</td>
         
-        <td align="right">{{ t10s }}</td>
-        <td align="right">{{ t50s }}</td>
-        <td align="right">{{ t100s }}</td>
-        <td align="right">{{ t200s }}</td>
+        <td align="right"{%if sort=="t10s"%} class="datahigh"{%endif%}>{{ t10s }}</td>
+        <td align="right"{%if sort=="t50s"%} class="datahigh"{%endif%}>{{ t50s }}</td>
+        <td align="right"{%if sort=="t100s"%} class="datahigh"{%endif%}>{{ t100s }}</td>
+        <td align="right"{%if sort=="t200s"%} class="datahigh"{%endif%}>{{ t200s }}</td>
         
-        <td align="right">{{ t10v }}</td>
-        <td align="right">{{ t50v }}</td>
-        <td align="right">{{ t100v }}</td>
-        <td align="right">{{ t200v }}</td>
+        <td align="right"{%if sort=="t10v"%} class="datahigh"{%endif%}>{{ t10v }}</td>
+        <td align="right"{%if sort=="t50v"%} class="datahigh"{%endif%}>{{ t50v }}</td>
+        <td align="right"{%if sort=="t100v"%} class="datahigh"{%endif%}>{{ t100v }}</td>
+        <td align="right"{%if sort=="t200v"%} class="datahigh"{%endif%}>{{ t200v }}</td>
     </tr>
     {% endfor %}
     

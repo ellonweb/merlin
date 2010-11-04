@@ -65,7 +65,7 @@
         <td align="right">{{ planet|rank("size") }}</td>
         <td align="right">{{ planet|rank("xp") }}</td>
         
-        <td align="right">
+        <td align="right"{%if sort=="xyz"%} class="datahigh"{%endif%}>
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
             <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
         </td>
@@ -75,16 +75,16 @@
         <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
                 {{ planet.planetname }}
         </a></td>
-        <td class="{{ planet.race }}">{{ planet.race }}</td>
-        <td align="right">{{ planet|bashcap("size") }}</td>
-        <td align="right">{{ planet|bashcap("value") }}</td>
-        <td align="right" class="datahigh">{{ planet|bashcap("score") }}</td>
-        <td align="right">{{ planet.ratio|round(1) }}</td>
-        <td align="right">{{ planet.xp|intcomma }}</td>
+        <td class="{%if sort=="race"%}datahigh {%endif%}{{ planet.race }}">{{ planet.race }}</td>
+        <td align="right"{%if sort=="size"%} class="datahigh"{%endif%}>{{ planet|bashcap("size") }}</td>
+        <td align="right"{%if sort=="value"%} class="datahigh"{%endif%}>{{ planet|bashcap("value") }}</td>
+        <td align="right"{%if sort=="score"%} class="datahigh"{%endif%}>{{ planet|bashcap("score") }}</td>
+        <td align="right"{%if sort=="ratio"%} class="datahigh"{%endif%}>{{ planet.ratio|round(1) }}</td>
+        <td align="right"{%if sort=="xp"%} class="datahigh"{%endif%}>{{ planet.xp|intcomma }}</td>
         
-        <td align="right">{{ planet|growth("size") }}</td>
-        <td align="right">{{ planet|growth("value") }}</td>
-        <td align="right">{{ planet|growth("score") }}</td>
+        <td align="right"{%if sort and sort.startswith("size_growth")%} class="datahigh"{%endif%}>{{ planet|growth("size") }}</td>
+        <td align="right"{%if sort and sort.startswith("value_growth")%} class="datahigh"{%endif%}>{{ planet|growth("value") }}</td>
+        <td align="right"{%if sort and sort.startswith("score_growth")%} class="datahigh"{%endif%}>{{ planet|growth("score") }}</td>
         
         {% block intel_content scoped %}
         {% if user|intel %}

@@ -294,4 +294,4 @@ class search(loadable):
         
         results = Q.all() if query else None
         
-        return render("search.tpl", request, planets=results, s=search, params=params, offset=offset, pages=pages, page=page)
+        return render("search.tpl", request, planets=results, sort=search["order1"], s=search, params=params, offset=offset, pages=pages, page=page)

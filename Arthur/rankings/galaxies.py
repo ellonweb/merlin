@@ -34,6 +34,8 @@ class galaxies(loadable):
         order =  {"score" : (asc(Galaxy.score_rank),),
                   "value" : (asc(Galaxy.value_rank),),
                   "size"  : (asc(Galaxy.size_rank),),
+                  "planets" : (desc(Galaxy.members),),
+                  "ratio" : (desc(Galaxy.ratio),),
                   "xp"    : (asc(Galaxy.xp_rank),),
                   "score_growth" : (desc(Galaxy.score_growth),),
                   "value_growth" : (desc(Galaxy.value_growth),),
