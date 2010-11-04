@@ -15,6 +15,12 @@
                     ("xp", "Experience",),
                     ("xp_growth", "Experience Growth",),
                     ("xp_growth_pc", "Experience Growth %",),
+                    ("totalroundroids", "[Total Round Roids]",),
+                    ("totallostroids", "[Total Lost Roids]",),
+                    ("ticksroiding", "[Ticks Roiding]",),
+                    ("ticksroided", "[Ticks Roided]",),
+                    ("tickroids", "[Tick-Roids]",),
+                    ("avroids", "[Av. Roids]",),
                     ("galsize", "[Galaxy] Size",),
                     ("galvalue", "[Galaxy] Value",),
                     ("galscore", "[Galaxy] Score",),
@@ -23,6 +29,7 @@
 {% block title %}Search Results{% endblock %}
 {% block sort %}{{ order }}{% endblock %}
 {% block sort_growth %}{{ order }}{% endblock %}
+{% block showsort %}{%for opt, name in orders if sort==opt%}<th>{{name}}</th>{%else%}{{super()}}{%endfor%}{%endblock%}
 {% block page %}/search/{{params}}/page:{{p}}/{% endblock %}
 {% block content %}
 <form method="post" action="/search/">

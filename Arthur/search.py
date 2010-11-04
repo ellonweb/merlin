@@ -65,15 +65,21 @@ class search(loadable):
                     "galvalue" : Galaxy.value,
                     "galsize" : Galaxy.size,
                     "galxp" : Galaxy.xp,
-                    "idle" : Planet.idle,
+#                    "idle" : Planet.idle,
                     "x" : Planet.x,
                     "y" : Planet.y,
                     "planets" : Galaxy.members,
+                    "totalroundroids" : Planet.totalroundroids,
+                    "totallostroids" : Planet.totallostroids,
+                    "ticksroiding" : Planet.ticksroiding,
+                    "ticksroided" : Planet.ticksroided,
+                    "tickroids" : Planet.tickroids,
                     }
         
         floatfilts = {
                     "ratio" : Planet.ratio,
                     "galratio" : Galaxy.ratio,
+                    "avroids" : Planet.avroids,
                     }
         
         rankfilts = {
@@ -285,6 +291,10 @@ class search(loadable):
             else:
                 Q = Q.order_by(d(order[os]))
         
+        showsort = True if search["order1"] not in ("xyz","size","value","score","ratio","xp",
+                                                    "size_growth","value_growth","score_growth",
+                                                    "size_growth_pc","value_growth_pc","score_growth_pc",) else False
+        
         count = Q.count()
         pages = count/50 + int(count%50 > 0)
         pages = range(1, 1+pages)
@@ -294,4 +304,6 @@ class search(loadable):
         
         results = Q.all() if query else None
         
-        return render("search.tpl", request, planets=results, sort=search["order1"], s=search, params=params, offset=offset, pages=pages, page=page)
+        return render("search.tpl", request, planets=results, sort=search["order1"],
+                                showsort=showsort, s=search, params=params,
+                                offset=offset, pages=pages, page=page)
