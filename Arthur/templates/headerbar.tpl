@@ -1,6 +1,7 @@
 <table cellspacing="1" cellpadding="3" width="100%">
 <tr>
     <td width="33%" align="left">
+        <a href="/"><img border="0" src="/static/logo.png" /></a>
     </td>
     <td width="34%" valign="middle" align="center">
     {% if user.planet %}{% with planet = user.planet %}
