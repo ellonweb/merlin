@@ -34,7 +34,7 @@
             (<a href="{% url "planet", owner.x, owner.y, owner.z %}">{{ owner.x }}:{{ owner.y }}:{{ owner.z }}</a>)
         </td>
         <td class="{{ owner.race }} center"> {{ owner.race }} </td>
-        <td class="right"> {{ (owner.score/1000000.0)|round(1) }}M </td>
+        <td class="right"> {{ ((owner.score or 0)/1000000.0)|round(1) }}M </td>
         <td class="center"> {{ fleet.eta }} </td>
         <td class="right"> {{ fleet.fleet_size|intcomma }}</td>
     </tr>
