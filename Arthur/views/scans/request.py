@@ -28,7 +28,7 @@ from Core.robocop import push
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load, require_user
 
-urlpatterns = patterns('Arthur.scans.request',
+urlpatterns = patterns('Arthur.views.scans.request',
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<type>['+"".join([type.lower() for type in PA.options("scans")])+'])/(?:(?P<dists>\d+)/)?$', 'request', name="request_planet"),
     url(r'^cancel/(?P<id>\d+)/$', 'cancel', name="request_cancel"),
     url(r'^(?P<id>\d+)/blocks/(?P<dists>\d+)/$', 'blocks', name="request_blocks"),
@@ -39,7 +39,7 @@ urlpatterns = patterns('Arthur.scans.request',
 class request(loadable):
     access = "half"
     def execute(self, request, user, x, y, z, type, dists):
-        from Arthur.scans.list import scans
+        from Arthur.views.scans.list import scans
         tick = Updates.current_tick()
         type = type.upper()
         

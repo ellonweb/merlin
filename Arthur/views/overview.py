@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from django.conf.urls.defaults import include, patterns, url
 from sqlalchemy import and_
 from sqlalchemy.sql import asc, desc
 from Core.config import Config
@@ -26,6 +27,10 @@ from Core.db import session
 from Core.maps import Galaxy, Planet, Alliance
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
+
+urlpatterns = patterns('Arthur.views.overview',
+    (r'^(?:home|logout)?/?$', 'home'),
+)
 
 @menu("Home")
 @load

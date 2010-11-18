@@ -30,7 +30,7 @@ from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 name = Config.get("Alliance", "name")
 
-urlpatterns = patterns('Arthur.dashboard',
+urlpatterns = patterns('Arthur.views.dashboard',
     url(r'^dashboard/$', 'dashboard'),
     url(r'^user/(?P<username>\S+)/$', 'dashboard', name="dashboard"),
 )

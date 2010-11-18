@@ -69,10 +69,10 @@ class book(loadable):
     def attack(self, request, user, id, message=None):
         attack = Attack.load(id)
         if attack and attack.active:
-            from Arthur.attack.attack import view
+            from Arthur.views.attack.attack import view
             return view.execute(request, user, id, message)
         else:
-            from Arthur.attack.attack import attack
+            from Arthur.views.attack.attack import attack
             return attack.execute(request, user, message)
 
 @load
@@ -125,8 +125,8 @@ class unbook(loadable):
     def attack(self, request, user, id, message=None):
         attack = Attack.load(id)
         if attack and attack.active:
-            from Arthur.attack.attack import view
+            from Arthur.views.attack.attack import view
             return view.execute(request, user, id, message)
         else:
-            from Arthur.attack.attack import attack
+            from Arthur.views.attack.attack import attack
             return attack.execute(request, user, message)
