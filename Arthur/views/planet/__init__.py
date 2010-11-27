@@ -29,5 +29,8 @@ urlpatterns = patterns('Arthur.views.planet',
     url(r'^planets/(?P<sort>\w+)/(?P<page>\d+)/$', 'planets.planets'),
     url(r'^planets/(?P<race>\w+)/(?P<sort>\w+)/$', 'planets.planets'),
     url(r'^planets/(?P<race>\w+)/(?P<sort>\w+)/(?P<page>\d+)/$', 'planets.planets', name="planets"),
-    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<fleets>fleets/)?$', 'planet.planet', name="planet"),
+    ## change iplanet to planet once implemented in line below
+    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/$', 'iplanet.planet', name="planet"),
+    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/intel/$', 'iplanet.planet', name="iplanet"),
+    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?:intel/)?fleets/$', 'iplanet.planet', {'fleets':True}, name="fplanet"),
 )

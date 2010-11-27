@@ -72,7 +72,7 @@
             {% for alliance in topalliances %}
     <tr class="{% if user|intel and alliance.name == name %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ alliance|rank("score") }}</td>
-        <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" href="{% url "alliance_members", alliance.name %}">
+        <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" href="{% url "alliance", alliance.name %}">
             {{ alliance.name }}
         </a></td>
         <td align="right">{{ alliance|members }}</td>

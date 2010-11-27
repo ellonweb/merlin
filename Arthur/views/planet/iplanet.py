@@ -30,7 +30,7 @@ from Arthur.loadable import loadable, load
 @load
 class planet(loadable):
     access = "member"
-    def execute(self, request, user, x, y, z, fleets):
+    def execute(self, request, user, x, y, z, fleets=False):
         week = Updates.week_tick()
         
         planet = Planet.load(x,y,z)
