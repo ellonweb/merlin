@@ -20,21 +20,9 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
-from Arthur.views.rankings import planets, galaxies, alliances, ialliances
+from Arthur.views.alliance import alliances, ialliances
 
-urlpatterns = patterns('Arthur.views.rankings',
-    url(r'^planets/$', 'planets.planets', name="planet_ranks"),
-    url(r'^planets/(?P<page>\d+)/$', 'planets.planets'),
-    url(r'^planets/(?P<sort>\w+)/$', 'planets.planets'),
-    url(r'^planets/(?P<sort>\w+)/(?P<page>\d+)/$', 'planets.planets'),
-    url(r'^planets/(?P<race>\w+)/(?P<sort>\w+)/$', 'planets.planets'),
-    url(r'^planets/(?P<race>\w+)/(?P<sort>\w+)/(?P<page>\d+)/$', 'planets.planets', name="planets"),
-    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<fleets>fleets/)?$', 'planet.planet', name="planet"),
-    url(r'^galaxy/(?P<x>\d+)[. :\-](?P<y>\d+)/$', 'galaxy.galaxy', name="galaxy"),
-    url(r'^galaxies/$', 'galaxies.galaxies', name="galaxy_ranks"),
-    url(r'^galaxies/(?P<page>\d+)/$', 'galaxies.galaxies'),
-    url(r'^galaxies/(?P<sort>\w+)/$', 'galaxies.galaxies'),
-    url(r'^galaxies/(?P<sort>\w+)/(?P<page>\d+)/$', 'galaxies.galaxies', name="galaxies"),
+urlpatterns = patterns('Arthur.views.alliance',
     url(r'^alliance/(?P<name>[^/]+)/$', 'alliance.alliance', name="alliance_members"),
     url(r'^alliance/(?P<name>[^/]+)/history/$', 'ialliancehistory.ialliancehistory', name="alliance_history"),
     url(r'^alliance/(?P<name>[^/]+)/(?P<page>\d+)/$', 'alliance.alliance'),

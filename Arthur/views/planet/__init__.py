@@ -20,26 +20,14 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
+from Arthur.views.planet import planets
 
-urlpatterns = patterns('Arthur.views',
-    (r'', include('Arthur.views.home')),
-    (r'', include('Arthur.views.lookup')),
-    (r'', include('Arthur.views.dashboard')),
-    (r'', include('Arthur.views.members')),
-    (r'', include('Arthur.views.planet')),
-    (r'', include('Arthur.views.galaxy')),
-    (r'', include('Arthur.views.alliance')),
-    (r'', include('Arthur.views.search')),
-    (r'', include('Arthur.views.attack')),
-    (r'', include('Arthur.views.scans')),
+urlpatterns = patterns('Arthur.views.planet',
+    url(r'^planets/$', 'planets.planets', name="planet_ranks"),
+    url(r'^planets/(?P<page>\d+)/$', 'planets.planets'),
+    url(r'^planets/(?P<sort>\w+)/$', 'planets.planets'),
+    url(r'^planets/(?P<sort>\w+)/(?P<page>\d+)/$', 'planets.planets'),
+    url(r'^planets/(?P<race>\w+)/(?P<sort>\w+)/$', 'planets.planets'),
+    url(r'^planets/(?P<race>\w+)/(?P<sort>\w+)/(?P<page>\d+)/$', 'planets.planets', name="planets"),
+    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<fleets>fleets/)?$', 'planet.planet', name="planet"),
 )
-
-from Arthur.views import home
-from Arthur.views import dashboard
-from Arthur.views import members
-from Arthur.views import planet
-from Arthur.views import galaxy
-from Arthur.views import alliance
-from Arthur.views import search
-from Arthur.views import attack
-from Arthur.views import scans
