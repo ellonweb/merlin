@@ -57,7 +57,7 @@ class lookup(loadable):
         if m is None:
             alliance = Alliance.load(lookup) if lookup else None
             if alliance:
-                return HttpResponseRedirect(reverse("alliance_members", kwargs={"name":alliance.name}))
+                return HttpResponseRedirect(reverse("alliance", kwargs={"name":alliance.name}))
             
             elif not user.is_member():
                 return HttpResponseRedirect(reverse("alliance_ranks"))
