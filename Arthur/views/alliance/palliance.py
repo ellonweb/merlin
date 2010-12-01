@@ -77,4 +77,4 @@ class alliance(loadable):
         for o in order:
             Q = Q.order_by(o)
         Q = Q.limit(50).offset(offset)
-        return render("alliance.tpl", request, alliance=alliance, planets=Q.all(), offset=offset, pages=pages, page=page, sort=sort, race=race)
+        return render("palliance.tpl", request, alliance=alliance, planets=Q.all(), offset=offset, pages=pages, page=page, sort=sort, race=race)
