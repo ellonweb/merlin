@@ -28,9 +28,9 @@ from Core.maps import Planet, Alliance, Intel
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
-@menu("Rankings", "Alliances (intel)")
+@menu("Rankings", "Alliances (intel)", suffix="intel")
 @load
-class ialliances(loadable):
+class alliances(loadable):
     access = Config.get("Arthur", "intel")
     def execute(self, request, user, page="1", sort="score"):
         page = int(page)

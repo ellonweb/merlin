@@ -34,7 +34,7 @@ class _menu(object):
         pre = prefix
         
         def wrapper(hook):
-            prefix = hook.__module__.split(".")[1] if pre else ""
+            prefix = hook.__module__.split(".")[2] if pre else ""
             url = ("/%s/%s/%s/"%(prefix,hook.name,suffix,)).replace("//","/")
             
             if head not in self.heads:
