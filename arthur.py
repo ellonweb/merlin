@@ -1,5 +1,5 @@
 # This file is part of Merlin/Arthur.
-# Merlin/Arthur is the Copyright (C)2009 of Elliot Rosemarine.
+# Merlin/Arthur is the Copyright (C)2009,2010 of Elliot Rosemarine.
 
 # Individual portions may be copyright by individual contributors, and
 # are included in this collective work with permission of the copyright
@@ -25,4 +25,4 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'Arthur.settings'
 import Arthur
 
 import django.core.management.commands.runserver
-application = django.core.management.commands.runserver.Command().handle()
+application = django.core.management.commands.runserver.Command().execute()
