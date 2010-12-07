@@ -134,21 +134,21 @@ while True:
         planet_insert+= "VALUES (%s, %s, %s, '%s', '%s', '%s', %s, %s, %s, %s);"
         for line in planets:
             p=decode(line).strip().split("\t")
-            session.execute(text(planet_insert % (p[0], p[1], p[2], p[3].strip("\""), p[4].strip("\""), p[5], p[6], p[7], p[8], p[9],)))
+            session.execute(text(planet_insert % (p[0], p[1], p[2], re.escape(p[3].strip("\"")), re.escape(p[4].strip("\"")), p[5], p[6], p[7], p[8], p[9],)))
 
         # As above
         galaxy_insert = "INSERT INTO galaxy_temp (x, y, name, size, score, value, xp) "
         galaxy_insert+= "VALUES (%s, %s, '%s', %s, %s, %s, %s);"
         for line in galaxies:
             g=decode(line).strip().split("\t")
-            session.execute(text(galaxy_insert % (g[0], g[1], g[2].strip("\""), g[3], g[4], g[5], g[6],)))
+            session.execute(text(galaxy_insert % (g[0], g[1], re.escape(g[2].strip("\"")), g[3], g[4], g[5], g[6],)))
 
         # As above
         alliance_insert = "INSERT INTO alliance_temp (score_rank, name, size, members, score, points, size_avg, score_avg, points_avg) "
         alliance_insert+= "VALUES (%s, '%s', %s, %s, %s, %s, %s, %s, %s);"
         for line in alliances:
             a=decode(line).strip().split("\t")
-            session.execute(text(alliance_insert % (a[0], a[1].strip("\""), a[2], a[3], a[4], a[5], int(a[2])/int(a[3]), int(a[4])/min(PA.getint("numbers", "tag_count"),int(a[3])), int(a[5])/int(a[3]),)))
+            session.execute(text(alliance_insert % (a[0], re.escape(a[1].strip("\"")), a[2], a[3], a[4], a[5], int(a[2])/int(a[3]), int(a[4])/min(PA.getint("numbers", "tag_count"),int(a[3])), int(a[5])/int(a[3]),)))
 
         t2=time.time()-t1
         print "Inserted dumps in %.3f seconds" % (t2,)
