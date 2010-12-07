@@ -131,24 +131,51 @@ while True:
         #  Some DBMS complained the resultant query was too long for the planet
         #  dumps, so back at one row per statement
         planet_insert = "INSERT INTO planet_temp (x, y, z, planetname, rulername, race, size, score, value, xp) "
-        planet_insert+= "VALUES (%s, %s, %s, '%s', '%s', '%s', %s, %s, %s, %s);"
+        planet_insert+= "VALUES (:x, :y, :z, :planet, :ruler, :race, :size, :score, :value, :xp);"
         for line in planets:
             p=decode(line).strip().split("\t")
-            session.execute(text(planet_insert % (p[0], p[1], p[2], p[3].strip("\""), p[4].strip("\""), p[5], p[6], p[7], p[8], p[9],)))
+            session.execute(text(planet_insert, bindparams=[
+                                                            bindparam("x", int(p[0])),
+                                                            bindparam("y", int(p[1])),
+                                                            bindparam("z", int(p[2])),
+                                                            bindparam("planet", p[3].strip("\"")),
+                                                            bindparam("ruler", p[4].strip("\"")),
+                                                            bindparam("race", p[5]),
+                                                            bindparam("size", int(p[6])),
+                                                            bindparam("score", int(p[7])),
+                                                            bindparam("value", int(p[8])),
+                                                            bindparam("xp", int(p[9])),
+                                                            ]))
 
         # As above
         galaxy_insert = "INSERT INTO galaxy_temp (x, y, name, size, score, value, xp) "
-        galaxy_insert+= "VALUES (%s, %s, '%s', %s, %s, %s, %s);"
+        galaxy_insert+= "VALUES (:x, :y, :name, :size, :score, :value, :xp);"
         for line in galaxies:
             g=decode(line).strip().split("\t")
-            session.execute(text(galaxy_insert % (g[0], g[1], g[2].strip("\""), g[3], g[4], g[5], g[6],)))
+            session.execute(text(galaxy_insert, bindparams=[
+                                                            bindparam("x", int(g[0])),
+                                                            bindparam("y", int(g[1])),
+                                                            bindparam("name", g[2].strip("\"")),
+                                                            bindparam("size", int(g[3])),
+                                                            bindparam("score", int(g[4])),
+                                                            bindparam("value", int(g[5])),
+                                                            bindparam("xp", int(g[6])),
+                                                            ]))
 
         # As above
         alliance_insert = "INSERT INTO alliance_temp (score_rank, name, size, members, score, points, size_avg, score_avg, points_avg) "
-        alliance_insert+= "VALUES (%s, '%s', %s, %s, %s, %s, %s, %s, %s);"
+        alliance_insert+= "VALUES (:score_rank, :name, :size, :members, :score, :points, :size/:members, :score/LEAST(:tag_count,:members), :points/:members);"
         for line in alliances:
             a=decode(line).strip().split("\t")
-            session.execute(text(alliance_insert % (a[0], a[1].strip("\""), a[2], a[3], a[4], a[5], int(a[2])/int(a[3]), int(a[4])/min(PA.getint("numbers", "tag_count"),int(a[3])), int(a[5])/int(a[3]),)))
+            session.execute(text(alliance_insert, bindparams=[
+                                                            bindparam("score_rank", int(a[0])),
+                                                            bindparam("name", a[1].strip("\"")),
+                                                            bindparam("size", int(a[2])),
+                                                            bindparam("members", int(a[3])),
+                                                            bindparam("score", int(a[4])),
+                                                            bindparam("points", int(a[5])),
+                                                            bindparam("tag_count", PA.getint("numbers", "tag_count")),
+                                                            ]))
 
         t2=time.time()-t1
         print "Inserted dumps in %.3f seconds" % (t2,)
