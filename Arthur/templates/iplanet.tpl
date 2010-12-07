@@ -16,7 +16,7 @@
 
 <table cellspacing="1" cellpadding="3" width="700" class="black">
     <tr class="datahigh">
-        <th colspan="6">Outgoing fleets <a href="{% url "planet", planet.x, planet.y, planet.z %}fleets/">(Show all)</a></th>
+        <th colspan="6">Outgoing fleets <a href="{% url "fplanet", planet.x, planet.y, planet.z %}">(Show all)</a></th>
     </tr>
     <tr class="header">
         <th width="10%">Target</th>
@@ -40,7 +40,7 @@
 <p>&nbsp;</p>
 <table cellspacing="1" cellpadding="3" width="700" class="black">
     <tr class="datahigh">
-        <th colspan="6">Incoming fleets <a href="{% url "planet", planet.x, planet.y, planet.z %}fleets/">(Show all)</a></th>
+        <th colspan="6">Incoming fleets <a href="{% url "fplanet", planet.x, planet.y, planet.z %}">(Show all)</a></th>
     </tr>
     <tr class="header">
         <th width="10%">Origin</th>

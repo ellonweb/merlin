@@ -56,9 +56,7 @@ class Updates(Base):
     @staticmethod
     def midnight_tick():
         now = datetime.utcnow()
-        d1 = datetime(now.year, now.month, now.day, now.hour)
-        d2 = datetime(now.year, now.month, now.day)
-        hours = (d1-d2).seconds/60/60
+        hours = now.hour
         tick = Updates.current_tick() - hours
         return tick
     
@@ -78,10 +76,25 @@ class Galaxy(Base):
     score = Column(Integer)
     value = Column(Integer)
     xp = Column(Integer)
+    members = Column(Integer)
+    ratio = Column(Float)
     size_rank = Column(Integer)
     score_rank = Column(Integer)
     value_rank = Column(Integer)
     xp_rank = Column(Integer)
+    size_growth = Column(Integer)
+    score_growth = Column(Integer)
+    value_growth = Column(Integer)
+    xp_growth = Column(Integer)
+    member_growth = Column(Integer)
+    size_growth_pc = Column(Float)
+    score_growth_pc = Column(Float)
+    value_growth_pc = Column(Float)
+    xp_growth_pc = Column(Float)
+    size_rank_change = Column(Integer)
+    score_rank_change = Column(Integer)
+    value_rank_change = Column(Integer)
+    xp_rank_change = Column(Integer)
     private = Column(Boolean)
     
     def history(self, tick):
@@ -133,6 +146,7 @@ class Planet(Base):
     __table_args__ = (ForeignKeyConstraint(('x', 'y',), (Galaxy.x, Galaxy.y,)), {})
     id = Column(Integer, primary_key=True)
     active = Column(Boolean)
+    age = Column(Integer)
     x = Column(Integer)
     y = Column(Integer)
     z = Column(Integer)
@@ -143,10 +157,29 @@ class Planet(Base):
     score = Column(Integer)
     value = Column(Integer)
     xp = Column(Integer)
+    ratio = Column(Float)
     size_rank = Column(Integer)
     score_rank = Column(Integer)
     value_rank = Column(Integer)
     xp_rank = Column(Integer)
+    size_growth = Column(Integer)
+    score_growth = Column(Integer)
+    value_growth = Column(Integer)
+    xp_growth = Column(Integer)
+    size_growth_pc = Column(Float)
+    score_growth_pc = Column(Float)
+    value_growth_pc = Column(Float)
+    xp_growth_pc = Column(Float)
+    size_rank_change = Column(Integer)
+    score_rank_change = Column(Integer)
+    value_rank_change = Column(Integer)
+    xp_rank_change = Column(Integer)
+    totalroundroids = Column(Integer)
+    totallostroids = Column(Integer)
+    ticksroiding = Column(Integer)
+    ticksroided = Column(Integer)
+    tickroids = Column(Integer)
+    avroids = Column(Float)
     vdiff = Column(Integer)
     idle = Column(Integer)
     
@@ -250,8 +283,30 @@ class Alliance(Base):
     points_rank = Column(Integer)
     size_avg = Column(Integer)
     score_avg = Column(Integer)
+    points_avg = Column(Integer)
     size_avg_rank = Column(Integer)
     score_avg_rank = Column(Integer)
+    points_avg_rank = Column(Integer)
+    size_growth = Column(Integer)
+    score_growth = Column(Integer)
+    points_growth = Column(Integer)
+    member_growth = Column(Integer)
+    size_growth_pc = Column(Float)
+    score_growth_pc = Column(Float)
+    points_growth_pc = Column(Float)
+    size_avg_growth = Column(Integer)
+    score_avg_growth = Column(Integer)
+    points_avg_growth = Column(Integer)
+    size_avg_growth_pc = Column(Float)
+    score_avg_growth_pc = Column(Float)
+    points_avg_growth_pc = Column(Float)
+    size_rank_change = Column(Integer)
+    members_rank_change = Column(Integer)
+    score_rank_change = Column(Integer)
+    points_rank_change = Column(Integer)
+    size_avg_rank_change = Column(Integer)
+    score_avg_rank_change = Column(Integer)
+    points_avg_rank_change = Column(Integer)
     
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
@@ -306,8 +361,10 @@ class AllianceHistory(Base):
     points_rank = Column(Integer)
     size_avg = Column(Integer)
     score_avg = Column(Integer)
+    points_avg = Column(Integer)
     size_avg_rank = Column(Integer)
     score_avg_rank = Column(Integer)
+    points_avg_rank = Column(Integer)
 Alliance.history_loader = dynamic_loader(AllianceHistory, backref="current")
 
 # ########################################################################### #
@@ -344,7 +401,8 @@ alliance_temp = Table('alliance_temp', Base.metadata,
     Column('points', Integer),
     Column('score_rank', Integer),
     Column('size_avg', Integer),
-    Column('score_avg', Integer))
+    Column('score_avg', Integer),
+    Column('points_avg', Integer))
 planet_new_id_search = Table('planet_new_id_search', Base.metadata,
     Column('id', Integer),
     Column('x', Integer, primary_key=True),
@@ -395,6 +453,9 @@ class User(Base):
     fleetcomment = Column(String(512))
     fleetupdated = Column(Integer, default=0)
     levels = filter(lambda lev: not lev[0] == "galmate", sorted(Config.items("Access"), key=lambda acc: int(acc[1]), reverse=True))
+    
+    def is_user(self):
+        return self in session
     
     @property
     def level(self):
@@ -503,22 +564,22 @@ for lvl, num in Config.items("Access"):
     # Bind user access functions
     setattr(User, "is_"+lvl, user_access_function(int(num)))
 
-class Session(Base):
+class Arthur(Base):
     __tablename__ = 'session'
     key = Column(String(40), primary_key=True)
     user_id = Column(Integer, ForeignKey(User.id, ondelete='set null'))
     expire = Column(DateTime)
     @staticmethod
     def load(key, now=None):
-        Q = session.query(Session)
+        Q = session.query(Arthur)
         if now is not None:
-            Q = Q.filter(Session.expire > now)
-        auth = Q.filter(Session.key == key).first()
+            Q = Q.filter(Arthur.expire > now)
+        auth = Q.filter(Arthur.key == key).first()
         if auth is not None and auth.user is not None and auth.user.active == True:
             return auth
         else:
             return None
-Session.user = relation(User)
+Arthur.user = relation(User)
 
 class PhoneFriend(Base):
     __tablename__ = 'phonefriends'
@@ -1305,6 +1366,7 @@ class PageView(Base):
     full_request = Column(String(512))
     username = Column(String(15))
     session = Column(String(32))
+    planet_id = Column(Integer)
     hostname = Column(String(100))
     request_time = Column(DateTime, default=current_timestamp())
 

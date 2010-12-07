@@ -20,9 +20,17 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
-handler404 = 'Arthur.errors.page_not_found'
-handler500 = 'Arthur.errors.server_error'
-urlpatterns = patterns('',
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
-    (r'', include('Arthur.views')),
+from Arthur.views.planet import planets
+
+urlpatterns = patterns('Arthur.views.planet',
+    url(r'^planets/$', 'planets.planets', name="planet_ranks"),
+    url(r'^planets/(?P<page>\d+)/$', 'planets.planets'),
+    url(r'^planets/(?P<sort>\w+)/$', 'planets.planets'),
+    url(r'^planets/(?P<sort>\w+)/(?P<page>\d+)/$', 'planets.planets'),
+    url(r'^planets/(?P<race>\w+)/(?P<sort>\w+)/$', 'planets.planets'),
+    url(r'^planets/(?P<race>\w+)/(?P<sort>\w+)/(?P<page>\d+)/$', 'planets.planets', name="planets"),
+    ## change iplanet to planet once implemented in line below
+    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/$', 'iplanet.planet', name="planet"),
+    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/intel/$', 'iplanet.planet', name="iplanet"),
+    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?:intel/)?fleets/$', 'iplanet.planet', {'fleets':True}, name="fplanet"),
 )

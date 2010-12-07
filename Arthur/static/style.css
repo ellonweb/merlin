@@ -38,17 +38,27 @@ a:hover {
 	color: #ccccfc;
 }
 
+a.myplanet {
+	color:#ffff00;
+	font-weight:bold;
+}
+a.myplanet:hover {
+	color:#cccc00;
+	font-weight:bold;
+}
+
 a.gray {
-	color: #cccccc;
+	color: #ffffff;
 }
 
 a.gray:hover {
-	color: #ffffff;
+	color: #cccccc;
 }
 
 input {
 	font-family: Verdana, Arial, Helvetica;
 	font-size: x-small;
+	background-color: rgb(221, 221, 221);
 }
 
 select {
@@ -111,6 +121,14 @@ tr.unknown {
 
 .yellow {
 	color: #ffff00;
+}
+
+.white {
+	color: #ffffff;
+}
+
+.orange {
+	color: #ffa500;
 }
 
 .Cat {
@@ -209,4 +227,12 @@ tr.unknown {
 
 .left {
 	text-align: left;
+}
+
+.growth_pc {
+	display: inline;
+}
+
+.growth_diff {
+	display: none;
 }

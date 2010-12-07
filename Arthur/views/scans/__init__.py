@@ -21,19 +21,20 @@
  
 from django.conf.urls.defaults import include, patterns, url
 from Core.paconf import PA
-from Arthur.scans import list
-from Arthur.scans import request
+from Arthur.views.scans import list
+from Arthur.views.scans import request
 
-urlpatterns = patterns('Arthur.scans',
+urlpatterns = patterns('',
+  url(r'^scans/', include(patterns('Arthur.views.scans',
     url(r'^$', 'list.scans', name="scans"),
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/',
-        include(patterns('Arthur.scans.planet',
+        include(patterns('Arthur.views.scans.planet',
             url(r'^$', 'planet', name="planet_scans"),
             url(r'^(?P<types>['+"".join([type.lower() for type in PA.options("scans")])+']+)/$', "types"),
             *[url(r'^'+type.lower()+'\w*/$', "scan", {"type":type}, name="planet_scan_"+type.lower()) for type in PA.options("scans")]
         ))),
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)/',
-        include(patterns('Arthur.scans.galaxy',
+        include(patterns('Arthur.views.scans.galaxy',
             url(r'^$', 'galaxy', name="galaxy_scans"),
             url(r'^(?P<types>['+"".join([type.lower() for type in PA.options("scans")])+']+)/$', "types")
         ))),
@@ -41,4 +42,6 @@ urlpatterns = patterns('Arthur.scans',
     url('^(?P<tick>\d+)/(?P<id>\w+)/$', 'planet.id', name="scan_id"),
     url('^group/(?P<id>\w+)/$', 'list.group', name="scan_group_id"),
     url('^requests/$', 'request.requests', name="requests"),
+  ))),
+  (r'^(?:scans/)?request/', include('Arthur.views.scans.request')),
 )

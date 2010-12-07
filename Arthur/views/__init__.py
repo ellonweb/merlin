@@ -20,9 +20,26 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
-handler404 = 'Arthur.errors.page_not_found'
-handler500 = 'Arthur.errors.server_error'
-urlpatterns = patterns('',
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
-    (r'', include('Arthur.views')),
+
+urlpatterns = patterns('Arthur.views',
+    (r'', include('Arthur.views.home')),
+    (r'', include('Arthur.views.lookup')),
+    (r'', include('Arthur.views.dashboard')),
+    (r'', include('Arthur.views.members')),
+    (r'', include('Arthur.views.planet')),
+    (r'', include('Arthur.views.galaxy')),
+    (r'', include('Arthur.views.alliance')),
+    (r'', include('Arthur.views.search')),
+    (r'', include('Arthur.views.attack')),
+    (r'', include('Arthur.views.scans')),
 )
+
+from Arthur.views import home
+from Arthur.views import dashboard
+from Arthur.views import members
+from Arthur.views import planet
+from Arthur.views import galaxy
+from Arthur.views import alliance
+from Arthur.views import search
+from Arthur.views import attack
+from Arthur.views import scans

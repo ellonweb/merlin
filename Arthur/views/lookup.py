@@ -20,12 +20,17 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import re
+from django.conf.urls.defaults import include, patterns, url
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from Core.db import session
 from Core.maps import Planet, Alliance, User, Intel
 from Hooks.scans.parser import scanre, scangrpre, parse
 from Arthur.loadable import loadable, load
+
+urlpatterns = patterns('Arthur.views.lookup',
+    (r'^lookup/$', 'lookup'),
+)
 
 @load
 class lookup(loadable):
@@ -52,7 +57,7 @@ class lookup(loadable):
         if m is None:
             alliance = Alliance.load(lookup) if lookup else None
             if alliance:
-                return HttpResponseRedirect(reverse("alliance_members", kwargs={"name":alliance.name}))
+                return HttpResponseRedirect(reverse("alliance", kwargs={"name":alliance.name}))
             
             elif not user.is_member():
                 return HttpResponseRedirect(reverse("alliance_ranks"))

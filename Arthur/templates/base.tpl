@@ -18,12 +18,29 @@
     <script type="text/javascript">
         function linkshift(event, link) {
             if (event.ctrlKey==1 || event.shiftKey==1 || event.altKey==1) {
-                window.open(link);
+                window.location.assign(link);
                 return false;
             }
             else {
               return true;
             }
+        }
+        
+        var cssRules = document.styleSheets[0].cssRules || document.styleSheets[0].rules;
+        function getStyle(name) {
+            for(var i = 0;i < cssRules.length;i++)
+                if(cssRules[i].selectorText == name)
+                    return cssRules[i].style;
+        }
+        function toggleGrowth() {
+            var growth_pc = getStyle('.growth_pc');
+            var growth_diff = getStyle('.growth_diff');
+            
+            if(!growth_pc || !growth_diff)
+                return;
+            
+            growth_pc.display = growth_pc.display == 'none' ? 'inline' : 'none';
+            growth_diff.display = growth_diff.display == 'none' ? 'inline' : 'none';
         }
     </script>
 
@@ -38,6 +55,7 @@
     </tr>
 </table>
 </center>
+{% block headerbar %}{% include "headerbar.tpl" %}{% endblock%}
     {% if menu %}
     <table cellspacing="1" cellpadding="3">
         <tr class="header">

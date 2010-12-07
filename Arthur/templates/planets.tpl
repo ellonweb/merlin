@@ -1,22 +1,29 @@
 {% extends "base.tpl" %}
-{% if planet and not planets %}{% set planets = ((planet, ph, planet.intel.nick, None,),) %}{% endif %}
+{% set cols = 16 %}
+{% if page %}{% set cols = cols + 1 %}{% endif %}
+{% if user|intel %}{% set cols = cols + 2 %}{% endif %}
+{% if showsort %}{% set cols = cols + 1 %}{% endif %}
+{% if planet and not planets %}{% set planets = ((planet, planet.intel.nick, None,),) %}{% endif %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="100%" class="black">
     <tr class="datahigh">
-        <th colspan="0">
+        <th colspan="{{cols}}">
             {% block title %}Planet listing{% endblock %}
         </th>
     </tr>
     <tr class="header">
         {% if page %}<th></th>{% endif %}
         <th colspan="4">Rank</th>
-        <th colspan="8">&nbsp;</th>
-        <th colspan="3">Growth</th>
-        {% block intel_head %}
+        <th colspan="9">&nbsp;</th>
+        <th class="center" colspan="3"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
         {% if user|intel %}
+        {% block intel_head %}
         <th colspan="2">Intel</th>
-        {% endif %}
         {% endblock %}
+        {% endif %}
+        {% if showsort %}
+        <th></th>
+        {% endif %}
     </tr>
     <tr class="header">
         {% if page %}<th>#</th>{% endif %}
@@ -26,11 +33,11 @@
         <th>Size</th>
         <th>XP</th>
         
-        <th>{% block xyz %}X:Y Z{% endblock %}</th>
+        <th align="right">{% block xyz %}X:Y &nbsp;Z{% endblock %}</th>
         
         <th>Ruler</th>
         <th>Planet</th>
-        {% for order, width in (("Race",0), ("Size",0,), ("Value",0,), ("Score",0,), ("XP",0,),) -%}
+        {% for order, width in (("Race",0), ("Size",0,), ("Value",0,), ("Score",0,), ("Ratio",0,), ("XP",0,),) -%}
         <th width="{{ width }}">
             {%- block sort scoped -%}
                 <a href="{% url "planets", race|default("all"), order|lower, page|default(1) %}">{{ order }}</a>
@@ -38,41 +45,56 @@
         </th>
         {% endfor %}
         
-        <th>Size</th>
-        <th>Value</th>
-        <th>Score</th>
+        {% for order, link in (("Size",0,), ("Value",0,), ("Score",0,),) -%}
+        <th width="{{ width }}">
+            {%- block sort_growth scoped -%}
+                <a href="{% url "planets", race|default("all"), order|lower + "_growth", page|default(1) %}" onclick="return linkshift(event, '{% url "planets", race|default("all"), order|lower + "_growth_pc", page|default(1) %}');">{{ order }}</a>
+            {%- endblock -%}
+        </th>
+        {% endfor %}
         
-        {% block intel_subhead %}
         {% if user|intel %}
+        {% block intel_subhead %}
         <th>Alliance</th>
         <th>Nick</th>
-        {% endif %}
         {% endblock %}
+        {% endif %}
+        
+        {% if showsort %}
+        {% block showsort %}
+        <th>Order</th>
+        {% endblock %}
+        {% endif %}
     </tr>
     
-    {% for planet, ph, nick, alliance in planets %}
-    <tr class="{{ loop.cycle('odd', 'even') }}">
+    {% for planet, nick, alliance in planets %}
+    <tr class="{% if planet == user.planet %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         {% if page %}<td>{{ loop.index + offset }}</td>{% endif %}
-        <td align="right">{{ planet.score_rank }}{% if ph %} {{ planet.score_rank|growth_rank_image(ph.score_rank) }}{% endif %}</td>
-        <td align="right">{{ planet.value_rank }}{% if ph %} {{ planet.value_rank|growth_rank_image(ph.value_rank) }}{% endif %}</td>
-        <td align="right">{{ planet.size_rank }}{% if ph %} {{ planet.size_rank|growth_rank_image(ph.size_rank) }}{% endif %}</td>
-        <td align="right">{{ planet.xp_rank }}{% if ph %} {{ planet.xp_rank|growth_rank_image(ph.xp_rank) }}{% endif %}</td>
+        <td align="right">{{ planet|rank("score") }}</td>
+        <td align="right">{{ planet|rank("value") }}</td>
+        <td align="right">{{ planet|rank("size") }}</td>
+        <td align="right">{{ planet|rank("xp") }}</td>
         
-        <td align="center">
+        <td align="right"{%if sort=="xyz"%} class="datahigh"{%endif%}>
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-            <a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.z }}</a>
+            <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
         </td>
-        <td>{{ planet.rulername }}</td>
-        <td>{{ planet.planetname }}</td>
-        <td class="{{ planet.race }}">{{ planet.race }}</td>
-        <td align="right">{{ planet.size|intcomma }}</td>
-        <td align="right">{{ planet.value|intcomma }}</td>
-        <td align="right">{{ planet.score|intcomma }}</td>
-        <td align="right">{{ planet.xp|intcomma }}</td>
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+                {{ planet.rulername }}
+        </a></td>
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+                {{ planet.planetname }}
+        </a></td>
+        <td class="{%if sort=="race"%}datahigh {%endif%}{{ planet.race }}">{{ planet.race }}</td>
+        <td align="right"{%if sort=="size"%} class="datahigh"{%endif%}>{{ planet|bashcap("size") }}</td>
+        <td align="right"{%if sort=="value"%} class="datahigh"{%endif%}>{{ planet|bashcap("value") }}</td>
+        <td align="right"{%if sort=="score"%} class="datahigh"{%endif%}>{{ planet|bashcap("score") }}</td>
+        <td align="right"{%if sort=="ratio"%} class="datahigh"{%endif%}>{{ planet.ratio|round(1) }}</td>
+        <td align="right"{%if sort=="xp"%} class="datahigh"{%endif%}>{{ planet.xp|intcomma }}</td>
         
-        <td align="right">{% if ph %}{{ planet.size|growth_roid(ph.size) }}{% endif %}</td>
-        <td align="right">{% if ph %}{{ planet.value|growth(ph.value) }}{% endif %}</td>
-        <td align="right">{% if ph %}{{ planet.score|growth(ph.score) }}{% endif %}</td>
+        <td align="right"{%if sort and sort.startswith("size_growth")%} class="datahigh"{%endif%}>{{ planet|growth("size") }}</td>
+        <td align="right"{%if sort and sort.startswith("value_growth")%} class="datahigh"{%endif%}>{{ planet|growth("value") }}</td>
+        <td align="right"{%if sort and sort.startswith("score_growth")%} class="datahigh"{%endif%}>{{ planet|growth("score") }}</td>
         
         {% block intel_content scoped %}
         {% if user|intel %}
@@ -80,12 +102,28 @@
         <td>{%if nick %}{{ nick }}{% endif %}</td>
         {% endif %}
         {% endblock %}
+        
+        {% if showsort %}
+        <td align="right" class="datahigh">
+        {% if sort in ("totalroundroids","totallostroids","ticksroiding","ticksroided","tickroids",) %}
+        {{planet|attr(sort)|intcomma}}
+        {% elif sort in ("avroids",) %}
+        {{planet|attr(sort)|round|int|intcomma}}
+        {% elif sort[3:] in ("score","value","size","xp",) %}
+        {{planet.galaxy|attr(sort[3:])|intcomma}}
+        {% elif sort[3:] in ("ratio",) %}
+        {{planet.galaxy|attr(sort[3:])|round(1)|intcomma}}
+        {% elif sort == "planets" %}
+        {{planet.galaxy.members}}
+        {% endif %}
+        </td>
+        {% endif %}
     </tr>
     {% endfor %}
     
     {% if pages %}
     <tr class="datahigh">
-        <td colspan="20">Pages:{% for p in pages %} {% if p != page %}<a href="
+        <td colspan="{{cols}}">Pages:{% for p in pages %} {% if p != page %}<a href="
             {%- block page scoped %}{% url "planets", race, sort p %}{% endblock -%}
             ">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}{% endfor %}</td>
     </tr>
@@ -93,26 +131,27 @@
     
     {% if galaxy %}
     <tr class="header">
-        <td colspan="19" height="6"/>
+        <td colspan="{{cols}}" height="6"/>
     </tr>
     <tr class="datahigh">
-        <td align="right">{{ galaxy.score_rank }}{% if gh %} {{ galaxy.score_rank|growth_rank_image(gh.score_rank) }}{% endif %}</td>
-        <td align="right">{{ galaxy.value_rank }}{% if gh %} {{ galaxy.value_rank|growth_rank_image(gh.value_rank) }}{% endif %}</td>
-        <td align="right">{{ galaxy.size_rank }}{% if gh %} {{ galaxy.size_rank|growth_rank_image(gh.size_rank) }}{% endif %}</td>
-        <td align="right">{{ galaxy.xp_rank }}{% if gh %} {{ galaxy.xp_rank|growth_rank_image(gh.xp_rank) }}{% endif %}</td>
+        <td align="right">{{ galaxy|rank("score") }}</td>
+        <td align="right">{{ galaxy|rank("value") }}</td>
+        <td align="right">{{ galaxy|rank("size") }}</td>
+        <td align="right">{{ galaxy|rank("xp") }}</td>
         
-        <td>&nbsp;</td>
+        <td align="right">{{ galaxy|members }}</td>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
         <td align="right">{{ galaxy.size|intcomma }}</td>
         <td align="right">{{ galaxy.value|intcomma }}</td>
         <td align="right">{{ galaxy.score|intcomma }}</td>
+        <td align="right">{{ galaxy.ratio|round(1) }}</td>
         <td align="right">{{ galaxy.xp|intcomma }}</td>
         
-        <td align="right">{% if gh %}{{ galaxy.size|growth_roid(gh.size) }}{% endif %}</td>
-        <td align="right">{% if gh %}{{ galaxy.value|growth(gh.value) }}{% endif %}</td>
-        <td align="right">{% if gh %}{{ galaxy.score|growth(gh.score) }}{% endif %}</td>
+        <td align="right">{{ galaxy|growth("size") }}</td>
+        <td align="right">{{ galaxy|growth("value") }}</td>
+        <td align="right">{{ galaxy|growth("score") }}</td>
         
         {% if user|intel %}
         <td>&nbsp;</td>

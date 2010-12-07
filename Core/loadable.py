@@ -25,7 +25,7 @@ import re
 from Core.exceptions_ import MerlinSystemCall, LoadableError, PrefError, ParseError, ChanParseError, PNickParseError, UserError
 from Core.config import Config
 from Core.paconf import PA
-from Core.db import Session
+from Core.db import Session, session
 from Core.maps import User, Channel, Command
 from Core.chanusertracker import CUT
 from Core.messages import PUBLIC_REPLY
@@ -34,7 +34,47 @@ from Core.messages import PUBLIC_REPLY
 # ##############################    LOADABLE    ############################# #
 # ########################################################################### #
 
-class loadable(object):
+class _base(object):
+    access = None
+    
+    def is_user(self, user):
+        return isinstance(user, User) and user.is_user()
+    
+    def user_has_planet(self, user):
+        if not self.is_user(user):
+            return False
+        if user.planet is None:
+            return False
+        return user.planet.active
+    
+    def num2short(self,num):
+        prefix = ("","-",)[num<0]
+        num = abs(num)
+        flt2int = lambda x: int(x) if x.is_integer() else x
+        try:
+            if num/10000000 >= 1:
+                return prefix+ str(flt2int(round(num/1000000.0,1)))+"m"
+            elif num/10000 >= 1:
+                return prefix+ str(flt2int(round(num/1000.0,1)))+"k"
+            else:
+                return prefix+ str(flt2int(round(num)))
+        except Exception:
+            raise ValueError
+    
+    def short2num(self,short):
+        try:
+            if short[-1].lower()=='m':
+                ret = float(short[:-1]) *1000000
+            elif short[-1].lower()=='k':
+                ret = float(short[:-1]) *1000
+            else:
+                ret = float(short)
+            return int(ret)
+        except Exception:
+            raise ValueError
+    
+
+class loadable(_base):
     # Base loadable class for callbacks
     ""
     usage = None
@@ -42,7 +82,6 @@ class loadable(object):
     param = ""
     trigger = "PRIVMSG"
     routes = None # List of (name, regex, access,)
-    access = None
     robocop = None
     PParseError = "You need to login and set mode +x to use this command"
     AccessError = "You don't have access to this command"
@@ -171,7 +210,7 @@ class loadable(object):
                 raise UserError
         else:
             if channel.userlevel >= access:
-                return True
+                return User()
             elif message.get_pnick():
                 raise UserError
     
@@ -187,17 +226,10 @@ class loadable(object):
             message.alert(self.AccessError)
         return
     
-    def is_user(self, user):
-        if isinstance(user, User):
+    def is_chan(self, message, chan):
+        if message.get_chan().lower() == chan.lower():
             return True
         return False
-    
-    def user_has_planet(self, user):
-        if not self.is_user(user):
-            return False
-        if user.planet is None:
-            return False
-        return user.planet.active
     
     def get_user_planet(self, user):
         if not self.is_user(user):
@@ -205,11 +237,6 @@ class loadable(object):
         if not self.user_has_planet(user):
             raise PrefError
         return user.planet
-    
-    def is_chan(self, message, chan):
-        if message.get_chan().lower() == chan.lower():
-            return True
-        return False
     
     def split_opts(self,params):
         param_dict={}
@@ -219,32 +246,6 @@ class loadable(object):
                 continue
             param_dict[a[0].lower()]=a[1]
         return param_dict
-    
-    def num2short(self,num):
-        prefix = ("","-",)[num<0]
-        num = abs(num)
-        flt2int = lambda x: int(x) if x.is_integer() else x
-        try:
-            if num/10000000 >= 1:
-                return prefix+ str(flt2int(round(num/1000000.0,1)))+"m"
-            elif num/10000 >= 1:
-                return prefix+ str(flt2int(round(num/1000.0,1)))+"k"
-            else:
-                return prefix+ str(flt2int(round(num)))
-        except Exception:
-            raise ValueError
-    
-    def short2num(self,short):
-        try:
-            if short[-1].lower()=='m':
-                ret = float(short[:-1]) *1000000
-            elif short[-1].lower()=='k':
-                ret = float(short[:-1]) *1000
-            else:
-                ret = float(short)
-            return int(ret)
-        except Exception:
-            raise ValueError
     
 
 # ########################################################################### #

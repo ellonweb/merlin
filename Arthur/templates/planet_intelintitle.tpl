@@ -17,3 +17,4 @@
 {% block intel_subhead %}{% endblock %}
 {% block intel_content %}{% endblock %}
 {% block sort %}{{ order }}{% endblock %}
+{% block sort_growth %}{{ order }}{% endblock %}

@@ -22,7 +22,7 @@
 from jinja2 import Environment, FileSystemLoader
 
 from Arthur.templatetags.url import URLReverserExtension
-jinja = Environment(extensions=["jinja2.ext.with_", URLReverserExtension], loader=FileSystemLoader('Arthur/templates'))
+jinja = Environment(extensions=["jinja2.ext.with_", "jinja2.ext.do", URLReverserExtension], loader=FileSystemLoader('Arthur/templates'))
 
 def filter(f):
     jinja.filters[f.__name__] = f

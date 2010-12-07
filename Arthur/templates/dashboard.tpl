@@ -3,7 +3,7 @@
 {% if user == dashuser %}
     {% set who = "Your" %}
 {% else %}
-    {% set who =  dashuser.name + "'s" %}
+    {% set who = dashuser.name + "'s" %}
 {% endif %}
 
 {% block title %}{{ who }} planet{% endblock %}

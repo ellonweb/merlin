@@ -20,9 +20,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
-handler404 = 'Arthur.errors.page_not_found'
-handler500 = 'Arthur.errors.server_error'
-urlpatterns = patterns('',
-    (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'F:/Code/Git/merlin/Arthur/static/'}),
-    (r'', include('Arthur.views')),
+from Arthur.views.attack import attack
+
+urlpatterns = patterns('Arthur.views.attack',
+    url(r'^attack/$', 'attack.attack', name="attacks"),
+    url(r'^attack/(?P<id>\d+)/$', 'attack.view', name="attack"),
+    url(r'^(?:attack/)?(?:attack/(?P<id>\d+)/)?book/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?P<when>\d+)/$', 'book.book', name="book"),
+    url(r'^(?:attack/)?(?:attack/(?P<id>\d+)/)?unbook/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?:(?P<when>\d+)/)?$', 'book.unbook', name="unbook"),
 )

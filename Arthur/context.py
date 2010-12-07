@@ -21,6 +21,7 @@
  
 from django.http import HttpResponse
 
+from Core.exceptions_ import UserError
 from Core.config import Config
 from Core.maps import Updates, Slogan
 from Arthur.jinja import jinja
@@ -33,7 +34,7 @@ class _menu(object):
         pre = prefix
         
         def wrapper(hook):
-            prefix = hook.__module__.split(".")[1] if pre else ""
+            prefix = hook.__module__.split(".")[2] if pre else ""
             url = ("/%s/%s/%s/"%(prefix,hook.name,suffix,)).replace("//","/")
             
             if head not in self.heads:
@@ -51,29 +52,41 @@ class _menu(object):
     def generate(self, user):
         menu = []
         for head in self.heads:
-            if self.content[head]["hook"].check_access(user):
-                menu.append([head, self.content[head]["url"], self.content[head]["link"], []])
-                
-                for sub in self.content[head]["subs"]:
-                    if self.content[head]["content"][sub]["hook"].check_access(user):
-                        menu[-1][3].append([sub, self.content[head]["content"][sub]["url"], self.content[head]["content"][sub]["link"]])
+            try:
+                if self.content[head]["hook"].check_access(user):
+                    menu.append([head, self.content[head]["url"], self.content[head]["link"], []])
+                    
+                    for sub in self.content[head]["subs"]:
+                        try:
+                            if self.content[head]["content"][sub]["hook"].check_access(user):
+                                menu[-1][3].append([sub, self.content[head]["content"][sub]["url"], self.content[head]["content"][sub]["link"]])
+                        except UserError:
+                            continue
+            except UserError:
+                continue
         
-        menu.append(["Logout", "/logout/", []])
+        if user.is_user():
+            menu.append(["Logout", "/logout/", []])
+        else:
+            menu.append(["Login", "/login/", []])
         return menu
 
 menu = _menu()
 
 def base_context(request):
     context = {"name"   : Config.get("Alliance", "name"),
-               "slogan" : Config.get("Alliance", "name")
+               "slogan" : Config.get("Alliance", "name"),
+               "tick"   : Updates.current_tick(),
                }
-    if request.session is not None:
+    if getattr(request, "user", None) is not None:
+        context["user"] = request.user
+        context["menu"] = menu.generate(request.user)
+    else:
+        context["user"] = None
+    if getattr(request, "session", None) is not None:
         slogan, count = Slogan.search("")
         if slogan is not None:
             context["slogan"] = str(slogan)
-        context["user"] = request.session.user
-        context["menu"] = menu.generate(request.session.user)
-        context["tick"] = Updates.current_tick()
     return context
 
 def render(template, request, **context):

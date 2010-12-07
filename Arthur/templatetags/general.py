@@ -19,11 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from Core.config import Config
 from Arthur.jinja import filter
 
 @filter
 def intel(user):
-    return user.is_member()
+    return getattr(user, "is_" + Config.get("Arthur", "intel"))()
+
+@filter
+def scans(user):
+    return getattr(user, "is_" + Config.get("Arthur", "scans"))()
 
 @filter
 def percent(value, total):

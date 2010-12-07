@@ -26,9 +26,10 @@ from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, Target, Attack
 from Arthur.context import render
-from Arthur.loadable import loadable, load
+from Arthur.loadable import loadable, load, require_user
 
 @load
+@require_user
 class book(loadable):
     access = "half"
     
@@ -68,13 +69,14 @@ class book(loadable):
     def attack(self, request, user, id, message=None):
         attack = Attack.load(id)
         if attack and attack.active:
-            from Arthur.attack.attack import view
+            from Arthur.views.attack.attack import view
             return view.execute(request, user, id, message)
         else:
-            from Arthur.attack.attack import attack
+            from Arthur.views.attack.attack import attack
             return attack.execute(request, user, message)
 
 @load
+@require_user
 class unbook(loadable):
     access = "half"
     
@@ -123,8 +125,8 @@ class unbook(loadable):
     def attack(self, request, user, id, message=None):
         attack = Attack.load(id)
         if attack and attack.active:
-            from Arthur.attack.attack import view
+            from Arthur.views.attack.attack import view
             return view.execute(request, user, id, message)
         else:
-            from Arthur.attack.attack import attack
+            from Arthur.views.attack.attack import attack
             return attack.execute(request, user, message)

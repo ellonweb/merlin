@@ -2,7 +2,7 @@
 {% block content %}
 <table cellspacing="1" cellpadding="3" class="black">
     <tr class="datahigh">
-        <th colspan="0"><a href="{% url "alliance_members", alliance.name %}">{{ alliance.name }}</a> History, based on present intel of {{ members }} ({{ alliance.members }}) members</th>
+        <th colspan="10"><a href="{% url "alliance_members", alliance.name %}">{{ alliance.name }}</a> History, based on present intel of {{ members }} ({{ alliance.members }}) members</th>
     </tr>
     <tr class="header">
         <th width="50">Tick</th>

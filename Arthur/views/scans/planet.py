@@ -22,23 +22,22 @@
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy.sql import asc, desc
+from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Updates, Planet, Scan
+from Core.maps import Planet, Scan
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
 @load
 class planet(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     
     def execute(self, request, user, x, y, z):
-        tick = Updates.midnight_tick()
         
         planet = Planet.load(x,y,z)
         if planet is None:
             return HttpResponseRedirect(reverse("planet_ranks"))
-        ph = planet.history(tick)
         
         Q = session.query(Scan)
         Q = Q.filter(Scan.planet == planet)
@@ -52,11 +51,11 @@ class planet(loadable):
             else:
                 group[-1][1].append(scan)
         
-        return render("scans/planet.tpl", request, planet=planet, ph=ph, group=group)
+        return render("scans/planet.tpl", request, planet=planet, group=group)
 
 @load
 class id(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     
     def execute(self, request, user, tick, id):
         Q = session.query(Scan)
@@ -71,7 +70,7 @@ class id(loadable):
 
 @load
 class scan(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     
     def execute(self, request, user, x, y, z, type):
         planet = Planet.load(x,y,z)
@@ -86,7 +85,7 @@ class scan(loadable):
 
 @load
 class types(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     
     def execute(self, request, user, x, y, z, types):
         types = types.upper()

@@ -22,6 +22,7 @@
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy.sql import asc, desc
+from Core.config import Config
 from Core.db import session
 from Core.maps import Updates, Planet, Scan, Request
 from Arthur.context import menu, render
@@ -30,7 +31,7 @@ from Arthur.loadable import loadable, load
 @menu("Scans")
 @load
 class scans(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     
     def execute(self, request, user, message=None, planet=None):
         tick = Updates.current_tick()
@@ -59,7 +60,7 @@ class scans(loadable):
 
 @load
 class group(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     
     def execute(self, request, user, id):
         Q = session.query(Planet, Scan)
@@ -83,7 +84,7 @@ class group(loadable):
 
 @load
 class tick(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     
     def execute(self, request, user, tick):
         Q = session.query(Planet, Scan)

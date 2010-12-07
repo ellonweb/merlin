@@ -21,28 +21,24 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from sqlalchemy import and_
-from sqlalchemy.sql import asc, desc
+from sqlalchemy.sql import asc
 from Core.db import session
-from Core.maps import Updates, Galaxy, Planet, PlanetHistory, Alliance, Intel
+from Core.maps import Galaxy, Planet, Alliance, Intel
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
 @load
 class galaxy(loadable):
     def execute(self, request, user, x, y):
-        tick = Updates.midnight_tick()
         
         galaxy = Galaxy.load(x,y)
         if galaxy is None:
             return HttpResponseRedirect(reverse("galaxy_ranks"))
-        gh = galaxy.history(tick)
         
-        Q = session.query(Planet, PlanetHistory, Intel.nick, Alliance.name)
+        Q = session.query(Planet, Intel.nick, Alliance.name)
         Q = Q.outerjoin(Planet.intel)
         Q = Q.outerjoin(Intel.alliance)
-        Q = Q.outerjoin((PlanetHistory, and_(Planet.id == PlanetHistory.id, PlanetHistory.tick == tick)))
         Q = Q.filter(Planet.active == True)
         Q = Q.filter(Planet.galaxy == galaxy)
         Q = Q.order_by(asc(Planet.z))
-        return render("galaxy.tpl", request, galaxy=galaxy, gh=gh, planets=Q.all())
+        return render("galaxy.tpl", request, galaxy=galaxy, planets=Q.all())
