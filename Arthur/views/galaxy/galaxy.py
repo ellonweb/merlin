@@ -21,6 +21,7 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from sqlalchemy import or_
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import asc, desc
 from sqlalchemy.sql.functions import sum
@@ -68,7 +69,13 @@ class galaxy(loadable):
         stats = Q.first()
         stats.exiles = len(galaxy.outs)
         
+        Q = session.query(PlanetExiles)
+        Q = Q.filter(or_(PlanetExiles.old == galaxy, PlanetExiles.new == galaxy))
+        Q = Q.order_by(desc(PlanetExiles.tick))
+        exiles = Q[:10]
+        
         return render("galaxy.tpl", request, galaxy=galaxy,
                                              planets=planets,
                                              stats=stats,
+                                             exiles=exiles,
                                              )
