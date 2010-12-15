@@ -609,8 +609,12 @@ while True:
                           alliances=Alliance.__table__.count(Alliance.active==True)
                         ))
 
-        # Create records of planet movements or deletions
-        session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz, newx, newy, newz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z, planet.x, planet.y, planet.z FROM planet, planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :oldtick AND (planet.active = :true AND (planet.x != planet_history.x OR planet.y != planet_history.y OR planet.z != planet_history.z) OR planet.active = :false);", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), true, false]))
+        # Create records of new planets,
+        session.execute(text("INSERT INTO planet_exiles (tick, id, newx, newy, newz) SELECT :tick, planet.id, planet.x, planet.y, planet.z FROM planet WHERE planet.id NOT IN (SELECT id FROM planet_history WHERE planet_history.tick = :oldtick) AND planet.active = :true;", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), true]))
+        # deleted plantes
+        session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z FROM planet, planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :oldtick AND planet.active = :false;", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), false]))
+        # and planet movements
+        session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz, newx, newy, newz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z, planet.x, planet.y, planet.z FROM planet, planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :oldtick AND planet.active = :true AND (planet.x != planet_history.x OR planet.y != planet_history.y OR planet.z != planet_history.z);", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), true]))
 
         # Copy the dumps to their respective history tables
         session.execute(text("INSERT INTO galaxy_history (tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank) SELECT :tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank FROM galaxy WHERE galaxy.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))

@@ -268,9 +268,9 @@ class PlanetExiles(Base):
     newx = Column(Integer)
     newy = Column(Integer)
     newz = Column(Integer)
-Galaxy.outs = relation(PlanetExiles, primaryjoin=and_(Galaxy.x==PlanetExiles.oldx, Galaxy.y==PlanetExiles.oldy),
+Galaxy.outs = relation(PlanetExiles, backref="old", primaryjoin=and_(Galaxy.x==PlanetExiles.oldx, Galaxy.y==PlanetExiles.oldy),
                                     order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.oldz),))
-Galaxy.ins = relation(PlanetExiles, primaryjoin=and_(Galaxy.x==PlanetExiles.newx, Galaxy.y==PlanetExiles.newy),
+Galaxy.ins = relation(PlanetExiles, backref="new", primaryjoin=and_(Galaxy.x==PlanetExiles.newx, Galaxy.y==PlanetExiles.newy),
                                     order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.newz),))
 PlanetExiles.planet = relation(Planet, backref="exiles", order_by=desc(PlanetExiles.tick))
 
