@@ -258,6 +258,8 @@ GalaxyHistory.planets = relation(PlanetHistory, order_by=asc(PlanetHistory.z), b
 GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory)
 class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
+    __table_args__ = (ForeignKeyConstraint(('oldx', 'oldy',), (Galaxy.x, Galaxy.y,)),
+                      ForeignKeyConstraint(('newx', 'newy',), (Galaxy.x, Galaxy.y,)), {})
     tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
     id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
     oldx = Column(Integer)
@@ -266,6 +268,11 @@ class PlanetExiles(Base):
     newx = Column(Integer)
     newy = Column(Integer)
     newz = Column(Integer)
+Galaxy.outs = relation(PlanetExiles, primaryjoin=and_(Galaxy.x==PlanetExiles.oldx, Galaxy.y==PlanetExiles.oldy),
+                                    order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.oldz),))
+Galaxy.ins = relation(PlanetExiles, primaryjoin=and_(Galaxy.x==PlanetExiles.newx, Galaxy.y==PlanetExiles.newy),
+                                    order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.newz),))
+PlanetExiles.planet = relation(Planet, backref="exiles", order_by=desc(PlanetExiles.tick))
 
 class Alliance(Base):
     __tablename__ = 'alliance'

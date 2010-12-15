@@ -1,6 +1,6 @@
 {% extends "base.tpl" %}
 {% block content %}
-<table cellspacing="1" cellpadding="3" width="100%" class="black">
+<table cellspacing="1" cellpadding="3" width="95%" class="black">
     <tr class="datahigh">
         <th colspan="17">Alliance listing (intel)</th>
     </tr>
