@@ -1,8 +1,13 @@
 <table cellspacing="1" cellpadding="3" width="100%">
 <tr>
-    <td width="33%" align="left">
+    <td rowspan="2" width="33%" align="left">
         <a href="/"><img border="0" src="/static/logo.png" /></a>
     </td>
+    <th align="center">{{ slogan }}</th>
+    <td rowspan="2" width="33%" align="right">
+    </td>
+</tr>
+<tr>
     <td width="34%" valign="middle" align="center">
     {% if user.planet %}{% with planet = user.planet %}
     
@@ -47,8 +52,6 @@
             <input type="submit" value="!"/>
         </form>
     {% endif %}
-    </td>
-    <td width="33%" align="right">
     </td>
 </tr>
 </table>
