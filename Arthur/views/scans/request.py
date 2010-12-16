@@ -21,6 +21,7 @@
  
 from django.conf.urls.defaults import include, patterns, url
 from sqlalchemy.sql import asc
+from Core.paconf import Config
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, Request
@@ -109,4 +110,4 @@ class requests(loadable):
         Q = Q.order_by(asc(Request.id))
         everyone = Q.all()
         
-        return render("scans/requests.tpl", request, types=Request._requestable, mine=mine, everyone=everyone, message=message)
+        return render("scans/requests.tpl", request, anonscans=Config.getboolean("Misc", "anonscans"), types=Request._requestable, mine=mine, everyone=everyone, message=message)

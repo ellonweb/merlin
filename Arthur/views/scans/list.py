@@ -56,7 +56,7 @@ class scans(loadable):
         Q = Q.order_by(desc(Scan.id))
         scans = Q[:25]
         
-        return render("scans/scans.tpl", request, types=Request._requestable, open=open, completed=completed, scans=scans, message=message, planet=planet)
+        return render("scans/scans.tpl", request, anonscans=Config.getboolean("Misc", "anonscans"), types=Request._requestable, open=open, completed=completed, scans=scans, message=message, planet=planet)
 
 @load
 class group(loadable):

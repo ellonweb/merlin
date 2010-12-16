@@ -73,16 +73,19 @@ class request(loadable):
         
         user = request.user
         planet = request.target
+        
+        requester = user.name if not Config.getboolean("Misc", "anonscans") else "Anon"
         dists_intel = planet.intel.dists if planet.intel else 0
-        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (request.id, user.name, request.type, planet.x,planet.y,planet.z, dists_intel, request.dists,) + request.link, self.scanchan())
+        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (request.id, requester, request.type, planet.x,planet.y,planet.z, dists_intel, request.dists,) + request.link, self.scanchan())
     
     def request(self, message, user, planet, scan, dists):
         request = Request(target=planet, scantype=scan, dists=dists)
         user.requests.append(request)
         session.commit()
         
+        requester = user.name if not Config.getboolean("Misc", "anonscans") else "Anon"
         dists_intel = planet.intel.dists if planet.intel else 0
-        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (request.id, user.name, request.type, planet.x,planet.y,planet.z, dists_intel, request.dists,) + request.link, self.scanchan())
+        message.privmsg("[%s] %s requested a %s Scan of %s:%s:%s Dists(i:%s/r:%s) " % (request.id, requester, request.type, planet.x,planet.y,planet.z, dists_intel, request.dists,) + request.link, self.scanchan())
         
         return request
     
@@ -95,7 +98,7 @@ class request(loadable):
             message.reply("No open request number %s exists (idiot)."%(id,))
             return
         if request.user is not user and not user.is_admin() and not self.is_chan(message, self.scanchan()):
-            message.reply("Only %s may cancel request %s."%(request.user.name,id))
+            message.reply("Scan request %s isn't yours and you're not a scanner!"%(id,))
             return
         
         request.active = False
