@@ -19,17 +19,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from django.conf.urls.defaults import include, patterns, url
-from Arthur.views.planet import planets
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from Core.db import session
+from Core.maps import Planet
+from Arthur.context import render
+from Arthur.loadable import loadable, load
 
-urlpatterns = patterns('Arthur.views.planet',
-    url(r'^planets/$', 'planets.planets', name="planet_ranks"),
-    url(r'^planets/(?P<page>\d+)/$', 'planets.planets'),
-    url(r'^planets/(?P<sort>\w+)/$', 'planets.planets'),
-    url(r'^planets/(?P<sort>\w+)/(?P<page>\d+)/$', 'planets.planets'),
-    url(r'^planets/(?P<race>\w+)/(?P<sort>\w+)/$', 'planets.planets'),
-    url(r'^planets/(?P<race>\w+)/(?P<sort>\w+)/(?P<page>\d+)/$', 'planets.planets', name="planets"),
-    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/$', 'planet.planet', name="planet"),
-    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/intel/$', 'iplanet.planet', name="iplanet"),
-    url(r'^planet/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/(?:intel/)?fleets/$', 'iplanet.planet', {'fleets':True}, name="fplanet"),
-)
+@load
+class planet(loadable):
+    def execute(self, request, user, x, y, z):
+        planet = Planet.load(x,y,z)
+        if planet is None:
+            return HttpResponseRedirect(reverse("planet_ranks"))
+        
+        return render("planet.tpl", request, planet=planet)
