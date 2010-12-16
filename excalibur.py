@@ -46,8 +46,8 @@ while True:
 
         # How long has passed since starting?
         # If 55 mins, we're not likely getting dumps this tick, so quit
-        if (time.time() - t_start) >= (55 * 60):
-            excaliburlog("55 minutes without a successful dump, giving up!")
+        if (time.time() - t_start) >= (25 * 60):
+            excaliburlog("25 minutes without a successful dump, giving up!")
             session.close()
             sys.exit()
 
@@ -136,13 +136,14 @@ while True:
 
         # Insert the data to the temporary tables
         # Planets
+        mapping = {"Prty": "Cat", "Bad": "Zik", "Good": "Xan"}
         session.execute(planet_temp.insert(), [{
                                                 "x": int(p[0]),
                                                 "y": int(p[1]),
                                                 "z": int(p[2]),
                                                 "planetname": p[3].strip("\""),
                                                 "rulername": p[4].strip("\""),
-                                                "race": p[5],
+                                                "race": mapping[p[5]],
                                                 "size": int(p[6] or 0),
                                                 "score": int(p[7] or 0),
                                                 "value": int(p[8] or 0),
