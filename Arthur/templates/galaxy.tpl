@@ -91,6 +91,9 @@
         <td>{{ planet.rulername }}</td>
         <td>{{ planet.planetname }}</td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
+        {%if not planet.active %}
+        <td align="center" colspan="8"><i>Planet doesn't exist anymore.</i></td>
+        {%else%}
         <td align="right">{{ planet|bashcap("size") }}</td>
         <td align="right">{{ planet|bashcap("value") }}</td>
         <td align="right">{{ planet|bashcap("score") }}</td>
@@ -100,6 +103,7 @@
         <td align="right">{{ planet|growth("size") }}</td>
         <td align="right">{{ planet|growth("value") }}</td>
         <td align="right">{{ planet|growth("score") }}</td>
+        {%endif%}
         
         <td align="right">{{exile.tick}}</td>
     </tr>
