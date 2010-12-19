@@ -27,11 +27,10 @@ from Core.maps import Planet
 from Arthur.jinja import filter
 
 @filter
-def growth(object, attr):
-    word = " points" if attr[:4] != "size" else " roids"
-    diff = getattr(object, attr+"_growth") or 0
-    pc = str(round(getattr(object, attr+"_growth_pc") or 0,1)) + "%"
-    ret = '<div class="growth_%s"><span class='
+def change(text, diff, title=""):
+    text = text or 0
+    diff = diff or 0
+    ret = '<span class='
     if diff < 0:
         ret += '"red"'
     elif diff > 0:
@@ -39,7 +38,15 @@ def growth(object, attr):
     else:
         ret += '"yellow"'
     ret += ' title="%s">%s</span></div>'
-    ret = ret*2 %("pc", intcomma(diff)+word, pc, "diff", pc, intcomma(diff),)
+    return ret%(title, text,)
+
+@filter
+def growth(object, attr):
+    word = " points" if attr[:4] != "size" else " roids"
+    diff = getattr(object, attr+"_growth") or 0
+    pc = str(round(getattr(object, attr+"_growth_pc") or 0,1)) + "%"
+    ret = '<div class="growth_%s">%s</div>'
+    ret = ret*2 %("pc", change(pc, diff, intcomma(diff)+word), "diff", change(intcomma(diff), diff, pc),)
     return ret
 
 @filter
@@ -48,15 +55,7 @@ def absgrowth(context, object, attr):
     present = bashcap(context, object, attr)
     diff = getattr(object, attr+"_growth") or 0
     pc = str(round(getattr(object, attr+"_growth_pc") or 0,1)) + "%"
-    ret = '%s (<span class='
-    if diff < 0:
-        ret += '"red"'
-    elif diff > 0:
-        ret += '"green"'
-    else:
-        ret += '"yellow"'
-    ret += ' title="%s">%s</span>)'
-    ret = ret %(present, pc, intcomma(diff),)
+    ret = '%s (%s)' %(present, change(intcomma(diff), diff, pc),)
     return ret
 
 @filter
@@ -90,26 +89,40 @@ def bashcap(context, target, attr):
 def members(object, all=False):
     present = getattr(object, "members")
     diff = getattr(object, "member_growth") or 0
-    ret = '<span class='
-    if diff < 0:
-        ret += '"red"'
-    elif diff > 0:
-        ret += '"green"'
-    else:
-        ret += '"yellow"'
-    ret += ' title="' + str(diff) + ' members">'
+    ret = ''
     if all and diff != 0:
         ret += '<span class="white">(</span>'
         ret += str(diff)
         ret += '<span class="white">)</span> '
     ret += str(present)
-    ret += '</span>'
+    ret = change(ret, diff, str(diff) + ' members')
     return ret
 
 @filter
 def rank(object, attr):
     value = getattr(object, attr+"_rank")
     diff = getattr(object, attr+"_rank_change") or 0
+    ret = str(value) + ' <img src='
+    if diff > 0:
+        ret += '"/static/down.gif"'
+    elif diff < 0:
+        ret += '"/static/up.gif"'
+    else:
+        ret += '"/static/nonemover.gif"'
+    ret += ' title='
+    if diff > 0:
+        ret += '"Down %s places"' %(diff,)
+    elif diff < 0:
+        ret += '"Up %s places"' %(-diff,)
+    else:
+        ret += '"Non mover"'
+    ret += ' />'
+    return ret
+
+@filter
+def hrank(object, attr, old):
+    value = getattr(object, attr+"_rank")
+    diff = (old or 0) - value
     ret = str(value) + ' <img src='
     if diff > 0:
         ret += '"/static/down.gif"'

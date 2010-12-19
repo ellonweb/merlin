@@ -28,7 +28,8 @@ def filter(f):
     jinja.filters[f.__name__] = f
     return f
 
-from django.template.defaultfilters import default, force_escape, linebreaks
+from django.template.defaultfilters import date, default, force_escape, linebreaks
+filter(date)
 filter(default)
 filter(force_escape)
 filter(linebreaks)
