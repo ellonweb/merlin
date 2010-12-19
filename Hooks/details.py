@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, Target
 from Core.loadable import loadable, route
@@ -53,7 +54,7 @@ class details(loadable):
 
             cap=target.maxcap(attacker)
             xp=attacker.calc_xp(target)
-            reply+="| Roids: %s | XP: %s | Score: %s" % (cap,xp,xp*60)
+            reply+="| Roids: %s | XP: %s | Score: %s" % (cap,xp,xp*PA.getint("numbers", "xp_value"))
             replies.append(reply)
         
         if target.intel is not None:

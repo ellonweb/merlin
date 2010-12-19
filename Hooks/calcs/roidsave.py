@@ -36,7 +36,7 @@ class roidsave(loadable):
 
         mining = mining *(float(bonus+100)/100)
 
-        value = ticks*roids*mining/100
+        value = ticks*roids*mining/PA.getint("numbers", "ship_value")
         reply = "In %s ticks (%s days) %s roids with %s%% bonus will mine %s value" % (ticks,ticks/24,roids,bonus,self.num2short(value))
         
         for gov in PA.options("govs"):

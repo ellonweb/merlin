@@ -46,20 +46,20 @@ class eff(loadable):
         if ship.t1 == "Roids":
             killed = total_damage/50
             message.reply("%s %s (%s) will capture Asteroid: %s (%s)" % (
-                num, ship.name, self.num2short(num*ship.total_cost/100),
+                num, ship.name, self.num2short(num*ship.total_cost/PA.getint("numbers", "ship_value")),
                 killed, self.num2short(killed*PA.getint("numbers", "roid_value")),))
             return
         if ship.t1 == "Struct":
             killed = total_damage/500
             message.reply("%s %s (%s) will destroy Structure: %s (%s)" % (
-                num, ship.name, self.num2short(num*ship.total_cost/100),
+                num, ship.name, self.num2short(num*ship.total_cost/PA.getint("numbers", "ship_value")),
                 killed, self.num2short(killed*PA.getint("numbers", "cons_value")),))
             return
         targets = session.query(Ship).filter(Ship.class_ == target_class)
         if targets.count() == 0:
             message.reply("%s does not have any targets in that category (%s)" % (ship.name,target))
             return
-        reply="%s %s (%s) hitting %s will " % (num, ship.name,self.num2short(num*ship.total_cost/100),target_class)
+        reply="%s %s (%s) hitting %s will " % (num, ship.name,self.num2short(num*ship.total_cost/PA.getint("numbers", "ship_value")),target_class)
         if ship.type.lower() == "norm" or ship.type.lower() == 'cloak':
             reply+="destroy "
         elif ship.type.lower() == "emp":
@@ -73,5 +73,5 @@ class eff(loadable):
                 killed=int(efficiency * ship.guns*num*float(100-target.empres)/100)
             else:
                 killed=int(efficiency * total_damage/target.armor)
-            reply+="%s: %s (%s) " % (target.name,killed,self.num2short(target.total_cost*killed/100))
+            reply+="%s: %s (%s) " % (target.name,killed,self.num2short(target.total_cost*killed/PA.getint("numbers", "ship_value")))
         message.reply(reply)

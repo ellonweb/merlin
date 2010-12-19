@@ -23,6 +23,7 @@ import re
 from sqlalchemy import cast, Float, func, Integer, or_
 from sqlalchemy.sql import desc
 from sqlalchemy.sql.functions import max, min
+from Core.paconf import PA
 from Core.db import session
 from Core.maps import Planet, Alliance, Intel
 from Core.loadable import loadable, route, require_planet
@@ -135,7 +136,7 @@ class whore(loadable):
         replies = []
         for planet, intel, xp_gain in result[:5]:
             reply="%s:%s:%s (%s)" % (planet.x,planet.y,planet.z,planet.race)
-            reply+=" Value: %s Size: %s Scoregain: %d" % (planet.value,planet.size, xp_gain*60)
+            reply+=" Value: %s Size: %s Scoregain: %d" % (planet.value,planet.size, xp_gain*PA.getint("numbers", "xp_value"))
             if intel:
                 if intel.nick:
                     reply+=" Nick: %s" % (intel.nick,)
