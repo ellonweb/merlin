@@ -2,11 +2,11 @@
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="95%" class="black">
     <tr class="datahigh">
-        <th colspan="16">Galaxy listing</th>
+        <th colspan="17">Galaxy listing</th>
     </tr>
     <tr class="header">
         <th colspan="5">Rank</th>
-        <th colspan="8">&nbsp;</th>
+        <th colspan="9">&nbsp;</th>
         <th class="center" colspan="3"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
     </tr>
     <tr class="header">
@@ -20,6 +20,7 @@
         <th>Name</th>
         <th><a href="{% url "galaxies", "size", page|default(1) %}">Size</a></th>
         <th><a href="{% url "galaxies", "value", page|default(1) %}">Value</a></th>
+        <th><a href="{% url "galaxies", "real_score", page|default(1) %}">Real Score</a></th>
         <th><a href="{% url "galaxies", "score", page|default(1) %}">Score</a></th>
         <th><a href="{% url "galaxies", "planets", page|default(1) %}">Plan</a></th>
         <th><a href="{% url "galaxies", "ratio", page|default(1) %}">Ratio</a></th>
@@ -44,6 +45,7 @@
         </a></td>
         <td align="right"{%if sort=="size"%} class="datahigh"{%endif%}>{{ galaxy.size|intcomma }}</td>
         <td align="right"{%if sort=="value"%} class="datahigh"{%endif%}>{{ galaxy.value|intcomma }}</td>
+        <td align="right"{%if sort=="real_score"%} class="datahigh"{%endif%}>{{ galaxy.real_score|intcomma }}</td>
         <td align="right"{%if sort=="score"%} class="datahigh"{%endif%}>{{ galaxy.score|intcomma }}</td>
         <td align="right"{%if sort=="planets"%} class="datahigh"{%endif%}>{{ galaxy|members }}</td>
         <td align="right"{%if sort=="ratio"%} class="datahigh"{%endif%}>{{ galaxy.ratio|round(1) }}</td>
@@ -58,7 +60,7 @@
     
     {% if pages %}
     <tr class="datahigh">
-        <td colspan="16">Pages:{% for p in pages %} {% if p != page %}<a href="{% url "galaxies", sort, p %}">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}{% endfor %}</td>
+        <td colspan="17">Pages:{% for p in pages %} {% if p != page %}<a href="{% url "galaxies", sort, p %}">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}{% endfor %}</td>
     </tr>
     {% endif %}
     

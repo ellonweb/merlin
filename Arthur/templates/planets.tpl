@@ -109,7 +109,7 @@
         {{planet|attr(sort)|intcomma}}
         {% elif sort in ("avroids",) %}
         {{planet|attr(sort)|round|int|intcomma}}
-        {% elif sort[3:] in ("score","value","size","xp",) %}
+        {% elif sort[3:] in ("score","real_score","value","size","xp",) %}
         {{planet.galaxy|attr(sort[3:])|intcomma}}
         {% elif sort[3:] in ("ratio",) %}
         {{planet.galaxy|attr(sort[3:])|round(1)|intcomma}}

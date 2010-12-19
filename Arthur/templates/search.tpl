@@ -24,6 +24,7 @@
                     ("galsize", "[Galaxy] Size",),
                     ("galvalue", "[Galaxy] Value",),
                     ("galscore", "[Galaxy] Score",),
+                    ("galreal_score", "[Galaxy] Real Score",),
                 )
         %}
 {% block title %}Search Results{% endblock %}
