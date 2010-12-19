@@ -97,7 +97,7 @@ class galaxy(loadable):
                             scorediff, realscorediff
                             )
         Q = Q.join(Updates)
-        Q = Q.outerjoin((next, and_(history.id==next.id, history.tick==next.tick-1)))
+        Q = Q.outerjoin((next, and_(history.id==next.id, history.tick-1==next.tick)))
         Q = Q.filter(history.current == galaxy)
         Q = Q.order_by(desc(history.tick))
         history = Q[:12]
