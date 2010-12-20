@@ -45,7 +45,7 @@ class Updates(Base):
     galaxies = Column(Integer)
     planets = Column(Integer)
     alliances = Column(Integer)
-    timestamp = Column(DateTime, default=current_timestamp())
+    timestamp = Column(DateTime, default=datetime.utcnow())
     clusters = Column(Integer, default=0)
     c200 = Column(Integer, default=0)
     ter = Column(Integer, default=0)
@@ -56,7 +56,7 @@ class Updates(Base):
     
     @property
     def age(self):
-        td = datetime.now() - self.timestamp
+        td = datetime.utcnow() - self.timestamp
         ret = ''
         days = td.days
         if days: ret += "%sd "%(days,)
