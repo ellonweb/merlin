@@ -144,7 +144,7 @@
         <td>{%if sizediff %}{{sizediff|intcomma|change(sizediff, "Value: "+sizediffvalue|intcomma)}}{%endif%}</td>
         <td>{{gh.value|intcomma}}</td>
         <td>{%if valuediff and sizediff %}
-            {{valuediff|intcomma|change(valuediff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma + "(Roid Value: "+sizediffvalue|intcomma+")")}}
+            {{valuediff|intcomma|change(valuediff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma + " (Roid Value: "+sizediffvalue|intcomma+")")}}
             {%elif valuediff %}
             {{valuediff|intcomma|change(valuediff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma)}}
             {%endif%}</td>
