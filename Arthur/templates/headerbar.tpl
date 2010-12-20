@@ -3,12 +3,13 @@
     <td rowspan="2" width="33%" align="left">
         <a href="/"><img border="0" src="/static/logo.png" /></a>
     </td>
-    <th align="center">{{ slogan }}</th>
+    <th valign="top" align="center">{{ slogan }}</th>
     <td rowspan="2" width="33%" align="right">
     </td>
 </tr>
 <tr>
     <td width="34%" valign="middle" align="center">
+{% if user is defined %}
     {% if user.planet %}{% with planet = user.planet %}
     
 <table cellspacing="0" cellpadding="1">
@@ -52,6 +53,7 @@
             <input type="submit" value="!"/>
         </form>
     {% endif %}
+{% endif %}
     </td>
 </tr>
 </table>
