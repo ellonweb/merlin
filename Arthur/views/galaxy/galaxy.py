@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from datetime import timedelta
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy import and_, or_
@@ -88,7 +89,7 @@ class galaxy(loadable):
         xpvalue = xpdiff * PA.getint("numbers", "xp_value")
         scorediff = history.score - next.score
         realscorediff = history.real_score - next.real_score
-        Q = session.query(history, Updates.timestamp,
+        Q = session.query(history, Updates.timestamp - timedelta(minutes=1),
                             next.score_rank, membersdiff,
                             sizediff, sizediffvalue,
                             valuediff, valuediffwsizevalue,
