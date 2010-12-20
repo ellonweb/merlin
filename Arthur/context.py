@@ -77,6 +77,7 @@ def base_context(request):
     context = {"name"   : Config.get("Alliance", "name"),
                "slogan" : Config.get("Alliance", "name"),
                "tick"   : Updates.current_tick(),
+               "update" : Updates.current(),
                }
     if getattr(request, "user", None) is not None:
         context["user"] = request.user
