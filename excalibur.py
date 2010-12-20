@@ -638,6 +638,23 @@ session.close()
 t1=time.time()-t_start
 print "Total time taken: %.3f seconds" % (t1,)
 
+# Update stats
+t_start=time.time()
+session.execute(text("""UPDATE updates SET
+                          clusters = (SELECT max(x)   FROM planet WHERE planet.active = :true AND x < 200),
+                          c200     = (SELECT count(*) FROM planet WHERE planet.active = :true AND x = 200),
+                          ter      = (SELECT count(*) FROM planet WHERE planet.active = :true AND race ILIKE 'ter%'),
+                          cat      = (SELECT count(*) FROM planet WHERE planet.active = :true AND race ILIKE 'cat%'),
+                          xan      = (SELECT count(*) FROM planet WHERE planet.active = :true AND race ILIKE 'xan%'),
+                          zik      = (SELECT count(*) FROM planet WHERE planet.active = :true AND race ILIKE 'zik%'),
+                          etd      = (SELECT count(*) FROM planet WHERE planet.active = :true AND race ILIKE 'etd%')
+                        WHERE updates.id = :tick
+                    ;""", bindparams=[bindparam("tick",planet_tick), true]))
+session.commit()
+session.close()
+t1=time.time()-t_start
+print "Update stats in: %.3f seconds" % (t1,)
+
 # Measure some dicks
 last_tick = Updates.current_tick()
 history_tick = max(last_tick-72, 1)
