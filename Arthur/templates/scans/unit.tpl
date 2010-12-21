@@ -31,8 +31,8 @@
         <td class="right"> {{ unit.amount|intcomma }} </td>
         <td class="center"> {{ unit.ship.class_[:2]|upper }} </td>
         <td class="center"> {{ unit.ship.t1[:2]|upper }} </td>
-        <td class="center"> {{ unit.ship.t2|default("-")[:2]|upper }} </td>
-        <td class="center"> {{ unit.ship.t3|default("-")[:2]|upper }} </td>
+        <td class="center"> {{ (unit.ship.t2|default("-"))[:2]|upper }} </td>
+        <td class="center"> {{ (unit.ship.t3|default("-"))[:2]|upper }} </td>
         
         {% if loop.last and loop.index is odd %}
             <td class="datahigh left">  </td>
