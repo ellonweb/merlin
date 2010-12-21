@@ -1,8 +1,9 @@
+{% from 'macros.tpl' import alliancelink with context %}
 {% extends "base.tpl" %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" class="black">
     <tr class="datahigh">
-        <th colspan="10"><a href="{% url "alliance_members", alliance.name %}">{{ alliance.name }}</a> History, based on present intel of {{ members }} ({{ alliance.members }}) members</th>
+        <th colspan="10"><a {{alliancelink(alliance.name)}}>{{ alliance.name }}</a> History, based on present <a href="{% url "alliance_members", alliance.name %}">intel of {{ members }} ({{ alliance.members }}) members</a></th>
     </tr>
     <tr class="header">
         <th width="50">Tick</th>

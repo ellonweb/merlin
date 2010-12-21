@@ -1,3 +1,4 @@
+{% from 'macros.tpl' import planetscanslink with context %}
 {% extends "base.tpl" %}
 {% block content %}
     <table cellspacing="1" cellpadding="3" width="600" class="black">
@@ -15,7 +16,7 @@
         
         {% for planet, scans in group %}
         <tr class="{{ loop.cycle('odd', 'even') }}">
-            <td class="center"><a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
+            <td class="center"><a {{planetscanslink(planet)}}>{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
             <td class="center {{ planet.race }}">{{ planet.race }}</td>
             <td class="right"> {{ planet.size|intcomma }} </td>
             <td class="right"> {{ planet.value|intcomma }} </td>

@@ -1,6 +1,7 @@
+{% from 'macros.tpl' import alliancelink with context %}
 {% extends "planets.tpl" %}
 {% block title %}
-    {{ planet.x }}:{{ planet.y }}:{{ planet.z }}
+    <a href="{% url "planet", planet.x, planet.y planet.z %}">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a>
     {% if user|intel %}
         {% if planet.intel and planet.intel.nick %}
             <i>{{ planet.intel.nick }}</i>
@@ -9,7 +10,9 @@
             {% endif %}
         {% endif %}
         {% if planet.intel and planet.alliance %}
+            <a {{alliancelink(planet.alliance.name)}}>
             <i>{{ planet.alliance.name }}</i>
+            </a>
         {% endif %}
     {% endif %}
 {% endblock %}

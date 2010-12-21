@@ -1,3 +1,4 @@
+{% from 'macros.tpl' import planetlink with context %}
 {% extends "base.tpl" %}
 {% block content %}
 {% if message %}
@@ -40,7 +41,7 @@
         
         {% for planet, lt in bookings %}
         <tr class="{{ loop.cycle('odd', 'even') }}">
-            <td class="center"><a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
+            <td class="center"><a {{planetlink(planet)}}>{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
             <td class="center">{{ lt - tick }}/{{ lt }}</td>
             <td class="center"><a href="{% url "unbook" planet.x, planet.y, planet.z, lt %}">Unbook</a></td>
             <td class="{{ planet.race }}">{{ planet.race }}</td>

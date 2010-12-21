@@ -1,3 +1,4 @@
+{% from 'macros.tpl' import planetlink with context %}
 {% extends "base.tpl" %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" class="black">
@@ -16,7 +17,7 @@
     <tr class="{{ loop.cycle('odd', 'even') }}">
         <td class="right">{{ epenis.rank }}</td>
         <td class="center"><a href="{% url "dashboard", member.name %}">{{ member.name }}</a></td>
-        <td class="center"><a href="{% url "planet", p.x, p.y, p.z %}">{{ p.x }}:{{ p.y }}:{{ p.z }}</a></td>
+        <td class="center"><a {{planetlink(p)}}>{{ p.x }}:{{ p.y }}:{{ p.z }}</a></td>
         <td class="right">{{ epenis.penis|intcomma }}</td>
     </tr>
     {% endfor %}

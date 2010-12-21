@@ -28,7 +28,7 @@
     </tr>
     {% for fleet, planet, alliance in outgoing %}
     <tr class="{{ fleet.mission|lower }}">
-        <td class="center"><a href="{% url "planet", planet.x, planet.y, planet.z %}" class="gray">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a> </td>
+        <td class="center"><a href="{% url "iplanet", planet.x, planet.y, planet.z %}" class="gray">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a> </td>
         <td class="center"> {{ alliance.name }} </td>
         <td class="left"> {{ fleet.fleet_name }} </td>
         <td class="right"> {{ fleet.fleet_size|intcomma }} </td>
@@ -52,7 +52,7 @@
     </tr>
     {% for fleet, planet, alliance in incoming %}
     <tr class="{{ fleet.mission|lower }}">
-        <td class="center"> <a href="{% url "planet", planet.x, planet.y, planet.z %}" class="gray">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a> </td>
+        <td class="center"> <a href="{% url "iplanet", planet.x, planet.y, planet.z %}" class="gray">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a> </td>
         <td class="center"> {{ alliance.name }} </td>
         <td class="left"> {{ fleet.fleet_name }} </td>
         <td class="right"> {{ fleet.fleet_size|intcomma }} </td>

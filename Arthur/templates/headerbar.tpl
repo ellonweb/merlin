@@ -1,3 +1,4 @@
+{% from 'macros.tpl' import planetlink with context %}
 <table cellspacing="1" cellpadding="3" width="100%">
 <tr>
     <td width="33%" align="left">
@@ -10,9 +11,9 @@
     <tr>
         <td align="center" colspan="3">
         <form method="post">
-        You are: <a class="myplanet" href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.rulername }}</a>
+        You are: <a class="myplanet" {{planetlink(planet)}}>{{ planet.rulername }}</a>
             (<a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-            <a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.z }}</a>)
+            <a {{planetlink(planet)}}>{{ planet.z }}</a>)
             <span class="{{ planet.race }}">{{ planet.race }}</span>
             <input type="submit" name="planet" value="Clear"/>
         </form>

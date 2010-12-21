@@ -1,3 +1,4 @@
+{% from 'macros.tpl' import alliancelink with context %}
 {% extends "base.tpl" %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="95%" class="black">
@@ -37,7 +38,7 @@
         <td align="right">{{ alliance|rank("score_avg") }}</td>
         <td align="right">{{ alliance|rank("size_avg") }}</td>
         
-        <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" href="{% url "alliance", alliance.name %}">
+        <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" {{alliancelink(alliance.name)}}">
             {{ alliance.name }}
         </a></td>
         <td align="right"{%if sort=="members"%} class="datahigh"{%endif%}>{{ alliance|members(True) }}</td>
