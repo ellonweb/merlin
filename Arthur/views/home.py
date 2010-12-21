@@ -109,7 +109,7 @@ class links(loadable):
                }.get(link)
         if link is None:
             return page_not_found(request)
-        return HttpResponseRedirect(link)
+        return HttpResponseRedirect(self.url(link, user))
 
 @menu(bot, "Guide to %s"%(Config.get("Connection","nick"),))
 @load

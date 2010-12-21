@@ -32,4 +32,4 @@ class links(loadable):
                  Config.get("URL","arthur"),
                 ]
         
-        message.reply("Links: "+" | ".join(links))
+        message.reply(self.url("Links: "+" | ".join(links), user))
