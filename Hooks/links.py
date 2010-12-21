@@ -27,9 +27,9 @@ class links(loadable):
     @route()
     def execute(self, message, user, params):
         
-        links = [Config.get("URL","arthur"),
-                 "http://sandmans.co.uk",
-                 "http://game.planetarion.com/bcalc.pl",
+        links = [Config.get("URL","game"),
+                 Config.get("URL","bcalc"),
+                 Config.get("URL","arthur"),
                 ]
         
         message.reply("Links: "+" | ".join(links))

@@ -26,8 +26,8 @@ from Core.maps import Planet, Alliance, User, Intel
 from Core.loadable import loadable, route, require_user
 
 class pref(loadable):
-    """Set your planet, password for the webby, email and phone number; order doesn't matter"""
-    usage = " [planet=x.y.z] [password=pass] [email=my.email@address.com] [phone=999] [pubphone=T|F] [smsmode=clickatell|google|both]"
+    """Set your planet, password for the webby, URL preference and phone number and settings; order doesn't matter"""
+    usage = " [planet=x.y.z] [password=pass] [url=ip] [phone=999] [pubphone=T|F] [smsmode=clickatell|google|both]"
     planet_coordre = re.compile(loadable.planet_coord)
     
     @route(r"")
@@ -36,6 +36,8 @@ class pref(loadable):
         reply = ""
         if user.planet is not None:
             reply += " planet=%s:%s:%s" % (user.planet.x,user.planet.y,user.planet.z,)
+        if user.url:
+            reply += " url: %s" % (Config.get("alturls", user.url),)
         if user.email:
             reply += " email=%s" % (user.email,)
         if user.phone:
@@ -79,6 +81,19 @@ class pref(loadable):
                     continue
                 user.passwd = val
                 reply += " password=%s"%(val)
+            if opt == "url":
+                if val == "game" or val in self.nulls:
+                    user.url = None
+                    val = Config.get("URL", "game")
+                elif val not in Config.options("alturls"):
+                    ret = "Valid URLs are: game: %s, " %(Config.get("URL", "game"),)
+                    ret+= ", ".join(["%s: %s" %(k,v,) for k, v in Config.items("alturls")])
+                    message.reply(ret)
+                    continue
+                else:
+                    user.url = val
+                    val = Config.get("alturls", val)
+                reply += " url: %s"%(val)
             if opt == "email":
                 try:
                     user.email = val
