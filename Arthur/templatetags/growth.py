@@ -37,8 +37,10 @@ def change(text, diff, title=""):
         ret += '"green"'
     else:
         ret += '"yellow"'
-    ret += ' title="%s">%s</span></div>'
-    return ret%(title, text,)
+    if title:
+        ret += ' title="%s"'%(intcomma(title),)
+    ret += '>%s</span></div>'%(intcomma(text),)
+    return ret
 
 @filter
 def growth(object, attr):

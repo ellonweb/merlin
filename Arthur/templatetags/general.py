@@ -39,17 +39,3 @@ def percent(value, total):
 def and_percent(value, total):
     fraction = float(value) / total if total else 0
     return "%s (%s%%)" % (value, round(fraction * 100, 1),)
-
-@filter
-def change(diff):
-    if diff is None:
-        return ""
-    ret = '<span class='
-    if diff < 0:
-        ret += '"red"'
-    elif diff > 0:
-        ret += '"green"'
-    else:
-        ret += '"yellow"'
-    ret += '>%s</span>' % (diff,)
-    return ret
