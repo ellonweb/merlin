@@ -426,7 +426,7 @@ while True:
         # Update everything from the temp table and generate ranks
         # Deactivated items are untouched but NULLed earlier
         session.execute(text("""UPDATE planet AS p SET
-                                  age = p.age + 1,
+                                  age = COALESCE(p.age, 0) + 1,
                                   x = t.x, y = t.y, z = t.z,
                                   planetname = t.planetname, rulername = t.rulername, race = t.race,
                                   size = t.size, score = t.score, value = t.value, xp = t.xp,
