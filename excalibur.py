@@ -404,7 +404,10 @@ while True:
                                   %ssize_rank_change = NULL, %sscore_rank_change = NULL, %svalue_rank_change = NULL, %sxp_rank_change = NULL,
                                   %ssize_rank = NULL, %sscore_rank = NULL, %svalue_rank = NULL, %sxp_rank = NULL,
                                   %stotalroundroids_rank = NULL, %stotallostroids_rank = NULL, %stotalroundroids_rank_change = NULL, %stotallostroids_rank_change = NULL,
-                             """ * 4) % (("",)*12 + ("cluster_",)*12 + ("galaxy_",)*12 + ("race_",)*12)) +
+                             """ * 4) % (("",)*12 + ("cluster_",)*12 + ("galaxy_",)*12 + ("race_",)*12)) + ((
+                             """
+                                  %s_highest_rank = NULL, %s_highest_rank_tick = NULL, %s_lowest_rank = NULL, %s_lowest_rank_tick = NULL,
+                             """ * 4) % (("size",)*4 + ("score",)*4 + ("value",)*4 + ("xp",)*4)) +
                              """
                                   vdiff = NULL, idle = NULL
                                 WHERE id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL)
@@ -490,6 +493,14 @@ while True:
                                   ticksroided = COALESCE(p.ticksroided, 0) + CASE WHEN (t.size < p.size) THEN 1 ELSE 0 END,
                                   tickroids = COALESCE(p.tickroids, 0) + t.size,
                                   avroids = COALESCE((p.tickroids + t.size) / (p.age + 1), t.size),
+                             """ + ((
+                             """
+                                  %s_highest_rank = CASE WHEN (t.%s_rank <= p.%s_highest_rank) THEN t.%s_rank ELSE p.%s_highest_rank END,
+                                  %s_highest_rank_tick = CASE WHEN (t.%s_rank <= p.%s_highest_rank) THEN :tick ELSE p.%s_highest_rank_tick END,
+                                  %s_lowest_rank = CASE WHEN (t.%s_rank >= p.%s_lowest_rank) THEN t.%s_rank ELSE p.%s_lowest_rank END,
+                                  %s_lowest_rank_tick = CASE WHEN (t.%s_rank >= p.%s_lowest_rank) THEN :tick ELSE p.%s_lowest_rank_tick END,
+                             """ * 4) % (("size",)*18 + ("score",)*18 + ("value",)*18 + ("xp",)*18)) +
+                             """
                                   vdiff = t.value - p.value,
                                   idle = COALESCE(1 + (SELECT p.idle WHERE (t.value-p.value) BETWEEN (p.vdiff-1) AND (p.vdiff+1) AND (p.xp-t.xp=0) ), 0)
                                 FROM (SELECT *,
@@ -516,7 +527,7 @@ while True:
                                   WHERE p.id = t.id AND p.active = :true) AS t) AS t
                                   WHERE p.id = t.id
                                 AND p.active = :true
-                            ;""", bindparams=[true]))
+                            ;""", bindparams=[true, bindparam("tick",planet_tick)]))
 
         t2=time.time()-t1
         print "Update planets from temp and generate ranks in %.3f seconds" % (t2,)
