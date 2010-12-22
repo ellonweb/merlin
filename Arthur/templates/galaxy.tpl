@@ -22,7 +22,7 @@
         <td width="12%">Total Lost Roids:</td><td width="12%">{{stats.tlr}}</td>
         <td width="12%">Ticks Roided:</td><td width="12%">{{stats.roided}}</td>
         <td width="12%">Lowest Position:</td><td width="12%">{{stats.lowest}} ({{stats.lowtick}})</td>
-        <td width="12%">XP/Roid:</td><td width="12%">{{(stats.xp|float/stats.size)|round(2)}}</td>
+        <td width="12%">XP/Roid:</td><td width="12%">{%if stats.size %}{{(stats.xp|float/stats.size)|round(2)}}{%else%}0{%endif%}</td>
     </tr>
 </table>
 
