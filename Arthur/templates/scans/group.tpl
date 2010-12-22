@@ -23,7 +23,7 @@
             <td>
                 {% for scan in scans %}
                     <a href="{% block url scoped %}#{{ scan.pa_id }}{% endblock %}"
-                    onclick="return linkshift(event, '{{ scan.link }}');">{{ scan.scantype }}</a>
+                    onclick="return linkshift(event, '{{ scan.link|url }}');">{{ scan.scantype }}</a>
                 {% endfor %}
             </td>
         </tr>
