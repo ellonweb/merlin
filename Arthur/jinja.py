@@ -19,6 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+import sys
+import jinja2
+if not 6.0 <= float(jinja2.__version__[2:5]):
+    sys.exit("Jinja2 2.6.0+ Required")
+
 from jinja2 import Environment, FileSystemLoader
 
 from Arthur.templatetags.url import URLReverserExtension
