@@ -25,7 +25,7 @@ from Core.config import Config
 from Core.paconf import PA
 from Core.string import decode
 from Core.db import true, false, session
-from Core.maps import Updates, Galaxy, Planet, Alliance, epenis, galpenis, apenis
+from Core.maps import Updates, Cluster, Galaxy, Planet, Alliance, epenis, galpenis, apenis
 from Core.maps import galaxy_temp, planet_temp, alliance_temp, planet_new_id_search, planet_old_id_search
 
 # Get the previous tick number!
@@ -181,6 +181,107 @@ while True:
         print "Inserted dumps in %.3f seconds" % (t2,)
         t1=time.time()
 
+# ########################################################################### #
+# ##############################    CLUSTERS    ############################# #
+# ########################################################################### #
+
+        # Make sure all the galaxies are active,
+        #  some might have been deactivated previously
+        session.execute(text("""UPDATE cluster SET
+                                  active = :true
+                            ;""", bindparams=[true]))
+
+        # For galaxies that are no longer present in the new dump, we will
+        #  NULL all the data, leaving only the coords and id for FKs
+        session.execute(text("""UPDATE cluster SET
+                                  active = :false,
+                                  size = NULL, score = NULL, value = NULL, xp = NULL,
+                                  ratio = NULL,
+                                  members = NULL, member_growth = NULL,
+                                  size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
+                                  size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
+                                  size_rank_change = NULL, score_rank_change = NULL, value_rank_change = NULL, xp_rank_change = NULL,
+                                  size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
+                                WHERE x NOT IN (SELECT x FROM galaxy_temp)
+                            ;""", bindparams=[false]))
+
+        # Any galaxies in the temp table without an id are new
+        # Insert them to the current table and the id(serial/auto_increment)
+        #  will be generated, and we can then copy it back to the temp table
+        session.execute(text("""INSERT INTO cluster (x, active)
+                                SELECT g.x, :true
+                                FROM
+                                  galaxy_temp as g
+                                WHERE
+                                  g.x NOT IN (SELECT x FROM cluster)
+                                GROUP BY g.x
+                            ;""", bindparams=[true]))
+
+        t2=time.time()-t1
+        print "Deactivate old clusters and generate new cluster ids in %.3f seconds" % (t2,)
+        t1=time.time()
+
+        # Update everything from the temp table and generate ranks
+        # Deactivated items are untouched but NULLed earlier
+        session.execute(text("""UPDATE cluster AS c SET
+                                  size = t.size, score = t.score, value = t.value, xp = t.xp,
+                                  ratio = 10000.0 * t.size / t.value,
+                                  members = t.count,
+                             """ + (
+                             """
+                                  size_growth = t.size - COALESCE(c.size - c.size_growth, 0),
+                                  score_growth = t.score - COALESCE(c.score - c.score_growth, 0),
+                                  value_growth = t.value - COALESCE(c.value - c.value_growth, 0),
+                                  xp_growth = t.xp - COALESCE(c.xp - c.xp_growth, 0),
+                                  member_growth = t.count - COALESCE(c.members - c.member_growth, 0),
+                                  size_growth_pc = CASE WHEN (c.size - c.size_growth != 0) THEN COALESCE((t.size - (c.size - c.size_growth)) * 100.0 / (c.size - c.size_growth), 0) ELSE 0 END,
+                                  score_growth_pc = CASE WHEN (c.score - c.score_growth != 0) THEN COALESCE((t.score - (c.score - c.score_growth)) * 100.0 / (c.score - c.score_growth), 0) ELSE 0 END,
+                                  value_growth_pc = CASE WHEN (c.value - c.value_growth != 0) THEN COALESCE((t.value - (c.value - c.value_growth)) * 100.0 / (c.value - c.value_growth), 0) ELSE 0 END,
+                                  xp_growth_pc = CASE WHEN (c.xp - c.xp_growth != 0) THEN COALESCE((t.xp - (c.xp - c.xp_growth)) * 100.0 / (c.xp - c.xp_growth), 0) ELSE 0 END,
+                                  size_rank_change = t.size_rank - COALESCE(c.size_rank - c.size_rank_change, 0),
+                                  score_rank_change = t.score_rank - COALESCE(c.score_rank - c.score_rank_change, 0),
+                                  value_rank_change = t.value_rank - COALESCE(c.value_rank - c.value_rank_change, 0),
+                                  xp_rank_change = t.xp_rank - COALESCE(c.xp_rank - c.xp_rank_change, 0),
+                             """ if not midnight
+                                 else
+                             """
+                                  size_growth = t.size - COALESCE(c.size, 0),
+                                  score_growth = t.score - COALESCE(c.score, 0),
+                                  value_growth = t.value - COALESCE(c.value, 0),
+                                  xp_growth = t.xp - COALESCE(c.xp, 0),
+                                  member_growth = t.count - COALESCE(c.members, 0),
+                                  size_growth_pc = CASE WHEN (c.size != 0) THEN COALESCE((t.size - c.size) * 100.0 / c.size, 0) ELSE 0 END,
+                                  score_growth_pc = CASE WHEN (c.score != 0) THEN COALESCE((t.score - c.score) * 100.0 / c.score * 100, 0) ELSE 0 END,
+                                  value_growth_pc = CASE WHEN (c.value != 0) THEN COALESCE((t.value - c.value) * 100.0 / c.value, 0) ELSE 0 END,
+                                  xp_growth_pc = CASE WHEN (c.xp != 0) THEN COALESCE((t.xp - c.xp) * 100.0 / c.xp, 0) ELSE 0 END,
+                                  size_rank_change = t.size_rank - COALESCE(c.size_rank, 0),
+                                  score_rank_change = t.score_rank - COALESCE(c.score_rank, 0),
+                                  value_rank_change = t.value_rank - COALESCE(c.value_rank, 0),
+                                  xp_rank_change = t.xp_rank - COALESCE(c.xp_rank, 0),
+                             """ ) +
+                             """
+                                  size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank
+                                FROM (SELECT *,
+                                  rank() OVER (ORDER BY size DESC) AS size_rank,
+                                  rank() OVER (ORDER BY score DESC) AS score_rank,
+                                  rank() OVER (ORDER BY value DESC) AS value_rank,
+                                  rank() OVER (ORDER BY xp DESC) AS xp_rank
+                                FROM (SELECT x,
+                                  count(*) as count,
+                                  sum(size) as size,
+                                  sum(value) as value,
+                                  sum(score) as score,
+                                  sum(xp) as xp
+                                FROM planet_temp
+                                  GROUP BY x) AS t) AS t
+                                WHERE c.x = t.x
+                                AND c.active = :true
+                            ;""", bindparams=[true]))
+
+        t2=time.time()-t1
+        print "Update clusters from temp and generate ranks in %.3f seconds" % (t2,)
+        t1=time.time()
+
 # We do galaxies before planets now in order to satisfy the planet(x,y) FK
 
 # ########################################################################### #
@@ -299,7 +400,7 @@ while True:
                                     rank() OVER (ORDER BY a.real_score DESC) AS real_score_rank
                                   FROM (SELECT x, y,
                                       count(*) AS count,
-                                      SUM(score) AS real_score
+                                      sum(score) AS real_score
                                     FROM planet_temp
                                     GROUP BY x, y
                                     ) AS a
@@ -676,6 +777,7 @@ while True:
         #  and a timestamp generated by SQLA
         session.execute(Updates.__table__.insert().values(
                           id=planet_tick,
+                          clusters=Cluster.__table__.count(Cluster.active==True),
                           galaxies=Galaxy.__table__.count(Galaxy.active==True),
                           planets=Planet.__table__.count(Planet.active==True),
                           alliances=Alliance.__table__.count(Alliance.active==True)
@@ -689,6 +791,7 @@ while True:
         session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz, newx, newy, newz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z, planet.x, planet.y, planet.z FROM planet, planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :oldtick AND planet.active = :true AND (planet.x != planet_history.x OR planet.y != planet_history.y OR planet.z != planet_history.z);", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), true]))
 
         # Copy the dumps to their respective history tables
+        session.execute(text("INSERT INTO cluster_history (tick, x, size, score, value, xp, members, size_rank, score_rank, value_rank, xp_rank) SELECT :tick, x, size, score, value, xp, members, size_rank, score_rank, value_rank, xp_rank FROM cluster WHERE cluster.active = :true ORDER BY x ASC;", bindparams=[bindparam("tick",planet_tick), true]))
         session.execute(text("INSERT INTO galaxy_history (tick, id, x, y, name, size, score, real_score, value, xp, members, size_rank, score_rank, real_score_rank, value_rank, xp_rank) SELECT :tick, id, x, y, name, size, score, real_score, value, xp, members, size_rank, score_rank, real_score_rank, value_rank, xp_rank FROM galaxy WHERE galaxy.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
         session.execute(text("INSERT INTO planet_history (tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff) SELECT :tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff FROM planet WHERE planet.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
         session.execute(text("INSERT INTO alliance_history (tick, id, name, size, members, score, points, size_avg, score_avg, points_avg, size_rank, members_rank, score_rank, points_rank, size_avg_rank, score_avg_rank, points_avg_rank) SELECT :tick, id, name, size, members, score, points, size_avg, score_avg, points_avg, size_rank, members_rank, score_rank, points_rank, size_avg_rank, score_avg_rank, points_avg_rank FROM alliance WHERE alliance.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
@@ -717,7 +820,6 @@ print "Total time taken: %.3f seconds" % (t1,)
 # Update stats
 t_start=time.time()
 session.execute(text("""UPDATE updates SET
-                          clusters = (SELECT max(x)   FROM planet WHERE planet.active = :true AND x < 200),
                           c200     = (SELECT count(*) FROM planet WHERE planet.active = :true AND x = 200),
                           ter      = (SELECT count(*) FROM planet WHERE planet.active = :true AND race ILIKE 'ter%'),
                           cat      = (SELECT count(*) FROM planet WHERE planet.active = :true AND race ILIKE 'cat%'),

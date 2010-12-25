@@ -88,11 +88,71 @@ class Updates(Base):
     def current():
         return session.query(Updates).order_by(desc(Updates.id)).first()
 
+class Cluster(Base):
+    __tablename__ = 'cluster'
+    x = Column(Integer, primary_key=True)
+    active = Column(Boolean)
+    size = Column(Integer)
+    score = Column(Integer)
+    value = Column(Integer)
+    xp = Column(Integer)
+    members = Column(Integer)
+    ratio = Column(Float)
+    size_rank = Column(Integer)
+    score_rank = Column(Integer)
+    value_rank = Column(Integer)
+    xp_rank = Column(Integer)
+    size_growth = Column(Integer)
+    score_growth = Column(Integer)
+    value_growth = Column(Integer)
+    xp_growth = Column(Integer)
+    member_growth = Column(Integer)
+    size_growth_pc = Column(Float)
+    score_growth_pc = Column(Float)
+    value_growth_pc = Column(Float)
+    xp_growth_pc = Column(Float)
+    size_rank_change = Column(Integer)
+    score_rank_change = Column(Integer)
+    value_rank_change = Column(Integer)
+    xp_rank_change = Column(Integer)
+    
+    def history(self, tick):
+        return self.history_loader.filter_by(tick=tick).first()
+    
+    def galaxy(self, y):
+        return self.galaxy_loader.filter_by(y=y).first()
+    
+    @staticmethod
+    def load(x, active=True):
+        Q = session.query(Cluster)
+        if active is True:
+            Q = Q.filter_by(active=True)
+        Q = Q.filter_by(x=x)
+        cluster = Q.first()
+        return cluster
+class ClusterHistory(Base):
+    __tablename__ = 'cluster_history'
+    __table_args__ = (UniqueConstraint('x', 'tick'), {})
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
+    x = Column(Integer, ForeignKey(Cluster.x), primary_key=True, autoincrement=False)
+    size = Column(Integer)
+    score = Column(Integer)
+    value = Column(Integer)
+    xp = Column(Integer)
+    members = Column(Integer)
+    size_rank = Column(Integer)
+    score_rank = Column(Integer)
+    value_rank = Column(Integer)
+    xp_rank = Column(Integer)
+    def galaxy(self, y):
+        return self.planet_loader.filter_by(y=y).first()
+Cluster.history_loader = dynamic_loader(ClusterHistory, backref="current")
+
 class Galaxy(Base):
     __tablename__ = 'galaxy'
     id = Column(Integer, primary_key=True)
     active = Column(Boolean)
-    x = Column(Integer)
+    x = Column(Integer, ForeignKey(Cluster.x))
     y = Column(Integer)
     name = Column(String(64))
     size = Column(Integer)
@@ -149,9 +209,11 @@ class Galaxy(Base):
         return encode(retstr)
         return retstr
 Galaxy._idx_x_y = Index('galaxy_x_y', Galaxy.x, Galaxy.y, unique=True)
+Cluster.galaxies = relation(Galaxy, order_by=asc(Galaxy.y), backref="cluster")
+Cluster.galaxy_loader = dynamic_loader(Galaxy)
 class GalaxyHistory(Base):
     __tablename__ = 'galaxy_history'
-    __table_args__ = (UniqueConstraint('x', 'y', 'tick'), {})
+    __table_args__ = (UniqueConstraint('x', 'y', 'tick'), ForeignKeyConstraint(('x', 'tick',), (ClusterHistory.x, ClusterHistory.tick,)), {})
     tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
     id = Column(Integer, ForeignKey(Galaxy.id), primary_key=True, autoincrement=False)
     x = Column(Integer)
@@ -171,6 +233,8 @@ class GalaxyHistory(Base):
     def planet(self, z):
         return self.planet_loader.filter_by(z=z).first()
 Galaxy.history_loader = dynamic_loader(GalaxyHistory, backref="current")
+ClusterHistory.galaxies = relation(GalaxyHistory, order_by=asc(GalaxyHistory.y), backref="cluster")
+ClusterHistory.galaxy_loader = dynamic_loader(GalaxyHistory)
 
 class Planet(Base):
     __tablename__ = 'planet'
