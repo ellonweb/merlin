@@ -77,12 +77,11 @@ def base_context(request):
     context = {"name"   : Config.get("Alliance", "name"),
                "slogan" : Config.get("Alliance", "name"),
                "tick"   : Updates.current_tick(),
+               "update" : Updates.current(),
                }
     if getattr(request, "user", None) is not None:
         context["user"] = request.user
         context["menu"] = menu.generate(request.user)
-    else:
-        context["user"] = None
     if getattr(request, "session", None) is not None:
         slogan, count = Slogan.search("")
         if slogan is not None:

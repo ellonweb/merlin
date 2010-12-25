@@ -45,7 +45,26 @@ class Updates(Base):
     galaxies = Column(Integer)
     planets = Column(Integer)
     alliances = Column(Integer)
-    timestamp = Column(DateTime, default=current_timestamp())
+    timestamp = Column(DateTime, default=datetime.utcnow())
+    clusters = Column(Integer, default=0)
+    c200 = Column(Integer, default=0)
+    ter = Column(Integer, default=0)
+    cat = Column(Integer, default=0)
+    xan = Column(Integer, default=0)
+    zik = Column(Integer, default=0)
+    etd = Column(Integer, default=0)
+    
+    @property
+    def age(self):
+        td = datetime.utcnow() - self.timestamp
+        ret = ''
+        days = td.days
+        if days: ret += "%sd "%(days,)
+        hours = td.seconds/60/60
+        if hours: ret += "%sh "%(hours,)
+        minutes = td.seconds/60 - hours*60
+        ret += "%sm ago"%(minutes,)
+        return ret
     
     @staticmethod
     def current_tick():
@@ -64,6 +83,10 @@ class Updates(Base):
     def week_tick():
         tick = Updates.current_tick() - (24 * 7)
         return tick
+    
+    @staticmethod
+    def current():
+        return session.query(Updates).order_by(desc(Updates.id)).first()
 
 class Galaxy(Base):
     __tablename__ = 'galaxy'

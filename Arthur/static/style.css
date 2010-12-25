@@ -70,6 +70,19 @@ table.black {
 	background-color: black;
 }
 
+table.stats {
+  background-color: #131313;
+  border-color: #151515 #666666 #666666 #151515;
+  border-right: 1px solid #666666;
+  border-style: solid;
+  border-width: 1px;
+  font-size: 9px;
+  height: 100px;
+  margin-right: 25px;
+  text-align: left;
+  width: 232px;
+}
+
 tr.header {
 	background-color: #293452;
 	background-image: url(dataheader.jpg);
