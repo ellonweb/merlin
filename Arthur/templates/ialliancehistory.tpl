@@ -26,12 +26,12 @@
         
         <td align="right">{{ avgsize|intcomma }}</td>
         <td align="right" title="Rank {{ sizerank }}">{{ size|intcomma }}</td>
-        <td align="right">{{ sizediff|change|intcomma }}</td>
+        <td align="right">{{ sizediff|change(sizediff) }}</td>
         
         <td align="right">{{ avgvalue|intcomma }}</td>
         <td align="right" title="Rank {{ valuerank }}">{{ value|intcomma }}</td>
-        <td align="right">{{ valuediff|change|intcomma }}</td>
-        <td align="right">{{ scorediff|change|intcomma }}</td>
+        <td align="right">{{ valuediff|change(valuediff) }}</td>
+        <td align="right">{{ scorediff|change(scorediff) }}</td>
         
         <td align="right">{{ t10v }}</td>
         <td align="right">{{ t100v }}</td>

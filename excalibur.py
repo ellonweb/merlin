@@ -215,6 +215,7 @@ while True:
                                   size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
                                   size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
                                   size_rank_change = NULL, score_rank_change = NULL, value_rank_change = NULL, xp_rank_change = NULL,
+                                  real_score = NULL, real_score_rank = NULL, real_score_growth = NULL, real_score_growth_pc = NULL, real_score_rank_change = NULL,
                                   size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
                                 WHERE id NOT IN (SELECT id FROM galaxy_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[false]))
@@ -262,6 +263,9 @@ while True:
                                   score_rank_change = t.score_rank - COALESCE(g.score_rank - g.score_rank_change, 0),
                                   value_rank_change = t.value_rank - COALESCE(g.value_rank - g.value_rank_change, 0),
                                   xp_rank_change = t.xp_rank - COALESCE(g.xp_rank - g.xp_rank_change, 0),
+                                  real_score_growth = p.real_score - COALESCE(g.real_score - g.real_score_growth, 0),
+                                  real_score_growth_pc = CASE WHEN (g.real_score - g.real_score_growth != 0) THEN COALESCE((p.real_score - (g.real_score - g.real_score_growth)) * 100.0 / (g.real_score - g.real_score_growth), 0) ELSE 0 END,
+                                  real_score_rank_change = p.real_score_rank - COALESCE(g.real_score_rank - g.real_score_rank_change, 0),
                              """ if not midnight
                                  else
                              """
@@ -278,8 +282,12 @@ while True:
                                   score_rank_change = t.score_rank - COALESCE(g.score_rank, 0),
                                   value_rank_change = t.value_rank - COALESCE(g.value_rank, 0),
                                   xp_rank_change = t.xp_rank - COALESCE(g.xp_rank, 0),
+                                  real_score_growth = p.real_score - COALESCE(g.real_score, 0),
+                                  real_score_growth_pc = CASE WHEN (g.real_score != 0) THEN COALESCE((p.real_score - g.real_score) * 100.0 / g.real_score * 100, 0) ELSE 0 END,
+                                  real_score_rank_change = p.real_score_rank - COALESCE(g.real_score_rank, 0),
                              """ ) +
                              """
+                                  real_score = p.real_score, real_score_rank = p.real_score_rank,
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank
                                 FROM (SELECT *,
                                   rank() OVER (ORDER BY size DESC) AS size_rank,
@@ -287,8 +295,16 @@ while True:
                                   rank() OVER (ORDER BY value DESC) AS value_rank,
                                   rank() OVER (ORDER BY xp DESC) AS xp_rank
                                 FROM galaxy_temp) AS t,
-                                  (SELECT count(*) AS count, x, y FROM planet_temp GROUP BY x, y) AS p
-                                  WHERE g.id = t.id
+                                  (SELECT a.x, a.y, a.count, a.real_score,
+                                    rank() OVER (ORDER BY a.real_score DESC) AS real_score_rank
+                                  FROM (SELECT x, y,
+                                      count(*) AS count,
+                                      SUM(score) AS real_score
+                                    FROM planet_temp
+                                    GROUP BY x, y
+                                    ) AS a
+                                  ) AS p
+                                WHERE g.id = t.id
                                    AND g.x = p.x AND g.y = p.y
                                 AND g.active = :true
                             ;""", bindparams=[true]))
@@ -673,7 +689,7 @@ while True:
         session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz, newx, newy, newz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z, planet.x, planet.y, planet.z FROM planet, planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :oldtick AND planet.active = :true AND (planet.x != planet_history.x OR planet.y != planet_history.y OR planet.z != planet_history.z);", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), true]))
 
         # Copy the dumps to their respective history tables
-        session.execute(text("INSERT INTO galaxy_history (tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank) SELECT :tick, id, x, y, name, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank FROM galaxy WHERE galaxy.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
+        session.execute(text("INSERT INTO galaxy_history (tick, id, x, y, name, size, score, real_score, value, xp, members, size_rank, score_rank, real_score_rank, value_rank, xp_rank) SELECT :tick, id, x, y, name, size, score, real_score, value, xp, members, size_rank, score_rank, real_score_rank, value_rank, xp_rank FROM galaxy WHERE galaxy.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
         session.execute(text("INSERT INTO planet_history (tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff) SELECT :tick, id, x, y, z, planetname, rulername, race, size, score, value, xp, size_rank, score_rank, value_rank, xp_rank, idle, vdiff FROM planet WHERE planet.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
         session.execute(text("INSERT INTO alliance_history (tick, id, name, size, members, score, points, size_avg, score_avg, points_avg, size_rank, members_rank, score_rank, points_rank, size_avg_rank, score_avg_rank, points_avg_rank) SELECT :tick, id, name, size, members, score, points, size_avg, score_avg, points_avg, size_rank, members_rank, score_rank, points_rank, size_avg_rank, score_avg_rank, points_avg_rank FROM alliance WHERE alliance.active = :true ORDER BY id ASC;", bindparams=[bindparam("tick",planet_tick), true]))
 

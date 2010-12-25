@@ -5,7 +5,7 @@ Requirements:
     Git
     Python 2.6
     PostgreSQL 8.4
-    psycopg2
+    psycopg2 2.2.1
     SQLAlchemy 0.6.3
 
 Additional Arthur requirements:

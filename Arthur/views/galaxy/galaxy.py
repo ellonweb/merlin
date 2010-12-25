@@ -19,13 +19,16 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from datetime import timedelta
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import asc, desc
 from sqlalchemy.sql.functions import sum
+from Core.paconf import PA
 from Core.db import session
-from Core.maps import Galaxy, GalaxyHistory, Planet, PlanetExiles, Alliance, Intel
+from Core.maps import Updates, Galaxy, GalaxyHistory, Planet, PlanetExiles, Alliance, Intel
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
@@ -68,7 +71,41 @@ class galaxy(loadable):
         stats = Q.first()
         stats.exiles = len(galaxy.outs)
         
+        Q = session.query(PlanetExiles)
+        Q = Q.filter(or_(PlanetExiles.old == galaxy, PlanetExiles.new == galaxy))
+        Q = Q.order_by(desc(PlanetExiles.tick))
+        exiles = Q[:10]
+        
+        history = aliased(GalaxyHistory)
+        next = aliased(GalaxyHistory)
+        membersdiff = history.members - next.members
+        sizediff = history.size - next.size
+        sizediffvalue = sizediff * PA.getint("numbers", "roid_value")
+        valuediff = history.value - next.value
+        valuediffwsizevalue = valuediff - sizediffvalue
+        resvalue = valuediffwsizevalue * PA.getint("numbers", "res_value")
+        shipvalue = valuediffwsizevalue * PA.getint("numbers", "ship_value")
+        xpdiff = history.xp - next.xp
+        xpvalue = xpdiff * PA.getint("numbers", "xp_value")
+        scorediff = history.score - next.score
+        realscorediff = history.real_score - next.real_score
+        Q = session.query(history, Updates.timestamp - timedelta(minutes=1),
+                            next.score_rank, membersdiff,
+                            sizediff, sizediffvalue,
+                            valuediff, valuediffwsizevalue,
+                            resvalue, shipvalue,
+                            xpdiff, xpvalue,
+                            scorediff, realscorediff
+                            )
+        Q = Q.join(Updates)
+        Q = Q.outerjoin((next, and_(history.id==next.id, history.tick-1==next.tick)))
+        Q = Q.filter(history.current == galaxy)
+        Q = Q.order_by(desc(history.tick))
+        history = Q[:12]
+        
         return render("galaxy.tpl", request, galaxy=galaxy,
                                              planets=planets,
                                              stats=stats,
+                                             exiles=exiles,
+                                             history=history,
                                              )

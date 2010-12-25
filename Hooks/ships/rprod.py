@@ -71,7 +71,7 @@ class rprod(loadable):
         res = int(self.revprod(ticks, factories, bonus))
         ships = int(res / cost)
 
-        reply = "You can build %s %s (%s) in %d ticks" % (self.num2short(ships), ship.name, self.num2short(ships*ship.total_cost/100), ticks)
+        reply = "You can build %s %s (%s) in %d ticks" % (self.num2short(ships), ship.name, self.num2short(ships*ship.total_cost/PA.getint("numbers", "ship_value")), ticks)
         reply += " using %s factories" % (factories,) if factories > 1 else ""
         reply += " with a" if race or gov else ""
         reply += " %s"%(PA.get(gov,"name"),) if gov else ""

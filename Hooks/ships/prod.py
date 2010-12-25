@@ -70,7 +70,7 @@ class prod(loadable):
 
         ticks = self.calc_ticks(cost, num, bonus, factories)
 
-        reply = "It will take %s ticks to build %s %s (%s)" % (ticks, self.num2short(num), ship.name, self.num2short(num*ship.total_cost/100))
+        reply = "It will take %s ticks to build %s %s (%s)" % (ticks, self.num2short(num), ship.name, self.num2short(num*ship.total_cost/PA.getint("numbers", "ship_value")))
         reply += " using %s factories" % (factories,) if factories > 1 else ""
         reply += " with a" if race or gov else ""
         reply += " %s"%(PA.get(gov,"name"),) if gov else ""

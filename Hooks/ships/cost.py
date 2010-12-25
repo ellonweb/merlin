@@ -55,5 +55,5 @@ class cost(loadable):
                         self.num2short(floor(ship.crystal*(1+bonus))*num),
                         self.num2short(floor(ship.eonium*(1+bonus))*num))
         
-        reply+=" It will add %s value"%(self.num2short(ship.total_cost*num/100),)
+        reply+=" It will add %s value"%(self.num2short(ship.total_cost*num/PA.getint("numbers", "ship_value")),)
         message.reply(reply)

@@ -39,7 +39,7 @@ class roidcost(loadable):
 
         mining=mining * ((float(bonus)+100)/100)
 
-        ticks = (cost*100)/(roids*mining)
+        ticks = (cost*PA.getint("numbers", "ship_value"))/(roids*mining)
         reply = "Capping %s roids at %s value with %s%% bonus will repay in %s ticks (%s days)" % (roids,self.num2short(cost),bonus,int(ticks),int(ticks/24))
         
         for gov in PA.options("govs"):
