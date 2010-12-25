@@ -612,11 +612,11 @@ while True:
                                   avroids = COALESCE((p.tickroids + t.size) / (p.age + 1), t.size),
                              """ + ((
                              """
-                                  %s_highest_rank = CASE WHEN (t.%s_rank <= p.%s_highest_rank) THEN t.%s_rank ELSE p.%s_highest_rank END,
-                                  %s_highest_rank_tick = CASE WHEN (t.%s_rank <= p.%s_highest_rank) THEN :tick ELSE p.%s_highest_rank_tick END,
-                                  %s_lowest_rank = CASE WHEN (t.%s_rank >= p.%s_lowest_rank) THEN t.%s_rank ELSE p.%s_lowest_rank END,
-                                  %s_lowest_rank_tick = CASE WHEN (t.%s_rank >= p.%s_lowest_rank) THEN :tick ELSE p.%s_lowest_rank_tick END,
-                             """ * 4) % (("size",)*18 + ("score",)*18 + ("value",)*18 + ("xp",)*18)) +
+                                  %s_highest_rank = CASE WHEN (t.%s_rank <= COALESCE(p.%s_highest_rank, t.%s_rank)) THEN t.%s_rank ELSE p.%s_highest_rank END,
+                                  %s_highest_rank_tick = CASE WHEN (t.%s_rank <= COALESCE(p.%s_highest_rank, t.%s_rank)) THEN :tick ELSE p.%s_highest_rank_tick END,
+                                  %s_lowest_rank = CASE WHEN (t.%s_rank >= COALESCE(p.%s_lowest_rank, t.%s_rank)) THEN t.%s_rank ELSE p.%s_lowest_rank END,
+                                  %s_lowest_rank_tick = CASE WHEN (t.%s_rank >= COALESCE(p.%s_lowest_rank, t.%s_rank)) THEN :tick ELSE p.%s_lowest_rank_tick END,
+                             """ * 4) % (("size",)*22 + ("score",)*22 + ("value",)*22 + ("xp",)*22)) +
                              """
                                   vdiff = t.value - p.value,
                                   idle = COALESCE(1 + (SELECT p.idle WHERE (t.value-p.value) BETWEEN (p.vdiff-1) AND (p.vdiff+1) AND (p.xp-t.xp=0) ), 0)
