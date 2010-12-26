@@ -34,10 +34,12 @@ from Arthur.loadable import loadable, load
 
 @load
 class planet(loadable):
-    def execute(self, request, user, x, y, z):
+    def execute(self, request, user, x, y, z, h=False, ticks=None):
         planet = Planet.load(x,y,z)
         if planet is None:
             return HttpResponseRedirect(reverse("planet_ranks"))
+        
+        ticks = int(ticks or 0) if h else 12
         
         history = aliased(PlanetHistory)
         next = aliased(PlanetHistory)
@@ -62,8 +64,10 @@ class planet(loadable):
         Q = Q.outerjoin((next, and_(history.id==next.id, history.tick-1==next.tick)))
         Q = Q.filter(history.current == planet)
         Q = Q.order_by(desc(history.tick))
-        history = Q[:12]
         
-        return render("planet.tpl", request, planet=planet,
-                                             history=history,
-                                             )
+        return render(["planet.tpl","hplanet.tpl"][h],
+                        request,
+                        planet = planet,
+                        history = Q[:ticks] if ticks else Q.all(),
+                        ticks = ticks,
+                      )

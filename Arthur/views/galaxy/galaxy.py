@@ -34,11 +34,12 @@ from Arthur.loadable import loadable, load
 
 @load
 class galaxy(loadable):
-    def execute(self, request, user, x, y):
-        
+    def execute(self, request, user, x, y, h=False, ticks=None):
         galaxy = Galaxy.load(x,y)
         if galaxy is None:
             return HttpResponseRedirect(reverse("galaxy_ranks"))
+        
+        ticks = int(ticks or 0) if h else 12
         
         Q = session.query(Planet, Intel.nick, Alliance.name)
         Q = Q.outerjoin(Planet.intel)
@@ -46,7 +47,7 @@ class galaxy(loadable):
         Q = Q.filter(Planet.active == True)
         Q = Q.filter(Planet.galaxy == galaxy)
         Q = Q.order_by(asc(Planet.z))
-        planets = Q.all()
+        planets = Q.all() if not h else None
         
         high = aliased(GalaxyHistory)
         low = aliased(GalaxyHistory)
@@ -68,13 +69,14 @@ class galaxy(loadable):
         Q = Q.filter(Planet.galaxy == galaxy)
         Q = Q.group_by(high.score_rank, high.tick, low.score_rank, low.tick)
         Q = Q.order_by(asc(high.score_rank), desc(high.tick), desc(low.score_rank), desc(low.tick))
-        stats = Q.first()
-        stats.exiles = len(galaxy.outs)
+        stats = Q.first() if not h else None
+        if not h:
+            stats.exiles = len(galaxy.outs)
         
         Q = session.query(PlanetExiles)
         Q = Q.filter(or_(PlanetExiles.old == galaxy, PlanetExiles.new == galaxy))
         Q = Q.order_by(desc(PlanetExiles.tick))
-        exiles = Q[:10]
+        exiles = Q[:10] if not h else None
         
         history = aliased(GalaxyHistory)
         next = aliased(GalaxyHistory)
@@ -101,11 +103,13 @@ class galaxy(loadable):
         Q = Q.outerjoin((next, and_(history.id==next.id, history.tick-1==next.tick)))
         Q = Q.filter(history.current == galaxy)
         Q = Q.order_by(desc(history.tick))
-        history = Q[:12]
         
-        return render("galaxy.tpl", request, galaxy=galaxy,
-                                             planets=planets,
-                                             stats=stats,
-                                             exiles=exiles,
-                                             history=history,
-                                             )
+        return render(["galaxy.tpl","hgalaxy.tpl"][h],
+                        request,
+                        galaxy = galaxy,
+                        planets = planets,
+                        stats = stats,
+                        exiles = exiles,
+                        history = Q[:ticks] if ticks else Q.all(),
+                        ticks = ticks,
+                      )

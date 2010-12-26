@@ -1,4 +1,5 @@
 {% from 'macros.tpl' import planetlink, alliancelink with context %}
+{% from 'history.tpl' import hplanet %}
 {% extends "base.tpl" %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="95%" class="black">
@@ -151,45 +152,5 @@
 
 <p>&nbsp;</p>
 
-<table cellspacing="1" cellpadding="3" width="95%" class="black">
-    <tr class="header">
-        <th colspan="12">Last 12 Ticks (View more)</th>
-    </tr>
-    <tr class="header">
-        <th>Tick</th>
-        <th>Rank</th>
-        <th colspan="2">Size</th>
-        <th colspan="3">Value</th>
-        <th colspan="2">Score</th>
-        <th colspan="2">Experience</th>
-        <th>Date / Time</th>
-    </tr>
-    {% for ph, timestamp,
-        oldrank,
-        sizediff, sizediffvalue,
-        valuediff, valuediffwsizevalue,
-        resvalue, shipvalue,
-        xpdiff, xpvalue,
-        scorediff in history %}
-    <tr class="{% if loop.first %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}" align="right">
-        <td>{{ph.tick}}</td>
-        <td>{{ph|hrank("score",oldrank)}}</td>
-        <td>{{ph.size|intcomma}}</td>
-        <td>{%if sizediff %}{{sizediff|intcomma|change(sizediff, "Value: "+sizediffvalue|intcomma)}}{%endif%}</td>
-        <td>{{ph.value|intcomma}}</td>
-        <td>{%if valuediff and sizediff %}
-            {{valuediff|intcomma|change(valuediff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma + " (Roid Value: "+sizediffvalue|intcomma+")")}}
-            {%elif valuediff %}
-            {{valuediff|intcomma|change(valuediff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma)}}
-            {%endif%}</td>
-        <td>{%if sizediff %}{{valuediffwsizevalue|intcomma|change(valuediffwsizevalue, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma)}}{%endif%}</td>
-        <td>{{ph.score|intcomma}}</td>
-        <td>{%if scorediff %}{{scorediff|intcomma|change(scorediff)}}{%endif%}</td>
-        <td>{{ph.xp|intcomma}}</td>
-        <td>{%if xpdiff %}{{xpdiff|intcomma|change(xpdiff, xpvalue|intcomma+" points.")}}{%endif%}</td>
-        <td>{{timestamp|date("D d/m H:i")}}</td>
-    </tr>
-    {% endfor %}
-
-</table>
+{% call hplanet(planet, history) %}Last 12 Ticks (<a href="{%url "hplanet", planet.x, planet.y, planet.z, 72%}">View more</a>){% endcall %}
 {% endblock %}
