@@ -35,8 +35,13 @@
         <td>{%if scorediff %}{{scorediff|intcomma|change(scorediff)}}{%endif%}</td>
         <td>{{ph.xp|intcomma}}</td>
         <td>{%if xpdiff %}{{xpdiff|intcomma|change(xpdiff, xpvalue|intcomma+" points.")}}{%endif%}</td>
-        <td>{{timestamp|date("D d/m H:i")}}</td>
+        <td>{%if not loop.first%}{{timestamp|date("D d/m H:i")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
     </tr>
+    {% if timestamp.hour == 0 and not loop.last %}
+    <tr class="header">
+        <td colspan="12" height="6"/>
+    </tr>
+    {% endif %}
     {% endfor %}
 </table>
 {% endmacro %}
@@ -89,8 +94,13 @@
         <td>{%if scorediff %}{{scorediff|intcomma|change(scorediff)}}{%endif%}</td>
         <td>{{gh.xp|intcomma}}</td>
         <td>{%if xpdiff %}{{xpdiff|intcomma|change(xpdiff, xpvalue|intcomma+" points.")}}{%endif%}</td>
-        <td>{{timestamp|date("D d/m H:i")}}</td>
+        <td>{%if not loop.first%}{{timestamp|date("D d/m H:i")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
     </tr>
+    {% if timestamp.hour == 0 and not loop.last %}
+    <tr class="header">
+        <td colspan="16" height="6"/>
+    </tr>
+    {% endif %}
     {% endfor %}
 </table>
 {% endmacro %}
