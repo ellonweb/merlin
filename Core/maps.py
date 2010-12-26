@@ -341,6 +341,10 @@ class Planet(Base):
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
     
+    def exile_count(self):
+        # minus 1 because the first is for new planet (just in case of bad data, return 0)
+        return max(session.query(PlanetExiles).filter(PlanetExiles.planet == self).count() - 1, 0)
+    
     def scan(self, type):
         return self.scans.filter_by(scantype=type[0].upper()).order_by(desc(Scan.id)).first()
     
