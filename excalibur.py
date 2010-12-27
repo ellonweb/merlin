@@ -384,6 +384,8 @@ while True:
                                                 planet_old_id_search.value - (2* planet_old_id_search.vdiff) AND
                                                 planet_old_id_search.value + (2* planet_old_id_search.vdiff)
                                       );"""))
+            # Final update
+            if load_planet_id_search() is None: break
             break
 
         t2=time.time()-t1
