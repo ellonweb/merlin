@@ -618,8 +618,8 @@ while True:
                                   %s_lowest_rank_tick = CASE WHEN (t.%s_rank >= COALESCE(p.%s_lowest_rank, t.%s_rank)) THEN :tick ELSE p.%s_lowest_rank_tick END,
                              """ * 4) % (("size",)*22 + ("score",)*22 + ("value",)*22 + ("xp",)*22)) +
                              """
-                                  vdiff = t.value - p.value,
-                                  idle = COALESCE(1 + (SELECT p.idle WHERE (t.value-p.value) BETWEEN (p.vdiff-1) AND (p.vdiff+1) AND (p.xp-t.xp=0) ), 0)
+                                  vdiff = COALESCE(t.value - p.value, 0),
+                                  idle = CASE WHEN ((t.value-p.value) BETWEEN (p.vdiff-1) AND (p.vdiff+1) AND (p.xp-t.xp=0)) THEN 1 + COALESCE(p.idle, 0) ELSE 0 END
                                 FROM (SELECT *,
                              """ + ((
                              """
