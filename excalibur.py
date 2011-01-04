@@ -192,14 +192,7 @@ while True:
         # Any galaxies in the temp table without an id are new
         # Insert them to the current table and the id(serial/auto_increment)
         #  will be generated, and we can then copy it back to the temp table
-        session.execute(text("""INSERT INTO cluster (x, active)
-                                SELECT g.x, :true
-                                FROM
-                                  galaxy_temp as g
-                                WHERE
-                                  g.x NOT IN (SELECT x FROM cluster)
-                                GROUP BY g.x
-                            ;""", bindparams=[true]))
+        session.execute(text("INSERT INTO cluster (x, active) SELECT g.x, :true FROM galaxy_temp as g WHERE g.x NOT IN (SELECT x FROM cluster) GROUP BY g.x;", bindparams=[true]))
 
         # For galaxies that are no longer present in the new dump
         session.execute(text("UPDATE cluster SET active = :false WHERE x NOT IN (SELECT x FROM galaxy_temp);", bindparams=[false]))
@@ -295,17 +288,7 @@ while True:
         # Insert them to the current table and the id(serial/auto_increment)
         #  will be generated, and we can then copy it back to the temp table
         # Galaxies under a certain amount of planets are private
-        session.execute(text("""INSERT INTO galaxy (x, y, active, private)
-                                SELECT g.x, g.y, :true, count(p) <= :priv_gal OR (g.x = 1 AND g.y = 1)
-                                FROM
-                                  galaxy_temp as g,
-                                  (SELECT x, y FROM planet_temp) as p
-                                WHERE
-                                  g.x = p.x AND g.y = p.y AND
-                                  g.id IS NULL
-                                GROUP BY
-                                  g.x, g.y
-                            ;""", bindparams=[true, bindparam("priv_gal",PA.getint("numbers", "priv_gal"))]))
+        session.execute(text("INSERT INTO galaxy (x, y, active) SELECT g.x, g.y, :true FROM galaxy_temp as g WHERE g.id IS NULL;", bindparams=[true]))
         session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y AND galaxy.active = :true ORDER BY galaxy.id DESC) WHERE id IS NULL;", bindparams=[true]))
 
         # For galaxies that are no longer present in the new dump
@@ -322,6 +305,7 @@ while True:
                                   name = t.name, size = t.size, score = t.score, value = t.value, xp = t.xp,
                                   ratio = 10000.0 * t.size / t.value,
                                   members = p.count,
+                                  private = p.count <= :priv_gal OR (g.x = 1 AND g.y = 1),
                              """ + (
                              """
                                   size_growth = t.size - COALESCE(g.size - g.size_growth, 0),
@@ -381,7 +365,7 @@ while True:
                                 WHERE g.id = t.id
                                    AND g.x = p.x AND g.y = p.y
                                 AND g.active = :true
-                            ;""", bindparams=[true]))
+                            ;""", bindparams=[true, bindparam("priv_gal",PA.getint("numbers", "priv_gal"))]))
 
         t2=time.time()-t1
         print "Update galaxies from temp and generate ranks in %.3f seconds" % (t2,)
