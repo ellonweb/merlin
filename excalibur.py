@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re, time, traceback, urllib2
+import datetime, re, time, traceback, urllib2
 from sqlalchemy.sql import text, bindparam
 from Core.config import Config
 from Core.paconf import PA
@@ -31,6 +31,7 @@ from Core.maps import galaxy_temp, planet_temp, alliance_temp, planet_new_id_sea
 # Get the previous tick number!
 last_tick = Updates.current_tick()
 midnight = Updates.midnight_tick() == last_tick
+hour = bindparam("hour",datetime.datetime.utcnow().hour)
 
 t_start=time.time()
 t1=t_start
@@ -476,11 +477,49 @@ while True:
         session.execute(text("INSERT INTO planet (rulername, planetname, active) SELECT rulername, planetname, :true FROM planet_temp WHERE id IS NULL;", bindparams=[true]))
         session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.rulername = planet_temp.rulername AND planet.planetname = planet_temp.planetname AND planet.active = :true ORDER BY planet.id DESC) WHERE id IS NULL;", bindparams=[true]))
 
+        t2=time.time()-t1
+        print "Generate new planet ids in %.3f seconds" % (t2,)
+        t1=time.time()
+
+        # Create records of new planets,
+        session.execute(text("""INSERT INTO planet_exiles (hour, tick, id, newx, newy, newz)
+                                SELECT :hour, :tick, planet.id, planet_temp.x, planet_temp.y, planet_temp.z
+                                FROM planet_temp, planet
+                                WHERE
+                                    planet.rulername = planet_temp.rulername AND
+                                    planet.planetname = planet_temp.planetname AND
+                                    planet.active = :true AND
+                                    planet.age IS NULL
+                            ;""", bindparams=[true, hour, bindparam("tick",planet_tick)]))
+        # deleted plantes
+        session.execute(text("""INSERT INTO planet_exiles (hour, tick, id, oldx, oldy, oldz)
+                                SELECT :hour, :tick, planet.id, planet.x, planet.y, planet.z
+                                FROM planet
+                                WHERE
+                                    planet.active = :true AND
+                                    planet.age IS NOT NULL AND
+                                    planet.id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL)
+                            ;""", bindparams=[true, hour, bindparam("tick",planet_tick)]))
+        # and planet movements
+        session.execute(text("""INSERT INTO planet_exiles (hour, tick, id, oldx, oldy, oldz, newx, newy, newz)
+                                SELECT :hour, :tick, planet.id, planet.x, planet.y, planet.z, planet_temp.x, planet_temp.y, planet_temp.z
+                                FROM planet_temp, planet
+                                WHERE
+                                    planet.id = planet_temp.id AND
+                                    planet.active = :true AND
+                                    planet.age IS NOT NULL AND
+                                    (planet.x != planet_temp.x OR planet.y != planet_temp.y OR planet.z != planet_temp.z)
+                            ;""", bindparams=[true, hour, bindparam("tick",planet_tick)]))
+
+        t2=time.time()-t1
+        print "Track new/deleted/moved planets in %.3f seconds" % (t2,)
+        t1=time.time()
+
         # For planets that are no longer present in the new dump
         session.execute(text("UPDATE planet SET active = :false WHERE id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL);", bindparams=[false]))
 
         t2=time.time()-t1
-        print "Deactivate old planets and generate new planet ids in %.3f seconds" % (t2,)
+        print "Deactivate old planets in %.3f seconds" % (t2,)
         t1=time.time()
 
         # Update everything from the temp table and generate ranks
@@ -719,13 +758,6 @@ while True:
         t2=time.time()-t1
         print "Update stats in: %.3f seconds" % (t2,)
         t1=time.time()
-
-        # Create records of new planets,
-        session.execute(text("INSERT INTO planet_exiles (tick, id, newx, newy, newz) SELECT :tick, planet.id, planet.x, planet.y, planet.z FROM planet WHERE planet.id NOT IN (SELECT id FROM planet_history WHERE planet_history.tick = :oldtick) AND planet.active = :true;", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), true]))
-        # deleted plantes
-        session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z FROM planet, planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :oldtick AND planet.active = :false;", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), false]))
-        # and planet movements
-        session.execute(text("INSERT INTO planet_exiles (tick, id, oldx, oldy, oldz, newx, newy, newz) SELECT :tick, planet.id, planet_history.x, planet_history.y, planet_history.z, planet.x, planet.y, planet.z FROM planet, planet_history WHERE planet.id = planet_history.id AND planet_history.tick = :oldtick AND planet.active = :true AND (planet.x != planet_history.x OR planet.y != planet_history.y OR planet.z != planet_history.z);", bindparams=[bindparam("tick",planet_tick), bindparam("oldtick",last_tick), true]))
 
         # Copy the dumps to their respective history tables
         session.execute(text("INSERT INTO cluster_history (tick, x, size, score, value, xp, members, size_rank, score_rank, value_rank, xp_rank) SELECT :tick, x, size, score, value, xp, members, size_rank, score_rank, value_rank, xp_rank FROM cluster WHERE cluster.active = :true ORDER BY x ASC;", bindparams=[bindparam("tick",planet_tick), true]))

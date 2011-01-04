@@ -419,6 +419,7 @@ class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
     __table_args__ = (ForeignKeyConstraint(('oldx', 'oldy',), (Galaxy.x, Galaxy.y,)),
                       ForeignKeyConstraint(('newx', 'newy',), (Galaxy.x, Galaxy.y,)), {})
+    hour = Column(Integer, index=True)
     tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
     id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
     oldx = Column(Integer)
