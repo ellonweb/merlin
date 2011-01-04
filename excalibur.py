@@ -187,23 +187,7 @@ while True:
 
         # Make sure all the galaxies are active,
         #  some might have been deactivated previously
-        session.execute(text("""UPDATE cluster SET
-                                  active = :true
-                            ;""", bindparams=[true]))
-
-        # For galaxies that are no longer present in the new dump, we will
-        #  NULL all the data, leaving only the coords and id for FKs
-        session.execute(text("""UPDATE cluster SET
-                                  active = :false,
-                                  size = NULL, score = NULL, value = NULL, xp = NULL,
-                                  ratio = NULL,
-                                  members = NULL, member_growth = NULL,
-                                  size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
-                                  size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
-                                  size_rank_change = NULL, score_rank_change = NULL, value_rank_change = NULL, xp_rank_change = NULL,
-                                  size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
-                                WHERE x NOT IN (SELECT x FROM galaxy_temp)
-                            ;""", bindparams=[false]))
+        session.execute(text("UPDATE cluster SET active = :true;", bindparams=[true]))
 
         # Any galaxies in the temp table without an id are new
         # Insert them to the current table and the id(serial/auto_increment)
@@ -216,6 +200,9 @@ while True:
                                   g.x NOT IN (SELECT x FROM cluster)
                                 GROUP BY g.x
                             ;""", bindparams=[true]))
+
+        # For galaxies that are no longer present in the new dump
+        session.execute(text("UPDATE cluster SET active = :false WHERE x NOT IN (SELECT x FROM galaxy_temp);", bindparams=[false]))
 
         t2=time.time()-t1
         print "Deactivate old clusters and generate new cluster ids in %.3f seconds" % (t2,)
@@ -298,28 +285,11 @@ while True:
 
         # Make sure all the galaxies are active,
         #  some might have been deactivated previously
-        session.execute(text("""UPDATE galaxy SET
-                                  active = :true
-                            ;""", bindparams=[true]))
+        session.execute(text("UPDATE galaxy SET active = :true;", bindparams=[true]))
 
         t2=time.time()-t1
         print "Copy galaxy ids to temp and activate in %.3f seconds" % (t2,)
         t1=time.time()
-
-        # For galaxies that are no longer present in the new dump, we will
-        #  NULL all the data, leaving only the coords and id for FKs
-        session.execute(text("""UPDATE galaxy SET
-                                  active = :false,
-                                  name = NULL, size = NULL, score = NULL, value = NULL, xp = NULL,
-                                  ratio = NULL,
-                                  members = NULL, member_growth = NULL,
-                                  size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
-                                  size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
-                                  size_rank_change = NULL, score_rank_change = NULL, value_rank_change = NULL, xp_rank_change = NULL,
-                                  real_score = NULL, real_score_rank = NULL, real_score_growth = NULL, real_score_growth_pc = NULL, real_score_rank_change = NULL,
-                                  size_rank = NULL, score_rank = NULL, value_rank = NULL, xp_rank = NULL
-                                WHERE id NOT IN (SELECT id FROM galaxy_temp WHERE id IS NOT NULL)
-                            ;""", bindparams=[false]))
 
         # Any galaxies in the temp table without an id are new
         # Insert them to the current table and the id(serial/auto_increment)
@@ -337,6 +307,9 @@ while True:
                                   g.x, g.y
                             ;""", bindparams=[true, bindparam("priv_gal",PA.getint("numbers", "priv_gal"))]))
         session.execute(text("UPDATE galaxy_temp SET id = (SELECT id FROM galaxy WHERE galaxy.x = galaxy_temp.x AND galaxy.y = galaxy_temp.y AND galaxy.active = :true ORDER BY galaxy.id DESC) WHERE id IS NULL;", bindparams=[true]))
+
+        # For galaxies that are no longer present in the new dump
+        session.execute(text("UPDATE galaxy SET active = :false WHERE id NOT IN (SELECT id FROM galaxy_temp WHERE id IS NOT NULL);", bindparams=[false]))
 
         t2=time.time()-t1
         print "Deactivate old galaxies and generate new galaxy ids in %.3f seconds" % (t2,)
@@ -507,34 +480,14 @@ while True:
         print "Lost planet ids match up in %.3f seconds" % (t2,)
         t1=time.time()
 
-        # For planets that are no longer present in the new dump, we will
-        #  NULL all the data, leaving only the coords and id for FKs
-        session.execute(text("""UPDATE planet SET
-                                  active = :false,
-                                  size = NULL, score = NULL, value = NULL, xp = NULL,
-                                  ratio = NULL,
-                                  size_growth = NULL, score_growth = NULL, value_growth = NULL, xp_growth = NULL,
-                                  size_growth_pc = NULL, score_growth_pc = NULL, value_growth_pc = NULL, xp_growth_pc = NULL,
-                                  totalroundroids = NULL, totallostroids = NULL, ticksroiding = NULL, ticksroided = NULL, tickroids = NULL, avroids = NULL,
-                             """ + ((
-                             """
-                                  %ssize_rank_change = NULL, %sscore_rank_change = NULL, %svalue_rank_change = NULL, %sxp_rank_change = NULL,
-                                  %ssize_rank = NULL, %sscore_rank = NULL, %svalue_rank = NULL, %sxp_rank = NULL,
-                                  %stotalroundroids_rank = NULL, %stotallostroids_rank = NULL, %stotalroundroids_rank_change = NULL, %stotallostroids_rank_change = NULL,
-                             """ * 4) % (("",)*12 + ("cluster_",)*12 + ("galaxy_",)*12 + ("race_",)*12)) + ((
-                             """
-                                  %s_highest_rank = NULL, %s_highest_rank_tick = NULL, %s_lowest_rank = NULL, %s_lowest_rank_tick = NULL,
-                             """ * 4) % (("size",)*4 + ("score",)*4 + ("value",)*4 + ("xp",)*4)) +
-                             """
-                                  vdiff = NULL, idle = NULL
-                                WHERE id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL)
-                            ;""", bindparams=[false]))
-
         # Any planets in the temp table without an id are new
         # Insert them to the current table and the id(serial/auto_increment)
         #  will be generated, and we can then copy it back to the temp table
         session.execute(text("INSERT INTO planet (rulername, planetname, active) SELECT rulername, planetname, :true FROM planet_temp WHERE id IS NULL;", bindparams=[true]))
         session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.rulername = planet_temp.rulername AND planet.planetname = planet_temp.planetname AND planet.active = :true ORDER BY planet.id DESC) WHERE id IS NULL;", bindparams=[true]))
+
+        # For planets that are no longer present in the new dump
+        session.execute(text("UPDATE planet SET active = :false WHERE id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL);", bindparams=[false]))
 
         t2=time.time()-t1
         print "Deactivate old planets and generate new planet ids in %.3f seconds" % (t2,)
@@ -664,33 +617,21 @@ while True:
 
         # Make sure all the alliances are active,
         #  some might have been deactivated previously
-        session.execute(text("""UPDATE alliance SET
-                                  active = :true
-                            ;""", bindparams=[true]))
+        session.execute(text("UPDATE alliance SET active = :true;", bindparams=[true]))
 
         t2=time.time()-t1
         print "Copy alliance ids to temp and activate in %.3f seconds" % (t2,)
         t1=time.time()
-
-        # For alliances that are no longer present in the new dump, we will
-        #  NULL all the data, leaving only the name and id for FKs
-        session.execute(text("""UPDATE alliance SET
-                                  active = :false,
-                                  size = NULL, members = NULL, score = NULL, points = NULL, size_avg = NULL, score_avg = NULL, points_avg = NULL,
-                                  size_growth = NULL, score_growth = NULL, points_growth = NULL, member_growth = NULL,
-                                  size_growth_pc = NULL, score_growth_pc = NULL, points_growth_pc = NULL,
-                                  size_avg_growth = NULL, score_avg_growth = NULL, points_avg_growth = NULL,
-                                  size_avg_growth_pc = NULL, score_avg_growth_pc = NULL, points_avg_growth_pc = NULL,
-                                  size_rank_change = NULL, members_rank_change = NULL, score_rank_change = NULL, points_rank_change = NULL, size_avg_rank_change = NULL, score_avg_rank_change = NULL, points_avg_rank_change = NULL,
-                                  size_rank = NULL, members_rank = NULL, score_rank = NULL, points_rank = NULL, size_avg_rank = NULL, score_avg_rank = NULL, points_avg_rank = NULL
-                                WHERE id NOT IN (SELECT id FROM alliance_temp WHERE id IS NOT NULL)
-                            ;""", bindparams=[false]))
 
         # Any alliances in the temp table without an id are new
         # Insert them to the current table and the id(serial/auto_increment)
         #  will be generated, and we can then copy it back to the temp table
         session.execute(text("INSERT INTO alliance (name, active) SELECT name, :true FROM alliance_temp WHERE id IS NULL;", bindparams=[true]))
         session.execute(text("UPDATE alliance_temp SET id = (SELECT id FROM alliance WHERE alliance.name = alliance_temp.name AND alliance.active = :true ORDER BY alliance.id DESC) WHERE id IS NULL;", bindparams=[true]))
+
+        # For alliances that are no longer present in the new dump, we will
+        #  NULL all the data, leaving only the name and id for FKs
+        session.execute(text("UPDATE alliance SET active = :false WHERE id NOT IN (SELECT id FROM alliance_temp WHERE id IS NOT NULL);", bindparams=[false]))
 
         t2=time.time()-t1
         print "Deactivate old alliances and generate new alliance ids in %.3f seconds" % (t2,)
