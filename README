@@ -1,18 +1,18 @@
-Merlin is the Copyright (C)2008,2009,2010 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
+Merlin is the Copyright (C)2008,2009,2010,2011 of Robin K. Hansen, Elliot Rosemarine, Andreas Jacobsen.
 Please read the included LICENSE.
 
 Requirements:
     Git
     Python 2.6
     PostgreSQL 8.4
-    psycopg2
+    psycopg2 2.2.1
     SQLAlchemy 0.6.3
 
 Additional Arthur requirements:
     Apache 2.2
     mod_wsgi
     Django
-    Jinja2
+    Jinja2 2.6
 
 Setting up Git: (Consult Git's website for full instructions)
     1) Navigate to the parent directory where you wish to install Merlin
@@ -63,6 +63,8 @@ Access settings and running Merlin:
        If you haven't added yourself to the Admin section of merlin.cfg this
         won't work! (You can add other admins/members without adding them to
         the config once you've added yourself.)
+       You may also want to !secure the bot.
+        You should do this each round and then !reboot.
    12) Any time you make changes to any of Merlin's code, you will need to use
         !reload. There are a few exceptions to this, such as changes to
         merlin.cfg, in which case you will need to !reboot.
