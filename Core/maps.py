@@ -284,6 +284,7 @@ class Planet(Base):
     tickroids = Column(Integer)
     avroids = Column(Float)
     vdiff = Column(Integer)
+    sdiff = Column(Integer)
     idle = Column(Integer)
     cluster_size_rank = Column(Integer)
     cluster_score_rank = Column(Integer)
@@ -412,6 +413,7 @@ class PlanetHistory(Base):
     xp_rank = Column(Integer)
     idle = Column(Integer)
     vdiff = Column(Integer)
+    sdiff = Column(Integer)
 Planet.history_loader = dynamic_loader(PlanetHistory, backref="current")
 GalaxyHistory.planets = relation(PlanetHistory, order_by=asc(PlanetHistory.z), backref="galaxy")
 GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory)
@@ -433,6 +435,34 @@ Galaxy.outs = relation(PlanetExiles, backref="old", primaryjoin=and_(Galaxy.x==P
 Galaxy.ins = relation(PlanetExiles, backref="new", primaryjoin=and_(Galaxy.x==PlanetExiles.newx, Galaxy.y==PlanetExiles.newy),
                                     order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.newz),))
 PlanetExiles.planet = relation(Planet, backref="exiles", order_by=desc(PlanetExiles.tick))
+class PlanetIdles(Base):
+    __tablename__ = 'planet_idles'
+    hour = Column(Integer, index=True)
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
+    idle = Column(Integer)
+PlanetIdles.planet = relation(Planet, backref="idles", order_by=desc(PlanetIdles.tick))
+class PlanetValueDrops(Base):
+    __tablename__ = 'planet_value_drops'
+    hour = Column(Integer, index=True)
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
+    vdiff = Column(Integer)
+PlanetValueDrops.planet = relation(Planet, backref="value_drops", order_by=desc(PlanetValueDrops.tick))
+class PlanetLandings(Base):
+    __tablename__ = 'planet_landings'
+    hour = Column(Integer, index=True)
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
+    sdiff = Column(Integer)
+PlanetLandings.planet = relation(Planet, backref="planet_landings", order_by=desc(PlanetLandings.tick))
+class PlanetLandedOn(Base):
+    __tablename__ = 'planet_landed_on'
+    hour = Column(Integer, index=True)
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
+    sdiff = Column(Integer)
+PlanetLandedOn.planet = relation(Planet, backref="planet_landed_on", order_by=desc(PlanetLandedOn.tick))
 
 class Alliance(Base):
     __tablename__ = 'alliance'

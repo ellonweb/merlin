@@ -601,6 +601,7 @@ while True:
                              """ * 4) % (("size",)*22 + ("score",)*22 + ("value",)*22 + ("xp",)*22)) +
                              """
                                   vdiff = COALESCE(t.value - p.value, 0),
+                                  sdiff = COALESCE(t.size - p.size, 0),
                                   idle = CASE WHEN ((t.value-p.value) BETWEEN (p.vdiff-1) AND (p.vdiff+1) AND (p.xp-t.xp=0)) THEN 1 + COALESCE(p.idle, 0) ELSE 0 END
                                 FROM (SELECT *,
                              """ + ((
@@ -630,6 +631,43 @@ while True:
 
         t2=time.time()-t1
         print "Update planets from temp and generate ranks in %.3f seconds" % (t2,)
+        t1=time.time()
+
+        # Idle data
+        session.execute(text("""INSERT INTO planet_idles (hour, tick, id, idle)
+                                SELECT :hour, :tick, planet.id, planet.idle
+                                FROM planet
+                                WHERE
+                                    planet.idle > 0 AND
+                                    planet.active = :true
+                            ;""", bindparams=[true, hour, bindparam("tick",planet_tick)]))
+        # Value drops
+        session.execute(text("""INSERT INTO planet_value_drops (hour, tick, id, vdiff)
+                                SELECT :hour, :tick, planet.id, planet.vdiff
+                                FROM planet
+                                WHERE
+                                    planet.vdiff < 0 AND
+                                    planet.active = :true
+                            ;""", bindparams=[true, hour, bindparam("tick",planet_tick)]))
+        # Landings
+        session.execute(text("""INSERT INTO planet_landings (hour, tick, id, sdiff)
+                                SELECT :hour, :tick, planet.id, planet.sdiff
+                                FROM planet
+                                WHERE
+                                    planet.sdiff > 0 AND
+                                    planet.active = :true
+                            ;""", bindparams=[true, hour, bindparam("tick",planet_tick)]))
+        # Landed on
+        session.execute(text("""INSERT INTO planet_landed_on (hour, tick, id, sdiff)
+                                SELECT :hour, :tick, planet.id, planet.sdiff
+                                FROM planet
+                                WHERE
+                                    planet.sdiff < 0 AND
+                                    planet.active = :true
+                            ;""", bindparams=[true, hour, bindparam("tick",planet_tick)]))
+
+        t2=time.time()-t1
+        print "Planet stats in in %.3f seconds" % (t2,)
         t1=time.time()
 
 # ########################################################################### #
