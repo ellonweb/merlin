@@ -368,8 +368,12 @@ while True:
                                   %s_highest_rank_tick = CASE WHEN (t.%s_rank <= COALESCE(g.%s_highest_rank, t.%s_rank)) THEN :tick ELSE g.%s_highest_rank_tick END,
                                   %s_lowest_rank = CASE WHEN (t.%s_rank >= COALESCE(g.%s_lowest_rank, t.%s_rank)) THEN t.%s_rank ELSE g.%s_lowest_rank END,
                                   %s_lowest_rank_tick = CASE WHEN (t.%s_rank >= COALESCE(g.%s_lowest_rank, t.%s_rank)) THEN :tick ELSE g.%s_lowest_rank_tick END,
-                             """ * 5) % (("size",)*22 + ("score",)*22 + ("real_score",)*22 + ("value",)*22 + ("xp",)*22)) +
+                             """ * 4) % (("size",)*22 + ("score",)*22 + ("value",)*22 + ("xp",)*22)) +
                              """
+                                  real_score_highest_rank = CASE WHEN (p.real_score_rank <= COALESCE(g.real_score_highest_rank, p.real_score_rank)) THEN p.real_score_rank ELSE g.real_score_highest_rank END,
+                                  real_score_highest_rank_tick = CASE WHEN (p.real_score_rank <= COALESCE(g.real_score_highest_rank, p.real_score_rank)) THEN :tick ELSE g.real_score_highest_rank_tick END,
+                                  real_score_lowest_rank = CASE WHEN (p.real_score_rank >= COALESCE(g.real_score_lowest_rank, p.real_score_rank)) THEN p.real_score_rank ELSE g.real_score_lowest_rank END,
+                                  real_score_lowest_rank_tick = CASE WHEN (p.real_score_rank >= COALESCE(g.real_score_lowest_rank, p.real_score_rank)) THEN :tick ELSE g.real_score_lowest_rank_tick END,
                                   real_score = p.real_score, real_score_rank = p.real_score_rank,
                                   totalroundroids = t.totalroundroids, totallostroids = t.totallostroids,
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank
