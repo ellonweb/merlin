@@ -59,10 +59,10 @@
     
     <tr class="datahigh center">
         <td colspan=6>
-            <a href="{{ scan.bcalc(True) }}" target="_blank">Calc as Target</a>
+            <a href="{{ scan.bcalc(True)|url }}" target="_blank">Calc as Target</a>
         </td>
         <td colspan=6>
-            <a href="{{ scan.bcalc(False) }}" target="_blank">Calc as Attacker</a>
+            <a href="{{ scan.bcalc(False)|url }}" target="_blank">Calc as Attacker</a>
         </td>
     </tr>
     

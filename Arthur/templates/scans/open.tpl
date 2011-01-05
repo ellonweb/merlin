@@ -23,7 +23,7 @@
         <td class="center">{{ req.tick }}</td>
         <td class="center">{{ req.scantype }}</td>
         <td>i:{{ req.target.intel.dists }}/r:{{ req.dists }}</td>
-        <td class="center"><a href="{{ req.link }}" target="_blank">Do Scan!</td>
+        <td class="center"><a href="{{ req.link|url }}" target="_blank">Do Scan!</td>
         <td class="center">{{ req.user.name }}</td>
         <td><a href="{% url "request_cancel", req.id %}">Cancel</a></td>
         <td>

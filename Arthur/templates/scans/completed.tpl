@@ -15,7 +15,7 @@
         <td class="center">{{ scan.tick }}</td>
         <td class="center">{{ scan.scantype }}</td>
         <td class="center"><a href="{% url "scan_id", scan.tick, scan.pa_id %}"
-                onclick="return linkshift(event, '{{ scan.link }}');">{{ scan.pa_id }}</a></td>
+                onclick="return linkshift(event, '{{ scan.link|url }}');">{{ scan.pa_id }}</a></td>
         <td class="center">{{ scan.scanner.name }}</td>
     </tr>
     {% endwith %}

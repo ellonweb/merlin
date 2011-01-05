@@ -705,6 +705,7 @@ class User(Base):
     active = Column(Boolean, default=True)
     access = Column(Integer)
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='set null'), index=True)
+    url = Column(String(10))
     email = Column(String(32))
     emailre = re.compile(r"^([\w.-]+@[\w.-]+)")
     phone = Column(String(48))

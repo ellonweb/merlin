@@ -27,8 +27,6 @@ Lamson side project for integrating with PA alerts
 
 General changes:
     pref option for receiving scan links to webby or pa
-    pref mode to set prefered PA url (ip etc)
-        replaces output on irc and webby
     excalibur: add history of non existant gals? compensating for PA bug
 
 IRC commands

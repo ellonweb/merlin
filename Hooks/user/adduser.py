@@ -90,3 +90,11 @@ class adduser(loadable):
                 return User(name=Config.get("Connection", "nick"), access=Config.getint("Access", "admin"))
             else:
                 raise
+    
+    def is_user(self, user):
+        if loadable.is_user(self, user):
+            return True
+        elif isinstance(user, User) and user.name == Config.get("Connection", "nick") and user.access == Config.getint("Access", "admin"):
+            return True
+        else:
+            return False

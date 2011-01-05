@@ -83,7 +83,7 @@ if round:
     print "Migrating data:"
     try:
         print "  - users/friends"
-        session.execute(text("INSERT INTO users (id, name, alias, passwd, active, access, email, phone, pubphone, _smsmode, sponsor, quits, available_cookies, carebears, last_cookie_date, fleetcount) SELECT id, name, alias, passwd, active, access, email, phone, pubphone, _smsmode::varchar::smsmode, sponsor, quits, available_cookies, carebears, last_cookie_date, 0 FROM %s.users;" % (round,)))
+        session.execute(text("INSERT INTO users (id, name, alias, passwd, active, access, url, email, phone, pubphone, _smsmode, sponsor, quits, available_cookies, carebears, last_cookie_date, fleetcount) SELECT id, name, alias, passwd, active, access, url, email, phone, pubphone, _smsmode::varchar::smsmode, sponsor, quits, available_cookies, carebears, last_cookie_date, 0 FROM %s.users;" % (round,)))
         session.execute(text("SELECT setval('users_id_seq',(SELECT max(id) FROM users));"))
         session.execute(text("INSERT INTO phonefriends (user_id, friend_id) SELECT user_id, friend_id FROM %s.phonefriends;" % (round,)))
         print "  - slogans/quotes"

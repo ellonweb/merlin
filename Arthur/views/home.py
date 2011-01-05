@@ -102,15 +102,14 @@ class home(loadable):
 class links(loadable):
     def execute(self, request, user, link):
         link = {
-                "game"        : "http://game.planetarion.com",
+                "game"        : Config.get("URL","game"),
                 "forums"      : "http://pirate.planetarion.com",
-                "sandmans"    : "http://sandmans.co.uk",
-                "bcalc"       : "http://game.planetarion.com/bcalc.pl",
+                "bcalc"       : Config.get("URL","bcalc"),
                 name          : reverse("alliance_members", kwargs={"name":name}),
                }.get(link)
         if link is None:
             return page_not_found(request)
-        return HttpResponseRedirect(link)
+        return HttpResponseRedirect(self.url(link, user))
 
 @menu(bot, "Guide to %s"%(Config.get("Connection","nick"),))
 @load

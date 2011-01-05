@@ -28,7 +28,7 @@
             <td>
                 {% for scan in scans %}
                     <a href="#{{ scan.pa_id }}"
-                    onclick="return linkshift(event, '{{ scan.link }}');">{{ scan.scantype }}</a>
+                    onclick="return linkshift(event, '{{ scan.link|url }}');">{{ scan.scantype }}</a>
                 {% endfor %}
             </td>
             <td>
