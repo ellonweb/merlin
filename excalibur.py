@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import re, time, traceback, urllib2
+import re, sys, time, traceback, urllib2
 from sqlalchemy.sql import text, bindparam
 from Core.config import Config
 from Core.paconf import PA
@@ -27,6 +27,10 @@ from Core.string import decode
 from Core.db import true, false, session
 from Core.maps import Updates, Galaxy, Planet, Alliance, epenis, galpenis, apenis
 from Core.maps import galaxy_temp, planet_temp, alliance_temp, planet_new_id_search, planet_old_id_search
+
+if len(sys.argv) > 1:
+    Config.set("URL", "dumps", sys.argv[1])
+print "Dumping from %s" %(Config.get("URL", "dumps"),)
 
 # Get the previous tick number!
 last_tick = Updates.current_tick()
