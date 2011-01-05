@@ -27,7 +27,7 @@
         <th width="15%">Landing Tick</th>
     </tr>
     {% for fleet, planet, alliance in outgoing %}
-    <tr class="{{ fleet.mission|lower }}">
+    <tr class="{%if fleet.mission|lower=="defend" and fleet.in_galaxy%}galdef{%else%}{{ fleet.mission|lower }}{%endif%}">
         <td class="center"><a href="{% url "iplanet", planet.x, planet.y, planet.z %}" class="gray">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a> </td>
         <td class="center"> {{ alliance.name }} </td>
         <td class="left"> {{ fleet.fleet_name }} </td>
@@ -51,7 +51,7 @@
         <th width="15%">Landing Tick</th>
     </tr>
     {% for fleet, planet, alliance in incoming %}
-    <tr class="{{ fleet.mission|lower }}">
+    <tr class="{%if fleet.mission|lower=="defend" and fleet.in_galaxy%}galdef{%else%}{{ fleet.mission|lower }}{%endif%}">
         <td class="center"> <a href="{% url "iplanet", planet.x, planet.y, planet.z %}" class="gray">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a> </td>
         <td class="center"> {{ alliance.name }} </td>
         <td class="left"> {{ fleet.fleet_name }} </td>

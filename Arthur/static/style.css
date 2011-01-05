@@ -112,6 +112,10 @@ td.even {
 	background-color: #252936;
 }
 
+tr.galdef {
+	background-color: #595989;
+}
+
 tr.defend {
 	background-color: #598959;
 }

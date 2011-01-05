@@ -853,7 +853,6 @@ class PhoneFriend(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     friend_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
-
 User.phonefriends = relation(User,  secondary=PhoneFriend.__table__,
                                   primaryjoin=PhoneFriend.user_id   == User.id,
                                 secondaryjoin=PhoneFriend.friend_id == User.id) # Asc
@@ -993,8 +992,6 @@ class Attack(Base):
         reply+= ", ".join(map(lambda p: "%s:%s:%s" %(p.x,p.y,p.z,), self.planets))
         return encode(reply)
         return reply
-    
-
 class AttackTarget(Base):
     __tablename__ = 'attack_target'
     id = Column(Integer, primary_key=True)
@@ -1230,7 +1227,6 @@ class Request(Base):
     @property
     def type(self):
         return PA.get(self.scantype,"name")
-    
 Request.user = relation(User, backref="requests")
 Request.target = relation(Planet)
 Request.scan = relation(Scan)
@@ -1435,6 +1431,8 @@ class FleetScan(Base):
     launch_tick = Column(Integer)
     landing_tick = Column(Integer)
     mission = Column(String(7))
+    in_cluster = Column(Boolean)
+    in_galaxy = Column(Boolean)
     
     @property
     def eta(self):

@@ -31,7 +31,7 @@
     
     {% for fleet in scan.fleets %}
     {% with owner = fleet.owner %}
-    <tr class="{{ fleet.mission|lower }}">
+    <tr class="{%if fleet.mission|lower=="defend" and fleet.in_galaxy%}galdef{%else%}{{ fleet.mission|lower }}{%endif%}">
         <td></td>
         <td nowrap="nowrap">
             {% if fleet.mission|lower == "attack" %}-{% elif fleet.mission|lower == "defend" %}+{% elif fleet.mission|lower == "return"%}~{% endif %}
