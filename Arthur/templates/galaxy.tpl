@@ -19,15 +19,15 @@
         </th>
     </tr>
     <tr align="right" class="odd">
-        <td width="12%">Total Round Roids:</td><td width="12%">{{stats.trr}}</td>
+        <td width="12%">Total Round Roids:</td><td width="12%">{{galaxy.totalroundroids}}</td>
         <td width="12%">Ticks Roiding:</td><td width="12%">{{stats.roiding}}</td>
-        <td width="12%">Highest Position:</td><td width="12%">{{stats.highest}} ({{stats.hightick}})</td>
+        <td width="12%">Highest Position:</td><td width="12%">{{galaxy.score_highest_rank}} (PT{{galaxy.score_highest_rank_tick}})</td>
         <td width="12%">Exiles:</td><td width="12%">{{stats.exiles}}</td>
     </tr>
     <tr align="right" class="odd">
-        <td width="12%">Total Lost Roids:</td><td width="12%">{{stats.tlr}}</td>
+        <td width="12%">Total Lost Roids:</td><td width="12%">{{galaxy.totallostroids}}</td>
         <td width="12%">Ticks Roided:</td><td width="12%">{{stats.roided}}</td>
-        <td width="12%">Lowest Position:</td><td width="12%">{{stats.lowest}} ({{stats.lowtick}})</td>
+        <td width="12%">Lowest Position:</td><td width="12%">{{galaxy.score_lowest_rank}} (PT{{galaxy.score_lowest_rank_tick}})</td>
         <td width="12%">XP/Roid:</td><td width="12%">{%if stats.size %}{{(stats.xp|float/stats.size)|round(2)}}{%else%}0{%endif%}</td>
     </tr>
 </table>

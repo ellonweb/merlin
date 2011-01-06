@@ -49,26 +49,14 @@ class galaxy(loadable):
         Q = Q.order_by(asc(Planet.z))
         planets = Q.all() if not h else None
         
-        high = aliased(GalaxyHistory)
-        low = aliased(GalaxyHistory)
-        Q = session.query(sum(Planet.totalroundroids).label("trr"),
-                          sum(Planet.totallostroids).label("tlr"),
+        Q = session.query(
                           sum(Planet.ticksroiding).label("roiding"),
                           sum(Planet.ticksroided).label("roided"),
-                          high.score_rank.label("highest"),
-                          high.tick.label("hightick"),
-                          low.score_rank.label("lowest"),
-                          low.tick.label("lowtick"),
                           sum(Planet.xp).label("xp"),
                           sum(Planet.size).label("size"),
                           )
-        Q = Q.join((Planet, Galaxy.planets))
-        Q = Q.join((high, Galaxy.history_loader))
-        Q = Q.join((low, Galaxy.history_loader))
         Q = Q.filter(Planet.active == True)
         Q = Q.filter(Planet.galaxy == galaxy)
-        Q = Q.group_by(high.score_rank, high.tick, low.score_rank, low.tick)
-        Q = Q.order_by(asc(high.score_rank), desc(high.tick), desc(low.score_rank), desc(low.tick))
         stats = Q.first() if not h else None
         if not h:
             stats.exiles = len(galaxy.outs)
