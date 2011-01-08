@@ -155,6 +155,10 @@ class loadable(_base):
             if self.is_chan(message, route._CHANNEL) is False:
                 raise ChanParseError(route._CHANNEL)
         
+        if getattr(route, "_USER_IN", None) is not None:
+            if CUT.nick_in_chan(message.get_nick(), route._USER_IN) is not True:
+                raise ChanParseError(route._USER_IN)
+        
         return route, name, user, params
     
     def run(self, message):
@@ -336,6 +340,17 @@ def channel(chan):
             raise LoadableError("Invalid channel")
     def wrapper(execute):
         execute._CHANNEL = chan
+        return execute
+    return wrapper
+
+def user_in(chan):
+    if not chan.find("#") == 0:
+        if chan in Config.options("Channels"):
+            chan = Config.get("Channels",chan)
+        else:
+            raise LoadableError("Invalid channel")
+    def wrapper(execute):
+        execute._USER_IN = chan
         return execute
     return wrapper
 
