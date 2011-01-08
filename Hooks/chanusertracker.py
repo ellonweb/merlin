@@ -59,10 +59,10 @@ def names(message):
         elif nick == "+"+Merlin.nick or nick == Merlin.nick:
             CUT.opped(message.get_chan(), False)
         if nick[0] in ("@","+"): nick = nick[1:]
-        CUT.join(message.get_chan(), nick)
-        if CUT.mode_is("rapid"):
+        if CUT.mode_is("rapid") and CUT.Nicks.get(nick) is None:
             # Use whois to get the user's pnick
             message.write("WHOIS %s" % (nick,))
+        CUT.join(message.get_chan(), nick)
 
 @system('PART')
 def part(message):
