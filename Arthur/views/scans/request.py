@@ -21,7 +21,7 @@
  
 from django.conf.urls.defaults import include, patterns, url
 from sqlalchemy.sql import asc
-from Core.paconf import Config
+from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, Request
