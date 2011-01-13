@@ -25,7 +25,6 @@ from django.http import HttpResponseRedirect
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import asc, desc
-from sqlalchemy.sql.functions import sum
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Galaxy, GalaxyHistory, Planet, PlanetExiles, Alliance, Intel
@@ -48,18 +47,6 @@ class galaxy(loadable):
         Q = Q.filter(Planet.galaxy == galaxy)
         Q = Q.order_by(asc(Planet.z))
         planets = Q.all() if not h else None
-        
-        Q = session.query(
-                          sum(Planet.ticksroiding).label("roiding"),
-                          sum(Planet.ticksroided).label("roided"),
-                          sum(Planet.xp).label("xp"),
-                          sum(Planet.size).label("size"),
-                          )
-        Q = Q.filter(Planet.active == True)
-        Q = Q.filter(Planet.galaxy == galaxy)
-        stats = Q.first() if not h else None
-        if not h:
-            stats.exiles = len(galaxy.outs)
         
         Q = session.query(PlanetExiles)
         Q = Q.filter(or_(PlanetExiles.old == galaxy, PlanetExiles.new == galaxy))
@@ -96,7 +83,7 @@ class galaxy(loadable):
                         request,
                         galaxy = galaxy,
                         planets = planets,
-                        stats = stats,
+                        exilecount = len(galaxy.outs),
                         exiles = exiles,
                         history = Q[:ticks] if ticks else Q.all(),
                         ticks = ticks,
