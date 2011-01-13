@@ -215,6 +215,7 @@ while True:
         # Update everything from the temp table and generate ranks
         # Deactivated items are untouched but NULLed earlier
         session.execute(text("""UPDATE cluster AS c SET
+                                  age = COALESCE(c.age, 0) + 1,
                                   size = t.size, score = t.score, value = t.value, xp = t.xp,
                                   ratio = 10000.0 * t.size / t.value,
                                   members = t.count,
@@ -257,7 +258,14 @@ while True:
                                   totalroundroids_growth_pc = CASE WHEN (c.totalroundroids != 0) THEN COALESCE((t.totalroundroids - c.totalroundroids) * 100.0 / c.totalroundroids, 0) ELSE 0 END,
                                   totallostroids_growth = t.totallostroids - COALESCE(c.totallostroids, 0),
                                   totallostroids_growth_pc = CASE WHEN (c.totallostroids != 0) THEN COALESCE((t.totallostroids - c.totallostroids) * 100.0 / c.totallostroids, 0) ELSE 0 END,
-                             """ ) + ((
+                             """ ) +
+                             """
+                                  ticksroiding = COALESCE(c.ticksroiding, 0) + CASE WHEN (t.size > c.size AND (t.size - c.size) != (t.xp - c.xp)) THEN 1 ELSE 0 END,
+                                  ticksroided = COALESCE(c.ticksroided, 0) + CASE WHEN (t.size < c.size) THEN 1 ELSE 0 END,
+                                  tickroids = COALESCE(c.tickroids, 0) + t.size,
+                                  avroids = COALESCE((c.tickroids + t.size) / (c.age + 1.0), t.size),
+                                  roidxp = t.xp * 1.0 / t.size,
+                             """ + ((
                              """
                                   %s_highest_rank = CASE WHEN (t.%s_rank <= COALESCE(c.%s_highest_rank, t.%s_rank)) THEN t.%s_rank ELSE c.%s_highest_rank END,
                                   %s_highest_rank_tick = CASE WHEN (t.%s_rank <= COALESCE(c.%s_highest_rank, t.%s_rank)) THEN :tick ELSE c.%s_highest_rank_tick END,
@@ -266,7 +274,10 @@ while True:
                              """ * 4) % (("size",)*22 + ("score",)*22 + ("value",)*22 + ("xp",)*22)) +
                              """
                                   totalroundroids = t.totalroundroids, totallostroids = t.totallostroids,
-                                  size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank
+                                  size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank,
+                                  vdiff = COALESCE(t.value - c.value, 0),
+                                  sdiff = COALESCE(t.size - c.size, 0),
+                                  idle = CASE WHEN ((t.value-c.value) BETWEEN (c.vdiff-1) AND (c.vdiff+1) AND (c.xp-t.xp=0)) THEN 1 + COALESCE(c.idle, 0) ELSE 0 END
                                 FROM (SELECT *,
                                   rank() OVER (ORDER BY totalroundroids DESC) AS totalroundroids_rank,
                                   rank() OVER (ORDER BY totallostroids DESC) AS totallostroids_rank,
@@ -333,6 +344,7 @@ while True:
         # Update everything from the temp table and generate ranks
         # Deactivated items are untouched but NULLed earlier
         session.execute(text("""UPDATE galaxy AS g SET
+                                  age = COALESCE(g.age, 0) + 1,
                                   x = t.x, y = t.y,
                                   name = t.name, size = t.size, score = t.score, value = t.value, xp = t.xp,
                                   ratio = 10000.0 * t.size / t.value,
@@ -383,7 +395,14 @@ while True:
                                   totalroundroids_growth_pc = CASE WHEN (g.totalroundroids != 0) THEN COALESCE((t.totalroundroids - g.totalroundroids) * 100.0 / g.totalroundroids, 0) ELSE 0 END,
                                   totallostroids_growth = t.totallostroids - COALESCE(g.totallostroids, 0),
                                   totallostroids_growth_pc = CASE WHEN (g.totallostroids != 0) THEN COALESCE((t.totallostroids - g.totallostroids) * 100.0 / g.totallostroids, 0) ELSE 0 END,
-                             """ ) + ((
+                             """ ) +
+                             """
+                                  ticksroiding = COALESCE(g.ticksroiding, 0) + CASE WHEN (t.size > g.size AND (t.size - g.size) != (t.xp - g.xp)) THEN 1 ELSE 0 END,
+                                  ticksroided = COALESCE(g.ticksroided, 0) + CASE WHEN (t.size < g.size) THEN 1 ELSE 0 END,
+                                  tickroids = COALESCE(g.tickroids, 0) + t.size,
+                                  avroids = COALESCE((g.tickroids + t.size) / (g.age + 1.0), t.size),
+                                  roidxp = t.xp * 1.0 / t.size,
+                             """ + ((
                              """
                                   %s_highest_rank = CASE WHEN (t.%s_rank <= COALESCE(g.%s_highest_rank, t.%s_rank)) THEN t.%s_rank ELSE g.%s_highest_rank END,
                                   %s_highest_rank_tick = CASE WHEN (t.%s_rank <= COALESCE(g.%s_highest_rank, t.%s_rank)) THEN :tick ELSE g.%s_highest_rank_tick END,
@@ -397,7 +416,10 @@ while True:
                                   real_score_lowest_rank_tick = CASE WHEN (p.real_score_rank >= COALESCE(g.real_score_lowest_rank, p.real_score_rank)) THEN :tick ELSE g.real_score_lowest_rank_tick END,
                                   real_score = p.real_score, real_score_rank = p.real_score_rank,
                                   totalroundroids = t.totalroundroids, totallostroids = t.totallostroids,
-                                  size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank
+                                  size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank,
+                                  vdiff = COALESCE(t.value - g.value, 0),
+                                  sdiff = COALESCE(t.size - g.size, 0),
+                                  idle = CASE WHEN ((t.value-g.value) BETWEEN (g.vdiff-1) AND (g.vdiff+1) AND (g.xp-t.xp=0)) THEN 1 + COALESCE(g.idle, 0) ELSE 0 END
                                 FROM (SELECT *,
                                   rank() OVER (ORDER BY totalroundroids DESC) AS totalroundroids_rank,
                                   rank() OVER (ORDER BY totallostroids DESC) AS totallostroids_rank,
@@ -641,7 +663,8 @@ while True:
                                   ticksroiding = COALESCE(p.ticksroiding, 0) + CASE WHEN (t.size > p.size AND (t.size - p.size) != (t.xp - p.xp)) THEN 1 ELSE 0 END,
                                   ticksroided = COALESCE(p.ticksroided, 0) + CASE WHEN (t.size < p.size) THEN 1 ELSE 0 END,
                                   tickroids = COALESCE(p.tickroids, 0) + t.size,
-                                  avroids = COALESCE((p.tickroids + t.size) / (p.age + 1), t.size),
+                                  avroids = COALESCE((p.tickroids + t.size) / (p.age + 1.0), t.size),
+                                  roidxp = t.xp * 1.0 / t.size,
                              """ + ((
                              """
                                   %s_highest_rank = CASE WHEN (t.%s_rank <= COALESCE(p.%s_highest_rank, t.%s_rank)) THEN t.%s_rank ELSE p.%s_highest_rank END,
@@ -757,6 +780,7 @@ while True:
         # Update everything from the temp table and generate ranks
         # Deactivated items are untouched but NULLed earlier
         session.execute(text("""UPDATE alliance AS a SET
+                                  age = COALESCE(a.age, 0) + 1,
                                   size = t.size, members = t.members, score = t.score, points = t.points,
                                   size_avg = t.size_avg, score_avg = t.score_avg, points_avg = t.points_avg,
                                   ratio = 10000.0 * t.size / t.score,
@@ -813,7 +837,14 @@ while True:
                                   totalroundroids_growth_pc = CASE WHEN (a.totalroundroids != 0) THEN COALESCE((t.totalroundroids - a.totalroundroids) * 100.0 / a.totalroundroids, 0) ELSE 0 END,
                                   totallostroids_growth = t.totallostroids - COALESCE(a.totallostroids, 0),
                                   totallostroids_growth_pc = CASE WHEN (a.totallostroids != 0) THEN COALESCE((t.totallostroids - a.totallostroids) * 100.0 / a.totallostroids, 0) ELSE 0 END,
-                             """ ) + ((
+                             """ ) +
+                             """
+                                  ticksroiding = COALESCE(a.ticksroiding, 0) + CASE WHEN (t.size > a.size AND (t.size - a.size) != (t.xp - a.xp)) THEN 1 ELSE 0 END,
+                                  ticksroided = COALESCE(a.ticksroided, 0) + CASE WHEN (t.size < a.size) THEN 1 ELSE 0 END,
+                                  tickroids = COALESCE(a.tickroids, 0) + t.size,
+                                  avroids = COALESCE((a.tickroids + t.size) / (a.age + 1.0), t.size),
+                                  roidxp = t.xp * 1.0 / t.size,
+                             """ + ((
                              """
                                   %s_highest_rank = CASE WHEN (t.%s_rank <= COALESCE(a.%s_highest_rank, t.%s_rank)) THEN t.%s_rank ELSE a.%s_highest_rank END,
                                   %s_highest_rank_tick = CASE WHEN (t.%s_rank <= COALESCE(a.%s_highest_rank, t.%s_rank)) THEN :tick ELSE a.%s_highest_rank_tick END,
@@ -823,7 +854,10 @@ while True:
                              """
                                   totalroundroids = t.totalroundroids, totallostroids = t.totallostroids,
                                   size_rank = t.size_rank, members_rank = t.members_rank, score_rank = t.score_rank, points_rank = t.points_rank,
-                                  size_avg_rank = t.size_avg_rank, score_avg_rank = t.score_avg_rank, points_avg_rank = t.points_avg_rank
+                                  size_avg_rank = t.size_avg_rank, score_avg_rank = t.score_avg_rank, points_avg_rank = t.points_avg_rank,
+                                  vdiff = COALESCE(t.score - a.score, 0),
+                                  sdiff = COALESCE(t.size - a.size, 0),
+                                  idle = CASE WHEN ((t.score-a.score) BETWEEN (a.vdiff-1) AND (a.vdiff+1) AND (a.xp-t.xp=0)) THEN 1 + COALESCE(a.idle, 0) ELSE 0 END
                                 FROM (SELECT *,
                                   rank() OVER (ORDER BY totalroundroids DESC) AS totalroundroids_rank,
                                   rank() OVER (ORDER BY totallostroids DESC) AS totallostroids_rank,
