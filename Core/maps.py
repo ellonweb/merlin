@@ -265,6 +265,10 @@ class Galaxy(Base):
     def planet(self, z):
         return self.planet_loader.filter_by(z=z).first()
     
+    def exile_count(self):
+        # minus 1 because the first is for new planet (just in case of bad data, return 0)
+        return len(self.outs)
+    
     @staticmethod
     def load(x,y, active=True):
         Q = session.query(Galaxy)

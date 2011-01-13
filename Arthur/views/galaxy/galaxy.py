@@ -83,7 +83,6 @@ class galaxy(loadable):
                         request,
                         galaxy = galaxy,
                         planets = planets,
-                        exilecount = len(galaxy.outs),
                         exiles = exiles,
                         history = Q[:ticks] if ticks else Q.all(),
                         ticks = ticks,
