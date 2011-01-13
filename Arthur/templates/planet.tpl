@@ -132,7 +132,7 @@
         <td>Exiles:</td>
         <td>(View) {{planet.exile_count()}}</td>
         <td>XP per Roid:</td>
-        <td>{{(planet.xp|float/planet.size)|round(2)}}</td>
+        <td>{{planet.roidxp|round(2)}}</td>
         <td>Tick-Roids:</td>
         <td>{{planet.tickroids|intcomma}}</td>
     </tr>
