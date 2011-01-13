@@ -67,15 +67,23 @@ Base.metadata.create_all()
 print "Setting up default channels"
 userlevel = Config.get("Access", "member")
 maxlevel = Config.get("Access", "admin")
+gallevel = Config.get("Access", "galmate")
 for chan, name in Config.items("Channels"):
     try:
-        session.add(Channel(name=name,userlevel=userlevel,maxlevel=maxlevel))
+        channel = Channel(name=name)
+        if chan != "public":
+            channel.userlevel = userlevel
+            channel.maxlevel = maxlevel
+        else:
+            channel.userlevel = gallevel
+            channel.maxlevel = gallevel
+        session.add(channel)
         session.flush()
     except IntegrityError:
-        print "Channel '%s' already exists" % (name,)
+        print "Channel '%s' already exists" % (channel.name,)
         session.rollback()
     else:
-        print "Created '%s' with access (%s|%s)" % (name, userlevel, maxlevel,)
+        print "Created '%s' with access (%s|%s)" % (channel.name, channel.userlevel, channel.maxlevel,)
         session.commit()
 session.close()
 
