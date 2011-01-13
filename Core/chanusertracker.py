@@ -145,6 +145,8 @@ class ChanUserTracker(object):
         try:
             if pnickf is not None:
                 pnick = pnickf()
+            else:
+                pnick = username
             # They have a pnick, so shouldn't need to auth, let's auth them anyway
             user = User.load(name=pnick)
         except PNickParseError:
