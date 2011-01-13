@@ -25,7 +25,7 @@ from sqlalchemy.sql import asc, desc
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Alliance, Planet, Alliance, Intel
+from Core.maps import Planet, Alliance, Intel
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 

@@ -1,4 +1,3 @@
-{% from 'macros.tpl' import planetlink with context %}
 {% from 'history.tpl' import hgalaxy %}
 {% extends "base.tpl" %}
 {% block content %}

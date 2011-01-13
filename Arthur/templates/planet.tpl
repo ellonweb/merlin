@@ -2,7 +2,7 @@
 {% from 'history.tpl' import hplanet %}
 {% extends "base.tpl" %}
 {% block content %}
-<table cellspacing="1" cellpadding="3" width="95%" class="black">
+<table cellspacing="1" cellpadding="3" width="85%" class="black">
     <tr class="header"><th colspan="10">Planet Info</th></tr>
     <tr class="datahigh">
         <th align="center" colspan="10">
