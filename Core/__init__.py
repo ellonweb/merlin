@@ -26,12 +26,13 @@ import time
 class merlin(object):
     # Main bot container
     
-    def attach(self, irc=(), robocop=()):
+    def attach(self, irc=(), robocop=(), cut=()):
         self.irc = irc
         self.robocop = robocop
+        self.cut = cut
     
     def detach(self):
-        return self.irc, self.robocop
+        return self.irc, self.robocop, self.cut
     
     @property
     def nick(self):
@@ -46,6 +47,7 @@ class merlin(object):
         from Core.loader import Loader
         from Core.exceptions_ import Quit, Reboot, Reload, Call999
         from Core.connection import Connection
+        from Core.chanusertracker import CUT
         from Core.robocop import RoboCop
         from Core.router import Router
         
@@ -58,6 +60,8 @@ class merlin(object):
             self.irc = Connection.attach(*self.irc)
             # Attach the RoboCop/clients sockets and configure
             self.robocop = RoboCop.attach(*self.robocop)
+            # Attach the CUT state
+            self.cut = CUT.attach(*self.cut)
             
             # Operation loop
             Router.run()
@@ -76,6 +80,8 @@ class merlin(object):
             return
         
         except Reload:
+            # Detach the current CUT state
+            self.cut = CUT.detach()
             print "%s Reloading..." % (time.asctime(),)
             # Reimport all the modules
             Loader.reload()
