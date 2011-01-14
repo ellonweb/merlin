@@ -25,6 +25,7 @@ from Core.loadable import loadable, route
 
 class fuckthatname(loadable):
     usage = " <fucked tag> usethis <better name>"
+    access = "member"
     
     @route(r"(.+)\s+use\s*this\s+(\S+)")
     def execute(self, message, user, params):
