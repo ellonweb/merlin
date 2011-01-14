@@ -66,6 +66,6 @@ class scans(loadable):
         
         reply = "%s on %s:%s:%s " % (PA.get(scantype,"name"),x,y,z,)
         reply+= "delivered to: "
-        reply+= ", ".join(nicks)
+        reply+= ", ".join(nicks) if not Config.getboolean("Misc", "anonscans") else "Anon"
         from Hooks.scans.request import request
         message.privmsg(reply, request().scanchan())

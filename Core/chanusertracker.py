@@ -24,6 +24,7 @@
 
 from Core.exceptions_ import PNickParseError, UserError
 from Core.config import Config
+from Core.db import session
 from Core.maps import User
 
 class ChanUserTracker(object):
@@ -170,6 +171,15 @@ class ChanUserTracker(object):
                 return None
         
         user = User.load(name=pnick)
+        if user is None and Config.getboolean("Misc", "autoreg"):
+            if nick and not nick.puser:
+                user = User.load(name=pnick, active=False)
+                if user is None:
+                    user = User(name=pnick)
+                    session.add(user)
+                else:
+                    user.active = True
+                session.commit()
         if user is None:
             return None
         
