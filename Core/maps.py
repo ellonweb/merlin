@@ -45,7 +45,26 @@ class Updates(Base):
     galaxies = Column(Integer)
     planets = Column(Integer)
     alliances = Column(Integer)
-    timestamp = Column(DateTime, default=current_timestamp())
+    timestamp = Column(DateTime, default=datetime.utcnow())
+    clusters = Column(Integer, default=0)
+    c200 = Column(Integer, default=0)
+    ter = Column(Integer, default=0)
+    cat = Column(Integer, default=0)
+    xan = Column(Integer, default=0)
+    zik = Column(Integer, default=0)
+    etd = Column(Integer, default=0)
+    
+    @property
+    def age(self):
+        td = datetime.utcnow() - self.timestamp
+        ret = ''
+        days = td.days
+        if days: ret += "%sd "%(days,)
+        hours = td.seconds/60/60
+        if hours: ret += "%sh "%(hours,)
+        minutes = td.seconds/60 - hours*60
+        ret += "%sm ago"%(minutes,)
+        return ret
     
     @staticmethod
     def current_tick():
@@ -64,14 +83,16 @@ class Updates(Base):
     def week_tick():
         tick = Updates.current_tick() - (24 * 7)
         return tick
+    
+    @staticmethod
+    def current():
+        return session.query(Updates).order_by(desc(Updates.id)).first()
 
-class Galaxy(Base):
-    __tablename__ = 'galaxy'
-    id = Column(Integer, primary_key=True)
+class Cluster(Base):
+    __tablename__ = 'cluster'
+    x = Column(Integer, primary_key=True)
     active = Column(Boolean)
-    x = Column(Integer)
-    y = Column(Integer)
-    name = Column(String(64))
+    age = Column(Integer)
     size = Column(Integer)
     score = Column(Integer)
     value = Column(Integer)
@@ -95,6 +116,147 @@ class Galaxy(Base):
     score_rank_change = Column(Integer)
     value_rank_change = Column(Integer)
     xp_rank_change = Column(Integer)
+    totalroundroids = Column(Integer)
+    totallostroids = Column(Integer)
+    totalroundroids_rank = Column(Integer)
+    totallostroids_rank = Column(Integer)
+    totalroundroids_rank_change = Column(Integer)
+    totallostroids_rank_change = Column(Integer)
+    totalroundroids_growth = Column(Integer)
+    totallostroids_growth = Column(Integer)
+    totalroundroids_growth_pc = Column(Integer)
+    totallostroids_growth_pc = Column(Integer)
+    ticksroiding = Column(Integer)
+    ticksroided = Column(Integer)
+    tickroids = Column(Integer)
+    avroids = Column(Float)
+    roidxp = Column(Float)
+    vdiff = Column(Integer)
+    sdiff = Column(Integer)
+    idle = Column(Integer)
+    size_highest_rank = Column(Integer)
+    size_highest_rank_tick = Column(Integer)
+    size_lowest_rank = Column(Integer)
+    size_lowest_rank_tick = Column(Integer)
+    score_highest_rank = Column(Integer)
+    score_highest_rank_tick = Column(Integer)
+    score_lowest_rank = Column(Integer)
+    score_lowest_rank_tick = Column(Integer)
+    value_highest_rank = Column(Integer)
+    value_highest_rank_tick = Column(Integer)
+    value_lowest_rank = Column(Integer)
+    value_lowest_rank_tick = Column(Integer)
+    xp_highest_rank = Column(Integer)
+    xp_highest_rank_tick = Column(Integer)
+    xp_lowest_rank = Column(Integer)
+    xp_lowest_rank_tick = Column(Integer)
+    
+    def history(self, tick):
+        return self.history_loader.filter_by(tick=tick).first()
+    
+    def galaxy(self, y):
+        return self.galaxy_loader.filter_by(y=y).first()
+    
+    @staticmethod
+    def load(x, active=True):
+        Q = session.query(Cluster)
+        if active is True:
+            Q = Q.filter_by(active=True)
+        Q = Q.filter_by(x=x)
+        cluster = Q.first()
+        return cluster
+class ClusterHistory(Base):
+    __tablename__ = 'cluster_history'
+    __table_args__ = (UniqueConstraint('x', 'tick'), {})
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
+    x = Column(Integer, ForeignKey(Cluster.x), primary_key=True, autoincrement=False)
+    size = Column(Integer)
+    score = Column(Integer)
+    value = Column(Integer)
+    xp = Column(Integer)
+    members = Column(Integer)
+    size_rank = Column(Integer)
+    score_rank = Column(Integer)
+    value_rank = Column(Integer)
+    xp_rank = Column(Integer)
+    def galaxy(self, y):
+        return self.planet_loader.filter_by(y=y).first()
+Cluster.history_loader = dynamic_loader(ClusterHistory, backref="current")
+
+class Galaxy(Base):
+    __tablename__ = 'galaxy'
+    id = Column(Integer, primary_key=True)
+    active = Column(Boolean)
+    age = Column(Integer)
+    x = Column(Integer, ForeignKey(Cluster.x))
+    y = Column(Integer)
+    name = Column(String(64))
+    size = Column(Integer)
+    score = Column(Integer)
+    real_score = Column(Integer)
+    value = Column(Integer)
+    xp = Column(Integer)
+    members = Column(Integer)
+    ratio = Column(Float)
+    size_rank = Column(Integer)
+    score_rank = Column(Integer)
+    real_score_rank = Column(Integer)
+    value_rank = Column(Integer)
+    xp_rank = Column(Integer)
+    size_growth = Column(Integer)
+    score_growth = Column(Integer)
+    real_score_growth = Column(Integer)
+    value_growth = Column(Integer)
+    xp_growth = Column(Integer)
+    member_growth = Column(Integer)
+    size_growth_pc = Column(Float)
+    score_growth_pc = Column(Float)
+    real_score_growth_pc = Column(Float)
+    value_growth_pc = Column(Float)
+    xp_growth_pc = Column(Float)
+    size_rank_change = Column(Integer)
+    score_rank_change = Column(Integer)
+    real_score_rank_change = Column(Integer)
+    value_rank_change = Column(Integer)
+    xp_rank_change = Column(Integer)
+    totalroundroids = Column(Integer)
+    totallostroids = Column(Integer)
+    totalroundroids_rank = Column(Integer)
+    totallostroids_rank = Column(Integer)
+    totalroundroids_rank_change = Column(Integer)
+    totallostroids_rank_change = Column(Integer)
+    totalroundroids_growth = Column(Integer)
+    totallostroids_growth = Column(Integer)
+    totalroundroids_growth_pc = Column(Integer)
+    totallostroids_growth_pc = Column(Integer)
+    ticksroiding = Column(Integer)
+    ticksroided = Column(Integer)
+    tickroids = Column(Integer)
+    avroids = Column(Float)
+    roidxp = Column(Float)
+    vdiff = Column(Integer)
+    sdiff = Column(Integer)
+    idle = Column(Integer)
+    size_highest_rank = Column(Integer)
+    size_highest_rank_tick = Column(Integer)
+    size_lowest_rank = Column(Integer)
+    size_lowest_rank_tick = Column(Integer)
+    score_highest_rank = Column(Integer)
+    score_highest_rank_tick = Column(Integer)
+    score_lowest_rank = Column(Integer)
+    score_lowest_rank_tick = Column(Integer)
+    real_score_highest_rank = Column(Integer)
+    real_score_highest_rank_tick = Column(Integer)
+    real_score_lowest_rank = Column(Integer)
+    real_score_lowest_rank_tick = Column(Integer)
+    value_highest_rank = Column(Integer)
+    value_highest_rank_tick = Column(Integer)
+    value_lowest_rank = Column(Integer)
+    value_lowest_rank_tick = Column(Integer)
+    xp_highest_rank = Column(Integer)
+    xp_highest_rank_tick = Column(Integer)
+    xp_lowest_rank = Column(Integer)
+    xp_lowest_rank_tick = Column(Integer)
     private = Column(Boolean)
     
     def history(self, tick):
@@ -102,6 +264,10 @@ class Galaxy(Base):
     
     def planet(self, z):
         return self.planet_loader.filter_by(z=z).first()
+    
+    def exile_count(self):
+        # minus 1 because the first is for new planet (just in case of bad data, return 0)
+        return len(self.outs)
     
     @staticmethod
     def load(x,y, active=True):
@@ -121,9 +287,11 @@ class Galaxy(Base):
         return encode(retstr)
         return retstr
 Galaxy._idx_x_y = Index('galaxy_x_y', Galaxy.x, Galaxy.y, unique=True)
+Cluster.galaxies = relation(Galaxy, order_by=asc(Galaxy.y), backref="cluster")
+Cluster.galaxy_loader = dynamic_loader(Galaxy)
 class GalaxyHistory(Base):
     __tablename__ = 'galaxy_history'
-    __table_args__ = (UniqueConstraint('x', 'y', 'tick'), {})
+    __table_args__ = (UniqueConstraint('x', 'y', 'tick'), ForeignKeyConstraint(('x', 'tick',), (ClusterHistory.x, ClusterHistory.tick,)), {})
     tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
     id = Column(Integer, ForeignKey(Galaxy.id), primary_key=True, autoincrement=False)
     x = Column(Integer)
@@ -131,15 +299,20 @@ class GalaxyHistory(Base):
     name = Column(String(64))
     size = Column(Integer)
     score = Column(Integer)
+    real_score = Column(Integer)
     value = Column(Integer)
     xp = Column(Integer)
+    members = Column(Integer)
     size_rank = Column(Integer)
     score_rank = Column(Integer)
+    real_score_rank = Column(Integer)
     value_rank = Column(Integer)
     xp_rank = Column(Integer)
     def planet(self, z):
         return self.planet_loader.filter_by(z=z).first()
 Galaxy.history_loader = dynamic_loader(GalaxyHistory, backref="current")
+ClusterHistory.galaxies = relation(GalaxyHistory, order_by=asc(GalaxyHistory.y), backref="cluster")
+ClusterHistory.galaxy_loader = dynamic_loader(GalaxyHistory)
 
 class Planet(Base):
     __tablename__ = 'planet'
@@ -176,15 +349,81 @@ class Planet(Base):
     xp_rank_change = Column(Integer)
     totalroundroids = Column(Integer)
     totallostroids = Column(Integer)
+    totalroundroids_rank = Column(Integer)
+    totallostroids_rank = Column(Integer)
+    totalroundroids_rank_change = Column(Integer)
+    totallostroids_rank_change = Column(Integer)
+    totalroundroids_growth = Column(Integer)
+    totallostroids_growth = Column(Integer)
+    totalroundroids_growth_pc = Column(Integer)
+    totallostroids_growth_pc = Column(Integer)
     ticksroiding = Column(Integer)
     ticksroided = Column(Integer)
     tickroids = Column(Integer)
     avroids = Column(Float)
+    roidxp = Column(Float)
     vdiff = Column(Integer)
+    sdiff = Column(Integer)
     idle = Column(Integer)
+    cluster_size_rank = Column(Integer)
+    cluster_score_rank = Column(Integer)
+    cluster_value_rank = Column(Integer)
+    cluster_xp_rank = Column(Integer)
+    cluster_size_rank_change = Column(Integer)
+    cluster_score_rank_change = Column(Integer)
+    cluster_value_rank_change = Column(Integer)
+    cluster_xp_rank_change = Column(Integer)
+    cluster_totalroundroids_rank = Column(Integer)
+    cluster_totallostroids_rank = Column(Integer)
+    cluster_totalroundroids_rank_change = Column(Integer)
+    cluster_totallostroids_rank_change = Column(Integer)
+    galaxy_size_rank = Column(Integer)
+    galaxy_score_rank = Column(Integer)
+    galaxy_value_rank = Column(Integer)
+    galaxy_xp_rank = Column(Integer)
+    galaxy_size_rank_change = Column(Integer)
+    galaxy_score_rank_change = Column(Integer)
+    galaxy_value_rank_change = Column(Integer)
+    galaxy_xp_rank_change = Column(Integer)
+    galaxy_totalroundroids_rank = Column(Integer)
+    galaxy_totallostroids_rank = Column(Integer)
+    galaxy_totalroundroids_rank_change = Column(Integer)
+    galaxy_totallostroids_rank_change = Column(Integer)
+    race_size_rank = Column(Integer)
+    race_score_rank = Column(Integer)
+    race_value_rank = Column(Integer)
+    race_xp_rank = Column(Integer)
+    race_size_rank_change = Column(Integer)
+    race_score_rank_change = Column(Integer)
+    race_value_rank_change = Column(Integer)
+    race_xp_rank_change = Column(Integer)
+    race_totalroundroids_rank = Column(Integer)
+    race_totallostroids_rank = Column(Integer)
+    race_totalroundroids_rank_change = Column(Integer)
+    race_totallostroids_rank_change = Column(Integer)
+    size_highest_rank = Column(Integer)
+    size_highest_rank_tick = Column(Integer)
+    size_lowest_rank = Column(Integer)
+    size_lowest_rank_tick = Column(Integer)
+    score_highest_rank = Column(Integer)
+    score_highest_rank_tick = Column(Integer)
+    score_lowest_rank = Column(Integer)
+    score_lowest_rank_tick = Column(Integer)
+    value_highest_rank = Column(Integer)
+    value_highest_rank_tick = Column(Integer)
+    value_lowest_rank = Column(Integer)
+    value_lowest_rank_tick = Column(Integer)
+    xp_highest_rank = Column(Integer)
+    xp_highest_rank_tick = Column(Integer)
+    xp_lowest_rank = Column(Integer)
+    xp_lowest_rank_tick = Column(Integer)
     
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
+    
+    def exile_count(self):
+        # minus 1 because the first is for new planet (just in case of bad data, return 0)
+        return max(session.query(PlanetExiles).filter(PlanetExiles.planet == self).count() - 1, 0)
     
     def scan(self, type):
         return self.scans.filter_by(scantype=type[0].upper()).order_by(desc(Scan.id)).first()
@@ -253,6 +492,7 @@ class PlanetHistory(Base):
     xp_rank = Column(Integer)
     idle = Column(Integer)
     vdiff = Column(Integer)
+    sdiff = Column(Integer)
 Planet.history_loader = dynamic_loader(PlanetHistory, backref="current")
 GalaxyHistory.planets = relation(PlanetHistory, order_by=asc(PlanetHistory.z), backref="galaxy")
 GalaxyHistory.planet_loader = dynamic_loader(PlanetHistory)
@@ -260,6 +500,7 @@ class PlanetExiles(Base):
     __tablename__ = 'planet_exiles'
     __table_args__ = (ForeignKeyConstraint(('oldx', 'oldy',), (Galaxy.x, Galaxy.y,)),
                       ForeignKeyConstraint(('newx', 'newy',), (Galaxy.x, Galaxy.y,)), {})
+    hour = Column(Integer, index=True)
     tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
     id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
     oldx = Column(Integer)
@@ -268,22 +509,52 @@ class PlanetExiles(Base):
     newx = Column(Integer)
     newy = Column(Integer)
     newz = Column(Integer)
-Galaxy.outs = relation(PlanetExiles, primaryjoin=and_(Galaxy.x==PlanetExiles.oldx, Galaxy.y==PlanetExiles.oldy),
+Galaxy.outs = relation(PlanetExiles, backref="old", primaryjoin=and_(Galaxy.x==PlanetExiles.oldx, Galaxy.y==PlanetExiles.oldy),
                                     order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.oldz),))
-Galaxy.ins = relation(PlanetExiles, primaryjoin=and_(Galaxy.x==PlanetExiles.newx, Galaxy.y==PlanetExiles.newy),
+Galaxy.ins = relation(PlanetExiles, backref="new", primaryjoin=and_(Galaxy.x==PlanetExiles.newx, Galaxy.y==PlanetExiles.newy),
                                     order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.newz),))
 PlanetExiles.planet = relation(Planet, backref="exiles", order_by=desc(PlanetExiles.tick))
+class PlanetIdles(Base):
+    __tablename__ = 'planet_idles'
+    hour = Column(Integer, index=True)
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
+    idle = Column(Integer)
+PlanetIdles.planet = relation(Planet, backref="idles", order_by=desc(PlanetIdles.tick))
+class PlanetValueDrops(Base):
+    __tablename__ = 'planet_value_drops'
+    hour = Column(Integer, index=True)
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
+    vdiff = Column(Integer)
+PlanetValueDrops.planet = relation(Planet, backref="value_drops", order_by=desc(PlanetValueDrops.tick))
+class PlanetLandings(Base):
+    __tablename__ = 'planet_landings'
+    hour = Column(Integer, index=True)
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
+    sdiff = Column(Integer)
+PlanetLandings.planet = relation(Planet, backref="planet_landings", order_by=desc(PlanetLandings.tick))
+class PlanetLandedOn(Base):
+    __tablename__ = 'planet_landed_on'
+    hour = Column(Integer, index=True)
+    tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
+    id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
+    sdiff = Column(Integer)
+PlanetLandedOn.planet = relation(Planet, backref="planet_landed_on", order_by=desc(PlanetLandedOn.tick))
 
 class Alliance(Base):
     __tablename__ = 'alliance'
     id = Column(Integer, primary_key=True)
     active = Column(Boolean)
+    age = Column(Integer)
     name = Column(String(20), index=True)
     alias = Column(String(20))
     size = Column(Integer)
     members = Column(Integer)
     score = Column(Integer)
     points = Column(Integer)
+    ratio = Column(Float)
     size_rank = Column(Integer)
     members_rank = Column(Integer)
     score_rank = Column(Integer)
@@ -314,6 +585,52 @@ class Alliance(Base):
     size_avg_rank_change = Column(Integer)
     score_avg_rank_change = Column(Integer)
     points_avg_rank_change = Column(Integer)
+    totalroundroids = Column(Integer)
+    totallostroids = Column(Integer)
+    totalroundroids_rank = Column(Integer)
+    totallostroids_rank = Column(Integer)
+    totalroundroids_rank_change = Column(Integer)
+    totallostroids_rank_change = Column(Integer)
+    totalroundroids_growth = Column(Integer)
+    totallostroids_growth = Column(Integer)
+    totalroundroids_growth_pc = Column(Integer)
+    totallostroids_growth_pc = Column(Integer)
+    ticksroiding = Column(Integer)
+    ticksroided = Column(Integer)
+    tickroids = Column(Integer)
+    avroids = Column(Float)
+    roidxp = Column(Float)
+    vdiff = Column(Integer)
+    sdiff = Column(Integer)
+    idle = Column(Integer)
+    size_highest_rank = Column(Integer)
+    size_highest_rank_tick = Column(Integer)
+    size_lowest_rank = Column(Integer)
+    size_lowest_rank_tick = Column(Integer)
+    members_highest_rank = Column(Integer)
+    members_highest_rank_tick = Column(Integer)
+    members_lowest_rank = Column(Integer)
+    members_lowest_rank_tick = Column(Integer)
+    score_highest_rank = Column(Integer)
+    score_highest_rank_tick = Column(Integer)
+    score_lowest_rank = Column(Integer)
+    score_lowest_rank_tick = Column(Integer)
+    points_highest_rank = Column(Integer)
+    points_highest_rank_tick = Column(Integer)
+    points_lowest_rank = Column(Integer)
+    points_lowest_rank_tick = Column(Integer)
+    size_avg_highest_rank = Column(Integer)
+    size_avg_highest_rank_tick = Column(Integer)
+    size_avg_lowest_rank = Column(Integer)
+    size_avg_lowest_rank_tick = Column(Integer)
+    score_avg_highest_rank = Column(Integer)
+    score_avg_highest_rank_tick = Column(Integer)
+    score_avg_lowest_rank = Column(Integer)
+    score_avg_lowest_rank_tick = Column(Integer)
+    points_avg_highest_rank = Column(Integer)
+    points_avg_highest_rank_tick = Column(Integer)
+    points_avg_lowest_rank = Column(Integer)
+    points_avg_lowest_rank_tick = Column(Integer)
     
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
@@ -446,6 +763,7 @@ class User(Base):
     active = Column(Boolean, default=True)
     access = Column(Integer)
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='set null'), index=True)
+    url = Column(String(10))
     email = Column(String(32))
     emailre = re.compile(r"^([\w.-]+@[\w.-]+)")
     phone = Column(String(48))
@@ -593,7 +911,6 @@ class PhoneFriend(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
     friend_id = Column(Integer, ForeignKey(User.id, ondelete='cascade'))
-
 User.phonefriends = relation(User,  secondary=PhoneFriend.__table__,
                                   primaryjoin=PhoneFriend.user_id   == User.id,
                                 secondaryjoin=PhoneFriend.friend_id == User.id) # Asc
@@ -733,8 +1050,6 @@ class Attack(Base):
         reply+= ", ".join(map(lambda p: "%s:%s:%s" %(p.x,p.y,p.z,), self.planets))
         return encode(reply)
         return reply
-    
-
 class AttackTarget(Base):
     __tablename__ = 'attack_target'
     id = Column(Integer, primary_key=True)
@@ -970,7 +1285,6 @@ class Request(Base):
     @property
     def type(self):
         return PA.get(self.scantype,"name")
-    
 Request.user = relation(User, backref="requests")
 Request.target = relation(Planet)
 Request.scan = relation(Scan)
@@ -1175,6 +1489,8 @@ class FleetScan(Base):
     launch_tick = Column(Integer)
     landing_tick = Column(Integer)
     mission = Column(String(7))
+    in_cluster = Column(Boolean)
+    in_galaxy = Column(Boolean)
     
     @property
     def eta(self):

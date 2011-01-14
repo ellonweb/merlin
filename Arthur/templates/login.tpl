@@ -1,5 +1,4 @@
 {% extends "base.tpl" %}
-{% block headerbar %}{% endblock %}
 {% block content %}
 <form method="post"{% if msg == "Logged out." %} action="/"{% endif %}>
 <p>{{ msg }}</p>

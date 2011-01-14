@@ -23,8 +23,8 @@ from django.conf.urls.defaults import include, patterns, url
 from Arthur.views.alliance import alliances, ialliances
 
 urlpatterns = patterns('Arthur.views.alliance',
-    ## change palliance to alliance once implemented in line below
-    url(r'^alliance/(?P<name>[^/]+)/$', 'palliance.alliance', name="alliance"),
+    url(r'^alliance/(?P<name>[^/]+)/$', 'alliance.alliance', name="alliance"),
+    url(r'^alliance/(?P<name>[^/]+)/history/(?:(?P<ticks>\d+)/)?$', 'alliance.alliance', {'h':True}, name="halliance"),
     url(r'^alliance/(?P<name>[^/]+)/planets/$', 'palliance.alliance', name="alliance_members"),
     url(r'^alliance/(?P<name>[^/]+)/planets/(?P<page>\d+)/$', 'palliance.alliance'),
     url(r'^alliance/(?P<name>[^/]+)/planets/(?P<sort>\w+)/$', 'palliance.alliance'),

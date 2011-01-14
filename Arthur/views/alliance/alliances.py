@@ -33,6 +33,7 @@ class alliances(loadable):
         offset = (page - 1)*50
         order =  {"score" : (asc(Alliance.score_rank),),
                   "size"  : (asc(Alliance.size_rank),),
+                  "ratio" : (desc(Alliance.ratio),),
                   "avg_score" : (asc(Alliance.score_avg_rank),),
                   "avg_size"  : (asc(Alliance.size_avg_rank),),
                   "members"   : (asc(Alliance.members_rank),),

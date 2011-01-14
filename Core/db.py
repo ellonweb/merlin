@@ -21,6 +21,9 @@
  
 # SQLAlchemy DB interface
 
+import psycopg2
+if not 2.1 <= float(psycopg2.__version__[2:6]):
+    sys.exit("psycopg2 2.2.1+ Required")
 import sys
 import sqlalchemy
 if not 6.3 <= float(sqlalchemy.__version__[2:5]) < 7.0:

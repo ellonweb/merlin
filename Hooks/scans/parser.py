@@ -302,6 +302,8 @@ class parse(Thread):
                 continue
             fleetscan.owner = attacker
             fleetscan.target = scan.planet
+            fleetscan.in_cluster = fleetscan.owner.x == fleetscan.target.x
+            fleetscan.in_galaxy = fleetscan.in_cluster and fleetscan.owner.y == fleetscan.target.y
 
             try:
                 scan.fleets.append(fleetscan)

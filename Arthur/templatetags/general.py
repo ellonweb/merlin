@@ -19,8 +19,18 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from jinja2 import contextfilter
+
 from Core.config import Config
 from Arthur.jinja import filter
+
+@filter
+@contextfilter
+def url(context, text):
+    if context['user'].url in Config.options("alturls"):
+        return text.replace(Config.get("URL", "game"), Config.get("alturls", context['user'].url))
+    else:
+        return text
 
 @filter
 def intel(user):
@@ -39,17 +49,3 @@ def percent(value, total):
 def and_percent(value, total):
     fraction = float(value) / total if total else 0
     return "%s (%s%%)" % (value, round(fraction * 100, 1),)
-
-@filter
-def change(diff):
-    if diff is None:
-        return ""
-    ret = '<span class='
-    if diff < 0:
-        ret += '"red"'
-    elif diff > 0:
-        ret += '"green"'
-    else:
-        ret += '"yellow"'
-    ret += '>%s</span>' % (diff,)
-    return ret

@@ -44,9 +44,9 @@ class stop(loadable):
         if ship is not None:
             pass
         elif "asteroids".rfind(name.lower()) > -1:
-            ship = Ship(name="Asteroids",class_="Roids",armor=50,total_cost=PA.getint("numbers", "roid_value")*100)
+            ship = Ship(name="Asteroids",class_="Roids",armor=50,total_cost=PA.getint("numbers", "roid_value")*PA.getint("numbers", "ship_value"))
         elif "constructions".rfind(name.lower()) > -1:
-            ship = Ship(name="Constructions",class_="Struct",armor=500,total_cost=PA.getint("numbers", "cons_value")*100)
+            ship = Ship(name="Constructions",class_="Struct",armor=500,total_cost=PA.getint("numbers", "cons_value")*PA.getint("numbers", "ship_value"))
         else:
             message.alert("No Ship called: %s" % (name,))
             return
@@ -62,11 +62,11 @@ class stop(loadable):
             reply="Destroying"
         else:
             reply="Stopping"
-        reply+=" %s %s (%s) as %s requires " % (num, ship.name,self.num2short(num*ship.total_cost/100),attacker)
+        reply+=" %s %s (%s) as %s requires " % (num, ship.name,self.num2short(num*ship.total_cost/PA.getint("numbers", "ship_value")),attacker)
         for attacker in attackers:
             if attacker.type.lower() == "emp" :
                 needed=int((math.ceil(num/(float(100-ship.empres)/100)/attacker.guns))/efficiency)
             else:
                 needed=int((math.ceil(float(ship.armor*num)/attacker.damage))/efficiency)
-            reply+="%s: %s (%s) " % (attacker.name,needed,self.num2short(attacker.total_cost*needed/100))
+            reply+="%s: %s (%s) " % (attacker.name,needed,self.num2short(attacker.total_cost*needed/PA.getint("numbers", "ship_value")))
         message.reply(reply)

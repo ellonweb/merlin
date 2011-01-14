@@ -73,6 +73,8 @@ class parse(object):
         landing_tick = int(eta) + int(curtick)
 
         fleet = FleetScan(owner=owner, target=target, fleet_size=fleetsize, fleet_name=fleetname, landing_tick=landing_tick, mission=mission)
+        fleet.in_cluster = owner_x == target_x
+        fleet.in_galaxy = fleet.in_cluster and owner_y == target_y
         try:
             session.add(fleet)
             session.commit()

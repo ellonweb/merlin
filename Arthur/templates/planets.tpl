@@ -1,3 +1,4 @@
+{% from 'macros.tpl' import planetlink, alliancelink with context %}
 {% extends "base.tpl" %}
 {% set cols = 16 %}
 {% if page %}{% set cols = cols + 1 %}{% endif %}
@@ -77,12 +78,12 @@
         
         <td align="right"{%if sort=="xyz"%} class="datahigh"{%endif%}>
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-            <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
+            <a {{planetlink(planet)}}>&nbsp;{{ planet.z }}</a>
         </td>
-        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" {{planetlink(planet)}}>
                 {{ planet.rulername }}
         </a></td>
-        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" {{planetlink(planet)}}>
                 {{ planet.planetname }}
         </a></td>
         <td class="{%if sort=="race"%}datahigh {%endif%}{{ planet.race }}">{{ planet.race }}</td>
@@ -98,7 +99,7 @@
         
         {% block intel_content scoped %}
         {% if user|intel %}
-        <td>{%if alliance %}<a href="{% url "alliance_members", alliance %}">{{ alliance }}</a>{% endif %}</td>
+        <td>{%if alliance %}<a {{alliancelink(alliance)}}>{{ alliance }}</a>{% endif %}</td>
         <td>{%if nick %}{{ nick }}{% endif %}</td>
         {% endif %}
         {% endblock %}
@@ -109,7 +110,7 @@
         {{planet|attr(sort)|intcomma}}
         {% elif sort in ("avroids",) %}
         {{planet|attr(sort)|round|int|intcomma}}
-        {% elif sort[3:] in ("score","value","size","xp",) %}
+        {% elif sort[3:] in ("score","real_score","value","size","xp",) %}
         {{planet.galaxy|attr(sort[3:])|intcomma}}
         {% elif sort[3:] in ("ratio",) %}
         {{planet.galaxy|attr(sort[3:])|round(1)|intcomma}}

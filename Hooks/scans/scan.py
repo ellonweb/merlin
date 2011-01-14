@@ -61,12 +61,12 @@ class scan(object):
         # Link to scan
         if params.group(7) == "l":
             reply = "%s on %s:%s:%s " % (scan.type,planet.x,planet.y,planet.z,)
-            reply+= scan.link
+            reply+= self.url(scan.link, user)
             message.reply(reply)
             return
         
         # Display the scan
-        message.reply(str(scan))
+        message.reply(self.url(str(scan), user))
     
     def id(self, message, user, params):
         Q = session.query(Scan)
@@ -77,7 +77,7 @@ class scan(object):
             message.reply("No Scans matching ID '%s'"%(params.group(1),))
             return
         # Display the scan
-        message.reply(str(scan))
+        message.reply(self.url(str(scan), user))
 
 class planet(scan, loadable):
     type = "P"

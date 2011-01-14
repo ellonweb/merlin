@@ -160,7 +160,7 @@ class request(loadable):
             message.reply("There are no open scan requests")
             return
         
-        message.reply(" ".join(map(lambda request: "[%s: %s]" % (request.id, request.link,), Q[:5])))
+        message.reply(self.url(" ".join(map(lambda request: "[%s: %s]" % (request.id, request.link,), Q[:5])), user))
     
     def scanchan(self):
         return Config.get("Channels", "scans") if "scans" in Config.options("Channels") else Config.get("Channels", "home")

@@ -23,7 +23,7 @@ from sqlalchemy.sql.functions import count, max
 from Core.config import Config
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Planet, Scan
+from Core.maps import Planet, User, Scan
 from Core.chanusertracker import CUT
 from Core.loadable import loadable, route, robohci
 
@@ -57,12 +57,14 @@ class scans(loadable):
     @robohci
     def robocop(self, message, scantype, pa_id, x, y, z, names):
         nicks = []
-        [nicks.extend(nick) for nick in [CUT.list_user_nicks(name) for name in names.split(",")]]
-        
         reply = "%s on %s:%s:%s " % (PA.get(scantype,"name"),x,y,z,)
         reply+= Config.get("URL","viewscan") % (pa_id,)
-        for nick in nicks:
-            message.privmsg(reply, nick)
+        
+        for name in names.split(","):
+            user = User.load(name)
+            for nick in CUT.list_user_nicks(name):
+                nicks.append(nick)
+                message.privmsg(self.url(reply, user), nick)
         
         reply = "%s on %s:%s:%s " % (PA.get(scantype,"name"),x,y,z,)
         reply+= "delivered to: "

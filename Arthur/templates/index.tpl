@@ -1,3 +1,4 @@
+{% from 'macros.tpl' import planetlink, alliancelink with context %}
 {% extends "base.tpl" %}
 {% block content %}
 <table width="100%">
@@ -16,9 +17,9 @@
         <td align="right">{{ planet|rank("score") }}</td>
         <td align="right">
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-            <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
+            <a {{planetlink(planet)}}>&nbsp;{{ planet.z }}</a>
         </td>
-        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" {{planetlink(planet)}}>
                 {{ planet.planetname }}
         </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
@@ -72,7 +73,7 @@
             {% for alliance in topalliances %}
     <tr class="{% if user|intel and alliance.name == name %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ alliance|rank("score") }}</td>
-        <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" href="{% url "alliance", alliance.name %}">
+        <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" {{alliancelink(alliance.name)}}>
             {{ alliance.name }}
         </a></td>
         <td align="right">{{ alliance|members }}</td>
@@ -103,9 +104,9 @@
         <td align="right">{{ planet|rank("score") }}</td>
         <td align="right">
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-            <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
+            <a {{planetlink(planet)}}>&nbsp;{{ planet.z }}</a>
         </td>
-        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" {{planetlink(planet)}}>
                 {{ planet.planetname }}
         </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
@@ -158,9 +159,9 @@
         <td align="right">{{ planet|rank("score") }}</td>
         <td align="right">
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-            <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
+            <a {{planetlink(planet)}}>&nbsp;{{ planet.z }}</a>
         </td>
-        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" {{planetlink(planet)}}>
                 {{ planet.planetname }}
         </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
@@ -213,9 +214,9 @@
         <td align="right">{{ planet|rank("score") }}</td>
         <td align="right">
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-            <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
+            <a {{planetlink(planet)}}>&nbsp;{{ planet.z }}</a>
         </td>
-        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" {{planetlink(planet)}}>
                 {{ planet.planetname }}
         </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
@@ -268,9 +269,9 @@
         <td align="right">{{ planet|rank("score") }}</td>
         <td align="right">
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-            <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
+            <a {{planetlink(planet)}}>&nbsp;{{ planet.z }}</a>
         </td>
-        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" href="{% url "planet", planet.x, planet.y, planet.z %}">
+        <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" {{planetlink(planet)}}>
                 {{ planet.planetname }}
         </a></td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>

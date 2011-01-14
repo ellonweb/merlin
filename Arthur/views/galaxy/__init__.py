@@ -23,7 +23,8 @@ from django.conf.urls.defaults import include, patterns, url
 from Arthur.views.galaxy import galaxies
 
 urlpatterns = patterns('Arthur.views.galaxy',
-    url(r'^galaxy/(?P<x>\d+)[. :\-](?P<y>\d+)/$', 'galaxy.galaxy', name="galaxy"),
+    url(r'^(?:galaxy/)?(?P<x>\d+)[. :\-](?P<y>\d+)/$', 'galaxy.galaxy', name="galaxy"),
+    url(r'^(?:galaxy/)?(?P<x>\d+)[. :\-](?P<y>\d+)/history/(?:(?P<ticks>\d+)/)?$', 'galaxy.galaxy', {'h':True}, name="hgalaxy"),
     url(r'^galaxies/$', 'galaxies.galaxies', name="galaxy_ranks"),
     url(r'^galaxies/(?P<page>\d+)/$', 'galaxies.galaxies'),
     url(r'^galaxies/(?P<sort>\w+)/$', 'galaxies.galaxies'),

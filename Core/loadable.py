@@ -47,6 +47,12 @@ class _base(object):
             return False
         return user.planet.active
     
+    def url(self, text, user):
+        if self.is_user(user) and user.url in Config.options("alturls"):
+            return text.replace(Config.get("URL", "game"), Config.get("alturls", user.url))
+        else:
+            return text
+    
     def num2short(self,num):
         prefix = ("","-",)[num<0]
         num = abs(num)

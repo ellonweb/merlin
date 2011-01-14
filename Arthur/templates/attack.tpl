@@ -1,3 +1,4 @@
+{% from 'macros.tpl' import planetlink with context %}
 {% extends "base.tpl" %}
 {% block content %}
 {% if message %}
@@ -19,7 +20,7 @@
         
         {% for planet, scans, bookings in group %}
         <tr class="{{ loop.cycle('odd', 'even') }}">
-            <td class="center"><a href="{% url "planet", planet.x, planet.y, planet.z %}">{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
+            <td class="center"><a {{planetlink(planet)}}>{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
             <td class="center {{ planet.race }}">{{ planet.race }}</td>
             <td class="right"> {{ planet.size|intcomma }} </td>
             <td class="right"> {{ planet.value|intcomma }} </td>
@@ -27,7 +28,7 @@
             <td>
                 {% for scan in scans %}
                     <a href="#{{ scan.pa_id }}"
-                    onclick="return linkshift(event, '{{ scan.link }}');">{{ scan.scantype }}</a>
+                    onclick="return linkshift(event, '{{ scan.link|url }}');">{{ scan.scantype }}</a>
                 {% endfor %}
             </td>
             <td>

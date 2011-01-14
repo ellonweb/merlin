@@ -1,3 +1,4 @@
+{% from 'macros.tpl' import planetscanslink with context %}
 <table cellspacing="1" cellpadding="3" width="700" class="black">
 {% with planet = scan.planet %}
 <tr class="datahigh">
@@ -30,12 +31,12 @@
     
     {% for fleet in scan.fleets %}
     {% with owner = fleet.owner %}
-    <tr class="{{ fleet.mission|lower }}">
+    <tr class="{%if fleet.mission|lower=="defend" and fleet.in_galaxy%}galdef{%else%}{{ fleet.mission|lower }}{%endif%}">
         <td></td>
         <td nowrap="nowrap">
             {% if fleet.mission|lower == "attack" %}-{% elif fleet.mission|lower == "defend" %}+{% elif fleet.mission|lower == "return"%}~{% endif %}
             {{ fleet.fleet_name }}
-            (<a href="{% url "planet", owner.x, owner.y, owner.z %}">{{ owner.x }}:{{ owner.y }}:{{ owner.z }}</a>)
+            (<a {{planetscanslink(owner)}}>{{ owner.x }}:{{ owner.y }}:{{ owner.z }}</a>)
         </td>
         <td class="{{ owner.race }} center"> {{ owner.race }} </td>
         <td class="right"> {{ ((owner.score or 0)/1000000.0)|round(1) }}M </td>
