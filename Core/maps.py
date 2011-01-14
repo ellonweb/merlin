@@ -599,7 +599,6 @@ class Alliance(Base):
     ticksroided = Column(Integer)
     tickroids = Column(Integer)
     avroids = Column(Float)
-    roidxp = Column(Float)
     vdiff = Column(Integer)
     sdiff = Column(Integer)
     idle = Column(Integer)

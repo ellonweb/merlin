@@ -841,11 +841,10 @@ while True:
                                   totallostroids_growth_pc = CASE WHEN (a.totallostroids != 0) THEN COALESCE((t.totallostroids - a.totallostroids) * 100.0 / a.totallostroids, 0) ELSE 0 END,
                              """ ) +
                              """
-                                  ticksroiding = COALESCE(a.ticksroiding, 0) + CASE WHEN (t.size > a.size AND (t.size - a.size) != (t.xp - a.xp)) THEN 1 ELSE 0 END,
+                                  ticksroiding = COALESCE(a.ticksroiding, 0) + CASE WHEN (t.size > a.size) THEN 1 ELSE 0 END,
                                   ticksroided = COALESCE(a.ticksroided, 0) + CASE WHEN (t.size < a.size) THEN 1 ELSE 0 END,
                                   tickroids = COALESCE(a.tickroids, 0) + t.size,
                                   avroids = COALESCE((a.tickroids + t.size) / (a.age + 1.0), t.size),
-                                  roidxp = t.xp * 1.0 / t.size,
                              """ + ((
                              """
                                   %s_highest_rank = CASE WHEN (t.%s_rank <= COALESCE(a.%s_highest_rank, t.%s_rank)) THEN t.%s_rank ELSE a.%s_highest_rank END,
@@ -859,7 +858,7 @@ while True:
                                   size_avg_rank = t.size_avg_rank, score_avg_rank = t.score_avg_rank, points_avg_rank = t.points_avg_rank,
                                   vdiff = COALESCE(t.score - a.score, 0),
                                   sdiff = COALESCE(t.size - a.size, 0),
-                                  idle = CASE WHEN ((t.score-a.score) BETWEEN (a.vdiff-1) AND (a.vdiff+1) AND (a.xp-t.xp=0)) THEN 1 + COALESCE(a.idle, 0) ELSE 0 END
+                                  idle = CASE WHEN ((t.score-a.score) BETWEEN (a.vdiff-1) AND (a.vdiff+1)) THEN 1 + COALESCE(a.idle, 0) ELSE 0 END
                                 FROM (SELECT *,
                                   rank() OVER (ORDER BY totalroundroids DESC) AS totalroundroids_rank,
                                   rank() OVER (ORDER BY totallostroids DESC) AS totallostroids_rank,

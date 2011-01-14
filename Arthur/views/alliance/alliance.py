@@ -22,10 +22,12 @@
 from datetime import timedelta
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from sqlalchemy import and_
+from sqlalchemy.orm import aliased
 from sqlalchemy.sql import desc
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Alliance, AllianceHistory
+from Core.maps import Updates, Alliance, AllianceHistory
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
@@ -58,7 +60,7 @@ class alliance(loadable):
                             )
         Q = Q.join(Updates)
         Q = Q.outerjoin((next, and_(history.id==next.id, history.tick-1==next.tick)))
-        Q = Q.filter(history.current == Alliance)
+        Q = Q.filter(history.current == alliance)
         Q = Q.order_by(desc(history.tick))
         
         return render(["alliance.tpl","halliance.tpl"][h],

@@ -108,7 +108,7 @@
 {% macro halliance(galaxy, history) %}
 <table cellspacing="1" cellpadding="3" width="95%" class="black">
     <tr class="header">
-        <th colspan="16">{{caller()}}</th>
+        <th colspan="17">{{caller()}}</th>
     </tr>
     <tr class="header">
         <th>Tick</th>

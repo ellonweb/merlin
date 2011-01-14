@@ -3,11 +3,11 @@
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="95%" class="black">
     <tr class="datahigh">
-        <th colspan="15">Alliance listing</th>
+        <th colspan="16">Alliance listing</th>
     </tr>
     <tr class="header">
         <th colspan="5">Rank</th>
-        <th colspan="6">&nbsp;</th>
+        <th colspan="7">&nbsp;</th>
         <th class="center" colspan="4"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
     </tr>
     <tr class="header">
@@ -59,7 +59,7 @@
     
     {% if pages %}
     <tr class="datahigh">
-        <td colspan="15">Pages:{% for p in pages %} {% if p != page %}<a href="{% url "alliances", sort, p %}">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}{% endfor %}</td>
+        <td colspan="16">Pages:{% for p in pages %} {% if p != page %}<a href="{% url "alliances", sort, p %}">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}{% endfor %}</td>
     </tr>
     {% endif %}
     
