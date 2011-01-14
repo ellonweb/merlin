@@ -62,7 +62,7 @@ class connection(object):
             self.file = self.sock.makefile('rb', 0)
 
         # WHOIS ourselves in order to setup the CUT
-        self.write("WHOIS %s" % nick)
+        # self.write("WHOIS %s" % nick)
         return self.sock, nick
     
     def disconnect(self, line):

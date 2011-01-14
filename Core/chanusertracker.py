@@ -32,6 +32,25 @@ class ChanUserTracker(object):
     Nicks = {}
     Pusers = {}
     
+    def attach(self, channels={}):
+        # Attach the CUT state
+        for chan, nicks in channels.items():
+            self.new_chan(chan)
+            for nick, puser in nicks.items():
+                self.join(chan, nick)
+                if puser:
+                    self.auth_user(nick, chan, None, puser, None)
+        return ()
+    
+    def detach(self):
+        # Generate CUT state
+        channels = {}
+        for chan in self.Channels.values():
+            channels[chan.chan] = {}
+            for nick in chan.nicks:
+                channels[chan.chan][nick.name] = nick.puser.name if nick.puser else None
+        return channels,
+    
     def __del__(self):
         self.Channels.clear()
         self.Nicks.clear()
@@ -125,7 +144,10 @@ class ChanUserTracker(object):
             return None
         
         try:
-            pnick = pnickf()
+            if pnickf is not None:
+                pnick = pnickf()
+            else:
+                pnick = username
             # They have a pnick, so shouldn't need to auth, let's auth them anyway
             user = User.load(name=pnick)
         except PNickParseError:
