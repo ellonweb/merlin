@@ -27,14 +27,15 @@ from Core.paconf import PA
 from Core.db import session
 from Core.maps import Updates, Planet, User, Request
 from Core.chanusertracker import CUT
-from Core.loadable import loadable, route, require_user, robohci
+from Core.loadable import loadable, route, require_user, user_in, robohci
 
 class request(loadable):
     """Request a scan"""
     alias = "req"
     usage = " <x.y.z> <scantype> [dists] | <id> blocks <amps> | cancel <id> | list | links"
     
-    @route(loadable.planet_coord+"\s+("+"|".join(PA.options("scans"))+r")\w*(?:\s+(\d+))?", access = "member")
+    @route(loadable.planet_coord+"\s+("+"|".join(PA.options("scans"))+r")\w*(?:\s+(\d+))?", access = "galmate")
+    @user_in("public")
     @require_user
     def execute(self, message, user, params):
         planet = Planet.load(*params.group(1,3,5))
@@ -93,7 +94,7 @@ class request(loadable):
         
         return request
     
-    @route(r"c(?:ancel)?\s+(\d+)", access = "member")
+    @route(r"c(?:ancel)?\s+(\d+)", access = "galmate")
     @require_user
     def cancel(self, message, user, params):
         id = params.group(1)

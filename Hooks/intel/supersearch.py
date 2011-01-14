@@ -29,7 +29,7 @@ class supersearch(loadable):
     """Advanced planet/intel search: alliance, nick, reportchan, amps, dists, size, value, race, comment"""
     usage = "[option=value]+ [comment=key words]"
     
-    @route("(.+)", access = "member")
+    @route("(.+)", access = "galmate")
     def search(self, message, user, params):
         Q = session.query(Planet, Intel)
         Q = Q.join(Planet.intel)

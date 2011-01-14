@@ -30,7 +30,7 @@ class info(loadable):
     """Alliance information (All information taken from intel, for tag information use the lookup command)"""
     usage = " <alliance>"
     
-    @route(r"(\S+)", access = "member")
+    @route(r"(\S+)", access = "galmate")
     def execute(self, message, user, params):
         
         tag_count = PA.getint("numbers", "tag_count")

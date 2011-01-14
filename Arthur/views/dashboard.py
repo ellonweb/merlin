@@ -35,7 +35,6 @@ urlpatterns = patterns('Arthur.views.dashboard',
     url(r'^user/(?P<username>\S+)/$', 'dashboard', name="dashboard"),
 )
 
-@menu(name, "Dashboard")
 @load
 class dashboard(loadable):
     access = "member"

@@ -28,7 +28,7 @@ class search(loadable):
     """Search for a planet by alliance or nick."""
     usage = " <alliance|nick>"
     
-    @route(r"(\S+)", access = "member")
+    @route(r"(\S+)", access = "galmate")
     def execute(self, message, user, params):
         
         param = "%"+params.group(1)+"%"

@@ -30,7 +30,7 @@ from Core.loadable import loadable, route, robohci
 class scans(loadable):
     usage = " <x:y:z>"
     
-    @route(loadable.planet_coord, access = "half")
+    @route(loadable.planet_coord, access = "galmate")
     def execute(self, message, user, params):
         
         planet = Planet.load(*params.group(1,3,5))

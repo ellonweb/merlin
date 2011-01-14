@@ -28,7 +28,7 @@ from Core.loadable import loadable, route
 
 class scan(object):
     usage = " (<x:y:z> [old] [link] | <id>)"
-    access = "half"
+    access = "galmate"
     type = ""
     planetre = loadable.planet_coord+r"(?:\s+(o)\S*)?(?:\s+(l)\S*)?"
     idre = r"(\w+)"

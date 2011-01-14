@@ -93,7 +93,6 @@ class home(loadable):
                    topalliances =     alliances.order_by(asc(Alliance.score_rank))[:8],
                             )
 
-@menu(name,          "Intel",       suffix = name)
 @menu("Planetarion", "BCalc",       suffix = "bcalc")
 @menu("Planetarion", "Forums",      suffix = "forums")
 @menu("Planetarion", "Game",        suffix = "game")
@@ -111,7 +110,6 @@ class links(loadable):
             return page_not_found(request)
         return HttpResponseRedirect(self.url(link, user))
 
-@menu(bot, "Guide to %s"%(Config.get("Connection","nick"),))
 @load
 @require_user
 class guide(loadable):

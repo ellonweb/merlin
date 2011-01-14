@@ -29,7 +29,7 @@ class racism(loadable):
     """Shows averages for each race matching a given alliance in intel or for a galaxy."""
     usage = " <alliance> | <x:y>"
     
-    @route(r"(\S+)", access = "member")
+    @route(r"(\S+)", access = "galmate")
     def intel_alliance(self, message, user, params):
         
         alliance = Alliance.load(params.group(1))
@@ -52,7 +52,7 @@ class racism(loadable):
         
         self.execute(message, alliance.name, result)
     
-    @route(loadable.coord, access = "member")
+    @route(loadable.coord, access = "galmate")
     def galaxy(self, message, user, params):
         galaxy = Galaxy.load(*params.group(1,3))
         if galaxy is None:

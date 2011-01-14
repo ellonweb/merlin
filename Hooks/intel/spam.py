@@ -28,7 +28,7 @@ class spam(loadable):
     """Spam alliance coords"""
     usage = " <alliance>"
     
-    @route(r"(\S+)", access = "member")
+    @route(r"(\S+)", access = "galmate")
     def execute(self, message, user, params):
         
         alliance = Alliance.load(params.group(1), active=False)

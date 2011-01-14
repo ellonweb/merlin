@@ -31,7 +31,7 @@ class intel(loadable):
     __doc__ += ", ".join(options)
     usage = " <x.y[.z]> [option=value]+"
     
-    @route(loadable.coord, access = "member")
+    @route(loadable.coord, access = "galmate")
     def view_intel(self, message, user, params):
         
         if params.group(5) is None:
@@ -75,7 +75,7 @@ class intel(loadable):
         else:
             message.reply("No information stored for %s:%s:%s"% (planet.x, planet.y, planet.z,))
     
-    @route(loadable.planet_coord+r"\s+(\S.*)", access = "member")
+    @route(loadable.planet_coord+r"\s+(\S.*)", access = "galmate")
     def set_intel(self, message, user, params):
         planet = Planet.load(*params.group(1,3,5))
         if planet is None:
