@@ -217,7 +217,7 @@ while True:
         session.execute(text("""UPDATE cluster AS c SET
                                   age = COALESCE(c.age, 0) + 1,
                                   size = t.size, score = t.score, value = t.value, xp = t.xp,
-                                  ratio = 10000.0 * t.size / t.value,
+                                  ratio = CASE WHEN (t.value != 0) THEN 10000.0 * t.size / t.value ELSE 0 END,
                                   members = t.count,
                              """ + (
                              """
@@ -268,7 +268,7 @@ while True:
                                   ticksroided = COALESCE(c.ticksroided, 0) + CASE WHEN (t.size < c.size) THEN 1 ELSE 0 END,
                                   tickroids = COALESCE(c.tickroids, 0) + t.size,
                                   avroids = COALESCE((c.tickroids + t.size) / (c.age + 1.0), t.size),
-                                  roidxp = t.xp * 1.0 / t.size,
+                                  roidxp = CASE WHEN (t.size != 0) THEN t.xp * 1.0 / t.size ELSE 0 END,
                              """ + ((
                              """
                                   %s_highest_rank = CASE WHEN (t.%s_rank <= COALESCE(c.%s_highest_rank, t.%s_rank)) THEN t.%s_rank ELSE c.%s_highest_rank END,
@@ -352,7 +352,7 @@ while True:
                                   age = COALESCE(g.age, 0) + 1,
                                   x = t.x, y = t.y,
                                   name = t.name, size = t.size, score = t.score, value = t.value, xp = t.xp,
-                                  ratio = 10000.0 * t.size / t.value,
+                                  ratio = CASE WHEN (t.value != 0) THEN 10000.0 * t.size / t.value ELSE 0 END,
                                   members = p.count,
                                   private = p.count <= :priv_gal OR (g.x = 1 AND g.y = 1),
                              """ + (
@@ -410,7 +410,7 @@ while True:
                                   ticksroided = COALESCE(g.ticksroided, 0) + CASE WHEN (t.size < g.size) THEN 1 ELSE 0 END,
                                   tickroids = COALESCE(g.tickroids, 0) + t.size,
                                   avroids = COALESCE((g.tickroids + t.size) / (g.age + 1.0), t.size),
-                                  roidxp = t.xp * 1.0 / t.size,
+                                  roidxp = CASE WHEN (t.size != 0) THEN t.xp * 1.0 / t.size ELSE 0 END,
                              """ + ((
                              """
                                   %s_highest_rank = CASE WHEN (t.%s_rank <= COALESCE(g.%s_highest_rank, t.%s_rank)) THEN t.%s_rank ELSE g.%s_highest_rank END,
@@ -613,7 +613,7 @@ while True:
                                   x = t.x, y = t.y, z = t.z,
                                   planetname = t.planetname, rulername = t.rulername, race = t.race,
                                   size = t.size, score = t.score, value = t.value, xp = t.xp,
-                                  ratio = 10000.0 * t.size / t.value,
+                                  ratio = CASE WHEN (t.value != 0) THEN 10000.0 * t.size / t.value ELSE 0 END,
                              """ + ((
                              """
                                   size_growth = t.size - COALESCE(p.size - p.size_growth, 0),
@@ -676,7 +676,7 @@ while True:
                                   ticksroided = COALESCE(p.ticksroided, 0) + CASE WHEN (t.size < p.size) THEN 1 ELSE 0 END,
                                   tickroids = COALESCE(p.tickroids, 0) + t.size,
                                   avroids = COALESCE((p.tickroids + t.size) / (p.age + 1.0), t.size),
-                                  roidxp = t.xp * 1.0 / t.size,
+                                  roidxp = CASE WHEN (t.size != 0) THEN t.xp * 1.0 / t.size ELSE 0 END,
                              """ + ((
                              """
                                   %s_highest_rank = CASE WHEN (t.%s_rank <= COALESCE(p.%s_highest_rank, t.%s_rank)) THEN t.%s_rank ELSE p.%s_highest_rank END,
@@ -795,7 +795,7 @@ while True:
                                   age = COALESCE(a.age, 0) + 1,
                                   size = t.size, members = t.members, score = t.score, points = t.points,
                                   size_avg = t.size_avg, score_avg = t.score_avg, points_avg = t.points_avg,
-                                  ratio = 10000.0 * t.size / t.score,
+                                  ratio = CASE WHEN (t.score != 0) THEN 10000.0 * t.size / t.score ELSE 0 END,
                              """ + (
                              """
                                   size_growth = t.size - COALESCE(a.size - a.size_growth, 0),
