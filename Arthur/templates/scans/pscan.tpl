@@ -15,9 +15,9 @@
     
     <tr class="odd right">
         <td class="datahigh" width="25%"> Score </td>
-        <td width="25%"> {{ planet.history(scan.tick)|default(planet).score|intcomma }} </td>
+        <td width="25%"> {{ (planet.history(scan.tick)|default(planet)).score|intcomma }} </td>
         <td class="datahigh" width="25%"> Value </td>
-        <td width="25%"> {{ planet.history(scan.tick)|default(planet).value|intcomma }} </td>
+        <td width="25%"> {{ (planet.history(scan.tick)|default(planet)).value|intcomma }} </td>
     </tr>
     
     <tr class="even right">
