@@ -150,6 +150,8 @@ class ChanUserTracker(object):
                 pnick = username
             # They have a pnick, so shouldn't need to auth, let's auth them anyway
             user = User.load(name=pnick)
+            if user is None:
+                return None
         except PNickParseError:
             # They don't have a pnick, expected
             user = User.load(name=username, passwd=password)
