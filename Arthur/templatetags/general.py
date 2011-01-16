@@ -41,6 +41,10 @@ def scans(user):
     return getattr(user, "is_" + Config.get("Arthur", "scans"))()
 
 @filter
+def pc(string):
+    return "%s%%"%(string,)
+
+@filter
 def percent(value, total):
     fraction = float(value) / total if total else 0
     return "%s%%" % (round(fraction * 100, 1),)

@@ -59,7 +59,7 @@
         <td>{{planet.size_highest_rank}} (PT{{planet.size_highest_rank_tick}})</td>
         <td>{{planet.size_lowest_rank}} (PT{{planet.size_lowest_rank_tick}})</td>
         <td>{{planet.size_growth|change(planet.size_growth)}}</td>
-        <td>{{planet.size_growth_pc|round(1)|change(planet.size_growth_pc)}}</td>
+        <td>{{planet.size_growth_pc|round(1)|pc|change(planet.size_growth_pc)}}</td>
     </tr>
     <tr class="even" align="right">
         <td nowrap="">Value:</td>
@@ -71,7 +71,7 @@
         <td>{{planet.value_highest_rank}} (PT{{planet.value_highest_rank_tick}})</td>
         <td>{{planet.value_lowest_rank}} (PT{{planet.value_lowest_rank_tick}})</td>
         <td>{{planet.value_growth|change(planet.value_growth)}}</td>
-        <td>{{planet.value_growth_pc|round(1)|change(planet.value_growth_pc)}}</td>
+        <td>{{planet.value_growth_pc|round(1)|pc|change(planet.value_growth_pc)}}</td>
     </tr>
     <tr class="datahigh" align="right">
         <td nowrap="">Score:</td>
@@ -83,7 +83,7 @@
         <td>{{planet.score_highest_rank}} (PT{{planet.score_highest_rank_tick}})</td>
         <td>{{planet.score_lowest_rank}} (PT{{planet.score_lowest_rank_tick}})</td>
         <td>{{planet.score_growth|change(planet.score_growth)}}</td>
-        <td>{{planet.score_growth_pc|round(1)|change(planet.score_growth_pc)}}</td>
+        <td>{{planet.score_growth_pc|round(1)|pc|change(planet.score_growth_pc)}}</td>
     </tr>
     <tr class="even" align="right">
         <td nowrap="">XP:</td>
@@ -95,7 +95,7 @@
         <td>{{planet.xp_highest_rank}} (PT{{planet.xp_highest_rank_tick}})</td>
         <td>{{planet.xp_lowest_rank}} (PT{{planet.xp_lowest_rank_tick}})</td>
         <td>{{planet.xp_growth|change(planet.xp_growth)}}</td>
-        <td>{{planet.xp_growth_pc|round(1)|change(planet.xp_growth_pc)}}</td>
+        <td>{{planet.xp_growth_pc|round(1)|pc|change(planet.xp_growth_pc)}}</td>
     </tr>
     <tr class="odd" align="right">
         <td nowrap="">Total Round Roids:</td>
@@ -107,7 +107,7 @@
         <td></td>
         <td></td>
         <td>{{planet.totalroundroids_growth|change(planet.totalroundroids_growth)}}</td>
-        <td>{{planet.totalroundroids_growth_pc|round(1)|change(planet.totalroundroids_growth_pc)}}</td>
+        <td>{{planet.totalroundroids_growth_pc|round(1)|pc|change(planet.totalroundroids_growth_pc)}}</td>
     </tr>
     <tr class="even" align="right">
         <td nowrap="">Total Lost Roids:</td>
@@ -119,7 +119,7 @@
         <td></td>
         <td></td>
         <td>{{planet.totallostroids_growth|change(planet.totallostroids_growth)}}</td>
-        <td>{{planet.totallostroids_growth_pc|round(1)|change(planet.totallostroids_growth_pc)}}</td>
+        <td>{{planet.totallostroids_growth_pc|round(1)|pc|change(planet.totallostroids_growth_pc)}}</td>
     </tr>
     <tr class="header">
         <td colspan="10" height="6"/>

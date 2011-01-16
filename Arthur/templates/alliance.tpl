@@ -28,7 +28,7 @@
         <td>{{alliance.size_highest_rank}} (PT{{alliance.size_highest_rank_tick}})</td>
         <td>{{alliance.size_lowest_rank}} (PT{{alliance.size_lowest_rank_tick}})</td>
         <td>{{alliance.size_growth|change(alliance.size_growth)}}</td>
-        <td>{{alliance.size_growth_pc|round(1)|change(alliance.size_growth_pc)}}</td>
+        <td>{{alliance.size_growth_pc|round(1)|pc|change(alliance.size_growth_pc)}}</td>
     </tr>
     <tr class="datahigh" align="right">
         <td nowrap="">Score:</td>
@@ -37,7 +37,7 @@
         <td>{{alliance.score_highest_rank}} (PT{{alliance.score_highest_rank_tick}})</td>
         <td>{{alliance.score_lowest_rank}} (PT{{alliance.score_lowest_rank_tick}})</td>
         <td>{{alliance.score_growth|change(alliance.score_growth)}}</td>
-        <td>{{alliance.score_growth_pc|round(1)|change(alliance.score_growth_pc)}}</td>
+        <td>{{alliance.score_growth_pc|round(1)|pc|change(alliance.score_growth_pc)}}</td>
     </tr>
     <tr class="even" align="right">
         <td nowrap="">Points:</td>
@@ -46,7 +46,7 @@
         <td>{{alliance.points_highest_rank}} (PT{{alliance.points_highest_rank_tick}})</td>
         <td>{{alliance.points_lowest_rank}} (PT{{alliance.points_lowest_rank_tick}})</td>
         <td>{{alliance.points_growth|change(alliance.points_growth)}}</td>
-        <td>{{alliance.points_growth_pc|round(1)|change(alliance.points_growth_pc)}}</td>
+        <td>{{alliance.points_growth_pc|round(1)|pc|change(alliance.points_growth_pc)}}</td>
     </tr>
     <tr class="odd" align="right">
         <td nowrap="">Average Size:</td>
@@ -55,7 +55,7 @@
         <td>{{alliance.size_avg_highest_rank}} (PT{{alliance.size_avg_highest_rank_tick}})</td>
         <td>{{alliance.size_avg_lowest_rank}} (PT{{alliance.size_avg_lowest_rank_tick}})</td>
         <td>{{alliance.size_avg_growth|change(alliance.size_avg_growth)}}</td>
-        <td>{{alliance.size_avg_growth_pc|round(1)|change(alliance.size_avg_growth_pc)}}</td>
+        <td>{{alliance.size_avg_growth_pc|round(1)|pc|change(alliance.size_avg_growth_pc)}}</td>
     </tr>
     <tr class="even" align="right">
         <td nowrap="">Average Score:</td>
@@ -64,7 +64,7 @@
         <td>{{alliance.score_avg_highest_rank}} (PT{{alliance.score_avg_highest_rank_tick}})</td>
         <td>{{alliance.score_avg_lowest_rank}} (PT{{alliance.score_avg_lowest_rank_tick}})</td>
         <td>{{alliance.score_avg_growth|change(alliance.score_avg_growth)}}</td>
-        <td>{{alliance.score_avg_growth_pc|round(1)|change(alliance.score_avg_growth_pc)}}</td>
+        <td>{{alliance.score_avg_growth_pc|round(1)|pc|change(alliance.score_avg_growth_pc)}}</td>
     </tr>
     <tr class="odd" align="right">
         <td nowrap="">Average Points:</td>
@@ -73,7 +73,7 @@
         <td>{{alliance.points_avg_highest_rank}} (PT{{alliance.points_avg_highest_rank_tick}})</td>
         <td>{{alliance.points_avg_lowest_rank}} (PT{{alliance.points_avg_lowest_rank_tick}})</td>
         <td>{{alliance.points_avg_growth|change(alliance.points_avg_growth)}}</td>
-        <td>{{alliance.points_avg_growth_pc|round(1)|change(alliance.points_avg_growth_pc)}}</td>
+        <td>{{alliance.points_avg_growth_pc|round(1)|pc|change(alliance.points_avg_growth_pc)}}</td>
     </tr>
     <tr class="even" align="right">
         <td nowrap="">Total Round Roids:</td>
@@ -82,7 +82,7 @@
         <td></td>
         <td></td>
         <td>{{alliance.totalroundroids_growth|change(alliance.totalroundroids_growth)}}</td>
-        <td>{{alliance.totalroundroids_growth_pc|round(1)|change(alliance.totalroundroids_growth_pc)}}</td>
+        <td>{{alliance.totalroundroids_growth_pc|round(1)|pc|change(alliance.totalroundroids_growth_pc)}}</td>
     </tr>
     <tr class="odd" align="right">
         <td nowrap="">Total Lost Roids:</td>
@@ -91,7 +91,7 @@
         <td></td>
         <td></td>
         <td>{{alliance.totallostroids_growth|change(alliance.totallostroids_growth)}}</td>
-        <td>{{alliance.totallostroids_growth_pc|round(1)|change(alliance.totallostroids_growth_pc)}}</td>
+        <td>{{alliance.totallostroids_growth_pc|round(1)|pc|change(alliance.totallostroids_growth_pc)}}</td>
     </tr>
     <tr class="header">
         <td colspan="7" height="6"/>
