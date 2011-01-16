@@ -662,6 +662,14 @@ class Alliance(Base):
         
         return alliance
     
+    @property
+    def intel_members(self):
+        Q = session.query(count()).select_from(Planet)
+        Q = Q.join(Planet.intel)
+        Q = Q.filter(Intel.alliance == self)
+        Q = Q.filter(Planet.active == True)
+        return Q.scalar()
+    
     def __str__(self):
         retstr="'%s' Members: %s (%s) " % (self.name,self.members,self.members_rank)
         retstr+="Score: %s (%s) Avg: %s (%s) " % (self.score,self.score_rank,self.score_avg,self.score_avg_rank)

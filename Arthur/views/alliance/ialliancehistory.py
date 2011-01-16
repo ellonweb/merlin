@@ -84,6 +84,4 @@ class ialliancehistory(loadable):
         
         history = Q.all()
         
-        members = history[0][1] if len(history) else 0
-        
-        return render("ialliancehistory.tpl", request, alliance=alliance, members=members, history=history)
+        return render("ialliancehistory.tpl", request, alliance=alliance, members=alliance.intel_members, history=history)

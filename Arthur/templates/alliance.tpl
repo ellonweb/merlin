@@ -12,10 +12,8 @@
     {%if user|intel%}
     <tr class="datahigh">
         <th align="center" colspan="7">
-            <a href="{% url "alliance_members", alliance.name %}">
-            Planets
-            </a>
-            ({{alliance.planets|count}} of {{alliance.members}})
+            <a href="{% url "alliance_members", alliance.name %}">Planets</a>
+            ({{members}} of {{alliance.members}})
         </th>
     </tr>
     {%endif%}

@@ -66,6 +66,7 @@ class alliance(loadable):
         return render(["alliance.tpl","halliance.tpl"][h],
                         request,
                         alliance = alliance,
+                        members = alliance.intel_members,
                         history = Q[:ticks] if ticks else Q.all(),
                         ticks = ticks,
                       )
