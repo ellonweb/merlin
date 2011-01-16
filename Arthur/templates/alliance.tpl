@@ -9,6 +9,16 @@
             <a class="{%if user|intel and alliance.name == name %}myplanet{%else%}gray{%endif%}" {{alliancelink(alliance.name)}}>{{alliance.name}}</a>
         </th>
     </tr>
+    {%if user|intel%}
+    <tr class="datahigh">
+        <th align="center" colspan="7">
+            <a href="{% url "alliance_members", alliance.name %}">
+            Planets
+            </a>
+            ({{alliance.planets|count}} of {{alliance.members}})
+        </th>
+    </tr>
+    {%endif%}
     <tr class="header">
         <td colspan="7" height="6"/>
     </tr>
