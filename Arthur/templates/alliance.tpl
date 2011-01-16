@@ -6,7 +6,7 @@
     <tr class="header"><th colspan="7">Alliance Info</th></tr>
     <tr class="datahigh">
         <th align="center" colspan="7">
-            <a class="{%if user|intel and alliance.name == name %}myplanet{%else%}gray{%endif%}" {{alliancelink(alliance)}}>{{alliance.name}}</a>
+            <a class="{%if user|intel and alliance.name == name %}myplanet{%else%}gray{%endif%}" {{alliancelink(alliance.name)}}>{{alliance.name}}</a>
         </th>
     </tr>
     <tr class="header">
