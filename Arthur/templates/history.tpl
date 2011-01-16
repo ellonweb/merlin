@@ -154,7 +154,7 @@
     </tr>
     {% if timestamp.hour == 0 and not loop.last %}
     <tr class="header">
-        <td colspan="16" height="6"/>
+        <td colspan="17" height="6"/>
     </tr>
     {% endif %}
     {% endfor %}

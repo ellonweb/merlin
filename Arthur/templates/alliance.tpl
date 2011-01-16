@@ -3,14 +3,14 @@
 {% extends "base.tpl" %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="60%" class="black">
-    <tr class="header"><th colspan="10">Alliance Info</th></tr>
+    <tr class="header"><th colspan="7">Alliance Info</th></tr>
     <tr class="datahigh">
-        <th align="center" colspan="10">
+        <th align="center" colspan="7">
             <a class="{%if user|intel and alliance.name == name %}myplanet{%else%}gray{%endif%}" {{alliancelink(alliance)}}>{{alliance.name}}</a>
         </th>
     </tr>
     <tr class="header">
-        <td colspan="10" height="6"/>
+        <td colspan="7" height="6"/>
     </tr>
     <tr class="datahigh">
         <td width="20%">&nbsp;</td>
@@ -94,7 +94,7 @@
         <td>{{alliance.totallostroids_growth_pc|round(1)|change(alliance.totallostroids_growth_pc)}}</td>
     </tr>
     <tr class="header">
-        <td colspan="10" height="6"/>
+        <td colspan="7" height="6"/>
     </tr>
     <tr class="even" align="right">
         <td></td>
