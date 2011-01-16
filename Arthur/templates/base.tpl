@@ -18,7 +18,8 @@
     <script type="text/javascript">
         function linkshift(event, link) {
             if (event.ctrlKey==1 || event.shiftKey==1 || event.altKey==1) {
-                window.location.assign(link);
+                if (link != undefined)
+                    window.location.assign(link);
                 return false;
             }
             else {
