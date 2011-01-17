@@ -1,7 +1,7 @@
 {% from 'history.tpl' import hgalaxy %}
 {% extends "planets.tpl" %}
 {% block title %}
-    <a class="{%if user.planet and galaxy == user.planet.galaxy %}myplanet{%else%}gray{%endif%}" {% url "galaxy", galaxy.x, galaxy.y %}>{{galaxy.name}}</a>
+    <a class="{%if user.planet and galaxy == user.planet.galaxy %}myplanet{%else%}gray{%endif%}" href="{% url "galaxy", galaxy.x, galaxy.y %}">{{galaxy.name}}</a>
     (<a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a>)
         -
     Real Score: {{galaxy.real_score|intcomma}} ({{galaxy|rank("score")}})
