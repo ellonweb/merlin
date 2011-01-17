@@ -22,8 +22,10 @@
 # System to implement channel, nick and user tracking
 # There are circular references used very carefully here, be wary when editting
 
+from Core import Merlin
 from Core.exceptions_ import PNickParseError, UserError
 from Core.config import Config
+from Core.connection import Connection
 from Core.db import session
 from Core.maps import User
 
@@ -55,6 +57,12 @@ class ChanUserTracker(object):
         self.Channels.clear()
         self.Nicks.clear()
         self.Pusers.clear()
+    
+    def reset(self):
+        self.Channels.clear()
+        self.Nicks.clear()
+        self.Pusers.clear()
+        Connection.write("WHOIS %s" % (Merlin.nick,))
     
     def mode_is(self, *modes):
         return Config.get("Misc","usercache") in modes
