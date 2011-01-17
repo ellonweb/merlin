@@ -142,7 +142,7 @@
         <td>Ticks Roided:</td>
         <td>{{planet.ticksroided}}</td>
         <td>Idle:</td>
-        <td></td>
+        <td>{{planet.idle}} ({{planet.total_idle}})</td>
         <td>Ratio:</td>
         <td>{{planet.ratio|round(2)}}</td>
         <td>Av. Roids:</td>

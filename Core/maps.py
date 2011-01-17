@@ -437,6 +437,12 @@ class Planet(Base):
         planet = Q.first()
         return planet
     
+    @property
+    def total_idle(self):
+        Q = session.query(PlanetIdles)
+        Q = Q.join(PlanetIdles.planet == self)
+        return Q.count()
+    
     def __str__(self):
         retstr="%s:%s:%s (%s) '%s' of '%s' " % (self.x,self.y,self.z,self.race,self.rulername,self.planetname)
         retstr+="Score: %s (%s) " % (self.score,self.score_rank)
@@ -664,11 +670,11 @@ class Alliance(Base):
     
     @property
     def intel_members(self):
-        Q = session.query(count()).select_from(Planet)
+        Q = session.query(Planet)
         Q = Q.join(Planet.intel)
         Q = Q.filter(Intel.alliance == self)
         Q = Q.filter(Planet.active == True)
-        return Q.scalar()
+        return Q.count()
     
     def __str__(self):
         retstr="'%s' Members: %s (%s) " % (self.name,self.members,self.members_rank)
