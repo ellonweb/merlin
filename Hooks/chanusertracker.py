@@ -36,7 +36,7 @@ def join(message):
     else:
         # Someone is joining a channel we're in
         CUT.join(message.get_chan(), message.get_nick())
-        if CUT.mode_is("rapid", "join", "command"):
+        if CUT.mode_is("rapid", "join"):
             # Set the user's pnick
             CUT.get_user(message.get_nick(), message.get_chan(), pnickf=message.get_pnick)
 

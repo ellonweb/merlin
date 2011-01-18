@@ -141,10 +141,6 @@ class ChanUserTracker(object):
             return []
     
     def auth_user(self, name, channel, pnickf, username, password):
-        # Update CUT with new nicks
-        if channel is not None and self.mode_is("rapid", "join", "command"):
-            self.join(channel, name)
-        
         # Trying to authenticate with !letmein or !auth
         nick = self.Nicks.get(name)
         if (nick is not None) and (nick.puser is not None):
@@ -167,7 +163,7 @@ class ChanUserTracker(object):
         if user is None:
             raise UserError
         
-        if (nick is not None) and self.mode_is("rapid", "join", "command"):
+        if (nick is not None) and self.mode_is("rapid", "join"):
             if self.Pusers.get(user.name) is None:
                 # Add the user to the tracker
                 self.Pusers[user.name] = Puser(user.name)
@@ -181,10 +177,6 @@ class ChanUserTracker(object):
         return user
     
     def get_user(self, name, channel, pnick=None, pnickf=None):
-        # Update CUT with new nicks
-        if channel is not None and self.mode_is("rapid", "join", "command"):
-            self.join(channel, name)
-        
         # Regular user check
         if (pnick is None) and (pnickf is None):
             # This shouldn't happen
@@ -220,7 +212,7 @@ class ChanUserTracker(object):
         if user is None:
             return None
         
-        if (nick is not None) and self.mode_is("rapid", "join", "command"):
+        if (nick is not None) and self.mode_is("rapid", "join"):
             if self.Pusers.get(user.name) is None:
                 # Add the user to the tracker
                 self.Pusers[user.name] = Puser(user.name)
