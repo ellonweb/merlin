@@ -350,6 +350,9 @@ class parse(Thread):
                 continue
             fleetscan.owner = owner
             fleetscan.target = scan.planet
+            fleetscan.in_cluster = fleetscan.owner.x == fleetscan.target.x
+            fleetscan.in_galaxy = fleetscan.in_cluster and fleetscan.owner.y == fleetscan.target.y
+
             try:
                 scan.fleets.append(fleetscan)
                 session.commit()
@@ -382,6 +385,8 @@ class parse(Thread):
                 continue
             fleetscan.owner = scan.planet
             fleetscan.target = target
+            fleetscan.in_cluster = fleetscan.owner.x == fleetscan.target.x
+            fleetscan.in_galaxy = fleetscan.in_cluster and fleetscan.owner.y == fleetscan.target.y
 
             try:
                 scan.fleets.append(fleetscan)
@@ -415,6 +420,8 @@ class parse(Thread):
                 continue
             fleetscan.owner = scan.planet
             fleetscan.target = target
+            fleetscan.in_cluster = fleetscan.owner.x == fleetscan.target.x
+            fleetscan.in_galaxy = fleetscan.in_cluster and fleetscan.owner.y == fleetscan.target.y
 
             try:
                 scan.fleets.append(fleetscan)
