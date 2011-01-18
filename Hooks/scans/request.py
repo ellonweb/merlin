@@ -58,7 +58,7 @@ class request(loadable):
         if mode == "cancel":
             reply = "Cancelled scan request %s" % (request.id,)
             message.privmsg(reply, self.scanchan())
-            nicks = CUT.list_user_nicks(request.user.name)
+            nicks = CUT.get_user_nicks(request.user.name)
             for nick in nicks:
                 message.privmsg(reply, nick)
             return
@@ -66,7 +66,7 @@ class request(loadable):
         if mode == "block":
             reply = "Updated request %s dists to %s" % (request.id, request.dists,)
             message.privmsg(reply, self.scanchan())
-            nicks = CUT.list_user_nicks(request.user.name)
+            nicks = CUT.get_user_nicks(request.user.name)
             for nick in nicks:
                 message.privmsg(reply, nick)
             return
@@ -109,7 +109,7 @@ class request(loadable):
         if message.get_chan() != self.scanchan():
             message.privmsg(reply, self.scanchan())
         
-        nicks = CUT.list_user_nicks(request.user.name)
+        nicks = CUT.get_user_nicks(request.user.name)
         if message.get_nick() not in nicks:
             for nick in nicks:
                 message.privmsg(reply, nick)
@@ -131,7 +131,7 @@ class request(loadable):
         if message.get_chan() != self.scanchan():
             message.privmsg(reply, self.scanchan())
         
-        nicks = CUT.list_user_nicks(request.user.name)
+        nicks = CUT.get_user_nicks(request.user.name)
         if message.get_nick() not in nicks:
             for nick in nicks:
                 message.privmsg(reply, nick)

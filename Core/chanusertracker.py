@@ -49,8 +49,8 @@ class ChanUserTracker(object):
         channels = {}
         for chan in self.Channels.values():
             channels[chan.chan] = {}
-            for nick in chan.nicks:
-                channels[chan.chan][nick.name] = nick.puser.name if nick.puser else None
+            for name in chan.nicks:
+                channels[chan.chan][name] = self.Nicks[name].puser
         return channels,
     
     def __del__(self):
@@ -129,16 +129,16 @@ class ChanUserTracker(object):
     
     def untrack_user(self, pnick):
         if self.Pusers.has_key(pnick):
-            for nick in self.Pusers[pnick].nicks:
-                nick.puser = None
+            for name in self.Pusers[pnick].nicks:
+                self.Nicks[name].puser = None
             del self.Pusers[pnick]
     
-    def list_user_nicks(self, pnick):
+    def get_user_nicks(self, pnick):
         # Return a list of nicks that are currently logged in with the pnick
         if self.Pusers.has_key(pnick):
-            return map(lambda nick: nick.name, self.Pusers[pnick].nicks)
+            return self.Pusers[pnick].nicks.copy()
         else:
-            return []
+            return set()
     
     def auth_user(self, name, channel, pnickf, username, password):
         # Trying to authenticate with !letmein or !auth
@@ -170,8 +170,8 @@ class ChanUserTracker(object):
             
             if nick.puser is None:
                 # Associate the user and nick
-                nick.puser = self.Pusers[user.name]
-                nick.puser.nicks.add(nick)
+                nick.puser = user.name
+                self.Pusers[user.name].nicks.add(nick.name)
         
         # Return the SQLA User
         return user
@@ -186,7 +186,7 @@ class ChanUserTracker(object):
         
         if (nick and nick.puser) is not None:
             # They already have a user associated
-            pnick = nick.puser.name
+            pnick = nick.puser
         elif pnickf is not None:
             # Call the pnick function, might raise PNickParseError
             try:
@@ -219,8 +219,8 @@ class ChanUserTracker(object):
             
             if nick.puser is None:
                 # Associate the user and nick
-                nick.puser = self.Pusers[user.name]
-                nick.puser.nicks.add(nick)
+                nick.puser = user.name
+                self.Pusers[user.name].nicks.add(nick.name)
         
         # Return the SQLA User
         return user
@@ -237,18 +237,16 @@ class Channel(object):
     
     def addnick(self, name):
         # Add a new nick to the channel
-        nick = CUT.Nicks.get(name)
-        if nick in self.nicks:
+        if name in self.nicks:
             return
-        if nick is None:
-            nick = Nick(name)
-            CUT.Nicks[name] = nick
-        self.nicks.add(nick)
-        nick.channels.add(self.chan)
+        if CUT.Nicks.get(name) is None:
+            CUT.Nicks[name] = Nick(name)
+        self.nicks.add(name)
+        CUT.Nicks[name].channels.add(self.chan)
     
     def remnick(self, nick):
         # Remove a nick from the list
-        self.nicks.remove(nick)
+        self.nicks.remove(nick.name)
         nick.channels.remove(self.chan)
         if len(nick.channels) == 0:
             nick.quit()
@@ -259,8 +257,8 @@ class Channel(object):
             del CUT.Channels[self.chan]
         
         # Update nicks
-        for nick in self.nicks.copy():
-            self.remnick(nick)
+        for name in self.nicks.copy():
+            self.remnick(CUT.Nicks[name])
     
 
 class Nick(object):
@@ -283,9 +281,9 @@ class Nick(object):
         
         # Remove puser
         if self.puser is not None:
-            self.puser.nicks.remove(self)
-            if len(self.puser.nicks) == 0:
-                del CUT.Pusers[self.puser.name]
+            CUT.Pusers[self.puser].remove(self.name)
+            if len(CUT.Pusers[self.puser].nicks) == 0:
+                del CUT.Pusers[self.puser]
             self.puser = None
         
         # Remove from channels

@@ -62,7 +62,7 @@ class scans(loadable):
         
         for name in names.split(","):
             user = User.load(name)
-            for nick in CUT.list_user_nicks(name):
+            for nick in CUT.get_user_nicks(name):
                 nicks.append(nick)
                 message.privmsg(self.url(reply, user), nick)
         
