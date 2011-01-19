@@ -42,6 +42,7 @@ def page_not_found(request):
     return HttpResponseNotFound(render("error.tpl", request, msg="Page not found"))
 
 def server_error(request):
+    # raise ## Uncomment this when shit breaks and you're not getting an error message
     return HttpResponseServerError(render("error.tpl", request, msg="Server error, please report the error to an admin as soon as possible"))
 
 class exceptions(object):
