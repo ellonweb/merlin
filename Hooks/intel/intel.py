@@ -110,7 +110,7 @@ class intel(loadable):
                 if val.isdigit():
                     setattr(planet.intel, opt, int(val))
             if opt == "comment":
-                planet.intel.comment = message.get_msg().split("comment=")[1]
+                planet.intel.comment = message.get_msg()[message.get_msg().lower().index("comment=")+len("comment="):]
         session.commit()
         if planet.intel and str(planet.intel):
             message.reply("Information stored for %s:%s:%s -%s"% (planet.x, planet.y, planet.z, str(planet.intel),))
