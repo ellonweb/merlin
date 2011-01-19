@@ -136,7 +136,7 @@
         <td>Ticks Roiding:</td>
         <td>{{planet.ticksroiding}}</td>
         <td>Exiles:</td>
-        <td>(View) {{planet.exile_count()}}</td>
+        <td>(View) {{planet.exile_count}}</td>
         <td>XP per Roid:</td>
         <td>{{planet.roidxp|round(2)}}</td>
         <td>Tick-Roids:</td>

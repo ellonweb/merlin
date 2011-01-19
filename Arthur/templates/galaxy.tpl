@@ -32,7 +32,7 @@
         <td width="12%">Total Round Roids:</td><td width="12%">{{galaxy.totalroundroids|intcomma}}</td>
         <td width="12%">Ticks Roiding:</td><td width="12%">{{galaxy.ticksroiding}}</td>
         <td width="12%">Highest Position:</td><td width="12%">{{galaxy.score_highest_rank}} (PT{{galaxy.score_highest_rank_tick}})</td>
-        <td width="12%">Exiles:</td><td width="12%">{{galaxy.exile_count()}}</td>
+        <td width="12%">Exiles:</td><td width="12%">{{galaxy.exile_count}}</td>
     </tr>
     <tr align="right" class="odd">
         <td width="12%">Total Lost Roids:</td><td width="12%">{{galaxy.totallostroids|intcomma}}</td>

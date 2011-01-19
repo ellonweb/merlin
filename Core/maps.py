@@ -265,10 +265,6 @@ class Galaxy(Base):
     def planet(self, z):
         return self.planet_loader.filter_by(z=z).first()
     
-    def exile_count(self):
-        # minus 1 because the first is for new planet (just in case of bad data, return 0)
-        return len(self.outs)
-    
     @staticmethod
     def load(x,y, active=True):
         Q = session.query(Galaxy)
@@ -277,6 +273,11 @@ class Galaxy(Base):
         Q = Q.filter_by(x=x, y=y)
         galaxy = Q.first()
         return galaxy
+    
+    @property
+    def exile_count(self):
+        # minus 1 because the first is for new planet (just in case of bad data, return 0)
+        return len(self.outs)
     
     def __str__(self):
         retstr="%s:%s '%s' (%s) " % (self.x,self.y,self.name,self.planet_loader.filter_by(active=True).count())
@@ -421,10 +422,6 @@ class Planet(Base):
     def history(self, tick):
         return self.history_loader.filter_by(tick=tick).first()
     
-    def exile_count(self):
-        # minus 1 because the first is for new planet (just in case of bad data, return 0)
-        return max(session.query(PlanetExiles).filter(PlanetExiles.planet == self).count() - 1, 0)
-    
     def scan(self, type):
         return self.scans.filter_by(scantype=type[0].upper()).order_by(desc(Scan.id)).first()
     
@@ -438,9 +435,14 @@ class Planet(Base):
         return planet
     
     @property
+    def exile_count(self):
+        # minus 1 because the first is for new planet (just in case of bad data, return 0)
+        return max(session.query(PlanetExiles).filter(PlanetExiles.planet == self).count() - 1, 0)
+    
+    @property
     def total_idle(self):
         Q = session.query(PlanetIdles)
-        Q = Q.join(PlanetIdles.planet == self)
+        Q = Q.filter(PlanetIdles.planet == self)
         return Q.count()
     
     def __str__(self):
