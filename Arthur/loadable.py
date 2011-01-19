@@ -129,7 +129,7 @@ class loadable(_base):
         pass
     
     def check_access(self, user):
-        user = user or User()
+        user = user or User(access=0)
         if not Config.getboolean("Arthur", "public") and not self.is_user(user):
             raise UserError("Hi! Please login below:")
         if getattr(self, "_USER", False) is True:
