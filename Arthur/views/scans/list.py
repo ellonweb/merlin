@@ -26,10 +26,11 @@ from Core.config import Config
 from Core.db import session
 from Core.maps import Updates, Planet, Scan, Request
 from Arthur.context import menu, render
-from Arthur.loadable import loadable, load
+from Arthur.loadable import loadable, load, require_user
 
 @menu("Scans")
 @load
+@require_user
 class scans(loadable):
     access = Config.get("Arthur", "scans")
     

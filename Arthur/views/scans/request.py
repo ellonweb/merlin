@@ -38,7 +38,7 @@ urlpatterns = patterns('Arthur.views.scans.request',
 @load
 @require_user
 class request(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     def execute(self, request, user, x, y, z, type, dists):
         from Arthur.views.scans.list import scans
         tick = Updates.current_tick()
@@ -60,7 +60,7 @@ class request(loadable):
 @load
 @require_user
 class cancel(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     def execute(self, request, user, id):
         req = Request.load(id)
         if req is None:
@@ -76,8 +76,9 @@ class cancel(loadable):
         return requests.execute(request, user, message="Cancelled scan request %s" % (id,))
 
 @load
+@require_user
 class blocks(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     def execute(self, request, user, id, dists):
         req = Request.load(id)
         if req is None:
@@ -92,8 +93,9 @@ class blocks(loadable):
 
 @menu("Scans", "Requests", prefix=True)
 @load
+@require_user
 class requests(loadable):
-    access = "half"
+    access = Config.get("Arthur", "scans")
     def execute(self, request, user, message=None):
         tick = Updates.current_tick()
         
