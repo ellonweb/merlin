@@ -97,7 +97,7 @@ class request(loadable):
         if request is None:
             message.reply("No open request number %s exists (idiot)."%(id,))
             return
-        if request.user is not user and not user.is_admin() and not self.is_chan(message, self.scanchan()):
+        if request.user is not user and not user.is_member() and not self.is_chan(message, self.scanchan()):
             message.reply("Scan request %s isn't yours and you're not a scanner!"%(id,))
             return
         
@@ -121,6 +121,9 @@ class request(loadable):
         request = Request.load(id)
         if request is None:
             message.reply("No open request number %s exists (idiot)."%(id,))
+            return
+        if request.user is not user and not user.is_member() and not self.is_chan(message, self.scanchan()):
+            message.reply("Scan request %s isn't yours and you're not a scanner!"%(id,))
             return
         
         request.dists = max(request.dists, dists)

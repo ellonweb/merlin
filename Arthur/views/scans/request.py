@@ -65,8 +65,8 @@ class cancel(loadable):
         req = Request.load(id)
         if req is None:
             return requests.execute(request, user, message="No open request number %s exists (idiot)."%(id,))
-        if req.user is not user and not user.is_admin():
-            return requests.execute(request, user, message="Only %s may cancel request %s."%(req.user.name,id))
+        if req.user is not user and not user.is_member():
+            return requests.execute(request, user, message="Scan request %s isn't yours and you're not a scanner!"%(id,))
         
         req.active = False
         session.commit()
@@ -83,6 +83,8 @@ class blocks(loadable):
         req = Request.load(id)
         if req is None:
             return requests.execute(request, user, message="No open request number %s exists (idiot)."%(id,))
+        if req.user is not user and not user.is_member():
+            return requests.execute(request, user, message="Scan request %s isn't yours and you're not a scanner!"%(id,))
         
         req.dists = max(req.dists, int(dists))
         session.commit()
