@@ -7,11 +7,13 @@
 {% if planet and not planets %}{% set planets = ((planet, planet.intel.nick, None,),) %}{% endif %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="95%" class="black">
+    {% block header scoped %}{% endblock %}
     <tr class="datahigh">
         <th colspan="{{cols}}">
             {% block title %}Planet listing{% endblock %}
         </th>
     </tr>
+    {% block extra_title scoped %}{% endblock %}
     <tr class="header">
         {% if page %}<th></th>{% endif %}
         <th colspan="4">Rank</th>

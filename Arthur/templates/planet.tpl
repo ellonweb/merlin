@@ -1,4 +1,4 @@
-{% from 'macros.tpl' import planetlink, alliancelink with context %}
+{% from 'macros.tpl' import planetlink, galaxyscanslink, alliancelink with context %}
 {% from 'history.tpl' import hplanet %}
 {% extends "base.tpl" %}
 {% block content %}
@@ -9,14 +9,19 @@
             <a class="{%if planet == user.planet %}myplanet{%else%}gray{%endif%}" {{planetlink(planet)}}>{{planet.rulername}}</a>
                 <i>of</i>
             <a class="{%if planet == user.planet %}myplanet{%else%}gray{%endif%}" {{planetlink(planet)}}>{{planet.planetname}}</a>
-            (<a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
+            (<a {{galaxyscanslink(planet.galaxy)}}>{{ planet.x }}:{{ planet.y }}</a>
             <a {{planetlink(planet)}}>{{ planet.z }}</a>)
             <span class="{{planet.race}}">{{planet.race}}</span>
         </th>
     </tr>
-    {%if user|intel%}
+    {%if user|scans or user|intel%}
     <tr class="datahigh">
         <th align="center" colspan="10">
+        {%if user|scans%}
+            <a href="{% url "planet_scans", planet.x, planet.y, planet.z %}">Scans</a>
+        {%endif%}
+        {%if user|scans and user|intel%}-{%endif%}
+        {%if user|intel%}
             <a href="{% url "iplanet", planet.x, planet.y, planet.z %}">
             Intel{%if planet.intel and (planet.intel.nick or planet.alliance)%}:{%endif%}
             </a>
@@ -31,6 +36,7 @@
                 <i>{{ planet.alliance.name }}</i>
                 </a>
             {% endif %}
+        {%endif%}
         </th>
     </tr>
     {%endif%}

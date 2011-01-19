@@ -1,3 +1,4 @@
+{% from 'macros.tpl' import galaxyscanslink with context %}
 {% extends "base.tpl" %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="95%" class="black">
@@ -39,8 +40,8 @@
         <td align="right">{{ galaxy|rank("size") }}</td>
         <td align="right">{{ galaxy|rank("xp") }}</td>
         
-        <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
-        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" href="{% url "galaxy", galaxy.x, galaxy.y %}">
+        <td align="right"><a {{galaxyscanslink(galaxy)}}>{{ galaxy.x }}:{{ galaxy.y }}</a></td>
+        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" {{galaxyscanslink(galaxy)}}>
                 {{ galaxy.name }}
         </a></td>
         <td align="right"{%if sort=="size"%} class="datahigh"{%endif%}>{{ galaxy.size|intcomma }}</td>

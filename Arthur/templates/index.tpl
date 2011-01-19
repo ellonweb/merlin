@@ -1,4 +1,4 @@
-{% from 'macros.tpl' import planetlink, alliancelink with context %}
+{% from 'macros.tpl' import planetlink, galaxyscanslink, alliancelink with context %}
 {% extends "base.tpl" %}
 {% block content %}
 <table width="100%">
@@ -44,8 +44,8 @@
 {% if loop.index > 10 %}<tr class="header"><td colspan="7"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy|rank("score") }}</td>
-        <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
-        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" href="{% url "galaxy", galaxy.x, galaxy.y %}">
+        <td align="right"><a {{galaxyscanslink(galaxy)}}>{{ galaxy.x }}:{{ galaxy.y }}</a></td>
+        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" {{galaxyscanslink(galaxy)}}>
                 {{ galaxy.name }}
         </a></td>
         <td align="right">{{ galaxy.size|intcomma }}</td>
@@ -130,8 +130,8 @@
 {% if loop.index > 5 %}<tr class="header"><td colspan="6"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy|rank("score") }}</td>
-        <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
-        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" href="{% url "galaxy", galaxy.x, galaxy.y %}">
+        <td align="right"><a {{galaxyscanslink(galaxy)}}>{{ galaxy.x }}:{{ galaxy.y }}</a></td>
+        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" {{galaxyscanslink(galaxy)}}>
                 {{ galaxy.name }}
         </a></td>
         <td align="right">{{ galaxy|absgrowth("size") }}</td>
@@ -185,8 +185,8 @@
 {% if loop.index > 5 %}<tr class="header"><td colspan="6"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy|rank("score") }}</td>
-        <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
-        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" href="{% url "galaxy", galaxy.x, galaxy.y %}">
+        <td align="right"><a {{galaxyscanslink(galaxy)}}>{{ galaxy.x }}:{{ galaxy.y }}</a></td>
+        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" {{galaxyscanslink(galaxy)}}>
                 {{ galaxy.name }}
         </a></td>
         <td align="right">{{ galaxy|absgrowth("size") }}</td>
@@ -240,8 +240,8 @@
 {% if loop.index > 5 %}<tr class="header"><td colspan="6"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy|rank("score") }}</td>
-        <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
-        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" href="{% url "galaxy", galaxy.x, galaxy.y %}">
+        <td align="right"><a {{galaxyscanslink(galaxy)}}>{{ galaxy.x }}:{{ galaxy.y }}</a></td>
+        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" {{galaxyscanslink(galaxy)}}>
                 {{ galaxy.name }}
         </a></td>
         <td align="right">{{ galaxy|absgrowth("xp") }}</td>
@@ -295,8 +295,8 @@
 {% if loop.index > 5 %}<tr class="header"><td colspan="6"></td></tr>{% endif %}
     <tr class="{% if galaxy == user.planet.galaxy %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ galaxy|rank("score") }}</td>
-        <td align="right"><a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a></td>
-        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" href="{% url "galaxy", galaxy.x, galaxy.y %}">
+        <td align="right"><a {{galaxyscanslink(galaxy)}}>{{ galaxy.x }}:{{ galaxy.y }}</a></td>
+        <td><a class="{% if galaxy == user.planet.galaxy %}myplanet{% else %}gray{% endif %}" {{galaxyscanslink(galaxy)}}>
                 {{ galaxy.name }}
         </a></td>
         <td align="right">{{ galaxy.size|intcomma }}</td>

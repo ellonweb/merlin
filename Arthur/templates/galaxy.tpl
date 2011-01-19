@@ -1,10 +1,20 @@
+{% from 'macros.tpl' import galaxyscanslink with context %}
 {% from 'history.tpl' import hgalaxy %}
 {% extends "planets.tpl" %}
 {% block title %}
-    <a class="{%if user.planet and galaxy == user.planet.galaxy %}myplanet{%else%}gray{%endif%}" href="{% url "galaxy", galaxy.x, galaxy.y %}">{{galaxy.name}}</a>
-    (<a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a>)
+    <a class="{%if user.planet and galaxy == user.planet.galaxy %}myplanet{%else%}gray{%endif%}" {{galaxyscanslink(galaxy)}}>{{galaxy.name}}</a>
+    (<a {{galaxyscanslink(galaxy)}}>{{ galaxy.x }}:{{ galaxy.y }}</a>)
         -
     Real Score: {{galaxy.real_score|intcomma}} ({{galaxy|rank("score")}})
+{% endblock %}
+{% block extra_title %}
+    {%if user|scans%}
+    <tr class="datahigh">
+        <th colspan="{{cols}}">
+            <a href="{% url "galaxy_scans", galaxy.x, galaxy.y %}">Scans</a>
+        </th>
+    </tr>
+    {%endif%}
 {% endblock %}
 {% block sort %}{{ order }}{% endblock %}
 {% block sort_growth %}{{ order }}{% endblock %}

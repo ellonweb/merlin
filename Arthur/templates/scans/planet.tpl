@@ -1,4 +1,13 @@
 {% extends "planet_intelintitle.tpl" %}
+{% block extra_title %}
+    {%if user|intel%}
+    <tr class="datahigh">
+        <th colspan="{{cols}}">
+            <a href="{% url "iplanet", planet.x, planet.y, planet.z %}">Intel</a>
+        </th>
+    </tr>
+    {%endif%}
+{% endblock %}
 {% block content %}
 {{ super() }}
 <p>&nbsp;</p>

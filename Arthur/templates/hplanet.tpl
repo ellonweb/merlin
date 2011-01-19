@@ -1,4 +1,4 @@
-{% from 'macros.tpl' import planetlink with context %}
+{% from 'macros.tpl' import planetlink, galaxyscanslink with context %}
 {% from 'history.tpl' import hplanet %}
 {% extends "base.tpl" %}
 {% block content %}
@@ -6,7 +6,7 @@
     <a class="{%if planet == user.planet %}myplanet{%else%}gray{%endif%}" {{planetlink(planet)}}>{{planet.rulername}}</a>
         <i>of</i>
     <a class="{%if planet == user.planet %}myplanet{%else%}gray{%endif%}" {{planetlink(planet)}}>{{planet.planetname}}</a>
-    (<a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
+    (<a {{galaxyscanslink(planet.galaxy)}}>{{ planet.x }}:{{ planet.y }}</a>
     <a {{planetlink(planet)}}>{{ planet.z }}</a>)
     <span class="{{planet.race}}">{{planet.race}}</span>
         -
