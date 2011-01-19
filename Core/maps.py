@@ -774,7 +774,7 @@ class User(Base):
     alias = Column(String(15))
     passwd = Column(String(32))
     active = Column(Boolean, default=True)
-    access = Column(Integer)
+    access = Column(Integer, default=(Config.getint("Access","galmate") if "galmate" in Config.options("Access") else 0))
     planet_id = Column(Integer, ForeignKey(Planet.id, ondelete='set null'), index=True)
     url = Column(String(10))
     email = Column(String(32))
