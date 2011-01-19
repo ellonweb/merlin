@@ -275,6 +275,9 @@ class Nick(object):
         for chan in self.channels:
             CUT.Channels[chan].nicks.remove(self.name)
             CUT.Channels[chan].nicks.add(name)
+        if self.puser is not None:
+            CUT.Pusers[self.puser].nicks.remove(self.name)
+            CUT.Pusers[self.puser].nicks.add(name)
         self.name = name
     
     def quit(self):
