@@ -47,10 +47,10 @@ class ChanUserTracker(object):
     def detach(self):
         # Generate CUT state
         channels = {}
-        for chan in self.Channels.values():
-            channels[chan.chan] = {}
-            for name in chan.nicks:
-                channels[chan.chan][name] = self.Nicks[name].puser
+        for chan in self.Channels.keys():
+            channels[chan] = {}
+            for name in self.Channels[chan].nicks:
+                channels[chan][name] = self.Nicks[name].puser
         return channels,
     
     def __del__(self):
