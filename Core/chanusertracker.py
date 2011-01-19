@@ -272,6 +272,9 @@ class Nick(object):
         # Update the nicks list
         del CUT.Nicks[self.name]
         CUT.Nicks[name] = self
+        for chan in self.channels:
+            CUT.Channels[chan].nicks.remove(self.name)
+            CUT.Channels[chan].nicks.add(name)
         self.name = name
     
     def quit(self):
@@ -287,8 +290,8 @@ class Nick(object):
             self.puser = None
         
         # Remove from channels
-        for channel in self.channels.copy():
-            CUT.Channels[channel].remnick(self)
+        for chan in self.channels.copy():
+            CUT.Channels[chan].remnick(self)
     
 
 class Puser(object):
