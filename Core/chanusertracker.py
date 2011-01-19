@@ -78,17 +78,17 @@ class ChanUserTracker(object):
         return validate
     
     def valid_nick(f):
-        def validate(self, nick, *args):
-            if self.Nicks.has_key(nick):
-                return f(self, self.Nicks[nick], *args)
+        def validate(self, name, *args):
+            if self.Nicks.has_key(name):
+                return f(self, self.Nicks[name], *args)
         return validate
     
     def valid_nick_chan(f):
-        def validate(self, nick, chan, *args):
-            if self.Nicks.has_key(nick) and self.Channels.has_key(chan):
-                nick = self.Nicks[nick]
+        def validate(self, name, chan, *args):
+            if self.Nicks.has_key(name) and self.Channels.has_key(chan):
+                nick = self.Nicks[name]
                 chan = self.Channels[chan]
-                if nick in chan.nicks:
+                if name in chan.nicks:
                     return f(self, nick, chan, *args)
         return validate
     
