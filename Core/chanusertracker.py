@@ -253,7 +253,7 @@ class Channel(object):
     
     def part(self):
         # We've parted or been kicked
-        if self.chan in CUT.Channels:
+        if self.chan in CUT.Channels.keys():
             del CUT.Channels[self.chan]
         
         # Update nicks
@@ -279,19 +279,20 @@ class Nick(object):
     
     def quit(self):
         # Quitting
-        if self.name in CUT.Nicks:
+        if self.name in CUT.Nicks.keys():
             del CUT.Nicks[self.name]
         
         # Remove puser
         if self.puser is not None:
-            CUT.Pusers[self.puser].remove(self.name)
+            CUT.Pusers[self.puser].nicks.remove(self.name)
             if len(CUT.Pusers[self.puser].nicks) == 0:
                 del CUT.Pusers[self.puser]
             self.puser = None
         
         # Remove from channels
         for chan in self.channels.copy():
-            CUT.Channels[chan].remnick(self)
+            CUT.Channels[chan].nicks.remove(self.name)
+            self.channels.remove(chan)
     
 
 class Puser(object):
