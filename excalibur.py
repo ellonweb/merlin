@@ -584,6 +584,16 @@ while True:
                                     planet.age IS NOT NULL AND
                                     planet.id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL)
                             ;""", bindparams=[true, hour, bindparam("tick",planet_tick)]))
+        # planet renames
+        session.execute(text("""INSERT INTO planet_exiles (hour, tick, id, oldx, oldy, oldz, newx, newy, newz)
+                                SELECT :hour, :tick, planet.id, planet.x, planet.y, planet.z, planet_temp.x, planet_temp.y, planet_temp.z
+                                FROM planet_temp, planet
+                                WHERE
+                                    planet.id = planet_temp.id AND
+                                    planet.active = :true AND
+                                    planet.age IS NOT NULL AND
+                                    (planet.rulername != planet_temp.rulername OR planet.planetname != planet_temp.planetname)
+                            ;""", bindparams=[true, hour, bindparam("tick",planet_tick)]))
         # and planet movements
         session.execute(text("""INSERT INTO planet_exiles (hour, tick, id, oldx, oldy, oldz, newx, newy, newz)
                                 SELECT :hour, :tick, planet.id, planet.x, planet.y, planet.z, planet_temp.x, planet_temp.y, planet_temp.z
