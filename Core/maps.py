@@ -515,6 +515,12 @@ class PlanetExiles(Base):
     newx = Column(Integer)
     newy = Column(Integer)
     newz = Column(Integer)
+    
+    @property
+    def history(self):
+        Q = session.query(PlanetHistory)
+        Q = Q.filter_by(id=self.id, tick=self.tick)
+        return Q.first()
 Galaxy.outs = relation(PlanetExiles, backref="old", primaryjoin=and_(Galaxy.x==PlanetExiles.oldx, Galaxy.y==PlanetExiles.oldy),
                                     order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.oldz),))
 Galaxy.ins = relation(PlanetExiles, backref="new", primaryjoin=and_(Galaxy.x==PlanetExiles.newx, Galaxy.y==PlanetExiles.newy),
