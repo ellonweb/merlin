@@ -1045,8 +1045,7 @@ class Attack(Base):
     
     def removeGalaxy(self, galaxy):
         for planet in galaxy.planets:
-            if planet.active:
-                self.removePlanet(planet)
+            self.removePlanet(planet)
     
     @staticmethod
     def load(id):

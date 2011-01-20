@@ -61,17 +61,24 @@ class editattack(loadable):
         
         for coord in re.findall(loadable.coord, params.group(2)):
             if not coord[4]:
-                galaxy = Galaxy.load(coord[0],coord[2])
+                galaxy = Galaxy.load(coord[0],coord[2], active=False)
                 if galaxy:
                     attack.removeGalaxy(galaxy)
             
             else:
-                planet = Planet.load(coord[0],coord[2],coord[4])
+                planet = Planet.load(coord[0],coord[2],coord[4], active=False)
                 if planet:
                     attack.removePlanet(planet)
         
+        if not len(attack.planets):
+            session.delete(attack)
+        
         session.commit()
-        message.reply(str(attack))
+        
+        if attack in session:
+            message.reply(str(attack))
+        else:
+            message.reply("Deleted Attack %d LT: %d | %s" %(attack.id,attack.landtick,attack.comment,))
     
     @route(r"(\d+)\s+land\s+(\d+)")
     def land(self, message, user, params):
@@ -83,6 +90,13 @@ class editattack(loadable):
         
         tick = Updates.current_tick()
         when = int(params.group(2))
+        
+        if when == 0:
+            session.delete(attack)
+            session.commit()
+            message.reply("Deleted Attack %d LT: %d | %s" %(attack.id,attack.landtick,attack.comment,))
+            return
+        
         if when < PA.getint("numbers", "protection"):
             eta = when
             when += tick
