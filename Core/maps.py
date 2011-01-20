@@ -160,9 +160,10 @@ class Cluster(Base):
     @staticmethod
     def load(x, active=True):
         Q = session.query(Cluster)
-        if active is True:
-            Q = Q.filter_by(active=True)
         Q = Q.filter_by(x=x)
+        galaxy = Q.filter_by(active=True).first()
+        if cluster is not None or active == True:
+            return cluster
         cluster = Q.first()
         return cluster
 class ClusterHistory(Base):
@@ -268,9 +269,10 @@ class Galaxy(Base):
     @staticmethod
     def load(x,y, active=True):
         Q = session.query(Galaxy)
-        if active is True:
-            Q = Q.filter_by(active=True)
         Q = Q.filter_by(x=x, y=y)
+        galaxy = Q.filter_by(active=True).first()
+        if galaxy is not None or active == True:
+            return galaxy
         galaxy = Q.first()
         return galaxy
     
@@ -428,9 +430,10 @@ class Planet(Base):
     @staticmethod
     def load(x,y,z, active=True):
         Q = session.query(Planet)
-        if active is True:
-            Q = Q.filter_by(active=True)
         Q = Q.filter_by(x=x, y=y, z=z)
+        planet = Q.filter_by(active=True).first()
+        if planet is not None or active == True:
+            return planet
         planet = Q.first()
         return planet
     
