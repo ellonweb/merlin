@@ -42,9 +42,13 @@
                     (
                     {{- lt - tick }}/{{ lt }}
                     {%- if target and target.user == user %}
+                        <b><i>
                         <a href="{% url "unbook", attack.id, planet.x, planet.y, planet.z, lt %}">{{ target.user.name }}</a>
+                        </i></b>
                     {%- elif target %}
+                        <b><i>
                         {{ target.user.name }}
+                        </i></b>
                     {%- elif target == false %}
                         unclaimed
                     {%- elif target is none %}
