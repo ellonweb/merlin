@@ -1,21 +1,27 @@
-{% from 'macros.tpl' import planetlink with context %}
+{% from 'macros.tpl' import planetlink, alliancelink with context %}
 {% extends "base.tpl" %}
+{% set cols = 7 %}
+{% if user|intel %}{% set cols = cols + 2 %}{% endif %}
 {% block content %}
 {% if message %}
     <p>{{ message }}</p>
 {% endif %}
-    <table cellpadding="3" cellspacing="1" width="900" class="black">
-        <tr class="datahigh"><th colspan="7">
+    <table cellpadding="3" cellspacing="1" class="black">
+        <tr class="datahigh"><th colspan="{{cols}}">
             Attack {{ attack.id }} LT: {{ attack.landtick }} {{ attack.comment }}
         </th></tr>
         <tr class="header">
-            <th width="7%">Coords</th>
-            <th width="5%">Race</th>
-            <th width="5%">Size</th>
-            <th width="8%">Value</th>
-            <th width="8%">Score</th>
-            <th width="6%">Scans</th>
-            <th width="61%">Bookings</th>
+            <th width="60">Coords</th>
+            <th width="60">Race</th>
+            <th width="60">Size</th>
+            <th width="120">Value</th>
+            <th width="120">Score</th>
+            <th>Scans</th>
+            <th>Bookings</th>
+            {% if user|intel %}
+            <th>Alliance</th>
+            <th>Nick</th>
+            {% endif %}
         </tr>
         
         {% for planet, scans, bookings in group %}
@@ -46,6 +52,10 @@
                     {%- endif -%}
                     )
                 {% endfor %}
+            {% if user|intel %}
+            <td>{%if planet.intel and planet.alliance %}<a {{alliancelink(planet.alliance.name)}}>{{ planet.alliance.name }}</a>{% endif %}</td>
+            <td>{%if planet.intel.nick %}{{ planet.intel.nick }}{% endif %}</td>
+            {% endif %}
         </tr>
         {% endfor %}
     </table>

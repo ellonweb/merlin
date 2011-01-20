@@ -2,7 +2,7 @@
 {% extends "base.tpl" %}
 {% set cols = 16 %}
 {% if page %}{% set cols = cols + 1 %}{% endif %}
-{% if user|intel %}{% set cols = cols + 2 %}{% endif %}
+{% if user|intel %}{% if planet and not planets %}{% elif alliance %}{% set cols = cols + 1 %}{% else %}{% set cols = cols + 2 %}{% endif %}{% endif %}
 {% if showsort %}{% set cols = cols + 1 %}{% endif %}
 {% if planet and not planets %}{% set planets = ((planet, planet.intel.nick, None,),) %}{% endif %}
 {% block content %}
@@ -99,12 +99,12 @@
         <td align="right"{%if sort and sort.startswith("value_growth")%} class="datahigh"{%endif%}>{{ planet|growth("value") }}</td>
         <td align="right"{%if sort and sort.startswith("score_growth")%} class="datahigh"{%endif%}>{{ planet|growth("score") }}</td>
         
-        {% block intel_content scoped %}
         {% if user|intel %}
+        {% block intel_content scoped %}
         <td>{%if alliance %}<a {{alliancelink(alliance)}}>{{ alliance }}</a>{% endif %}</td>
         <td>{%if nick %}{{ nick }}{% endif %}</td>
-        {% endif %}
         {% endblock %}
+        {% endif %}
         
         {% if showsort %}
         <td align="right" class="datahigh">
@@ -157,8 +157,10 @@
         <td align="right">{{ galaxy|growth("score") }}</td>
         
         {% if user|intel %}
+        {% block intel_galaxy_footer scoped %}
         <td>&nbsp;</td>
         <td>&nbsp;</td>
+        {% endblock %}
         {% endif %}
     </tr>
     {% endif %}
