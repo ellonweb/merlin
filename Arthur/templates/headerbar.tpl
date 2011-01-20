@@ -48,12 +48,16 @@
     {% endwith %}
     {% else %}
         <form method="post">
-            My Coords:<br />
-            <input type="text" size="7" name="planet"/>
+            <input type="text" value="My Coords" size="10" style="text-align:center;" onblur="value=(value!=''?value:'My Coords');" onfocus="value=(value!='My Coords'?value:'');" name="planet"/>
             <input type="submit" value="!"/>
         </form>
     {% endif %}
 {% endif %}
+    <p/>
+<form method="post" action="/lookup/">
+    <input type="text" name="lookup" value="Lookup" size="10" style="text-align:center;" onblur="value=(value!=''?value:'Lookup');" onfocus="value=(value!='Lookup'?value:'');" onkeyup="var val=this.value;this.value=val+' ';this.value=val; var tl=val.length; if(tl<10){this.size=10;return;} if(tl>80){ this.size=100;return;} this.size=tl+(tl/4);"/>
+    <input type="submit" value="!"/>
+</form>
     </td>
     <td width="33%" align="right">
         <table class="stats">
