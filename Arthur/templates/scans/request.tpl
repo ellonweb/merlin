@@ -1,14 +1,18 @@
 <form onsubmit="request_scan(); return false;">
     <script type="text/javascript">
         function request_scan() {
-            var x = document.getElementById("x").value;
-            var y = document.getElementById("y").value;
-            var z = document.getElementById("z").value;
+            var x = parseInt(document.getElementById("x").value);
+            var y = parseInt(document.getElementById("y").value);
+            var z = parseInt(document.getElementById("z").value);
             var type = document.getElementById('type').value;
+            if (isNaN(x) || isNaN(y) || isNaN(z) || x <= 0 || y <= 0 || z <= 0)
+                return false;
             if (document.getElementById('dists').value == '' || document.getElementById('dists').value == 'dists')
                 var dists = '';
             else
-                var dists = document.getElementById('dists').value;
+                var dists = parseInt(document.getElementById('dists').value);
+                if (isNaN(dists) || dists <= 0)
+                    dists = '';
             var url = "/request/" + x + "." + y + "." + z + "/" + type + "/" + (dists ? dists + "/" : "");
             document.location = url;
         }
@@ -27,7 +31,7 @@
                 {% endfor %}
                 </select>
             </td>
-            <td><input type="text" id="dists" name="dists" value="dists" size="3" onfocus="value=''" /></td>
+            <td><input type="text" id="dists" name="dists" value="dists" size="3" onblur="value=(value!=''?value:'dists');" onfocus="value=(value!='dists'?value:'');" /></td>
             <td><input type="submit" id="request" name="request" value="Request Scan" /></td>
         </tr>
     </table>

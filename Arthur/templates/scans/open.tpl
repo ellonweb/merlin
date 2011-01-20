@@ -1,7 +1,9 @@
 <table cellpadding="3" cellspacing="1" class="black">
     <script type="text/javascript">
         function request_blocks(id) {
-            var dists = document.getElementById(id + '_dists').value;
+            var dists = parseInt(document.getElementById(id + '_dists').value);
+            if (isNaN(dists) || dists <= 0)
+                return false;
             var url = "/request/" + id + "/blocks/" + dists + "/";
             document.location = url;
         }
