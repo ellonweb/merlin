@@ -1,4 +1,4 @@
-{% from 'macros.tpl' import planetscanslink, alliancelink with context %}
+{% from 'macros.tpl' import planetscanslink, galaxyscanslink, alliancelink with context %}
 {% extends "base.tpl" %}
 {% set cols = 6 %}
 {% if user|intel %}{% set cols = cols + 2 %}{% endif %}
@@ -22,7 +22,7 @@
         
         {% for planet, scans in group %}
         <tr class="{{ loop.cycle('odd', 'even') }}">
-            <td class="center"><a {{planetscanslink(planet)}}>{{ planet.x }}:{{ planet.y }}:{{ planet.z }}</a></td>
+            <td class="center"><a {{galaxyscanslink(planet.galaxy)}}>{{ planet.x }}:{{ planet.y }}</a> <a {{planetscanslink(planet)}}>{{ planet.z }}</a></td>
             <td class="center {{ planet.race }}">{{ planet.race }}</td>
             <td class="right"> {{ planet.size|intcomma }} </td>
             <td class="right"> {{ planet.value|intcomma }} </td>
