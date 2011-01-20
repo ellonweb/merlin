@@ -33,7 +33,7 @@
             <td class="right"> {{ planet.size|intcomma }} </td>
             <td class="right"> {{ planet.value|intcomma }} </td>
             <td class="right"> {{ planet.score|intcomma }} </td>
-            <td>
+            <td class="center">
                 {% for scan in scans %}
                     <a href="#{{ scan.pa_id }}"
                     onclick="return linkshift(event, '{{ scan.link|url }}');">{{ scan.scantype }}</a>
@@ -61,8 +61,8 @@
             <td align="right">{{ planet|growth("size") }}</td>
             <td align="right">{{ planet|growth("value") }}</td>
             {% if user|intel %}
-            <td>{%if planet.intel and planet.alliance %}<a {{alliancelink(planet.alliance.name)}}>{{ planet.alliance.name }}</a>{% endif %}</td>
-            <td>{%if planet.intel.nick %}{{ planet.intel.nick }}{% endif %}</td>
+            <td class="center">{%if planet.intel and planet.alliance %}<a {{alliancelink(planet.alliance.name)}}>{{ planet.alliance.name }}</a>{% endif %}</td>
+            <td class="center">{%if planet.intel.nick %}{{ planet.intel.nick }}{% endif %}</td>
             {% endif %}
         </tr>
         {% endfor %}
