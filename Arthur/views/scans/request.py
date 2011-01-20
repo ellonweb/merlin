@@ -86,7 +86,7 @@ class blocks(loadable):
         if req.user is not user and not user.is_member():
             return requests.execute(request, user, message="Scan request %s isn't yours and you're not a scanner!"%(id,))
         
-        req.dists = max(req.dists, int(dists))
+        req.dists = max(req.dists, int(dists)+1)
         session.commit()
         
         push("request", request_id=req.id, mode="block")

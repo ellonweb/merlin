@@ -117,7 +117,7 @@ class request(loadable):
     @route(r"(\d+)\s+b(?:lock(?:s|ed)?)?\s+(\d+)", access = "member")
     def blocks(self, message, user, params):
         id = params.group(1)
-        dists = int(params.group(2))
+        dists = int(params.group(2))+1
         request = Request.load(id)
         if request is None:
             message.reply("No open request number %s exists (idiot)."%(id,))
