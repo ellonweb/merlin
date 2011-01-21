@@ -25,7 +25,7 @@ from Arthur.views.scans import list
 from Arthur.views.scans import request
 
 urlpatterns = patterns('',
-  url(r'^scans/', include(patterns('Arthur.views.scans',
+  url(r'^scans?/', include(patterns('Arthur.views.scans',
     url(r'^$', 'list.scans', name="scans"),
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/',
         include(patterns('Arthur.views.scans.planet',
@@ -41,7 +41,7 @@ urlpatterns = patterns('',
     url('^(?P<tick>\d+)/$', 'list.tick', name="scan_tick"),
     url('^(?P<tick>\d+)/(?P<id>\w+)/$', 'planet.id', name="scan_id"),
     url('^group/(?P<id>\w+)/$', 'list.group', name="scan_group_id"),
-    url('^requests/$', 'request.requests', name="requests"),
   ))),
-  (r'^(?:scans/)?request/', include('Arthur.views.scans.request')),
+  url('^(?:scans?/)?requests?/$', 'Arthur.views.scans.request.requests', name="requests"),
+  url(r'^(?:scans?/)?requests?/', include('Arthur.views.scans.request')),
 )
