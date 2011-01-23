@@ -25,6 +25,7 @@ import re, time
 
 from Core import Merlin
 from Core.exceptions_ import ParseError, ChanParseError, MsgParseError, PNickParseError
+from Core.config import Config
 from Core.string import encode
 
 PUBLIC_PREFIX  = ("!",)
@@ -35,7 +36,7 @@ PUBLIC_REPLY  = 1
 PRIVATE_REPLY = 2
 NOTICE_REPLY  = 3
 
-pnickre = re.compile(r"^:.+!.+@(.+)\.users\.netgamers\.org")
+pnickre = re.compile(r":.+!.+@(.+)\.%s" %(re.escape(Config.get("Services","usermask")),))
 
 class Message(object):
     # The message object will be passed around to callbacks for inspection and ability to write to the server
@@ -107,9 +108,9 @@ class Message(object):
     
     def get_pnick(self):
         #Return the pnick. Raises ParseError on failure
-        match = pnickre.search(self.line)
+        match = pnickre.match(self.line.split()[0])
         if not match: # Raise a ParseError: User hasn't authed with P
-            raise PNickParseError("Could not parse P-nick.")
+            raise PNickParseError("Could not parse %s nick."%(Config.get("Services", "nick"),))
         return match.group(1)
     
     def get_msg(self):

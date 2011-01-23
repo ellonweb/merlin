@@ -43,8 +43,8 @@ class galchan(loadable):
             session.add(Channel(name=chan, userlevel=access, maxlevel=access))
             session.commit()
             message.reply("Added your galchannel as %s (if you didn't add me to the channel with at least access 24 first, I'm never going to bother joining)" % (chan,))
-            message.privmsg("set %s autoinvite on" %(chan,),'P');
-            message.privmsg("invite %s" %(chan,),'P');
+            message.privmsg("set %s autoinvite on" %(chan,),Config.get("Services", "nick"));
+            message.privmsg("invite %s" %(chan,),Config.get("Services", "nick"));
         except IntegrityError:
             session.rollback()
             message.reply("Channel %s already exists" % (chan,))

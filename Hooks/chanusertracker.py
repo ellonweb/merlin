@@ -21,11 +21,16 @@
  
 # This module interfaces with and updates the Core's tracker
 
+import re
 from Core import Merlin
 from Core.exceptions_ import UserError
 from Core.config import Config
 from Core.chanusertracker import CUT
 from Core.loadable import system
+
+modesre = re.compile("([~&@%+]*)(\w+)")
+chanre = re.compile("([~&@%+]?)([#&]\w+)")
+pnickre = re.compile("(.+)\.%s" %(re.escape(Config.get("Services","usermask")),))
 
 @system('JOIN')
 def join(message):
@@ -54,11 +59,11 @@ def topic_change(message):
 def names(message):
     # List of users in a channel
     for nick in message.get_msg().split():
-        if nick == "@"+Merlin.nick:
+        modes, nick = modesre.match(nick).groups()
+        if nick == Merlin.nick and "@" in modes:
             CUT.opped(message.get_chan(), True)
-        elif nick == "+"+Merlin.nick or nick == Merlin.nick:
+        elif nick == Merlin.nick:
             CUT.opped(message.get_chan(), False)
-        if nick[0] in ("@","+"): nick = nick[1:]
         if CUT.mode_is("rapid") and CUT.Nicks.get(nick) is None:
             # Use whois to get the user's pnick
             message.write("WHOIS %s" % (nick,))
@@ -98,12 +103,14 @@ def nick(message):
     if message.get_nick() != Merlin.nick:
         CUT.nick_change(message.get_nick(), message.get_msg())
 
-@system('330')
+@system('311')
 def pnick(message):
     # Part of a WHOIS result
-    if message.get_msg() == "is logged in as":
+    hostmask = message.line.split()[5]
+    m = pnickre.match(hostmask)
+    if m:
         nick = message.line.split()[3]
-        pnick = message.line.split()[4]
+        pnick = m.group(1)
         # Set the user's pnick
         CUT.get_user(nick, None, pnick=pnick)
 
@@ -113,8 +120,8 @@ def channels(message):
     if message.get_chan() == Merlin.nick:
         # Cycle through the list of channels
         for chan in message.get_msg().split():
-            opped = chan[0] == "@"
-            if chan[0] in ("@","+"): chan = chan[1:]
+            modes, chan = chanre.match(chan).groups()
+            opped = "@" in modes
             # Reset the channel and get a list of nicks
             CUT.new_chan(chan)
             CUT.opped(chan, opped)
@@ -136,7 +143,10 @@ def op(message):
             modes = "+" + modes
         # modes that require args, [0] for -, [1] for +
         require_args = {
+            'q': (True, True),
+            'a': (True, True),
             'o': (True, True),
+            'h': (True, True),
             'v': (True, True),
             'b': (True, True),
             'l': (False, True),

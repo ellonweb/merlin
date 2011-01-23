@@ -57,11 +57,11 @@ class getanewdaddy(loadable):
         
         session.commit()
         
-        message.privmsg("remuser %s %s"%(Config.get("Channels","home"), idiot.name,),'p')
-        message.privmsg("ban %s *!*@%s.users.netgamers.org Your sponsor doesn't like you anymore"%(Config.get("Channels","home"), idiot.name,),'p')
+        message.privmsg("remuser %s %s"%(Config.get("Channels","home"), idiot.name,),Config.get("Services", "nick"))
+        message.privmsg("ban %s *!*@%s.%s Your sponsor doesn't like you anymore"%(Config.get("Channels","home"), idiot.name, Config.get("Services", "usermask"),),Config.get("Services", "nick"))
         if idiot.sponsor != user.name:
-            message.privmsg("note send %s Some admin has removed you for whatever reason. If you still wish to be a member, go ahead and find someone else to sponsor you back."%(idiot.name,),'p')
+            message.privmsg("note send %s Some admin has removed you for whatever reason. If you still wish to be a member, go ahead and find someone else to sponsor you back."%(idiot.name,),Config.get("Services", "nick"))
             message.reply("%s has been reduced to \"galmate\" level and removed from the channel. %s is no longer %s's sponsor. If anyone else would like to sponsor that person back, they may."%(idiot.name,idiot.sponsor,idiot.name))
         else:
-            message.privmsg("note send %s Your sponsor (%s) no longer wishes to be your sponsor. If you still wish to be a member, go ahead and find someone else to sponsor you back."%(idiot.name,user.name,),'p')
+            message.privmsg("note send %s Your sponsor (%s) no longer wishes to be your sponsor. If you still wish to be a member, go ahead and find someone else to sponsor you back."%(idiot.name,user.name,),Config.get("Services", "nick"))
             message.reply("%s has been reduced to \"galmate\" level and removed from the channel. You are no longer %s's sponsor. If anyone else would like to sponsor that person back, they may."%(idiot.name,idiot.name))

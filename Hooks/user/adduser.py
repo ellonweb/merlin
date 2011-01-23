@@ -76,7 +76,7 @@ class adduser(loadable):
         if len(added):
             message.reply("Added users (%s) at level %s" % (",".join(added),access))
         if len(added) and access >= Config.getint("Access","member"):
-            message.privmsg("adduser %s %s 399" %(Config.get("Channels","home"), ",".join(added),), "P")
+            message.privmsg("adduser %s %s 399" %(Config.get("Channels","home"), ",".join(added),), Config.get("Services", "nick"))
     
     def check_access(self, message, access=None, user=None, channel=None):
         try:

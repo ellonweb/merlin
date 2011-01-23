@@ -37,7 +37,7 @@ class remchan(loadable):
         if chan is None:
             message.reply("Channel '%s' does not exist" % (channel,))
             if user.is_admin():
-                message.privmsg("remuser %s %s" %(channel, Config.get('Connection', 'nick')),'P')
+                message.privmsg("remuser %s %s" %(channel, Config.get('Connection', 'nick')),Config.get("Services", "nick"))
                 message.part(channel)
             return
         
@@ -48,6 +48,6 @@ class remchan(loadable):
         session.delete(chan)
         session.commit()
         
-        message.privmsg("remuser %s %s" %(chan.name, Config.get('Connection', 'nick')),'P')
+        message.privmsg("remuser %s %s" %(chan.name, Config.get('Connection', 'nick')),Config.get("Services", "nick"))
         message.part(chan.name)
         message.reply("Removed channel %s" % (chan.name,))

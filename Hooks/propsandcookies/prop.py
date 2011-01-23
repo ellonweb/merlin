@@ -247,7 +247,7 @@ class prop(loadable):
             elif not member.is_member():
                 member.access = access
                 member.sponsor = prop.proposer.name
-            message.privmsg("adduser %s %s 399" %(Config.get("Channels","home"), pnick,), "P")
+            message.privmsg("adduser %s %s 399" %(Config.get("Channels","home"), pnick,), Config.get("Services", "nick"))
             message.reply("%s has been added to %s and given member level access to me."%(pnick,Config.get("Channels","home")))
         
         if prop.type == "kick" and passed:
@@ -263,9 +263,9 @@ class prop(loadable):
                 if intel.alliance == alliance:
                     intel.alliance = None
             
-            message.privmsg("remuser %s %s"%(Config.get("Channels","home"), idiot.name,),'p')
-            message.privmsg("ban %s *!*@%s.users.netgamers.org Your sponsor doesn't like you anymore"%(Config.get("Channels","home"), idiot.name,),'p')
-            message.privmsg("note send %s A proposition to kick you from %s has been raised by %s with reason '%s' and passed by a vote of %s to %s."%(idiot.name,Config.get("Alliance","name"),prop.proposer.name,prop.comment_text,yes,no),'p')
+            message.privmsg("remuser %s %s"%(Config.get("Channels","home"), idiot.name,),Config.get("Services", "nick"))
+            message.privmsg("ban %s *!*@%s.%s Your sponsor doesn't like you anymore"%(Config.get("Channels","home"), idiot.name, Config.get("Services", "usermask"),),Config.get("Services", "nick"))
+            message.privmsg("note send %s A proposition to kick you from %s has been raised by %s with reason '%s' and passed by a vote of %s to %s."%(idiot.name,Config.get("Alliance","name"),prop.proposer.name,prop.comment_text,yes,no),Config.get("Services", "nick"))
             message.reply("%s has been reduced to \"galmate\" level and removed from the channel."%(idiot.name,))
         
         if prop.type == "suggestion" and passed:

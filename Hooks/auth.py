@@ -52,13 +52,13 @@ def connected(message):
     # Kill the ghost
     nick = Config.get("Connection", "nick")
     if Merlin.nick != nick:
-        message.privmsg("RECOVER %s %s %s" % (nick, nick, Config.get("Connection", "passwd")), "P@cservice.netgamers.org")
+        message.privmsg("RECOVER %s %s %s" % (nick, nick, Config.get("Connection", "passwd")), Config.get("Services", "login"))
     login(message)
 
 @system('NOTICE')
 def PNS(message):
     # Message from P or NickServ
-    if message.get_hostmask() in ("P!cservice@netgamers.org","NS!NickServ@netgamers.org"):
+    if message.get_hostmask() in (Config.get("Services", "host"),Config.get("Services", "nickserv"),):
         if re.match(r"^(Recover Successful For|Unable to find)", message.get_msg()):
             # Ghosted
             message.nick(Config.get("Connection", "nick"))
@@ -69,7 +69,7 @@ def PNS(message):
 
 def login(message):
     # Login
-    message.privmsg("LOGIN %s %s" % (Config.get("Connection", "nick"), Config.get("Connection", "passwd")), "P@cservice.netgamers.org")
+    message.privmsg("LOGIN %s %s" % (Config.get("Connection", "nick"), Config.get("Connection", "passwd")), Config.get("Services", "login"))
 
 @system('396')
 def loggedin(message):
@@ -81,18 +81,18 @@ def loggedin(message):
         return # This is now deprecated in favour of
                #  setting autoinvite when adding the chan
         for channel in session.query(Channel):
-            message.privmsg("INVITE %s" % (channel.name,), "P")
+            message.privmsg("INVITE %s" % (channel.name,), Config.get("Services", "nick"))
 
 @system('INVITE')
 def pinvite(message):
     # P invites us to a channel
-    if message.get_hostmask() == "P!cservice@netgamers.org" and Channel.load(message.get_msg()) is not None:
+    if message.get_hostmask() == Config.get("Services", "host") and Channel.load(message.get_msg()) is not None:
         message.join(message.get_msg())
 
 @system('PRIVMSG', admin=True)
 def secure(message):
     """Secures the PNick of the bot."""
-    message.privmsg("SET MAXLOGINS 2\nSET INVISIBLE ON\nSET AUTOKILL ON", "P")
-    message.reply("Secured the PNick")
+    message.privmsg("SET MAXLOGINS 2\nSET INVISIBLE ON\nSET AUTOKILL ON", Config.get("Services", "nick"))
+    message.reply("Secured the %s nick"%(Config.get("Services", "nick"),))
     for chan, name in Config.items("Channels"):
-        message.privmsg("set %s autoinvite on" %(name,),'P');
+        message.privmsg("SET %s AUTOINVITE ON" %(name,),Config.get("Services", "nick"));

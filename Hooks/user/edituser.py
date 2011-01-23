@@ -66,19 +66,19 @@ class edituser(loadable):
         
         if type(access) == int:
             if member.active == True and member.access < mbraxx and access >= mbraxx:
-                message.privmsg("adduser %s %s 399" %(home, member.name,), "P")
+                message.privmsg("adduser %s %s 399" %(home, member.name,), Config.get("Services", "nick"))
                 message.reply("%s has been added to %s"%(member.name, home,))
             if member.active == True and member.access >= mbraxx and access < mbraxx:
-                message.privmsg("remuser %s %s"%(home, member.name,), "P")
-                message.privmsg("ban %s *!*@%s.users.netgamers.org GTFO, EAAD"%(home, member.name,), "P")
+                message.privmsg("remuser %s %s"%(home, member.name,), Config.get("Services", "nick"))
+                message.privmsg("ban %s *!*@%s.%s GTFO, EAAD"%(home, member.name, Config.get("Services", "usermask"),), Config.get("Services", "nick"))
             member.access = access
         else:
             if member.active != access and access == True and member.access >= mbraxx:
-                message.privmsg("adduser %s %s 399" %(home, member.name,), "P")
+                message.privmsg("adduser %s %s 399" %(home, member.name,), Config.get("Services", "nick"))
                 message.reply("%s has been added to %s"%(member.name, home,))
             if member.active != access and access == False and member.access >= mbraxx:
-                message.privmsg("remuser %s %s"%(home, member.name,), "P")
-                message.privmsg("ban %s *!*@%s.users.netgamers.org GTFO, EAAD"%(home, member.name,), "P")
+                message.privmsg("remuser %s %s"%(home, member.name,), Config.get("Services", "nick"))
+                message.privmsg("ban %s *!*@%s.%s GTFO, EAAD"%(home, member.name, Config.get("Services", "usermask"),), Config.get("Services", "nick"))
             member.active = access
         session.commit()
         message.reply("Editted user %s access: %s" % (member.name, access,))

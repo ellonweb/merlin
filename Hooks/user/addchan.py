@@ -52,8 +52,8 @@ class addchan(loadable):
             session.add(Channel(name=chan, userlevel=access, maxlevel=user.access))
             session.commit()
             message.reply("Added chan %s at level %s" % (chan,access,))
-            message.privmsg("set %s autoinvite on" %(chan,),'P');
-            message.privmsg("invite %s" %(chan,),'P');
+            message.privmsg("set %s autoinvite on" %(chan,),Config.get("Services", "nick"));
+            message.privmsg("invite %s" %(chan,),Config.get("Services", "nick"));
         except IntegrityError:
             session.rollback()
             message.reply("Channel %s already exists" % (chan,))
