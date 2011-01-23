@@ -58,7 +58,7 @@ def connected(message):
 @system('NOTICE')
 def PNS(message):
     # Message from P or NickServ
-    if message.get_hostmask() in (Config.get("Services", "host"),Config.get("Services", "nickserv"),):
+    if message.get_hostmask().lower() in (Config.get("Services", "host").lower(),Config.get("Services", "nickserv").lower(),):
         if re.match(r"^(Recover Successful For|Unable to find)", message.get_msg()):
             # Ghosted
             message.nick(Config.get("Connection", "nick"))
@@ -86,7 +86,7 @@ def loggedin(message):
 @system('INVITE')
 def pinvite(message):
     # P invites us to a channel
-    if message.get_hostmask() == Config.get("Services", "host") and Channel.load(message.get_msg()) is not None:
+    if message.get_hostmask().lower() == Config.get("Services", "host").lower() and Channel.load(message.get_msg()) is not None:
         message.join(message.get_msg())
 
 @system('PRIVMSG', admin=True)

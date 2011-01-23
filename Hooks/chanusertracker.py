@@ -28,9 +28,9 @@ from Core.config import Config
 from Core.chanusertracker import CUT
 from Core.loadable import system
 
-modesre = re.compile("([~&@%+]*)(\w+)")
-chanre = re.compile("([~&@%+]?)([#&]\w+)")
-pnickre = re.compile("(.+)\.%s" %(re.escape(Config.get("Services","usermask")),))
+modesre = re.compile("([~&@%+]*)(\w+)", re.I)
+chanre = re.compile("([~&@%+]?)([#&]\w+)", re.I)
+pnickre = re.compile("(.+)\.%s" %(re.escape(Config.get("Services","usermask")),), re.I)
 
 @system('JOIN')
 def join(message):

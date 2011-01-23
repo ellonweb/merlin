@@ -36,7 +36,7 @@ PUBLIC_REPLY  = 1
 PRIVATE_REPLY = 2
 NOTICE_REPLY  = 3
 
-pnickre = re.compile(r":.+!.+@(.+)\.%s" %(re.escape(Config.get("Services","usermask")),))
+pnickre = re.compile(r":.+!.+@(.+)\.%s" %(re.escape(Config.get("Services","usermask")),), re.I)
 
 class Message(object):
     # The message object will be passed around to callbacks for inspection and ability to write to the server
