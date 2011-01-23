@@ -1023,6 +1023,7 @@ class Attack(Base):
     id = Column(Integer, primary_key=True)
     landtick = Column(Integer)
     comment = Column(Text)
+    _waves = 5
     _active_ticks = 12
     
     def addPlanet(self, planet):

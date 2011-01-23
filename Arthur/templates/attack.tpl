@@ -1,6 +1,6 @@
 {% from 'macros.tpl' import planetlink, galaxyscanslink, alliancelink with context %}
 {% extends "base.tpl" %}
-{% set cols = 9 %}
+{% set cols = 8 + waves|count %}
 {% if user|intel %}{% set cols = cols + 2 %}{% endif %}
 {% block content %}
 {% if message %}
@@ -17,7 +17,9 @@
             <th>Value</th>
             <th>Score</th>
             <th>Scans</th>
-            <th>Bookings</th>
+            {%- for lt in waves %}
+            <th>ETA {{lt-tick}} ({{lt}})</th>
+            {% endfor -%}
             <th><a href="" onclick="toggleGrowth();return false;">Size</a></th>
             <th><a href="" onclick="toggleGrowth();return false;">Value</a></th>
             {% if user|intel %}
@@ -39,10 +41,8 @@
                     onclick="return linkshift(event, '{{ scan.link|url }}');">{{ scan.scantype }}</a>
                 {% endfor %}
             </td>
-            <td>
                 {% for lt, target in bookings %}
-                    (
-                    {{- lt - tick }}/{{ lt }}
+            <td class="center">
                     {%- if target and target.user == user %}
                         <b><i>
                         <a href="{% url "unbook", attack.id, planet.x, planet.y, planet.z, lt %}">{{ target.user.name }}</a>
@@ -56,7 +56,7 @@
                     {%- elif target is none %}
                         <a href="{% url "book", attack.id, planet.x, planet.y, planet.z, lt %}">book</a>
                     {%- endif -%}
-                    )
+            </td>
                 {% endfor %}
             <td align="right">{{ planet|growth("size") }}</td>
             <td align="right">{{ planet|growth("value") }}</td>

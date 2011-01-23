@@ -60,6 +60,7 @@ class view(loadable):
         if attack is None or not attack.active:
             return HttpResponseRedirect(reverse("attacks"))
         
+        waves = xrange(attack.landtick, attack.landtick + Attack._waves)
         show_jgps = attack.landtick <= Updates.current_tick() + Attack._active_ticks/3
         
         group = []
@@ -83,7 +84,7 @@ class view(loadable):
                 scans.append(planet.scan("J"))
             
             bookings = dict([(target.tick, target,) for target in planet.bookings.filter(Target.tick.between(attack.landtick, attack.landtick+4))])
-            for tick in xrange(attack.landtick, attack.landtick+5):
+            for tick in waves:
                 group[-1][2].append((tick, bookings.get(tick) or (False if show_jgps else None),))
         
-        return render("attack.tpl", request, attack=attack, message=message, group=group, scans=scans)
+        return render("attack.tpl", request, attack=attack, message=message, waves=waves, group=group, scans=scans)
