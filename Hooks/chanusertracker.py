@@ -23,27 +23,32 @@
 
 import re
 from Core import Merlin
-from Core.exceptions_ import UserError
+from Core.exceptions_ import MsgParseError, UserError
 from Core.config import Config
 from Core.chanusertracker import CUT
 from Core.loadable import system
 
-modesre = re.compile("([~&@%+]*)(\w+)", re.I)
-chanre = re.compile("([~&@%+]?)([#&]\w+)", re.I)
+modesre = re.compile("([~&@%+]*)(\S+)", re.I)
+chanre = re.compile("([~&@%+]?)([#&]\S+)", re.I)
 pnickre = re.compile("(.+)\.%s" %(re.escape(Config.get("Services","usermask")),), re.I)
 
 @system('JOIN')
 def join(message):
     # Someone is joining a channel
+    try:
+        chan = message.get_msg()
+    except MsgParseError:
+        chan = message.get_chan()
+    
     if message.get_nick() == Merlin.nick:
         # Bot is joining the channel, so add a new object to the dict
-        CUT.new_chan(message.get_chan())
+        CUT.new_chan(chan)
     else:
         # Someone is joining a channel we're in
-        CUT.join(message.get_chan(), message.get_nick())
+        CUT.join(chan, message.get_nick())
         if CUT.mode_is("rapid", "join"):
             # Set the user's pnick
-            CUT.get_user(message.get_nick(), message.get_chan(), pnickf=message.get_pnick)
+            CUT.get_user(message.get_nick(), chan, pnickf=message.get_pnick)
 
 @system('332')
 def topic_join(message):
