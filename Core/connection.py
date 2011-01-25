@@ -47,6 +47,11 @@ class connection(object):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.settimeout(330)
         self.sock.connect((server, port,))
+        
+        passwd = Config.get("Connection", "servpass")
+        if passwd:
+            self.write("PASS %s" % (passwd,))
+        
         self.write("NICK %s" % (nick,))
         self.write("USER %s 0 * : %s" % (nick, nick,))
         return self.sock
