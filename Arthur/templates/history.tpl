@@ -12,7 +12,7 @@
         <th colspan="2">Experience</th>
         <th>Date / Time</th>
     </tr>
-    {% for ph, timestamp,
+    {% for ph,
         oldrank,
         sizediff, sizediffvalue,
         valuediff, valuediffwsizevalue,
@@ -35,9 +35,9 @@
         <td>{%if scorediff %}{{scorediff|intcomma|change(scorediff)}}{%endif%}</td>
         <td>{{ph.xp|intcomma}}</td>
         <td>{%if xpdiff %}{{xpdiff|intcomma|change(xpdiff, xpvalue|intcomma+" points.")}}{%endif%}</td>
-        <td>{%if not loop.first%}{{timestamp|date("D d/m H:i")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
+        <td>{%if not loop.first%}{{ph.timestamp|date("D d/m H:i")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
     </tr>
-    {% if timestamp.hour == 0 and not loop.last %}
+    {% if ph.timestamp.hour == 0 and not loop.last %}
     <tr class="header">
         <td colspan="12" height="6"/>
     </tr>
@@ -62,7 +62,7 @@
         <th colspan="2">Experience</th>
         <th>Date / Time</th>
     </tr>
-    {% for gh, timestamp,
+    {% for gh,
         oldrank, membersdiff,
         sizediff, sizediffvalue,
         valuediff, valuediffwsizevalue,
@@ -94,9 +94,9 @@
         <td>{%if scorediff %}{{scorediff|intcomma|change(scorediff)}}{%endif%}</td>
         <td>{{gh.xp|intcomma}}</td>
         <td>{%if xpdiff %}{{xpdiff|intcomma|change(xpdiff, xpvalue|intcomma+" points.")}}{%endif%}</td>
-        <td>{%if not loop.first%}{{timestamp|date("D d/m H:i")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
+        <td>{%if not loop.first%}{{gh.timestamp|date("D d/m H:i")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
     </tr>
-    {% if timestamp.hour == 0 and not loop.last %}
+    {% if gh.timestamp.hour == 0 and not loop.last %}
     <tr class="header">
         <td colspan="16" height="6"/>
     </tr>
@@ -122,7 +122,7 @@
         <th colspan="2">Points</th>
         <th>Date / Time</th>
     </tr>
-    {% for ah, timestamp,
+    {% for ah,
         oldrank, membersdiff,
         sizediff_avg, scorediff_avg, pointsdiff_avg,
         sizediff, sizediffvalue,
@@ -150,9 +150,9 @@
             </td>
         <td>{{ah.points|intcomma}}</td>
         <td>{%if pointsdiff %}{{pointsdiff|intcomma|change(pointsdiff)}}{%endif%}</td>
-        <td>{%if not loop.first%}{{timestamp|date("D d/m H:i")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
+        <td>{%if not loop.first%}{{ah.timestamp|date("D d/m H:i")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
     </tr>
-    {% if timestamp.hour == 0 and not loop.last %}
+    {% if ah.timestamp.hour == 0 and not loop.last %}
     <tr class="header">
         <td colspan="17" height="6"/>
     </tr>

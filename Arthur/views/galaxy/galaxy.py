@@ -19,7 +19,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from datetime import timedelta
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy import and_, or_
@@ -27,7 +26,7 @@ from sqlalchemy.orm import aliased
 from sqlalchemy.sql import asc, desc
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Updates, Galaxy, GalaxyHistory, Planet, PlanetExiles, Alliance, Intel
+from Core.maps import Galaxy, GalaxyHistory, Planet, PlanetExiles, Alliance, Intel
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
@@ -66,7 +65,7 @@ class galaxy(loadable):
         xpvalue = xpdiff * PA.getint("numbers", "xp_value")
         scorediff = history.score - next.score
         realscorediff = history.real_score - next.real_score
-        Q = session.query(history, Updates.timestamp - timedelta(minutes=1),
+        Q = session.query(history,
                             next.score_rank, membersdiff,
                             sizediff, sizediffvalue,
                             valuediff, valuediffwsizevalue,
@@ -74,7 +73,6 @@ class galaxy(loadable):
                             xpdiff, xpvalue,
                             scorediff, realscorediff
                             )
-        Q = Q.join(Updates)
         Q = Q.outerjoin((next, and_(history.id==next.id, history.tick-1==next.tick)))
         Q = Q.filter(history.current == galaxy)
         Q = Q.order_by(desc(history.tick))

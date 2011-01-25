@@ -19,7 +19,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from datetime import timedelta
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy import and_
@@ -28,7 +27,7 @@ from sqlalchemy.sql import desc
 from sqlalchemy.sql.functions import sum
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Updates, Planet, PlanetHistory
+from Core.maps import Planet, PlanetHistory
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
@@ -52,7 +51,7 @@ class planet(loadable):
         xpdiff = history.xp - next.xp
         xpvalue = xpdiff * PA.getint("numbers", "xp_value")
         scorediff = history.score - next.score
-        Q = session.query(history, Updates.timestamp - timedelta(minutes=1),
+        Q = session.query(history,
                             next.score_rank,
                             sizediff, sizediffvalue,
                             valuediff, valuediffwsizevalue,
@@ -60,7 +59,6 @@ class planet(loadable):
                             xpdiff, xpvalue,
                             scorediff
                             )
-        Q = Q.join(Updates)
         Q = Q.outerjoin((next, and_(history.id==next.id, history.tick-1==next.tick)))
         Q = Q.filter(history.current == planet)
         Q = Q.order_by(desc(history.tick))
