@@ -853,6 +853,7 @@ class User(Base):
     def hasher(passwd):
         # *Every* user password operation should go through this function
         # This can be easily adapted to use SHA1 instead, or add salts
+        passwd = encode(passwd)
         return hashlib.md5(passwd).hexdigest()
     
     @staticmethod
