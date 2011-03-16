@@ -19,8 +19,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from ssl import SSLError
 from urllib import urlencode
-from urllib2 import urlopen
+from urllib2 import urlopen, URLError
+from Core.exceptions_ import SMSError
 from Core.config import Config
 from Core.loadable import loadable, route
 
@@ -38,15 +40,19 @@ class showmethemoney(loadable):
                          "api_id": Config.get("clickatell", "api"),
                         })
         
-        status, msg = urlopen("https://api.clickatell.com/http/getbalance", get).read().split(":")
+        try:
+            status, msg = urlopen("https://api.clickatell.com/http/getbalance", get).read().split(":")
         
-        if status in ("Credit",):
-            balance = float(msg.strip())
-            if not balance:
-                message.reply("Help me help you. I need the kwan. SHOW ME THE MONEY")
+            if status in ("Credit",):
+                balance = float(msg.strip())
+                if not balance:
+                    message.reply("Help me help you. I need the kwan. SHOW ME THE MONEY")
+                else:
+                    message.reply("Current kwan balance: %d"%(balance,))
+            elif status in ("ERR",):
+                raise SMSError(msg.strip())
             else:
-                message.reply("Current kwan balance: %d"%(balance,))
-        elif status in ("ERR",):
-            message.reply("Error sending message: %s" % (msg.strip(),))
-        else:
-            message.reply("That wasn't supposed to happen. I don't really know what wrong. Maybe your mother dropped you.")
+                message.reply("That wasn't supposed to happen. I don't really know what wrong. Maybe your mother dropped you.")
+        
+        except (URLError, SSLError, SMSError) as e:
+            message.reply("Error sending message: %s" % (str(e),))

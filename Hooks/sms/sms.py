@@ -22,9 +22,10 @@
 import json
 import re
 import time
+from ssl import SSLError
 from urllib import urlencode
 from urllib2 import urlopen, Request, URLError
-from Core.exceptions_ import LoadableError
+from Core.exceptions_ import SMSError
 from Core.config import Config
 from Core.string import decode, encode
 from Core.db import session
@@ -103,7 +104,7 @@ class sms(loadable):
             else:
                 return ""
             
-        except (URLError, SMSError) as e:
+        except (URLError, SSLError, SMSError) as e:
             return "Error sending message: %s" % (str(e),)
     
     def send_googlevoice(self, user, receiver, public_text, phone, message):
@@ -180,7 +181,7 @@ class sms(loadable):
             else:
                 raise SMSError("message not found in any of the matching conversations")
             
-        except (URLError, SMSError) as e:
+        except (URLError, SSLError, SMSError) as e:
             return "Error sending message: %s" % (str(e),)
     
     def googlevoice_regex_json(self):
@@ -230,6 +231,3 @@ class sms(loadable):
     def log_message(self,sender,receiver,phone,text,mode):
         session.add(SMS(sender=sender,receiver=receiver,phone=phone,sms_text=text,mode=mode))
         session.commit()
-
-class SMSError(LoadableError):
-    pass

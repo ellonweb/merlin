@@ -62,3 +62,6 @@ class PNickParseError(ParseError):
 
 class UserError(MerlinError):
     pass
+
+class SMSError(LoadableError):
+    pass
