@@ -73,7 +73,7 @@ class loadable(_base):
                 session.commit()
                 raise UserError("Logged out.")
             request.session = auth
-            return auth.user, None
+            return auth.user, None, key
         elif (request.REQUEST.get(USER) and request.REQUEST.get(PASS)):
             user = User.load(name=request.REQUEST.get(USER), passwd=request.REQUEST.get(PASS))
             if user is None:
@@ -85,29 +85,29 @@ class loadable(_base):
                 session.add(auth)
                 session.commit()
                 request.session = auth
-                return user, key
+                return user, key, key
         else:
-            return None, None
+            return None, None, None
     
     def router(self, request):
-        user, cookie = self.authenticate(request)
+        user, cookie, key = self.authenticate(request)
         user = self.check_access(user)
         request.user = user
         
         planet_id = self.check_planet(request, user)
         
-        return user, cookie, planet_id
+        return user, cookie, key, planet_id
     
     def run(self, request, **kwargs):
         try:
-            user, cookie, planet_id = self.router(request)
+            user, cookie, key, planet_id = self.router(request)
             response = self.execute(request, user, **kwargs)
             
             session = Session()
             session.add(PageView(page = self.name,
                                  full_request = request.get_full_path(),
                                  username = user.name,
-                                 session = request.session.key if request.session else None,
+                                 session = key,
                                  planet_id = user.planet.id if user.planet else None,
                                  hostname = request.get_host(),))
             session.commit()
