@@ -269,6 +269,13 @@ class Galaxy(Base):
         # minus 1 because the first is for new planet (just in case of bad data, return 0)
         return len(self.outs)
     
+    @property
+    def exiles(self):
+        Q = session.query(PlanetExiles)
+        Q = Q.filter(or_(PlanetExiles.old == self, PlanetExiles.new == self))
+        Q = Q.order_by(desc(PlanetExiles.tick))
+        return Q.all()
+    
     @staticmethod
     def load(x,y, active=True):
         Q = session.query(Galaxy)
@@ -521,6 +528,13 @@ class PlanetExiles(Base):
         Q = session.query(PlanetHistory)
         Q = Q.filter_by(id=self.id, tick=self.tick)
         return Q.first()
+    
+    @staticmethod
+    def recent():
+        Q = session.query(PlanetExiles)
+        Q = Q.filter(PlanetExiles.tick >= Updates.current_tick()-24)
+        Q = Q.order_by(desc(PlanetExiles.tick))
+        return Q[:100]
 Galaxy.outs = relation(PlanetExiles, backref="old", primaryjoin=and_(Galaxy.x==PlanetExiles.oldx, Galaxy.y==PlanetExiles.oldy),
                                     order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.oldz),))
 Galaxy.ins = relation(PlanetExiles, backref="new", primaryjoin=and_(Galaxy.x==PlanetExiles.newx, Galaxy.y==PlanetExiles.newy),
