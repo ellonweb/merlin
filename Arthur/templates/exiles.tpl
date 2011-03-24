@@ -1,32 +1,12 @@
 {% from 'macros.tpl' import planetlink with context %}
-{% extends "base.tpl" %}
-{% block content %}
+{% macro exiletable(exiles) %}
 <table cellspacing="1" cellpadding="3" width="95%" class="black">
     <tr class="header">
         <th>Rank</th>
         <th>Old</th>
         <th>New</th>
         <th>Current</th>
-        <th colspan="8">
-            {% if through is not defined %}
-            Recent
-            {% elif through %}
-            {% elif not through -%}
-                {% if galaxy is defined %}      <a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a>
-                {% elif planet is defined %}    <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-                                                    <a {{planetlink(planet)}}>{{ planet.z }}</a>
-                {%- endif %}'s
-            {% endif %}
-            Planet Movements
-            {% if through is not defined %}
-            {% elif through %} Through
-                {% if galaxy is defined %}      <a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a>
-                {% elif planet is defined %}    <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-                                                    <a {{planetlink(planet)}}>{{ planet.z }}</a>
-                {% endif %}
-            {% elif not through -%}
-            {% endif %}
-        </th>
+        <th colspan="8">{{caller()}}</th>
         <th colspan="3"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
         <th></th>
     </tr>
@@ -53,28 +33,29 @@
         <th>Tick</th>
     </tr>
     {% for exile in exiles %}
-    {% set planet = exile.planet %}
-    <tr class="{%if not exile.old %}defend{%elif not exile.new %}attack{%else%}odd{%endif%}">
+    {% set planet = exile.history %}
+    {% set current = exile.planet %}
+    <tr class="{%if not exile.old %}new{%elif not exile.new %}deleted{%else%}{{loop.cycle('odd', 'even')}}{%endif%}{%if not current.active%} nolongerexists{%endif%}">
         <td align="right">{%if planet.active %}{{ planet|rank("score") }}{%endif%}</td>
         
         <td align="right">
         {%if exile.old %}
             <a href="{% url "galaxy", exile.oldx, exile.oldy %}">{{ exile.oldx }}:{{ exile.oldy }}</a>
             &nbsp;{{ exile.oldz }}
-        {%else%}<span class="green">New</span>{%endif%}
+        {%else%}<span class="new">New</span>{%endif%}
         </td>
         <td align="right">
         {%if exile.new %}
             <a href="{% url "galaxy", exile.newx, exile.newy %}">{{ exile.newx }}:{{ exile.newy }}</a>
-            {%if exile.new == planet.galaxy and exile.newz == planet.z %}
+            {%if current.active and current.galaxy == planet.galaxy and current.z == planet.z %}
             <a href="{% url "planet", exile.newx, exile.newy, exile.newz %}">&nbsp;{{ exile.newz }}</a>
             {%else%}
             &nbsp;{{ exile.newz }}
             {%endif%}
-        {%else%}<span class="red">Deleted</span>{%endif%}
+        {%else%}<span class="deleted">Deleted</span>{%endif%}
         </td>
         <td align="right">
-        {%if exile.new and planet.active and (exile.new != planet.galaxy or exile.newz != planet.z)%}
+        {%if exile.new and current.active and (current.galaxy != planet.galaxy or current.z != planet.z)%}
             <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
             <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
         {%endif%}
@@ -102,5 +83,27 @@
     {% endfor %}
 
 </table>
-
+{% endmacro %}
+{% extends "base.tpl" %}
+{% block content %}
+{% call exiletable(exiles) %}
+    {% if through is not defined %}
+    Recent
+    {% elif through %}
+    {% elif not through -%}
+        {% if galaxy is defined %}      <a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a>
+        {% elif planet is defined %}    <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
+                                            <a {{planetlink(planet)}}>{{ planet.z }}</a>
+        {%- endif %}'s
+    {% endif %}
+    Planet Movements
+    {% if through is not defined %}
+    {% elif through %} Through
+        {% if galaxy is defined %}      <a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a>
+        {% elif planet is defined %}    <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
+                                            <a {{planetlink(planet)}}>{{ planet.z }}</a>
+        {% endif %}
+    {% elif not through -%}
+    {% endif %}
+{% endcall %}
 {% endblock %}
