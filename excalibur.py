@@ -284,6 +284,12 @@ while True:
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank,
                                   vdiff = COALESCE(t.value - c.value, 0),
                                   sdiff = COALESCE(t.size - c.size, 0),
+                                  xdiff = COALESCE(t.xp - c.xp, 0),
+                                  rdiff = COALESCE(t.score - c.score, 0),
+                                  vrankdiff = COALESCE(t.value_rank - c.value_rank, 0),
+                                  srankdiff = COALESCE(t.size_rank - c.size_rank, 0),
+                                  xrankdiff = COALESCE(t.xp_rank - c.xp_rank, 0),
+                                  rrankdiff = COALESCE(t.score_rank - c.score_rank, 0),
                                   idle = CASE WHEN ((t.value-c.value) BETWEEN (c.vdiff-1) AND (c.vdiff+1) AND (c.xp-t.xp=0)) THEN 1 + COALESCE(c.idle, 0) ELSE 0 END
                                 FROM (SELECT *,
                                   rank() OVER (ORDER BY totalroundroids DESC) AS totalroundroids_rank,
@@ -431,6 +437,12 @@ while True:
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank,
                                   vdiff = COALESCE(t.value - g.value, 0),
                                   sdiff = COALESCE(t.size - g.size, 0),
+                                  xdiff = COALESCE(t.xp - g.xp, 0),
+                                  rdiff = COALESCE(t.score - g.score, 0),
+                                  vrankdiff = COALESCE(t.value_rank - g.value_rank, 0),
+                                  srankdiff = COALESCE(t.size_rank - g.size_rank, 0),
+                                  xrankdiff = COALESCE(t.xp_rank - g.xp_rank, 0),
+                                  rrankdiff = COALESCE(t.score_rank - g.score_rank, 0),
                                   idle = CASE WHEN ((t.value-g.value) BETWEEN (g.vdiff-1) AND (g.vdiff+1) AND (g.xp-t.xp=0)) THEN 1 + COALESCE(g.idle, 0) ELSE 0 END
                                 FROM (SELECT *,
                                   rank() OVER (ORDER BY totalroundroids DESC) AS totalroundroids_rank,
@@ -689,6 +701,12 @@ while True:
                              """
                                   vdiff = COALESCE(t.value - p.value, 0),
                                   sdiff = COALESCE(t.size - p.size, 0),
+                                  xdiff = COALESCE(t.xp - p.xp, 0),
+                                  rdiff = COALESCE(t.score - p.score, 0),
+                                  vrankdiff = COALESCE(t.value_rank - p.value_rank, 0),
+                                  srankdiff = COALESCE(t.size_rank - p.size_rank, 0),
+                                  xrankdiff = COALESCE(t.xp_rank - p.xp_rank, 0),
+                                  rrankdiff = COALESCE(t.score_rank - p.score_rank, 0),
                                   idle = CASE WHEN ((t.value-p.value) BETWEEN (p.vdiff-1) AND (p.vdiff+1) AND (p.xp-t.xp=0)) THEN 1 + COALESCE(p.idle, 0) ELSE 0 END
                                 FROM (SELECT *,
                              """ + ((
@@ -873,9 +891,11 @@ while True:
                                   totalroundroids_rank = t.totalroundroids_rank, totallostroids_rank = t.totallostroids_rank,
                                   size_rank = t.size_rank, members_rank = t.members_rank, score_rank = t.score_rank, points_rank = t.points_rank,
                                   size_avg_rank = t.size_avg_rank, score_avg_rank = t.score_avg_rank, points_avg_rank = t.points_avg_rank,
-                                  vdiff = COALESCE(t.score - a.score, 0),
                                   sdiff = COALESCE(t.size - a.size, 0),
-                                  idle = CASE WHEN ((t.score-a.score) BETWEEN (a.vdiff-1) AND (a.vdiff+1)) THEN 1 + COALESCE(a.idle, 0) ELSE 0 END
+                                  rdiff = COALESCE(t.score - a.score, 0),
+                                  srankdiff = COALESCE(t.size_rank - a.size_rank, 0),
+                                  rrankdiff = COALESCE(t.score_rank - a.score_rank, 0),
+                                  idle = CASE WHEN ((t.score-a.score) BETWEEN (a.rdiff-1) AND (a.rdiff+1)) THEN 1 + COALESCE(a.idle, 0) ELSE 0 END
                                 FROM (SELECT *,
                                   rank() OVER (ORDER BY totalroundroids DESC) AS totalroundroids_rank,
                                   rank() OVER (ORDER BY totallostroids DESC) AS totallostroids_rank,
