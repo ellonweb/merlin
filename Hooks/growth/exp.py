@@ -52,11 +52,11 @@ class exp(loadable):
                 message.reply("No data for %s:%s:%s on tick %s" % (p.x,p.y,p.z,tick))
                 return
             
-            tick, value, vdiff, size, sdiff = result
+            tick, value, vdiff, size, rdiff = result
             reply="Exerience on pt%s for %s:%s:%s: " % (tick,p.x,p.y,p.z)
             reply+="xp: %s (%s%s)" % (value,["+",""][vdiff<0],vdiff)
-            if sdiff!=0:
-                reply+=" roids: %s%s" % (["+",""][sdiff<0],sdiff)
+            if rdiff!=0:
+                reply+=" roids: %s%s" % (["+",""][rdiff<0],rdiff)
             message.reply(reply)
         else:
             tick = Updates.current_tick()
@@ -67,10 +67,10 @@ class exp(loadable):
                 return
             
             prev=[]
-            for tick, value, vdiff, size, sdiff in result:
+            for tick, value, vdiff, size, rdiff in result:
                 reply="pt%s %s (%s%s)" % (tick, self.num2short(value), ["+",""][vdiff<0],self.num2short(vdiff),)
-                if sdiff!=0:
-                    reply+=" roids: %s%s" % (["+",""][sdiff<0],sdiff)
+                if rdiff!=0:
+                    reply+=" roids: %s%s" % (["+",""][rdiff<0],rdiff)
                 prev.append(reply)
             reply="Experience in the last 15 ticks on %s:%s:%s: " % (p.x,p.y,p.z)+ ' | '.join(prev)
             message.reply(reply)

@@ -776,14 +776,14 @@ class PlanetLandings(Base):
     hour = Column(Integer, index=True)
     tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
     id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
-    sdiff = Column(Integer)
+    rdiff = Column(Integer)
 PlanetLandings.planet = relation(Planet, backref="planet_landings", order_by=desc(PlanetLandings.tick))
 class PlanetLandedOn(Base):
     __tablename__ = 'planet_landed_on'
     hour = Column(Integer, index=True)
     tick = Column(Integer, ForeignKey(Updates.id, ondelete='cascade'), primary_key=True, autoincrement=False)
     id = Column(Integer, ForeignKey(Planet.id), primary_key=True, autoincrement=False)
-    sdiff = Column(Integer)
+    rdiff = Column(Integer)
 PlanetLandedOn.planet = relation(Planet, backref="planet_landed_on", order_by=desc(PlanetLandedOn.tick))
 
 class Alliance(Base):
