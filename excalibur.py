@@ -438,11 +438,13 @@ while True:
                                   size_rank = t.size_rank, score_rank = t.score_rank, value_rank = t.value_rank, xp_rank = t.xp_rank,
                                   vdiff = COALESCE(t.value - g.value, 0),
                                   sdiff = COALESCE(t.score - g.score, 0),
+                                  rsdiff = COALESCE(p.real_score - g.real_score, 0),
                                   xdiff = COALESCE(t.xp - g.xp, 0),
                                   rdiff = COALESCE(t.size - g.size, 0),
                                   mdiff = COALESCE(p.count - g.members, 0),
                                   vrankdiff = COALESCE(t.value_rank - g.value_rank, 0),
                                   srankdiff = COALESCE(t.score_rank - g.score_rank, 0),
+                                  rsrankdiff = COALESCE(p.real_score_rank - g.real_score_rank, 0),
                                   xrankdiff = COALESCE(t.xp_rank - g.xp_rank, 0),
                                   rrankdiff = COALESCE(t.size_rank - g.size_rank, 0),
                                   idle = CASE WHEN ((t.value-g.value) BETWEEN (g.vdiff-1) AND (g.vdiff+1) AND (g.xp-t.xp=0)) THEN 1 + COALESCE(g.idle, 0) ELSE 0 END
