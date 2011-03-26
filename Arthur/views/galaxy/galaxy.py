@@ -21,8 +21,7 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from sqlalchemy import and_, or_
-from sqlalchemy.orm import aliased
+from sqlalchemy import or_
 from sqlalchemy.sql import asc, desc
 from Core.paconf import PA
 from Core.db import session
@@ -52,30 +51,19 @@ class galaxy(loadable):
         Q = Q.order_by(desc(PlanetExiles.tick))
         exiles = Q[:10] if not h else None
         
-        history = aliased(GalaxyHistory)
-        next = aliased(GalaxyHistory)
-        membersdiff = history.members - next.members
-        sizediff = history.size - next.size
-        sizediffvalue = sizediff * PA.getint("numbers", "roid_value")
-        valuediff = history.value - next.value
-        valuediffwsizevalue = valuediff - sizediffvalue
+        sizediffvalue = GalaxyHistory.rdiff * PA.getint("numbers", "roid_value")
+        valuediffwsizevalue = GalaxyHistory.vdiff - sizediffvalue
         resvalue = valuediffwsizevalue * PA.getint("numbers", "res_value")
         shipvalue = valuediffwsizevalue * PA.getint("numbers", "ship_value")
-        xpdiff = history.xp - next.xp
-        xpvalue = xpdiff * PA.getint("numbers", "xp_value")
-        scorediff = history.score - next.score
-        realscorediff = history.real_score - next.real_score
-        Q = session.query(history,
-                            next.score_rank, membersdiff,
-                            sizediff, sizediffvalue,
-                            valuediff, valuediffwsizevalue,
+        xpvalue = GalaxyHistory.xdiff * PA.getint("numbers", "xp_value")
+        Q = session.query(GalaxyHistory,
+                            sizediffvalue,
+                            valuediffwsizevalue,
                             resvalue, shipvalue,
-                            xpdiff, xpvalue,
-                            scorediff, realscorediff
+                            xpvalue,
                             )
-        Q = Q.outerjoin((next, and_(history.id==next.id, history.tick-1==next.tick)))
-        Q = Q.filter(history.current == galaxy)
-        Q = Q.order_by(desc(history.tick))
+        Q = Q.filter(GalaxyHistory.current == galaxy)
+        Q = Q.order_by(desc(GalaxyHistory.tick))
         
         return render(["galaxy.tpl","hgalaxy.tpl"][h],
                         request,

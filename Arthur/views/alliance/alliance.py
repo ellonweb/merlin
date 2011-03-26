@@ -21,8 +21,6 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from sqlalchemy import and_
-from sqlalchemy.orm import aliased
 from sqlalchemy.sql import desc
 from Core.paconf import PA
 from Core.db import session
@@ -39,27 +37,14 @@ class alliance(loadable):
         
         ticks = int(ticks or 0) if h else 12
         
-        history = aliased(AllianceHistory)
-        next = aliased(AllianceHistory)
-        membersdiff = history.members - next.members
-        sizediff_avg = history.size_avg - next.size_avg
-        scorediff_avg = history.score_avg - next.score_avg
-        pointsdiff_avg = history.points_avg - next.points_avg
-        sizediff = history.size - next.size
-        sizediffvalue = sizediff * PA.getint("numbers", "roid_value")
-        scorediff = history.score - next.score
-        scorediffwsizevalue = scorediff - sizediffvalue
-        pointsdiff = history.points - next.points
-        Q = session.query(history,
-                            next.score_rank, membersdiff,
-                            sizediff_avg, scorediff_avg, pointsdiff_avg,
-                            sizediff, sizediffvalue,
-                            scorediff, scorediffwsizevalue,
-                            pointsdiff
+        sizediffvalue = AllianceHistory.rdiff * PA.getint("numbers", "roid_value")
+        scorediffwsizevalue = AllianceHistory.sdiff - sizediffvalue
+        Q = session.query(AllianceHistory,
+                            sizediffvalue,
+                            scorediffwsizevalue,
                             )
-        Q = Q.outerjoin((next, and_(history.id==next.id, history.tick-1==next.tick)))
-        Q = Q.filter(history.current == alliance)
-        Q = Q.order_by(desc(history.tick))
+        Q = Q.filter(AllianceHistory.current == alliance)
+        Q = Q.order_by(desc(AllianceHistory.tick))
         
         return render(["alliance.tpl","halliance.tpl"][h],
                         request,

@@ -13,28 +13,26 @@
         <th>Date / Time</th>
     </tr>
     {% for ph,
-        oldrank,
-        sizediff, sizediffvalue,
-        valuediff, valuediffwsizevalue,
+        sizediffvalue,
+        valuediffwsizevalue,
         resvalue, shipvalue,
-        xpdiff, xpvalue,
-        scorediff in history %}
+        xpvalue in history %}
     <tr class="{% if loop.first %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}" align="right">
         <td>{{ph.tick}}</td>
-        <td>{{ph|hrank("score",oldrank)}}</td>
+        <td>{{ph|hrank("score",ph.srankdiff)}}</td>
         <td>{{ph.size|intcomma}}</td>
-        <td>{%if sizediff %}{{sizediff|intcomma|change(sizediff, "Value: "+sizediffvalue|intcomma)}}{%endif%}</td>
+        <td>{%if ph.rdiff %}{{ph.rdiff|intcomma|change(ph.rdiff, "Value: "+sizediffvalue|intcomma)}}{%endif%}</td>
         <td>{{ph.value|intcomma}}</td>
-        <td>{%if valuediff and sizediff %}
-            {{valuediff|intcomma|change(valuediff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma + " (Roid Value: "+sizediffvalue|intcomma+")")}}
-            {%elif valuediff %}
-            {{valuediff|intcomma|change(valuediff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma)}}
+        <td>{%if ph.vdiff and ph.rdiff %}
+            {{ph.vdiff|intcomma|change(ph.vdiff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma + " (Roid Value: "+sizediffvalue|intcomma+")")}}
+            {%elif ph.vdiff %}
+            {{ph.vdiff|intcomma|change(ph.vdiff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma)}}
             {%endif%}</td>
-        <td>{%if sizediff %}{{valuediffwsizevalue|intcomma|change(valuediffwsizevalue, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma)}}{%endif%}</td>
+        <td>{%if ph.rdiff %}{{valuediffwsizevalue|intcomma|change(valuediffwsizevalue, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma)}}{%endif%}</td>
         <td>{{ph.score|intcomma}}</td>
-        <td>{%if scorediff %}{{scorediff|intcomma|change(scorediff)}}{%endif%}</td>
+        <td>{%if ph.sdiff %}{{ph.sdiff|intcomma|change(ph.sdiff)}}{%endif%}</td>
         <td>{{ph.xp|intcomma}}</td>
-        <td>{%if xpdiff %}{{xpdiff|intcomma|change(xpdiff, xpvalue|intcomma+" points.")}}{%endif%}</td>
+        <td>{%if ph.xdiff %}{{ph.xdiff|intcomma|change(ph.xdiff, xpvalue|intcomma+" points.")}}{%endif%}</td>
         <td>{%if not loop.first%}{{ph.timestamp|date("D d/m H:i")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
     </tr>
     {% if ph.timestamp.hour == 0 and not loop.last %}
@@ -63,37 +61,35 @@
         <th>Date / Time</th>
     </tr>
     {% for gh,
-        oldrank, membersdiff,
-        sizediff, sizediffvalue,
-        valuediff, valuediffwsizevalue,
+        sizediffvalue,
+        valuediffwsizevalue,
         resvalue, shipvalue,
-        xpdiff, xpvalue,
-        scorediff, realscorediff in history %}
+        xpvalue in history %}
     <tr class="{% if loop.first %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}" align="right">
         <td>{{gh.tick}}</td>
-        <td>{{gh|hrank("score",oldrank)}}</td>
+        <td>{{gh|hrank("score",gh.srankdiff)}}</td>
         <td>{{gh.members}}</td>
-        <td>{%if membersdiff %}{{membersdiff|change(membersdiff)}}{%endif%}</td>
+        <td>{%if gh.mdiff %}{{gh.mdiff|change(gh.mdiff)}}{%endif%}</td>
         <td>{{gh.size|intcomma}}</td>
-        <td>{%if sizediff %}{{sizediff|intcomma|change(sizediff, "Value: "+sizediffvalue|intcomma)}}{%endif%}</td>
+        <td>{%if gh.rdiff %}{{gh.rdiff|intcomma|change(gh.rdiff, "Value: "+sizediffvalue|intcomma)}}{%endif%}</td>
         <td>{{gh.value|intcomma}}</td>
-        <td>{%if valuediff and sizediff %}
-            {{valuediff|intcomma|change(valuediff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma + " (Roid Value: "+sizediffvalue|intcomma+")")}}
-            {%elif valuediff %}
-            {{valuediff|intcomma|change(valuediff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma)}}
+        <td>{%if gh.vdiff and gh.rdiff %}
+            {{gh.vdiff|intcomma|change(gh.vdiff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma + " (Roid Value: "+sizediffvalue|intcomma+")")}}
+            {%elif gh.vdiff %}
+            {{gh.vdiff|intcomma|change(gh.vdiff, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma)}}
             {%endif%}</td>
-        <td>{%if sizediff %}{{valuediffwsizevalue|intcomma|change(valuediffwsizevalue, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma)}}{%endif%}</td>
+        <td>{%if gh.rdiff %}{{valuediffwsizevalue|intcomma|change(valuediffwsizevalue, "Resources: "+resvalue|intcomma +" / Ships: "+shipvalue|intcomma)}}{%endif%}</td>
         <td>{{gh.real_score|intcomma}}</td>
-        <td>{%if realscorediff and sizediff %}
-            {{realscorediff|intcomma|change(realscorediff, sizediffvalue|intcomma+" from roids. "+valuediffwsizevalue|intcomma+" from value. "+xpvalue|intcomma+" from XP.")}}
-            {%elif realscorediff %}
-            {{realscorediff|intcomma|change(realscorediff, valuediffwsizevalue|intcomma+" from value. "+xpvalue|intcomma+" from XP.")}}
+        <td>{%if gh.rsdiff and gh.rdiff %}
+            {{gh.rsdiff|intcomma|change(gh.rsdiff, sizediffvalue|intcomma+" from roids. "+valuediffwsizevalue|intcomma+" from value. "+xpvalue|intcomma+" from XP.")}}
+            {%elif gh.rsdiff %}
+            {{gh.rsdiff|intcomma|change(gh.rsdiff, valuediffwsizevalue|intcomma+" from value. "+xpvalue|intcomma+" from XP.")}}
             {%endif%}
             </td>
         <td>{{gh.score|intcomma}}</td>
-        <td>{%if scorediff %}{{scorediff|intcomma|change(scorediff)}}{%endif%}</td>
+        <td>{%if gh.sdiff %}{{gh.sdiff|intcomma|change(gh.sdiff)}}{%endif%}</td>
         <td>{{gh.xp|intcomma}}</td>
-        <td>{%if xpdiff %}{{xpdiff|intcomma|change(xpdiff, xpvalue|intcomma+" points.")}}{%endif%}</td>
+        <td>{%if gh.xdiff %}{{gh.xdiff|intcomma|change(gh.xdiff, xpvalue|intcomma+" points.")}}{%endif%}</td>
         <td>{%if not loop.first%}{{gh.timestamp|date("D d/m H:i")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
     </tr>
     {% if gh.timestamp.hour == 0 and not loop.last %}
@@ -123,33 +119,30 @@
         <th>Date / Time</th>
     </tr>
     {% for ah,
-        oldrank, membersdiff,
-        sizediff_avg, scorediff_avg, pointsdiff_avg,
-        sizediff, sizediffvalue,
-        scorediff, scorediffwsizevalue,
-        pointsdiff in history %}
+        sizediffvalue,
+        scorediffwsizevalue in history %}
     <tr class="{% if loop.first %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}" align="right">
         <td>{{ah.tick}}</td>
-        <td>{{ah|hrank("score",oldrank)}}</td>
+        <td>{{ah|hrank("score",ah.srankdiff)}}</td>
         <td>{{ah.members}}</td>
-        <td>{%if membersdiff %}{{membersdiff|change(membersdiff)}}{%endif%}</td>
+        <td>{%if ah.mdiff %}{{ah.mdiff|change(ah.mdiff)}}{%endif%}</td>
         <td>{{ah.size_avg|intcomma}}</td>
-        <td>{%if sizediff_avg %}{{sizediff_avg|intcomma|change(sizediff_avg)}}{%endif%}</td>
+        <td>{%if ah.ravgdiff %}{{ah.ravgdiff|intcomma|change(ah.ravgdiff)}}{%endif%}</td>
         <td>{{ah.score_avg|intcomma}}</td>
-        <td>{%if scorediff_avg %}{{scorediff_avg|intcomma|change(scorediff_avg)}}{%endif%}</td>
+        <td>{%if ah.savgdiff %}{{ah.savgdiff|intcomma|change(ah.savgdiff)}}{%endif%}</td>
         <td>{{ah.points_avg|intcomma}}</td>
-        <td>{%if pointsdiff_avg %}{{pointsdiff_avg|intcomma|change(pointsdiff_avg)}}{%endif%}</td>
+        <td>{%if ah.pavgdiff %}{{ah.pavgdiff|intcomma|change(ah.pavgdiff)}}{%endif%}</td>
         <td>{{ah.size|intcomma}}</td>
-        <td>{%if sizediff %}{{sizediff|intcomma|change(sizediff, "Value: "+sizediffvalue|intcomma)}}{%endif%}</td>
+        <td>{%if ah.rdiff %}{{ah.rdiff|intcomma|change(ah.rdiff, "Value: "+sizediffvalue|intcomma)}}{%endif%}</td>
         <td>{{ah.score|intcomma}}</td>
-        <td>{%if scorediff and sizediff %}
-            {{scorediff|intcomma|change(scorediff, sizediffvalue|intcomma+" from roids. "+scorediffwsizevalue|intcomma+" from value or XP.")}}
-            {%elif scorediff %}
-            {{scorediff|intcomma|change(scorediff, scorediffwsizevalue|intcomma+" from value or XP.")}}
+        <td>{%if ah.sdiff and ah.rdiff %}
+            {{ah.sdiff|intcomma|change(ah.sdiff, sizediffvalue|intcomma+" from roids. "+scorediffwsizevalue|intcomma+" from value or XP.")}}
+            {%elif ah.sdiff %}
+            {{ah.sdiff|intcomma|change(ah.sdiff, scorediffwsizevalue|intcomma+" from value or XP.")}}
             {%endif%}
             </td>
         <td>{{ah.points|intcomma}}</td>
-        <td>{%if pointsdiff %}{{pointsdiff|intcomma|change(pointsdiff)}}{%endif%}</td>
+        <td>{%if ah.pdiff %}{{ah.pdiff|intcomma|change(ah.pdiff)}}{%endif%}</td>
         <td>{%if not loop.first%}{{ah.timestamp|date("D d/m H:i")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
     </tr>
     {% if ah.timestamp.hour == 0 and not loop.last %}

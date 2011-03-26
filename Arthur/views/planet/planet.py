@@ -21,10 +21,7 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from sqlalchemy import and_
-from sqlalchemy.orm import aliased
 from sqlalchemy.sql import desc
-from sqlalchemy.sql.functions import sum
 from Core.paconf import PA
 from Core.db import session
 from Core.maps import Planet, PlanetHistory
@@ -40,28 +37,19 @@ class planet(loadable):
         
         ticks = int(ticks or 0) if h else 12
         
-        history = aliased(PlanetHistory)
-        next = aliased(PlanetHistory)
-        sizediff = history.size - next.size
-        sizediffvalue = sizediff * PA.getint("numbers", "roid_value")
-        valuediff = history.value - next.value
-        valuediffwsizevalue = valuediff - sizediffvalue
+        sizediffvalue = PlanetHistory.rdiff * PA.getint("numbers", "roid_value")
+        valuediffwsizevalue = PlanetHistory.vdiff - sizediffvalue
         resvalue = valuediffwsizevalue * PA.getint("numbers", "res_value")
         shipvalue = valuediffwsizevalue * PA.getint("numbers", "ship_value")
-        xpdiff = history.xp - next.xp
-        xpvalue = xpdiff * PA.getint("numbers", "xp_value")
-        scorediff = history.score - next.score
-        Q = session.query(history,
-                            next.score_rank,
-                            sizediff, sizediffvalue,
-                            valuediff, valuediffwsizevalue,
+        xpvalue = PlanetHistory.xdiff * PA.getint("numbers", "xp_value")
+        Q = session.query(PlanetHistory,
+                            sizediffvalue,
+                            valuediffwsizevalue,
                             resvalue, shipvalue,
-                            xpdiff, xpvalue,
-                            scorediff
+                            xpvalue,
                             )
-        Q = Q.outerjoin((next, and_(history.id==next.id, history.tick-1==next.tick)))
-        Q = Q.filter(history.current == planet)
-        Q = Q.order_by(desc(history.tick))
+        Q = Q.filter(PlanetHistory.current == planet)
+        Q = Q.order_by(desc(PlanetHistory.tick))
         
         return render(["planet.tpl","hplanet.tpl"][h],
                         request,

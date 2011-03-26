@@ -122,9 +122,8 @@ def rank(object, attr):
     return ret
 
 @filter
-def hrank(object, attr, old):
+def hrank(object, attr, diff):
     value = getattr(object, attr+"_rank")
-    diff = value - (old or 0)
     ret = str(value) + ' <img src='
     if diff > 0:
         ret += '"/static/down.gif"'
