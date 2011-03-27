@@ -249,3 +249,46 @@
     {% endfor %}
 </table>
 {% endmacro %}
+
+{% macro hsalliance(alliance, hsummary) %}
+<table cellspacing="1" cellpadding="3" width="95%" class="black">
+    <tr class="header">
+        <th colspan="4">Rank</th>
+        <th colspan="7">{{caller()}}</th>
+        <th class="center" colspan="4"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
+        <th></th>
+    </tr>
+    <tr class="header">
+        <th>Score</th><th>Size</th><th>Av Score</th><th>Av Size</th>
+        <th>Name</th>
+        <th>Members</th><th>Av Size</th><th>Av Score</th><th>Size</th><th>Score</th><th>Ratio</th>
+        <th>Av Size</th><th>Av Score</th><th>Size</th><th>Score</th>
+        <th align="right">Date</th>
+    </tr>
+    {% for ah in hsummary %}
+    <tr class="{% if loop.first %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
+        <td align="right">{{ ah|rank("score") }}</td>
+        <td align="right">{{ ah|rank("size") }}</td>
+        <td align="right">{{ ah|rank("score_avg") }}</td>
+        <td align="right">{{ ah|rank("size_avg") }}</td>
+        
+        <td><a class="gray" href="{% url "alliance", ah.name %}">
+                {{ ah.name }}
+        </a></td>
+        <td align="right">{{ ah|members(True) }}</td>
+        <td align="right">{{ ah.size_avg|intcomma }}</td>
+        <td align="right">{{ ah.score_avg|intcomma }}</td>
+        <td align="right">{{ ah.size|intcomma }}</td>
+        <td align="right">{{ ah.score|intcomma }}</td>
+        <td align="right">{{ ah.ratio|round(1) }}</td>
+        
+        <td align="right">{{ ah|growth("size_avg") }}</td>
+        <td align="right">{{ ah|growth("score_avg") }}</td>
+        <td align="right">{{ ah|growth("size") }}</td>
+        <td align="right">{{ ah|growth("score") }}</td>
+        
+        <td align="right">{%if not loop.first%}{{ah.timestamp|date("D d/m/y")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endmacro %}

@@ -1,5 +1,5 @@
 {% from 'macros.tpl' import alliancelink with context %}
-{% from 'history.tpl' import halliance %}
+{% from 'history.tpl' import halliance, hsalliance with context %}
 {% extends "base.tpl" %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="60%" class="black">
@@ -117,4 +117,8 @@
 <p>&nbsp;</p>
 
 {% call halliance(alliance, history) %}Last 12 Ticks (<a href="{%url "halliance", alliance.name, 72%}">View more</a>){% endcall %}
+
+<p>&nbsp;</p>
+
+{% call hsalliance(alliance, hsummary) %}Alliance History (<a href="{%url "hsalliance", alliance.name%}">View all</a>){% endcall %}
 {% endblock %}

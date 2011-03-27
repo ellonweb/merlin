@@ -21,35 +21,50 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from sqlalchemy import or_
 from sqlalchemy.sql import desc
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Alliance, AllianceHistory
+from Core.maps import Updates, Alliance, AllianceHistory
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
 @load
 class alliance(loadable):
-    def execute(self, request, user, name, h=False, ticks=None):
+    def execute(self, request, user, name, h=False, hs=False, ticks=None):
         alliance = Alliance.load(name)
         if alliance is None:
             return HttpResponseRedirect(reverse("alliance_ranks"))
         
         ticks = int(ticks or 0) if h else 12
         
-        sizediffvalue = AllianceHistory.rdiff * PA.getint("numbers", "roid_value")
-        scorediffwsizevalue = AllianceHistory.sdiff - sizediffvalue
-        Q = session.query(AllianceHistory,
-                            sizediffvalue,
-                            scorediffwsizevalue,
-                            )
-        Q = Q.filter(AllianceHistory.current == alliance)
-        Q = Q.order_by(desc(AllianceHistory.tick))
+        if not hs:
+            sizediffvalue = AllianceHistory.rdiff * PA.getint("numbers", "roid_value")
+            scorediffwsizevalue = AllianceHistory.sdiff - sizediffvalue
+            Q = session.query(AllianceHistory,
+                                sizediffvalue,
+                                scorediffwsizevalue,
+                                )
+            Q = Q.filter(AllianceHistory.current == alliance)
+            Q = Q.order_by(desc(AllianceHistory.tick))
+            history = Q[:ticks] if ticks else Q.all()
+        else:
+            history = None
         
-        return render(["alliance.tpl","halliance.tpl"][h],
+        if not h:
+            Q = session.query(AllianceHistory)
+            Q = Q.filter(or_(AllianceHistory.hour == 23, AllianceHistory.tick == Updates.current_tick()))
+            Q = Q.filter(AllianceHistory.current == alliance)
+            Q = Q.order_by(desc(AllianceHistory.tick))
+            hsummary = Q.all() if hs else Q[:14]
+        else:
+            hsummary = None
+        
+        return render(["alliance.tpl",["halliance.tpl","hsalliance.tpl"][hs]][h or hs],
                         request,
                         alliance = alliance,
                         members = alliance.intel_members,
-                        history = Q[:ticks] if ticks else Q.all(),
+                        history = history,
+                        hsummary = hsummary,
                         ticks = ticks,
                       )
