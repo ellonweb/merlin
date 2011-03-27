@@ -20,14 +20,12 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
-from Arthur.views.galaxy import galaxies
+from Arthur.views.exiles import exiles
 
-urlpatterns = patterns('Arthur.views.galaxy',
-    url(r'^(?:galaxy/)?(?P<x>\d+)[. :\-](?P<y>\d+)/$', 'galaxy.galaxy', name="galaxy"),
-    url(r'^(?:galaxy/)?(?P<x>\d+)[. :\-](?P<y>\d+)/history/(?:(?P<ticks>\d+)/)?$', 'galaxy.galaxy', {'h':True}, name="hgalaxy"),
-    url(r'^(?:galaxy/)?(?P<x>\d+)[. :\-](?P<y>\d+)/history/summary/$', 'galaxy.galaxy', {'hs':True}, name="hsgalaxy"),
-    url(r'^galaxies/$', 'galaxies.galaxies', name="galaxy_ranks"),
-    url(r'^galaxies/(?P<page>\d+)/$', 'galaxies.galaxies'),
-    url(r'^galaxies/(?P<sort>\w+)/$', 'galaxies.galaxies'),
-    url(r'^galaxies/(?P<sort>\w+)/(?P<page>\d+)/$', 'galaxies.galaxies', name="galaxies"),
+urlpatterns = patterns('Arthur.views.exiles',
+    url(r'^exiles/$', 'exiles.exiles', name="exiles"),
+    url(r'^exiles/through/(?P<x>\d+)[. :\-](?P<y>\d+)/$', 'exiles.galaxy', {'through':True}, name="galaxy_exiles"),
+    url(r'^exiles/of/(?P<x>\d+)[. :\-](?P<y>\d+)/$', 'exiles.galaxy', {'through':False}),
+    url(r'^exiles/of/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/$', 'exiles.planet', {'through':False}, name="planet_exiles"),
+    url(r'^exiles/through/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/$', 'exiles.planet', {'through':True}),
 )

@@ -19,11 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from datetime import timedelta
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from sqlalchemy import and_
-from sqlalchemy.orm import aliased
+from sqlalchemy import or_
 from sqlalchemy.sql import desc
 from Core.paconf import PA
 from Core.db import session
@@ -33,40 +31,40 @@ from Arthur.loadable import loadable, load
 
 @load
 class alliance(loadable):
-    def execute(self, request, user, name, h=False, ticks=None):
+    def execute(self, request, user, name, h=False, hs=False, ticks=None):
         alliance = Alliance.load(name)
         if alliance is None:
             return HttpResponseRedirect(reverse("alliance_ranks"))
         
         ticks = int(ticks or 0) if h else 12
         
-        history = aliased(AllianceHistory)
-        next = aliased(AllianceHistory)
-        membersdiff = history.members - next.members
-        sizediff_avg = history.size_avg - next.size_avg
-        scorediff_avg = history.score_avg - next.score_avg
-        pointsdiff_avg = history.points_avg - next.points_avg
-        sizediff = history.size - next.size
-        sizediffvalue = sizediff * PA.getint("numbers", "roid_value")
-        scorediff = history.score - next.score
-        scorediffwsizevalue = scorediff - sizediffvalue
-        pointsdiff = history.points - next.points
-        Q = session.query(history, Updates.timestamp - timedelta(minutes=1),
-                            next.score_rank, membersdiff,
-                            sizediff_avg, scorediff_avg, pointsdiff_avg,
-                            sizediff, sizediffvalue,
-                            scorediff, scorediffwsizevalue,
-                            pointsdiff
-                            )
-        Q = Q.join(Updates)
-        Q = Q.outerjoin((next, and_(history.id==next.id, history.tick-1==next.tick)))
-        Q = Q.filter(history.current == alliance)
-        Q = Q.order_by(desc(history.tick))
+        if not hs:
+            sizediffvalue = AllianceHistory.rdiff * PA.getint("numbers", "roid_value")
+            scorediffwsizevalue = AllianceHistory.sdiff - sizediffvalue
+            Q = session.query(AllianceHistory,
+                                sizediffvalue,
+                                scorediffwsizevalue,
+                                )
+            Q = Q.filter(AllianceHistory.current == alliance)
+            Q = Q.order_by(desc(AllianceHistory.tick))
+            history = Q[:ticks] if ticks else Q.all()
+        else:
+            history = None
         
-        return render(["alliance.tpl","halliance.tpl"][h],
+        if not h:
+            Q = session.query(AllianceHistory)
+            Q = Q.filter(or_(AllianceHistory.hour == 23, AllianceHistory.tick == Updates.current_tick()))
+            Q = Q.filter(AllianceHistory.current == alliance)
+            Q = Q.order_by(desc(AllianceHistory.tick))
+            hsummary = Q.all() if hs else Q[:14]
+        else:
+            hsummary = None
+        
+        return render(["alliance.tpl",["halliance.tpl","hsalliance.tpl"][hs]][h or hs],
                         request,
                         alliance = alliance,
                         members = alliance.intel_members,
-                        history = Q[:ticks] if ticks else Q.all(),
+                        history = history,
+                        hsummary = hsummary,
                         ticks = ticks,
                       )

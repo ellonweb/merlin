@@ -59,6 +59,7 @@ class ialliancehistory(loadable):
                           literal_column("rank() OVER (PARTITION BY planet_history.tick ORDER BY sum(planet_history.size) DESC)").label("size_rank"),
                           literal_column("rank() OVER (PARTITION BY planet_history.tick ORDER BY sum(planet_history.value) DESC)").label("value_rank"),
                           )
+        Q = Q.filter(PlanetHistory.active == True)
         Q = Q.join(PlanetHistory.current)
         Q = Q.join(Planet.intel)
         Q = Q.join(Intel.alliance)
@@ -71,6 +72,7 @@ class ialliancehistory(loadable):
                           size-sizeo, value-valueo, score-scoreo,
                           t10v, t100v,
                           )
+        Q = Q.filter(ph.active == True)
         Q = Q.join(ph.current)
         Q = Q.join(Planet.intel)
         Q = Q.join(Intel.alliance)

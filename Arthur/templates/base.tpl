@@ -84,7 +84,7 @@
 <div id="footer" align="center">
     Uses <a href="http://www.twinhelix.com/">DHTML / JavaScript Menu &copy; by TwinHelix Designs</a>
     <br />
-    All your base are belong to us. Codez &copy; 2009-2010 Elliot Rosemarine.
+    All your base are belong to us. Codez &copy; 2009-2011 Elliot Rosemarine.
 </div>
 </body>
 </html>

@@ -25,6 +25,7 @@ from Arthur.views.alliance import alliances, ialliances
 urlpatterns = patterns('Arthur.views.alliance',
     url(r'^alliance/(?P<name>[^/]+)/$', 'alliance.alliance', name="alliance"),
     url(r'^alliance/(?P<name>[^/]+)/history/(?:(?P<ticks>\d+)/)?$', 'alliance.alliance', {'h':True}, name="halliance"),
+    url(r'^alliance/(?P<name>[^/]+)/history/summary/$', 'alliance.alliance', {'hs':True}, name="hsalliance"),
     url(r'^alliance/(?P<name>[^/]+)/planets/$', 'palliance.alliance', name="alliance_members"),
     url(r'^alliance/(?P<name>[^/]+)/planets/history/$', 'ialliancehistory.ialliancehistory', name="alliance_history"),
     url(r'^alliance/(?P<name>[^/]+)/planets/(?P<page>\d+)/$', 'palliance.alliance'),

@@ -1,5 +1,5 @@
 {% from 'macros.tpl' import planetlink, galaxyscanslink, alliancelink with context %}
-{% from 'history.tpl' import hplanet %}
+{% from 'history.tpl' import hplanet, hsplanet with context %}
 {% extends "base.tpl" %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="85%" class="black">
@@ -136,7 +136,7 @@
         <td>Ticks Roiding:</td>
         <td>{{planet.ticksroiding}}</td>
         <td>Exiles:</td>
-        <td>(View) {{planet.exile_count}}</td>
+        <td><a href="{% url "planet_exiles", planet.x, planet.y, planet.z %}">(View)</a> {{planet.exile_count}}</td>
         <td>XP per Roid:</td>
         <td>{{planet.roidxp|round(2)}}</td>
         <td>Tick-Roids:</td>
@@ -159,4 +159,39 @@
 <p>&nbsp;</p>
 
 {% call hplanet(planet, history) %}Last 12 Ticks (<a href="{%url "hplanet", planet.x, planet.y, planet.z, 72%}">View more</a>){% endcall %}
+
+<p>&nbsp;</p>
+
+<table cellspacing="1" cellpadding="3" width="95%" class="black">
+    <tr class="header"><th colspan="26">Round Hourly Activity</th></tr>
+    <tr class="datahigh" align="center">
+        <td></td>
+        {% for h in range(24) %}<td><strong{%if hour==h%} class="yellow"{%endif%}>{{h}}:00</strong></td>{%endfor%}
+        <td class="datahigh">Total</td>
+    </tr>
+    <tr class="odd" align="right">
+        <td>Landings: </td>
+        {% for h in range(24) %}<td>{{hourstats.landings[h]}}</td>{%endfor%}
+        <td class="datahigh"><strong>{{hourstats.landingsT}}</strong></td>
+    </tr>
+    <tr class="even" align="right">
+        <td>Landed on: </td>
+        {% for h in range(24) %}<td>{{hourstats.landed[h]}}</td>{%endfor%}
+        <td class="datahigh"><strong>{{hourstats.landedT}}</strong></td>
+    </tr>
+    <tr class="odd" align="right">
+        <td>Value drops: </td>
+        {% for h in range(24) %}<td>{{hourstats.vdrops[h]}}</td>{%endfor%}
+        <td class="datahigh"><strong>{{hourstats.vdropsT}}</strong></td>
+    </tr>
+    <tr class="even" align="right">
+        <td>Idle: </td>
+        {% for h in range(24) %}<td>{{hourstats.idles[h]}}</td>{%endfor%}
+        <td class="datahigh"><strong>{{hourstats.idlesT}}</strong></td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
+{% call hsplanet(planet, hsummary) %}Planet History (<a href="{%url "hsplanet", planet.x, planet.y, planet.z%}">View all</a>){% endcall %}
 {% endblock %}

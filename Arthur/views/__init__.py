@@ -30,6 +30,7 @@ urlpatterns = patterns('Arthur.views',
     (r'', include('Arthur.views.galaxy')),
     (r'', include('Arthur.views.alliance')),
     (r'', include('Arthur.views.search')),
+    (r'', include('Arthur.views.exiles')),
     (r'', include('Arthur.views.attack')),
     (r'', include('Arthur.views.scans')),
 )
@@ -41,5 +42,6 @@ from Arthur.views import planet
 from Arthur.views import galaxy
 from Arthur.views import alliance
 from Arthur.views import search
+from Arthur.views import exiles
 from Arthur.views import attack
 from Arthur.views import scans
