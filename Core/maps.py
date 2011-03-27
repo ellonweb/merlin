@@ -969,6 +969,7 @@ class AllianceHistory(Base):
     active = Column(Boolean)
     age = Column(Integer)
     name = Column(String)
+    alias = Column(String)
     size = Column(Integer)
     members = Column(Integer)
     score = Column(Integer)
