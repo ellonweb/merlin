@@ -1,5 +1,5 @@
 {% from 'macros.tpl' import galaxyscanslink with context %}
-{% from 'history.tpl' import hgalaxy %}
+{% from 'history.tpl' import hgalaxy, hsgalaxy with context %}
 {% from 'exiles.tpl' import exiletable with context %}
 {% extends "planets.tpl" %}
 {% block title %}
@@ -50,4 +50,8 @@
 <p>&nbsp;</p>
 
 {% call hgalaxy(galaxy, history) %}Last 12 Ticks (<a href="{%url "hgalaxy", galaxy.x, galaxy.y, 72%}">View more</a>){% endcall %}
+
+<p>&nbsp;</p>
+
+{% call hsgalaxy(galaxy, hsummary) %}Galaxy History (<a href="{%url "hsgalaxy", galaxy.x, galaxy.y%}">View all</a>){% endcall %}
 {% endblock %}

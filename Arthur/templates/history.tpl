@@ -204,3 +204,48 @@
     {% endfor %}
 </table>
 {% endmacro %}
+
+{% macro hsgalaxy(galaxy, hsummary) %}
+<table cellspacing="1" cellpadding="3" width="95%" class="black">
+    <tr class="header">
+        <th colspan="4">Rank</th>
+        <th colspan="9">{{caller()}}</th>
+        <th class="center" colspan="3"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
+        <th></th>
+    </tr>
+    <tr class="header">
+        <th>Score</th><th>Value</th><th>Size</th><th>XP</th>
+        <th align="right">X:Y</th>
+        <th>Name</th>
+        <th>Size</th><th>Value</th><th>Real Score</th><th>Score</th><th>Plan</th><th>Ratio</th><th>XP</th>
+        <th>Size</th><th>Value</th><th>Score</th>
+        <th align="right">Date</th>
+    </tr>
+    {% for gh in hsummary %}
+    <tr class="{% if loop.first %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
+        <td align="right">{{ gh|rank("score") }}</td>
+        <td align="right">{{ gh|rank("value") }}</td>
+        <td align="right">{{ gh|rank("size") }}</td>
+        <td align="right">{{ gh|rank("xp") }}</td>
+        
+        <td align="right"><a href="{% url "galaxy", gh.x, gh.y %}">{{ gh.x }}:{{ gh.y }}</a></td>
+        <td><a class="gray" href="{% url "galaxy", gh.x, gh.y %}">
+                {{ gh.name }}
+        </a></td>
+        <td align="right">{{ gh.size|intcomma }}</td>
+        <td align="right">{{ gh.value|intcomma }}</td>
+        <td align="right">{{ gh.real_score|intcomma }}</td>
+        <td align="right" class="datahigh">{{ gh.score|intcomma }}</td>
+        <td align="right">{{ gh|members }}</td>
+        <td align="right">{{ gh.ratio|round(1) }}</td>
+        <td align="right">{{ gh.xp|intcomma }}</td>
+        
+        <td align="right">{{ gh|growth("size") }}</td>
+        <td align="right">{{ gh|growth("value") }}</td>
+        <td align="right">{{ gh|growth("score") }}</td>
+        
+        <td align="right">{%if not loop.first%}{{gh.timestamp|date("D d/m/y")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endmacro %}
