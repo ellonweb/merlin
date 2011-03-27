@@ -22,9 +22,10 @@
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from Core.maps import Galaxy, Planet, PlanetExiles
-from Arthur.context import render
+from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
+@menu("Exiles")
 @load
 class exiles(loadable):
     def execute(self, request, user):

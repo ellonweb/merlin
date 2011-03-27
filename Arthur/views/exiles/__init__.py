@@ -20,6 +20,7 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 from django.conf.urls.defaults import include, patterns, url
+from Arthur.views.exiles import exiles
 
 urlpatterns = patterns('Arthur.views.exiles',
     url(r'^exiles/$', 'exiles.exiles', name="exiles"),

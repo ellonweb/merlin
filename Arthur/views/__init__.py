@@ -42,5 +42,6 @@ from Arthur.views import planet
 from Arthur.views import galaxy
 from Arthur.views import alliance
 from Arthur.views import search
+from Arthur.views import exiles
 from Arthur.views import attack
 from Arthur.views import scans
