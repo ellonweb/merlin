@@ -25,7 +25,7 @@ from Arthur.views.exiles import exiles
 urlpatterns = patterns('Arthur.views.exiles',
     url(r'^exiles/$', 'exiles.exiles', name="exiles"),
     url(r'^exiles/through/(?P<x>\d+)[. :\-](?P<y>\d+)/$', 'exiles.galaxy', {'through':True}, name="galaxy_exiles"),
-    url(r'^exiles/of/(?P<x>\d+)[. :\-](?P<y>\d+)/$', 'exiles.galaxy', {'through':False}, name="galaxy_exiles"),
+    url(r'^exiles/of/(?P<x>\d+)[. :\-](?P<y>\d+)/$', 'exiles.galaxy', {'through':False}),
     url(r'^exiles/of/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/$', 'exiles.planet', {'through':False}, name="planet_exiles"),
-    url(r'^exiles/through/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/$', 'exiles.planet', {'through':True}, name="planet_exiles"),
+    url(r'^exiles/through/(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)/$', 'exiles.planet', {'through':True}),
 )
