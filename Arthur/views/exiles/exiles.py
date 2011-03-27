@@ -21,11 +21,14 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from sqlalchemy import and_, or_
+from sqlalchemy.sql import desc
+from Core.db import session
 from Core.maps import Galaxy, Planet, PlanetExiles
 from Arthur.context import menu, render
 from Arthur.loadable import loadable, load
 
-@menu("Exiles")
+@menu("Tracker")
 @load
 class exiles(loadable):
     def execute(self, request, user):
@@ -41,7 +44,11 @@ class galaxy(loadable):
         if through:
             exiles = galaxy.exiles
         else:
-            pass
+            Q = session.query(PlanetExiles)
+            Q = Q.join(PlanetExiles.planet)
+            Q = Q.filter(and_(Planet.x == galaxy.x, Planet.y == galaxy.y))
+            Q = Q.order_by(desc(PlanetExiles.tick))
+            exiles = Q.all()
         
         return render("exiles.tpl", request, galaxy = galaxy, through = through, exiles = exiles)
 
@@ -53,7 +60,11 @@ class planet(loadable):
             return HttpResponseRedirect(reverse("exiles"))
         
         if through:
-            pass
+            Q = session.query(PlanetExiles)
+            Q = Q.filter(or_(and_(PlanetExiles.oldx == planet.x, PlanetExiles.oldy == planet.y, PlanetExiles.oldz == planet.z),
+                             and_(PlanetExiles.newx == planet.x, PlanetExiles.newy == planet.y, PlanetExiles.newz == planet.z)))
+            Q = Q.order_by(desc(PlanetExiles.tick))
+            exiles = Q.all()
         else:
             exiles = planet.exiles
         

@@ -133,7 +133,7 @@
     {% elif through %}
     {% elif not through -%}
         {% if galaxy is defined %}      <a href="{% url "galaxy", galaxy.x, galaxy.y %}">{{ galaxy.x }}:{{ galaxy.y }}</a>
-        {% elif planet is defined %}    <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
+        {%- elif planet is defined %}    <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
                                             <a {{planetlink(planet)}}>{{ planet.z }}</a>
         {%- endif %}'s
     {% endif %}
