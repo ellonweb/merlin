@@ -21,11 +21,10 @@
  
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from sqlalchemy import or_
 from sqlalchemy.sql import asc, desc
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Galaxy, GalaxyHistory, Planet, PlanetExiles, Alliance, Intel
+from Core.maps import Galaxy, GalaxyHistory, Planet, Alliance, Intel
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
@@ -46,10 +45,7 @@ class galaxy(loadable):
         Q = Q.order_by(asc(Planet.z))
         planets = Q.all() if not h else None
         
-        Q = session.query(PlanetExiles)
-        Q = Q.filter(or_(PlanetExiles.old == galaxy, PlanetExiles.new == galaxy))
-        Q = Q.order_by(desc(PlanetExiles.tick))
-        exiles = Q[:10] if not h else None
+        exiles = galaxy.exiles[:10] if not h else None
         
         sizediffvalue = GalaxyHistory.rdiff * PA.getint("numbers", "roid_value")
         valuediffwsizevalue = GalaxyHistory.vdiff - sizediffvalue
