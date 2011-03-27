@@ -353,7 +353,6 @@ class Galaxy(Base):
     
     @property
     def exile_count(self):
-        # minus 1 because the first is for new planet (just in case of bad data, return 0)
         return len(self.outs)
     
     @property
@@ -596,8 +595,10 @@ class Planet(Base):
     
     @property
     def exile_count(self):
-        # minus 1 because the first is for new planet (just in case of bad data, return 0)
-        return max(session.query(PlanetExiles).filter(PlanetExiles.planet == self).count() - 1, 0)
+        return session.query(PlanetExiles).filter(and_(PlanetExiles.planet == self, PlanetExiles.oldx != None, PlanetExiles.newx != None,
+                                                   or_(PlanetExiles.oldx != PlanetExiles.newx,
+                                                       PlanetExiles.oldy != PlanetExiles.newy,
+                                                       PlanetExiles.oldz != PlanetExiles.newz))).count()
     
     @property
     def total_idle(self):
