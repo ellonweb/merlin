@@ -1,3 +1,4 @@
+{% from 'macros.tpl' import planetlink with context %}
 {% macro hplanet(planet, history) %}
 <table cellspacing="1" cellpadding="3" width="95%" class="black">
     <tr class="header">
@@ -10,7 +11,7 @@
         <th colspan="3">Value</th>
         <th colspan="2">Score</th>
         <th colspan="2">Experience</th>
-        <th>Date / Time</th>
+        <th align="right">Date / Time</th>
     </tr>
     {% for ph,
         sizediffvalue,
@@ -58,7 +59,7 @@
         <th colspan="2">Real Score</th>
         <th colspan="2">Score</th>
         <th colspan="2">Experience</th>
-        <th>Date / Time</th>
+        <th align="right">Date / Time</th>
     </tr>
     {% for gh,
         sizediffvalue,
@@ -150,6 +151,56 @@
         <td colspan="17" height="6"/>
     </tr>
     {% endif %}
+    {% endfor %}
+</table>
+{% endmacro %}
+
+{% macro hsplanet(planet, hsummary) %}
+<table cellspacing="1" cellpadding="3" width="95%" class="black">
+    <tr class="header">
+        <th colspan="4">Rank</th>
+        <th colspan="9">{{caller()}}</th>
+        <th class="center" colspan="3"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
+        <th></th>
+    </tr>
+    <tr class="header">
+        <th>Score</th><th>Value</th><th>Size</th><th>XP</th>
+        <th align="right">X:Y &nbsp;Z</th>
+        <th>Ruler</th><th>Planet</th>
+        <th>Race</th><th>Size</th><th>Value</th><th>Score</th><th>Ratio</th><th>XP</th>
+        <th>Size</th><th>Value</th><th>Score</th>
+        <th align="right">Date</th>
+    </tr>
+    {% for ph in hsummary %}
+    <tr class="{% if loop.first %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
+        <td align="right">{{ ph|rank("score") }}</td>
+        <td align="right">{{ ph|rank("value") }}</td>
+        <td align="right">{{ ph|rank("size") }}</td>
+        <td align="right">{{ ph|rank("xp") }}</td>
+        
+        <td align="right">
+            <a href="{% url "galaxy", ph.x, ph.y %}">{{ ph.x }}:{{ ph.y }}</a>
+            &nbsp;{{ ph.z }}
+        </td>
+        <td><a class="gray" {{planetlink(ph)}}>
+                {{ ph.rulername }}
+        </a></td>
+        <td><a class="gray" {{planetlink(ph)}}>
+                {{ ph.planetname }}
+        </a></td>
+        <td class="{{ ph.race }}">{{ ph.race }}</td>
+        <td align="right">{{ ph.size|intcomma }}</td>
+        <td align="right">{{ ph.value|intcomma }}</td>
+        <td align="right" class="datahigh">{{ phscore|intcomma }}</td>
+        <td align="right">{{ ph.ratio|round(1) }}</td>
+        <td align="right">{{ ph.xp|intcomma }}</td>
+        
+        <td align="right">{{ ph|growth("size") }}</td>
+        <td align="right">{{ ph|growth("value") }}</td>
+        <td align="right">{{ ph|growth("score") }}</td>
+        
+        <td align="right">{%if not loop.first%}{{ph.timestamp|date("D d/m/y")}}{%else%}<strong class="red">NOW</strong>{%endif%}</td>
+    </tr>
     {% endfor %}
 </table>
 {% endmacro %}

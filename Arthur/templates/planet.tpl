@@ -1,5 +1,5 @@
 {% from 'macros.tpl' import planetlink, galaxyscanslink, alliancelink with context %}
-{% from 'history.tpl' import hplanet %}
+{% from 'history.tpl' import hplanet, hsplanet with context %}
 {% extends "base.tpl" %}
 {% block content %}
 <table cellspacing="1" cellpadding="3" width="85%" class="black">
@@ -191,4 +191,7 @@
     </tr>
 </table>
 
+<p>&nbsp;</p>
+
+{% call hsplanet(planet, hsummary) %}Planet History (<a href="{%url "hsplanet", planet.x, planet.y, planet.z%}">View all</a>){% endcall %}
 {% endblock %}

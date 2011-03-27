@@ -22,38 +22,43 @@
 from datetime import datetime
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
+from sqlalchemy import or_
 from sqlalchemy.sql import desc
 from sqlalchemy.sql.functions import count
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Planet, PlanetHistory, PlanetIdles, PlanetValueDrops, PlanetLandings, PlanetLandedOn
+from Core.maps import Updates, Planet, PlanetHistory, PlanetIdles, PlanetValueDrops, PlanetLandings, PlanetLandedOn
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
 @load
 class planet(loadable):
-    def execute(self, request, user, x, y, z, h=False, ticks=None):
+    def execute(self, request, user, x, y, z, h=False, hs=False, ticks=None):
         planet = Planet.load(x,y,z)
         if planet is None:
             return HttpResponseRedirect(reverse("planet_ranks"))
         
-        ticks = int(ticks or 0) if h else 12
+        ticks = int(ticks or 0) if (h or hs) else 12
         
-        sizediffvalue = PlanetHistory.rdiff * PA.getint("numbers", "roid_value")
-        valuediffwsizevalue = PlanetHistory.vdiff - sizediffvalue
-        resvalue = valuediffwsizevalue * PA.getint("numbers", "res_value")
-        shipvalue = valuediffwsizevalue * PA.getint("numbers", "ship_value")
-        xpvalue = PlanetHistory.xdiff * PA.getint("numbers", "xp_value")
-        Q = session.query(PlanetHistory,
-                            sizediffvalue,
-                            valuediffwsizevalue,
-                            resvalue, shipvalue,
-                            xpvalue,
-                            )
-        Q = Q.filter(PlanetHistory.current == planet)
-        Q = Q.order_by(desc(PlanetHistory.tick))
+        if not hs:
+            sizediffvalue = PlanetHistory.rdiff * PA.getint("numbers", "roid_value")
+            valuediffwsizevalue = PlanetHistory.vdiff - sizediffvalue
+            resvalue = valuediffwsizevalue * PA.getint("numbers", "res_value")
+            shipvalue = valuediffwsizevalue * PA.getint("numbers", "ship_value")
+            xpvalue = PlanetHistory.xdiff * PA.getint("numbers", "xp_value")
+            Q = session.query(PlanetHistory,
+                                sizediffvalue,
+                                valuediffwsizevalue,
+                                resvalue, shipvalue,
+                                xpvalue,
+                                )
+            Q = Q.filter(PlanetHistory.current == planet)
+            Q = Q.order_by(desc(PlanetHistory.tick))
+            history = Q[:ticks] if ticks else Q.all()
+        else:
+            history = None
         
-        if not h:
+        if not (h or hs):
             landings = session.query(PlanetLandings.hour, count()).filter(PlanetLandings.planet==planet).group_by(PlanetLandings.hour).all()
             landed = session.query(PlanetLandedOn.hour, count()).filter(PlanetLandedOn.planet==planet).group_by(PlanetLandedOn.hour).all()
             vdrops = session.query(PlanetValueDrops.hour, count()).filter(PlanetValueDrops.planet==planet).group_by(PlanetValueDrops.hour).all()
@@ -67,10 +72,20 @@ class planet(loadable):
         else:
             hourstats = None
         
-        return render(["planet.tpl","hplanet.tpl"][h],
+        if not h:
+            Q = session.query(PlanetHistory)
+            Q = Q.filter(or_(PlanetHistory.hour == 23, PlanetHistory.tick == Updates.current_tick()))
+            Q = Q.filter(PlanetHistory.current == planet)
+            Q = Q.order_by(desc(PlanetHistory.tick))
+            hsummary = Q.all() if hs else Q[:14]
+        else:
+            hsummary = None
+        
+        return render(["planet.tpl",["hplanet.tpl","hsplanet.tpl"][hs]][h or hs],
                         request,
                         planet = planet,
-                        history = Q[:ticks] if ticks else Q.all(),
+                        history = history,
                         hour = datetime.utcnow().hour, hourstats = hourstats,
+                        hsummary = hsummary,
                         ticks = ticks,
                       )
