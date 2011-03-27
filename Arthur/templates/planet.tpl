@@ -159,4 +159,36 @@
 <p>&nbsp;</p>
 
 {% call hplanet(planet, history) %}Last 12 Ticks (<a href="{%url "hplanet", planet.x, planet.y, planet.z, 72%}">View more</a>){% endcall %}
+
+<p>&nbsp;</p>
+
+<table cellspacing="1" cellpadding="3" width="95%" class="black">
+    <tr class="header"><th colspan="26">Round Hourly Activity</th></tr>
+    <tr class="datahigh" align="center">
+        <td></td>
+        {% for h in range(24) %}<td><strong{%if hour==h%} class="yellow"{%endif%}>{{h}}:00</strong></td>{%endfor%}
+        <td class="datahigh">Total</td>
+    </tr>
+    <tr class="odd" align="right">
+        <td>Landings: </td>
+        {% for h in range(24) %}<td>{{hourstats.landings[h]}}</td>{%endfor%}
+        <td class="datahigh"><strong>{{hourstats.landingsT}}</strong></td>
+    </tr>
+    <tr class="even" align="right">
+        <td>Landed on: </td>
+        {% for h in range(24) %}<td>{{hourstats.landed[h]}}</td>{%endfor%}
+        <td class="datahigh"><strong>{{hourstats.landedT}}</strong></td>
+    </tr>
+    <tr class="odd" align="right">
+        <td>Value drops: </td>
+        {% for h in range(24) %}<td>{{hourstats.vdrops[h]}}</td>{%endfor%}
+        <td class="datahigh"><strong>{{hourstats.vdropsT}}</strong></td>
+    </tr>
+    <tr class="even" align="right">
+        <td>Idle: </td>
+        {% for h in range(24) %}<td>{{hourstats.idles[h]}}</td>{%endfor%}
+        <td class="datahigh"><strong>{{hourstats.idlesT}}</strong></td>
+    </tr>
+</table>
+
 {% endblock %}

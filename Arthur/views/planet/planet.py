@@ -19,12 +19,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+from datetime import datetime
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy.sql import desc
+from sqlalchemy.sql.functions import count
 from Core.paconf import PA
 from Core.db import session
-from Core.maps import Planet, PlanetHistory
+from Core.maps import Planet, PlanetHistory, PlanetIdles, PlanetValueDrops, PlanetLandings, PlanetLandedOn
 from Arthur.context import render
 from Arthur.loadable import loadable, load
 
@@ -51,9 +53,24 @@ class planet(loadable):
         Q = Q.filter(PlanetHistory.current == planet)
         Q = Q.order_by(desc(PlanetHistory.tick))
         
+        if not h:
+            landings = session.query(PlanetLandings.hour, count()).filter(PlanetLandings.planet==planet).group_by(PlanetLandings.hour).all()
+            landed = session.query(PlanetLandedOn.hour, count()).filter(PlanetLandedOn.planet==planet).group_by(PlanetLandedOn.hour).all()
+            vdrops = session.query(PlanetValueDrops.hour, count()).filter(PlanetValueDrops.planet==planet).group_by(PlanetValueDrops.hour).all()
+            idles = session.query(PlanetIdles.hour, count()).filter(PlanetIdles.planet==planet).group_by(PlanetIdles.hour).all()
+            hourstats = {
+                            'landings' : dict(landings), 'landingsT' : sum([c for hour,c in landings]),
+                            'landed'   : dict(landed),   'landedT'   : sum([c for hour,c in landed]),
+                            'vdrops'   : dict(vdrops),   'vdropsT'   : sum([c for hour,c in vdrops]),
+                            'idles'    : dict(idles),    'idlesT'    : sum([c for hour,c in idles]),
+                            }
+        else:
+            hourstats = None
+        
         return render(["planet.tpl","hplanet.tpl"][h],
                         request,
                         planet = planet,
                         history = Q[:ticks] if ticks else Q.all(),
+                        hour = datetime.utcnow().hour, hourstats = hourstats,
                         ticks = ticks,
                       )
