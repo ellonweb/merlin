@@ -35,7 +35,7 @@
     {% for exile in exiles %}
     {% set planet = exile.history %}
     {% set current = exile.planet %}
-    {% set newiscurrent = exile.new and current.active and current.galaxy == planet.galaxy and current.z == planet.z %}
+    {% set newiscurrent = exile.new and current.active and current.x == planet.x and current.y == planet.y and current.z == planet.z %}
     {% set newbutnotcurrent = exile.new and current.active and not newiscurrent %}
     <tr class="{%if not exile.old %}new{%elif not exile.new %}deleted{%else%}{{loop.cycle('odd', 'even')}}{%endif%}{%if not current.active%} nolongerexists{%endif%}">
         <td align="right">{%if planet.active %}{{ planet|rank("score") }}{%endif%}</td>
@@ -58,8 +58,8 @@
         </td>
         <td align="right"{%if newbutnotcurrent%} class="datahigh"{%endif%}>
         {%if newbutnotcurrent%}
-            <a href="{% url "galaxy", planet.x, planet.y %}">{{ planet.x }}:{{ planet.y }}</a>
-            <a href="{% url "planet", planet.x, planet.y, planet.z %}">&nbsp;{{ planet.z }}</a>
+            <a href="{% url "galaxy", current.x, current.y %}">{{ current.x }}:{{ current.y }}</a>
+            <a href="{% url "planet", current.x, current.y, current.z %}">&nbsp;{{ current.z }}</a>
         {%endif%}
         </td>
         
