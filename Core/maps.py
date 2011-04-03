@@ -785,7 +785,7 @@ Galaxy.outs = relation(PlanetExiles, backref="old", primaryjoin=and_(Galaxy.x==P
                                     order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.oldz),))
 Galaxy.ins = relation(PlanetExiles, backref="new", primaryjoin=and_(Galaxy.x==PlanetExiles.newx, Galaxy.y==PlanetExiles.newy),
                                     order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.newz),))
-PlanetExiles.planet = relation(Planet, backref="exiles", order_by=desc(PlanetExiles.tick))
+Planet.exiles = relation(PlanetExiles, backref="planet", order_by=desc(PlanetExiles.tick))
 class PlanetIdles(Base):
     __tablename__ = 'planet_idles'
     hour = Column(Integer, index=True)
