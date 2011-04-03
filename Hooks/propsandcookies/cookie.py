@@ -28,10 +28,11 @@ from Core.loadable import loadable, route, require_user, channel
 
 class cookie(loadable):
     """Cookies are used to give out carebears. Carebears are rewards for carefaces. Give cookies to people when you think they've done something beneficial for you or for the alliance in general."""
+    alias = "cookies"
     usage = " [howmany] <receiver> <reason> | [stat]"
     access = "member"
     
-    @route(r"statu?s?")
+    @route(r"(?:statu?s?)?")
     @require_user
     def stat(self, message, user, params):
         #Stats
