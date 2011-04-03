@@ -94,8 +94,15 @@ class Updates(Base):
         return Q.first()
     
     def __str__(self):
-        retstr = "Tick %s was scraped %s" % (self.id, self.age,)
-        retstr+= " (%s)" % (self.timestamp.strftime("%a %d/%m %H:%M"),)
+        diff = Updates.current_tick() - self.id
+        if diff == 0:
+            retstr = "It is currently tick %s " % (self.id,)
+        if diff == 1:
+            retstr = "Last tick was %s " % (self.id,)
+        if diff > 1:
+            retstr = "Tick %s was %s ticks ago "  % (self.id, diff,)
+        retstr += "(%s -" % (self.age,)
+        retstr += " %s)" % (self.timestamp.strftime("%a %d/%m %H:%M"),)
         return retstr
 
 class Cluster(Base):

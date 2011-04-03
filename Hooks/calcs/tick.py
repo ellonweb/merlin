@@ -61,7 +61,10 @@ class tick(loadable):
                 seconds += mins *60
                 retstr += "%sm" % (mins,)
                 
-                retstr = "Tick %s is expected to happen in %s" % (params.group(1), retstr,)
+                if diff == 1:
+                    retstr = "Next tick is %s (in %s" % (params.group(1), retstr,)
+                else:
+                    retstr = "Tick %s is expected to happen in %s ticks (in %s" % (params.group(1), diff, retstr,)
             
             elif diff < 0:
                 
@@ -79,8 +82,11 @@ class tick(loadable):
                 seconds -= mins*60
                 retstr += "%sm" % (mins,)
                 
-                retstr = "Tick %s was expected to happen %s ago but was not been scraped" % (params.group(1), retstr,)
+                if diff == -1:
+                    retstr = "Last tick was %s (%s ago" % (params.group(1), retstr,)
+                else:
+                    retstr = "Tick %s was expected to happen %s ticks ago but was not scraped (%s ago" % (params.group(1), -diff, retstr,)
             
             time = now + timedelta(seconds=seconds)
-            retstr += " (%s)" % (time.strftime("%a %d/%m %H:%M"),)
+            retstr += " - %s)" % (time.strftime("%a %d/%m %H:%M"),)
             message.reply(retstr)
