@@ -31,7 +31,7 @@ class attack(loadable):
     usage = " [<eta|landingtick> <coordlist> [comment]] | [list] | [show <id>]"
     access = "half"
     
-    @route(r"list")
+    @route(r"(?:list)?")
     def list(self,message,user,params):
         Q = session.query(Attack)
         Q = Q.filter(Attack.landtick >= Updates.current_tick() - Attack._active_ticks)
