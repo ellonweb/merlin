@@ -92,6 +92,11 @@ class Updates(Base):
         else:
             Q = Q.order_by(desc(Updates.id))
         return Q.first()
+    
+    def __str__(self):
+        retstr = "Tick %s was scraped %s" % (self.id, self.age,)
+        retstr+= " (%s)" % (self.timestamp.strftime("%a %d/%m %H:%M"),)
+        return retstr
 
 class Cluster(Base):
     __tablename__ = 'cluster'

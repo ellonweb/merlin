@@ -30,4 +30,5 @@ __all__ = [
            "maxcap",
            "xp",
            "seagal",
+           "tick",
            ]
