@@ -85,8 +85,13 @@ class Updates(Base):
         return tick
     
     @staticmethod
-    def current():
-        return session.query(Updates).order_by(desc(Updates.id)).first()
+    def load(tick=None):
+        Q = session.query(Updates)
+        if tick is not None:
+            Q = Q.filter_by(id=tick)
+        else:
+            Q = Q.order_by(desc(Updates.id))
+        return Q.first()
 
 class Cluster(Base):
     __tablename__ = 'cluster'
