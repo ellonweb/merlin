@@ -191,7 +191,7 @@
         <td class="{{ ph.race }}">{{ ph.race }}</td>
         <td align="right">{{ ph.size|intcomma }}</td>
         <td align="right">{{ ph.value|intcomma }}</td>
-        <td align="right" class="datahigh">{{ phscore|intcomma }}</td>
+        <td align="right" class="datahigh">{{ ph.score|intcomma }}</td>
         <td align="right">{{ ph.ratio|round(1) }}</td>
         <td align="right">{{ ph.xp|intcomma }}</td>
         
