@@ -27,7 +27,7 @@ from Core.loadable import loadable, route, require_user
 class mydef(loadable):
     """Add your fleets for defense listing. For example: 2x 20k Barghest 30k Harpy Call me any time for hot shipsex."""
     usage = " [fleets] x <[ship count] [ship name]> [comment]"
-    countre = re.compile(r"^(\d+(?:\.\d+)?[mk]?)$",re.I)
+    countre = re.compile(r"^((?:\d+(?:\.\d+)?[mk]?)|(?:[\d,]+))$",re.I)
     shipre = re.compile(r"^(\w+),?$")
     
     @route(r"(\d)\s*x\s*(.*)", access = "member")
@@ -86,6 +86,9 @@ class mydef(loadable):
         while len(parts) > 1:
             mc=self.countre.match(parts[0])
             ms=self.shipre.match(parts[1])
+            if not mc and not ms:
+                mc=self.countre.match(parts[1])
+                ms=self.shipre.match(parts[0])
             if not mc or not ms:
                 break
             

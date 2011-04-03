@@ -69,6 +69,7 @@ class _base(object):
     
     def short2num(self,short):
         try:
+            short = short.replace(",", "")
             if short[-1].lower()=='m':
                 ret = float(short[:-1]) *1000000
             elif short[-1].lower()=='k':
