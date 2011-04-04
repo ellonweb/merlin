@@ -78,15 +78,20 @@ class parse(Thread):
     def group(self, uid, gid):
         scanlog("Group scan: %s" %(gid,))
         page = urlopen(Config.get("URL","viewgroup")%(gid,)).read()
-        for m in re.finditer('scan_id=([0-9a-zA-Z]+)',page):
-            try:
-                self.scan(uid, m.group(1), gid)
-            except Exception, e:
-                scanlog("Exception in scan: %s"%(str(e),), traceback=True)
+        for scan in page.split("<hr>"):
+            m = re.search('scan_id=([0-9a-zA-Z]+)',scan)
+            if m:
+                try:
+                    self.execute(scan, uid, m.group(1), gid)
+                except Exception, e:
+                    scanlog("Exception in scan: %s"%(str(e),), traceback=True)
     
     def scan(self, uid, pa_id, gid=None):
-        scanlog("Scan: %s (group: %s)" %(pa_id,gid,))
         page = urlopen(Config.get("URL","viewscan")%(pa_id,)).read()
+        self.execute(page, uid, pa_id, gid)
+    
+    def execute(self, page, uid, pa_id, gid=None):
+        scanlog("Scan: %s (group: %s)" %(pa_id,gid,))
         page = decode(page)
         
         m = re.search('>([^>]+) on (\d+)\:(\d+)\:(\d+) in tick (\d+)', page)
