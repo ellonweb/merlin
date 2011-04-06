@@ -77,7 +77,7 @@ class parse(Thread):
     
     def group(self, uid, gid):
         scanlog("Group scan: %s" %(gid,))
-        page = urlopen(Config.get("URL","viewgroup")%(gid,)).read()
+        page = urlopen(Config.get("URL","viewgroup")%(gid,)+"&inc=1").read()
         for scan in page.split("<hr>"):
             m = re.search('scan_id=([0-9a-zA-Z]+)',scan)
             if m:
@@ -87,7 +87,7 @@ class parse(Thread):
                     scanlog("Exception in scan: %s"%(str(e),), traceback=True)
     
     def scan(self, uid, pa_id, gid=None):
-        page = urlopen(Config.get("URL","viewscan")%(pa_id,)).read()
+        page = urlopen(Config.get("URL","viewscan")%(pa_id,)+"&inc=1").read()
         self.execute(page, uid, pa_id, gid)
     
     def execute(self, page, uid, pa_id, gid=None):
