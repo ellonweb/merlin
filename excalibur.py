@@ -774,6 +774,7 @@ while True:
                                 FROM planet
                                 WHERE
                                     planet.rdiff > 0 AND
+                                    planet.rdiff != planet.xdiff AND
                                     planet.active = :true
                             ;""", bindparams=[tick, hour, true]))
         # Landed on
