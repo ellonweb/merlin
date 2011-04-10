@@ -786,12 +786,6 @@ class PlanetExiles(Base):
     newy = Column(Integer)
     newz = Column(Integer)
     
-    @property
-    def history(self):
-        Q = session.query(PlanetHistory)
-        Q = Q.filter_by(id=self.id, tick=self.tick)
-        return Q.first()
-    
     @staticmethod
     def recent():
         Q = session.query(PlanetExiles)
@@ -802,7 +796,9 @@ Galaxy.outs = relation(PlanetExiles, backref="old", primaryjoin=and_(Galaxy.x==P
                                     order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.oldz),))
 Galaxy.ins = relation(PlanetExiles, backref="new", primaryjoin=and_(Galaxy.x==PlanetExiles.newx, Galaxy.y==PlanetExiles.newy),
                                     order_by=(desc(PlanetExiles.tick), asc(PlanetExiles.newz),))
-Planet.exiles = relation(PlanetExiles, backref="planet", order_by=desc(PlanetExiles.tick))
+PlanetExiles.planet = relation(Planet, lazy=False, backref=backref("exiles", order_by=desc(PlanetExiles.tick)))
+PlanetExiles.history = relation(PlanetHistory, lazy=False, foreign_keys=(PlanetExiles.tick, PlanetExiles.id,),
+                                    primaryjoin=and_(PlanetHistory.tick == PlanetExiles.tick, PlanetHistory.id == PlanetExiles.id))
 class PlanetIdles(Base):
     __tablename__ = 'planet_idles'
     hour = Column(Integer, index=True)
