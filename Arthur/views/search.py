@@ -195,6 +195,7 @@ class search(loadable):
             if param == "bash" and user.planet is not None:
                 Q = Q.filter(or_(Planet.value.op(">")(user.planet.value*PA.getfloat("bash","value")),
                                  Planet.score.op(">")(user.planet.score*PA.getfloat("bash","score"))))
+                Q = Q.filter(Planet.x < 200)
                 search[param] = 'checked="checked"'
                 continue
             
