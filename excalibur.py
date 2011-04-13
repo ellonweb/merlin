@@ -300,7 +300,7 @@ while True:
                                   rank() OVER (ORDER BY value DESC) AS value_rank,
                                   rank() OVER (ORDER BY xp DESC) AS xp_rank
                                 FROM (SELECT t.*,
-                                  COALESCE(c.totalroundroids + (GREATEST(t.size - c.size, 0)), 0) AS totalroundroids,
+                                  COALESCE(c.totalroundroids + (GREATEST(t.size - c.size, 0)), t.size) AS totalroundroids,
                                   COALESCE(c.totallostroids + (GREATEST(c.size - t.size, 0)), 0) AS totallostroids
                                 FROM cluster AS c, (SELECT x,
                                   count(*) as count,
@@ -456,7 +456,7 @@ while True:
                                   rank() OVER (ORDER BY value DESC) AS value_rank,
                                   rank() OVER (ORDER BY xp DESC) AS xp_rank
                                 FROM (SELECT t.*,
-                                  COALESCE(g.totalroundroids + (GREATEST(t.size - g.size, 0)), 0) AS totalroundroids,
+                                  COALESCE(g.totalroundroids + (GREATEST(t.size - g.size, 0)), t.size) AS totalroundroids,
                                   COALESCE(g.totallostroids + (GREATEST(g.size - g.size, 0)), 0) AS totallostroids
                                 FROM galaxy AS g, galaxy_temp AS t
                                   WHERE g.id = t.id AND g.active = :true) AS t) AS t,
@@ -740,7 +740,7 @@ while True:
                                   rank() OVER (ORDER BY value DESC) AS value_rank,
                                   rank() OVER (ORDER BY xp DESC) AS xp_rank
                                 FROM (SELECT t.*,
-                                  COALESCE(p.totalroundroids + (GREATEST(t.size - p.size, 0)), 0) AS totalroundroids,
+                                  COALESCE(p.totalroundroids + (GREATEST(t.size - p.size, 0)), t.size) AS totalroundroids,
                                   COALESCE(p.totallostroids + (GREATEST(p.size - t.size, 0)), 0) AS totallostroids
                                 FROM planet AS p, planet_temp AS t
                                   WHERE p.id = t.id AND p.active = :true) AS t) AS t
@@ -931,7 +931,7 @@ while True:
                                   rank() OVER (ORDER BY score_avg DESC) AS score_avg_rank,
                                   rank() OVER (ORDER BY points_avg DESC) AS points_avg_rank
                                 FROM (SELECT t.*,
-                                  COALESCE(a.totalroundroids + (GREATEST(t.size - a.size, 0)), 0) AS totalroundroids,
+                                  COALESCE(a.totalroundroids + (GREATEST(t.size - a.size, 0)), t.size) AS totalroundroids,
                                   COALESCE(a.totallostroids + (GREATEST(a.size - t.size, 0)), 0) AS totallostroids
                                 FROM alliance AS a, alliance_temp AS t
                                   WHERE a.id = t.id AND a.active = :true) AS t) AS t
