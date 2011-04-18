@@ -21,7 +21,9 @@
  
 import json
 import re
+import socket
 import time
+from smtplib import SMTP, SMTPException, SMTPSenderRefused, SMTPRecipientsRefused
 from ssl import SSLError
 from urllib import urlencode
 from urllib2 import urlopen, Request, URLError
@@ -56,23 +58,25 @@ class sms(loadable):
             return
 
         if receiver.smsmode == "Email":
-            message.reply("Emailing not yet implemented")
-            return
-
-        phone = self.prepare_phone_number(receiver.phone)
-        if not phone or len(phone) <= 7:
-            message.reply("%s has no phone number or their phone number is too short to be valid (under 6 digits). Super secret message not sent." % (receiver.name,))
-            return
+            mode = receiver.smsmode
+            phone = receiver.email
+        else:
+            mode = Config.get("Misc", "sms")
+            phone = self.prepare_phone_number(receiver.phone)
+            if not phone or len(phone) <= 7:
+                message.reply("%s has no phone number or their phone number is too short to be valid (under 6 digits). Super secret message not sent." % (receiver.name,))
+                return
 
         if len(text) >= 160:
             message.reply("Max length for a text is 160 characters. Your text was %i characters long. Super secret message not sent." % (len(text),))
             return
 
-        mode = Config.get("Misc", "sms")
         mode = receiver.smsmode or mode if mode == "combined" else mode
         mode = mode.lower()
         error = ""
         
+        if mode == "email":
+            error = self.send_email(user, receiver, public_text, phone, text)
         if mode == "googlevoice" or mode == "combined":
             error = self.send_googlevoice(user, receiver, public_text, phone, text)
         if mode == "clickatell" or (mode == "combined" and error is not None):
@@ -228,6 +232,37 @@ class sms(loadable):
         s = "".join([c for c in text if c.isdigit()])
         return "+"+s.lstrip("00")
 
+    def send_email(self, user, receiver, public_text, email, message):
+        try:
+            smtp = SMTP(Config.get("smtp", "host"), Config.get("smtp", "port"))
+            
+            try:
+                smtp.starttls()
+            except SMTPException as e:
+                raise SMSError("unable to shift connection into TLS: %s" % (str(e),))
+            
+            try:
+                smtp.login(Config.get("smtp", "user"), Config.get("smtp", "pass"))
+            except SMTPException as e:
+                raise SMSError("unable to authenticate: %s" % (str(e),))
+            
+            try:
+                smtp.sendmail(Config.get("smtp", "user"), email, 
+                              "To:%s\nFrom:%s\nSubject:%s\n%s\n" % (email,
+                                                                    Config.get("smtp", "user"),
+                                                                    Config.get("Alliance", "name"),
+                                                                    message,))
+            except SMTPSenderRefused as e:
+                raise SMSError("sender refused: %s" % (str(e),))
+            except SMTPRecipientsRefused as e:
+                raise SMSError("unable to send: %s" % (str(e),))
+            
+            smtp.quit()
+            self.log_message(user, receiver, email, public_text, "email")
+            
+        except (socket.error, SSLError, SMTPException, SMSError) as e:
+            return "Error sending message: %s" % (str(e),)
+    
     def log_message(self,sender,receiver,phone,text,mode):
         session.add(SMS(sender=sender,receiver=receiver,phone=phone,sms_text=text,mode=mode))
         session.commit()
