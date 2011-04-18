@@ -506,11 +506,11 @@ while True:
                 session.execute(planet_new_id_search.delete())
                 session.execute(planet_old_id_search.delete())
                 # Insert from the new tick any planets without id
-                if session.execute(text("INSERT INTO planet_new_id_search (id, x, y, z, race, size, score, value, xp) SELECT id, x, y, z, race, size, score, value, xp FROM planet_temp WHERE planet_temp.id IS NULL;")).rowcount < 1:
+                if session.execute(text("INSERT INTO planet_new_id_search SELECT id, x, y, z, planetname, rulername, race, size, score, value, xp FROM planet_temp WHERE planet_temp.id IS NULL;")).rowcount < 1:
                     return None
                 # Insert from the previous tick any planets without
                 #  an equivalent planet from the new tick
-                if session.execute(text("INSERT INTO planet_old_id_search (id, x, y, z, race, size, score, value, xp, vdiff) SELECT id, x, y, z, race, size, score, value, xp, vdiff FROM planet WHERE planet.id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL) AND planet.active = :true;", bindparams=[true])).rowcount < 1:
+                if session.execute(text("INSERT INTO planet_old_id_search SELECT id, x, y, z, planetname, rulername, race, size, score, value, xp, vdiff FROM planet WHERE planet.id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL) AND planet.active = :true;", bindparams=[true])).rowcount < 1:
                     return None
                 # If either of the two search tables do not have any planets
                 #  to match moved in (.rowcount() < 1) then return None, else:
@@ -564,6 +564,16 @@ while True:
                                         planet_new_id_search.value BETWEEN
                                                 planet_old_id_search.value - (2* planet_old_id_search.vdiff) AND
                                                 planet_old_id_search.value + (2* planet_old_id_search.vdiff)
+                                      );"""))
+            # Fifth set of criterion for planets that half-match
+            if load_planet_id_search() is None: break
+            session.execute(text("""UPDATE planet_new_id_search SET id = (
+                                      SELECT id FROM planet_old_id_search WHERE
+                                        planet_old_id_search.x = planet_new_id_search.x AND
+                                        planet_old_id_search.y = planet_new_id_search.y AND
+                                        planet_old_id_search.z = planet_new_id_search.z AND
+                                        (planet_old_id_search.planetname = planet_new_id_search.planetname
+                                         OR planet_old_id_search.rulername = planet_new_id_search.rulername)
                                       );"""))
             # Final update
             if load_planet_id_search() is None: break
