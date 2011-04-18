@@ -95,12 +95,16 @@ class pref(loadable):
                     val = Config.get("alturls", val)
                 reply += " url: %s"%(val)
             if opt == "email":
-                try:
-                    user.email = val
-                except AssertionError:
-                    pass
+                if val in self.nulls:
+                    user.email = None
+                    reply += " email=None"
                 else:
-                    reply += " email=%s"%(val)
+                    try:
+                        user.email = val
+                    except AssertionError:
+                        reply += " email=%s"%(user.email)
+                    else:
+                        reply += " email=%s"%(val)
             if opt == "phone":
                 if val in self.nulls:
                     user.phone = ""

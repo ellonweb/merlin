@@ -1215,7 +1215,7 @@ class User(Base):
         return User.hasher(passwd)
     @validates('email')
     def valid_email(self, key, email):
-        assert self.emailre.match(email)
+        assert email is None or self.emailre.match(email)
         return email
     
     @staticmethod
