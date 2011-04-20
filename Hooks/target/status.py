@@ -131,7 +131,7 @@ class status(loadable):
         
         if params.group(1) is None and not self.is_user(user):
             raise PNickParseError
-        booker = User.load(params.group(1), exact=False) if params.group(1) is not None else user
+        booker = User.load(params.group(1), exact=False, access="member") or User.load(params.group(1)) if params.group(1) is not None else user
         alliance = (Alliance(name="Unknown") if params.group(1).lower() == "unknown" else Alliance.load(params.group(1))) if booker is None else None
         if (booker or alliance) is None:
             message.reply("No alliance or user matching '%s' found" % (params.group(1),))

@@ -31,7 +31,7 @@ class epenis(loadable):
     def execute(self, message, user, params):
         
         if params.group(1) is not None:
-            penis = User.load(name=params.group(1),exact=False)
+            penis = User.load(name=params.group(1),exact=False,access="member")
         else:
             penis = user
         if not self.is_user(penis):

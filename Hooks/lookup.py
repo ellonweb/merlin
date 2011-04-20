@@ -67,7 +67,7 @@ class lookup(loadable):
             message.reply("No alliance matching '%s' found" % (params.group(1),))
             return
         else:
-            lookup = User.load(params.group(1), exact=False)
+            lookup = User.load(params.group(1), exact=False, access="member") or User.load(params.group(1))
             if lookup is None:
                 message.reply("No alliance or user matching '%s' found" % (params.group(1),))
                 return

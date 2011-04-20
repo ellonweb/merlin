@@ -33,7 +33,7 @@ class quits(loadable):
         search=params.group(1)
 
         # do stuff here
-        whore = User.load(name=search,exact=False)
+        whore = User.load(name=search,exact=False,access="member")
         if whore is None:
             message.reply("No users matching '%s'"%(search,))
             return
