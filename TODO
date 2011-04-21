@@ -1,19 +1,33 @@
-http://www.sqlalchemy.org/trac/ticket/1529 (reloading/err)
-http://www.sqlalchemy.org/trac/ticket/1844 (rank()/window)
-
-|       Known Bugs       |   Occurrence   |     Effect     |
-| SQLA map reload (1529) | ext. rare      | recoverable    |
-
-exception model refactor
-rewrite CLI or integrate as an extra IO stream
-rewrite Connection.write and Action.write to use detached threaded system
-
 Core Stuff:
+    exception model refactor
+    rewrite CLI or integrate as an extra IO stream
+    rewrite Connection.write and Action.write to use detached threaded system
     Break up mappings to seperate files, avoid singleton problem, sqla 1529
-    
+        http://www.sqlalchemy.org/trac/ticket/1529 (reloading/err)
     @route params reverser
         loadable.planet_coord x/y/z, planet_coord2 a/b/c
         self.short2num
+    massive Excalibur OO refactor
+        option to store original dumps on HDD
+        tool to rebuild db:
+            move history to alternate
+            use althist to populate temp tables
+            retick based on temp tables as normal
+            loop
+            option to grab missing dumps from alternate source
+
+General changes:
+    update Guide (static and webby)
+    createdb analyzes users table and deals with new columns
+    pref option for receiving scan links to webby or pa
+    pref option for hiding phone
+        if hidenum=t and pubphone=t then only phonelist can see them but everyone can sms them
+        if hidenum=f and pubphone=t then everyone can see them and everyone can sms them
+        if hidenum=f and pubphone=f then only phonelist can see them and only phonelist can sms them
+        if hidenum=t and pubphone=f then only phonelist can see them and only phonelist can sms them
+        if pubphone=f, hidenum is irrelevant
+    SQL window functions (sqla0.7)
+        http://www.sqlalchemy.org/trac/ticket/1844 (rank()/window)
 
 Google stuff: (no rush now it's limited to USA)
     migrate googlevoice code to use /m/
@@ -25,23 +39,23 @@ Google stuff: (no rush now it's limited to USA)
 
 Lamson side project for integrating with PA alerts
 
-General changes:
-    pref option for receiving scan links to webby or pa
-
 IRC commands
     truncate lines at 300? chars instead of 450
     command to search intel from previous rounds
     anti
+    on requesting a scan, if one exists from the last x ticks (3-5?):
+        show the age (in minutes) of the most recent scan
+        suggest that the user might cancel the request if it's good enough
+        but still make the request
 
 Arthur additions:
+    paginate /exiles/
+    show scans on /attacks/ for current bookings
     log pages for merlin and arthur
-    
     mydef overview page
         nick | x.y.z | fleets | ships | comment | phone | age
-    
     bcalc add to last active
         relies on Cin providing a service API
-    
     Do Scan in webby auto feeds id back from PA
         link opens iframe to do scan
         jscript parses page and extracts id
