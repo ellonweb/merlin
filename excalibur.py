@@ -1010,7 +1010,7 @@ print "epenis in %.3f seconds" % (t2,)
 t1=time.time()
 session.execute(galpenis.__table__.delete())
 session.execute(text("SELECT setval('galpenis_rank_seq', 1, :false);", bindparams=[false]))
-session.execute(text("INSERT INTO galpenis (galaxy_id, penis) SELECT galaxy.id, galaxy.score - galaxy_history.score FROM galaxy, galaxy_history WHERE galaxy.active = :true AND galaxy.id = galaxy_history.id AND galaxy_history.tick = :tick ORDER BY galaxy.score - galaxy_history.score DESC;", bindparams=[history_tick, true]))
+session.execute(text("INSERT INTO galpenis (galaxy_id, penis) SELECT galaxy.id, galaxy.score - galaxy_history.score FROM galaxy, galaxy_history WHERE galaxy.active = :true AND galaxy.x != 200 AND galaxy.id = galaxy_history.id AND galaxy_history.tick = :tick ORDER BY galaxy.score - galaxy_history.score DESC;", bindparams=[history_tick, true]))
 t2=time.time()-t1
 print "galpenis in %.3f seconds" % (t2,)
 t1=time.time()
