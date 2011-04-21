@@ -33,9 +33,9 @@
         <th><a href="{% url "ialliances", "t200v", page|default(1) %}">Top 200</a></th>
     </tr>
     {% for aname, members, size, value, score, asize, avalue, ascore, t10s, t50s, t100s, t200s, t10v, t50v, t100v, t200v, imembers, id in alliances %}
-    <tr class="{% if user|intel and aname == name %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
+    <tr class="{% if user|intel and aname|lower == name|lower %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td>{{ loop.index + offset }}</td>
-        <td><a class="{% if user|intel and aname == name %}myplanet{% else %}gray{% endif %}" href="{% url "alliance_members", aname %}">
+        <td><a class="{% if user|intel and aname|lower == name|lower %}myplanet{% else %}gray{% endif %}" href="{% url "alliance_members", aname %}">
             {{ aname }}
         </a></td>
         <td align="right"{%if sort=="members"%} class="datahigh"{%endif%}>{{ imembers }} ({{ members }})</td>

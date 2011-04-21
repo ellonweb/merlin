@@ -71,9 +71,9 @@
                 <th class="center" colspan="2"><a href="" onclick="toggleGrowth();return false;">Growth</a></th>
             </tr>
             {% for alliance in topalliances %}
-    <tr class="{% if user|intel and alliance.name == name %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
+    <tr class="{% if user|intel and alliance.name|lower == name|lower %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td align="right">{{ alliance|rank("score") }}</td>
-        <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" {{alliancelink(alliance.name)}}>
+        <td><a class="{% if user|intel and alliance.name|lower == name|lower %}myplanet{% else %}gray{% endif %}" {{alliancelink(alliance.name)}}>
             {{ alliance.name }}
         </a></td>
         <td align="right">{{ alliance|members }}</td>

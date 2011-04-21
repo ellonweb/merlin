@@ -32,14 +32,14 @@
         
     </tr>
     {% for alliance in alliances %}
-    <tr class="{% if user|intel and alliance.name == name %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
+    <tr class="{% if user|intel and alliance.name|lower == name|lower %}datahigh{% else %}{{ loop.cycle('odd', 'even') }}{% endif %}">
         <td>{{ loop.index + offset }}</td>
         <td align="right">{{ alliance|rank("score") }}</td>
         <td align="right">{{ alliance|rank("size") }}</td>
         <td align="right">{{ alliance|rank("score_avg") }}</td>
         <td align="right">{{ alliance|rank("size_avg") }}</td>
         
-        <td><a class="{% if user|intel and alliance.name == name %}myplanet{% else %}gray{% endif %}" {{alliancelink(alliance.name)}}">
+        <td><a class="{% if user|intel and alliance.name|lower == name|lower %}myplanet{% else %}gray{% endif %}" {{alliancelink(alliance.name)}}">
             {{ alliance.name }}
         </a></td>
         <td align="right"{%if sort=="members"%} class="datahigh"{%endif%}>{{ alliance|members(True) }}</td>

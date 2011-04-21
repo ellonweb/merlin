@@ -3,7 +3,7 @@
 {% extends "base.tpl" %}
 {% block content %}
 {% call hsalliance(alliance, hsummary) %}
-    <a class="{%if user|intel and alliance.name == name %}myplanet{%else%}gray{%endif%}" {{alliancelink(alliance.name)}}>{{alliance.name}}</a>
+    <a class="{%if user|intel and alliance.name|lower == name|lower %}myplanet{%else%}gray{%endif%}" {{alliancelink(alliance.name)}}>{{alliance.name}}</a>
         -
     Alliance History
 {% endcall %}
