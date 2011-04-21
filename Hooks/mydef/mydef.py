@@ -28,7 +28,7 @@ class mydef(loadable):
     """Add your fleets for defense listing. For example: 2x 20k Barghest 30k Harpy Call me any time for hot shipsex."""
     usage = " [fleets] x <[ship count] [ship name]> [comment]"
     countre = re.compile(r"^((?:\d+(?:\.\d+)?[mk]?)|(?:[\d,]+))$",re.I)
-    shipre = re.compile(r"^(\w+),?$")
+    shipre = re.compile(r"^([a-zA-Z]+),?$")
     
     @route(r"(\d)\s*x\s*(.*)", access = "member")
     @require_user
