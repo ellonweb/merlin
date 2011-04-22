@@ -936,9 +936,9 @@ class Alliance(Base):
         filters = (
                     Alliance.name.ilike(name),
                     Alliance.name.ilike(name+"%"),
-                    Alliance.name.ilike("%"+name+"%"),
                     Alliance.alias.ilike(name),
                     Alliance.alias.ilike(name+"%"),
+                    Alliance.name.ilike("%"+name+"%"),
                     Alliance.alias.ilike("%"+name+"%"),
                     )
         
