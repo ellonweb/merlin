@@ -154,10 +154,10 @@ while True:
                                                             bindparam("planet", p[3].strip("\"")),
                                                             bindparam("ruler", p[4].strip("\"")),
                                                             bindparam("race", p[5]),
-                                                            bindparam("size", int(p[6])),
-                                                            bindparam("score", int(p[7])),
-                                                            bindparam("value", int(p[8])),
-                                                            bindparam("xp", int(p[9])),
+                                                            bindparam("size", int(p[6] or 0)),
+                                                            bindparam("score", int(p[7] or 0)),
+                                                            bindparam("value", int(p[8] or 0)),
+                                                            bindparam("xp", int(p[9] or 0)),
                                                             ]))
 
         # As above
@@ -169,10 +169,10 @@ while True:
                                                             bindparam("x", int(g[0])),
                                                             bindparam("y", int(g[1])),
                                                             bindparam("name", g[2].strip("\"")),
-                                                            bindparam("size", int(g[3])),
-                                                            bindparam("score", int(g[4])),
-                                                            bindparam("value", int(g[5])),
-                                                            bindparam("xp", int(g[6])),
+                                                            bindparam("size", int(g[3] or 0)),
+                                                            bindparam("score", int(g[4] or 0)),
+                                                            bindparam("value", int(g[5] or 0)),
+                                                            bindparam("xp", int(g[6] or 0)),
                                                             ]))
 
         # As above
@@ -183,10 +183,10 @@ while True:
             session.execute(text(alliance_insert, bindparams=[
                                                             bindparam("score_rank", int(a[0])),
                                                             bindparam("name", a[1].strip("\"")),
-                                                            bindparam("size", int(a[2])),
-                                                            bindparam("members", int(a[3])),
-                                                            bindparam("score", int(a[4])),
-                                                            bindparam("points", int(a[5])),
+                                                            bindparam("size", int(a[2] or 0)),
+                                                            bindparam("members", int(a[3] or 1)),
+                                                            bindparam("score", int(a[4] or 0)),
+                                                            bindparam("points", int(a[5] or 0)),
                                                             bindparam("tag_count", PA.getint("numbers", "tag_count")),
                                                             ]))
 
