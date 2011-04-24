@@ -4,17 +4,26 @@ Core Stuff:
     rewrite Connection.write and Action.write to use detached threaded system
     Break up mappings to seperate files, avoid singleton problem, sqla 1529
         http://www.sqlalchemy.org/trac/ticket/1529 (reloading/err)
+
+Router2:
+    (existing attempt:)
     @route params reverser
         loadable.planet_coord x/y/z, planet_coord2 a/b/c
         self.short2num
-    massive Excalibur OO refactor
+    OR:
+    @route with abstract terms
+        @route("planet")
+        except either coords or user name lookup etc
+
+massive Excalibur OO refactor
+    decouple dump downloading and validation from processing
         option to store original dumps on HDD
-        tool to rebuild db:
-            move history to alternate
-            use althist to populate temp tables
-            retick based on temp tables as normal
-            loop
-            option to grab missing dumps from alternate source
+    tool to rebuild db:
+        move history to alternate
+        use althist to populate temp tables
+        retick based on temp tables as normal
+        loop
+        option to grab missing dumps from alternate source
 
 General changes:
     update Guide (static and webby)
@@ -26,6 +35,8 @@ General changes:
         if hidenum=f and pubphone=f then only phonelist can see them and only phonelist can sms them
         if hidenum=t and pubphone=f then only phonelist can see them and only phonelist can sms them
         if pubphone=f, hidenum is irrelevant
+    decouple requester from request
+        multiple similar requests are grouped
     SQL window functions (sqla0.7)
         http://www.sqlalchemy.org/trac/ticket/1844 (rank()/window)
 
