@@ -35,6 +35,7 @@ from Core.loadable import system
 from Core.robocop import push
 
 scanre=re.compile("http://[^/]+/showscan.pl\?scan_id=([0-9a-zA-Z]+)")
+scanre2=re.compile("http://[^/]+/waves.pl\?scan_id=([0-9a-zA-Z]+)")
 scangrpre=re.compile("http://[^/]+/showscan.pl\?scan_grp=([0-9a-zA-Z]+)")
 
 @system('PRIVMSG')
@@ -45,6 +46,8 @@ def catcher(message):
     except PNickParseError:
         uid = None
     for m in scanre.finditer(message.get_msg()):
+        parse(uid, "scan", m.group(1)).start()
+    for m in scanre2.finditer(message.get_msg()):
         parse(uid, "scan", m.group(1)).start()
     for m in scangrpre.finditer(message.get_msg()):
         parse(uid, "group", m.group(1)).start()
