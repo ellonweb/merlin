@@ -136,59 +136,40 @@ while True:
             galaxies.readlines()
             alliances.readlines()
 
-        # Insert the data to the temporary tables, some DBMS do not support
-        #  multiple row insert in the same statement so we have to do it one at
-        #  a time which is a bit slow unfortunatly
-        # Previously got around this with:
-        #  INSERT INTO .. row UNION row UNION row...
-        #  Some DBMS complained the resultant query was too long for the planet
-        #  dumps, so back at one row per statement
-        planet_insert = "INSERT INTO planet_temp (x, y, z, planetname, rulername, race, size, score, value, xp) "
-        planet_insert+= "VALUES (:x, :y, :z, :planet, :ruler, :race, :size, :score, :value, :xp);"
-        for line in planets:
-            p=decode(line).strip().split("\t")
-            session.execute(text(planet_insert, bindparams=[
-                                                            bindparam("x", int(p[0])),
-                                                            bindparam("y", int(p[1])),
-                                                            bindparam("z", int(p[2])),
-                                                            bindparam("planet", p[3].strip("\"")),
-                                                            bindparam("ruler", p[4].strip("\"")),
-                                                            bindparam("race", p[5]),
-                                                            bindparam("size", int(p[6])),
-                                                            bindparam("score", int(p[7])),
-                                                            bindparam("value", int(p[8])),
-                                                            bindparam("xp", int(p[9])),
-                                                            ]))
-
-        # As above
-        galaxy_insert = "INSERT INTO galaxy_temp (x, y, name, size, score, value, xp) "
-        galaxy_insert+= "VALUES (:x, :y, :name, :size, :score, :value, :xp);"
-        for line in galaxies:
-            g=decode(line).strip().split("\t")
-            session.execute(text(galaxy_insert, bindparams=[
-                                                            bindparam("x", int(g[0])),
-                                                            bindparam("y", int(g[1])),
-                                                            bindparam("name", g[2].strip("\"")),
-                                                            bindparam("size", int(g[3])),
-                                                            bindparam("score", int(g[4])),
-                                                            bindparam("value", int(g[5])),
-                                                            bindparam("xp", int(g[6])),
-                                                            ]))
-
-        # As above
-        alliance_insert = "INSERT INTO alliance_temp (score_rank, name, size, members, score, points, size_avg, score_avg, points_avg) "
-        alliance_insert+= "VALUES (:score_rank, :name, :size, :members, :score, :points, :size/:members, :score/LEAST(:tag_count,:members), :points/:members);"
-        for line in alliances:
-            a=decode(line).strip().split("\t")
-            session.execute(text(alliance_insert, bindparams=[
-                                                            bindparam("score_rank", int(a[0])),
-                                                            bindparam("name", a[1].strip("\"")),
-                                                            bindparam("size", int(a[2])),
-                                                            bindparam("members", int(a[3])),
-                                                            bindparam("score", int(a[4])),
-                                                            bindparam("points", int(a[5])),
-                                                            bindparam("tag_count", PA.getint("numbers", "tag_count")),
-                                                            ]))
+        # Insert the data to the temporary tables
+        # Planets
+        session.execute(planet_temp.insert(), [{
+                                                "x": int(p[0]),
+                                                "y": int(p[1]),
+                                                "z": int(p[2]),
+                                                "planet": p[3].strip("\""),
+                                                "ruler": p[4].strip("\""),
+                                                "race": p[5],
+                                                "size": int(p[6]),
+                                                "score": int(p[7]),
+                                                "value": int(p[8]),
+                                                "xp": int(p[9]),
+                                               } for p in [decode(line).strip().split("\t") for line in planets]])
+        # Galaxies
+        session.execute(galaxy_temp.insert(), [{
+                                                "x": int(g[0]),
+                                                "y": int(g[1]),
+                                                "name": g[2].strip("\""),
+                                                "size": int(g[3]),
+                                                "score": int(g[4]),
+                                                "value": int(g[5]),
+                                                "xp": int(g[6]),
+                                               } for g in [decode(line).strip().split("\t") for line in galaxies]])
+        # Alliances
+        session.execute(alliance_temp.insert(), [{
+                                                "score_rank": int(a[0]),
+                                                "name": a[1].strip("\""),
+                                                "size": int(a[2]),
+                                                "members": int(a[3]),
+                                                "score": int(a[4]),
+                                                "points": int(a[5]),
+                                                "tag_count": PA.getint("numbers", "tag_count"),
+                                               } for a in [decode(line).strip().split("\t") for line in alliances]])
 
         t2=time.time()-t1
         print "Inserted dumps in %.3f seconds" % (t2,)
