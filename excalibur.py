@@ -168,7 +168,9 @@ while True:
                                                 "members": int(a[3]),
                                                 "score": int(a[4]),
                                                 "points": int(a[5]),
-                                                "tag_count": PA.getint("numbers", "tag_count"),
+                                                "size_avg": int(a[2]) / int(a[3]),
+                                                "score_avg": int(a[4]) / min(int(a[3]), PA.getint("numbers", "tag_count")),
+                                                "points_avg": int(a[5]) / int(a[3]),
                                                } for a in [decode(line).strip().split("\t") for line in alliances]])
 
         t2=time.time()-t1
