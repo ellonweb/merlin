@@ -132,9 +132,9 @@ while True:
         #  and don't store anything from the dumps other than the tick itself
         if planet_tick <= PA.getint("numbers", "shuffle"):
             print "Pre-shuffle dumps detected, emptying out the data"
-            planets.readlines()
-            galaxies.readlines()
-            alliances.readlines()
+            planets = None
+            galaxies = None
+            alliances = None
 
         # Insert the data to the temporary tables
         # Planets
@@ -142,14 +142,14 @@ while True:
                                                 "x": int(p[0]),
                                                 "y": int(p[1]),
                                                 "z": int(p[2]),
-                                                "planet": p[3].strip("\""),
-                                                "ruler": p[4].strip("\""),
+                                                "planetname": p[3].strip("\""),
+                                                "rulername": p[4].strip("\""),
                                                 "race": p[5],
                                                 "size": int(p[6] or 0),
                                                 "score": int(p[7] or 0),
                                                 "value": int(p[8] or 0),
                                                 "xp": int(p[9] or 0),
-                                               } for p in [decode(line).strip().split("\t") for line in planets]])
+                                               } for p in [decode(line).strip().split("\t") for line in planets]]) if planets else None
         # Galaxies
         session.execute(galaxy_temp.insert(), [{
                                                 "x": int(g[0]),
@@ -159,7 +159,7 @@ while True:
                                                 "score": int(g[4] or 0),
                                                 "value": int(g[5] or 0),
                                                 "xp": int(g[6] or 0),
-                                               } for g in [decode(line).strip().split("\t") for line in galaxies]])
+                                               } for g in [decode(line).strip().split("\t") for line in galaxies]]) if galaxies else None
         # Alliances
         session.execute(alliance_temp.insert(), [{
                                                 "score_rank": int(a[0]),
@@ -171,7 +171,7 @@ while True:
                                                 "size_avg": int(a[2] or 0) / int(a[3] or 1),
                                                 "score_avg": int(a[4] or 0) / min(int(a[3] or 1), PA.getint("numbers", "tag_count")),
                                                 "points_avg": int(a[5] or 0) / int(a[3] or 1),
-                                               } for a in [decode(line).strip().split("\t") for line in alliances]])
+                                               } for a in [decode(line).strip().split("\t") for line in alliances]]) if alliances else None
 
         t2=time.time()-t1
         print "Inserted dumps in %.3f seconds" % (t2,)
