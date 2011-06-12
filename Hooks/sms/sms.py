@@ -60,6 +60,9 @@ class sms(loadable):
         if receiver.smsmode == "Email":
             mode = receiver.smsmode
             phone = receiver.email
+            if not phone:
+                message.reply("That incompetent retard %s has set their sms mode to email but hasn't provided an address. Super secret message not sent." % (receiver.name,))
+                return
         else:
             mode = Config.get("Misc", "sms")
             phone = self.prepare_phone_number(receiver.phone)
