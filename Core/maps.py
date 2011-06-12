@@ -183,6 +183,8 @@ class Cluster(Base):
     
     @staticmethod
     def load(x, active=True):
+        if not x:
+            return None
         Q = session.query(Cluster)
         Q = Q.filter_by(x=x)
         galaxy = Q.filter_by(active=True).first()
@@ -360,6 +362,8 @@ class Galaxy(Base):
     
     @staticmethod
     def load(x,y, active=True):
+        if not x or not y:
+            return None
         Q = session.query(Galaxy)
         Q = Q.filter_by(x=x, y=y)
         galaxy = Q.filter_by(active=True).first()
@@ -602,6 +606,8 @@ class Planet(Base):
     
     @staticmethod
     def load(x,y,z, active=True):
+        if not x or not y or not z:
+            return None
         Q = session.query(Planet)
         Q = Q.filter_by(x=x, y=y, z=z)
         planet = Q.filter_by(active=True).first()
@@ -933,6 +939,9 @@ class Alliance(Base):
     
     @staticmethod
     def load(name, alias=True, active=True):
+        if not name:
+            return None
+        
         filters = (
                     Alliance.name.ilike(name),
                     Alliance.name.ilike(name+"%"),
