@@ -48,6 +48,10 @@ class request(loadable):
         request = self.request(message, user, planet, scan, dists)
         if message.get_chan() != self.scanchan():
             message.reply("Requested a %s Scan of %s:%s:%s. !request cancel %s to cancel the request." % (request.type, planet.x, planet.y, planet.z, request.id,))
+        
+        scan = planet.scan(scan)
+        if scan and request.tick - scan.tick < PA.getint(scan.scantype,"expire"):
+            message.reply("%s Scan of %s:%s:%s is already available from %s ticks ago: %s. !request cancel %s if this is suitable." % (scan.scantype, planet.x, planet.y, planet.z, request.tick - scan.tick, scan.link, request.id,))
     
     @robohci
     def robocop(self, message, request_id, mode):

@@ -54,10 +54,6 @@ IRC commands
     truncate lines at 300? chars instead of 450
     command to search intel from previous rounds
     anti
-    on requesting a scan, if one exists from the last x ticks (3-5?):
-        show the age (in minutes) of the most recent scan
-        suggest that the user might cancel the request if it's good enough
-        but still make the request
 
 Arthur additions:
     paginate /exiles/
