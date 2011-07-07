@@ -440,7 +440,7 @@ while True:
                                   rank() OVER (ORDER BY xp DESC) AS xp_rank
                                 FROM (SELECT t.*,
                                   COALESCE(g.totalroundroids + (GREATEST(t.size - g.size, 0)), t.size) AS totalroundroids,
-                                  COALESCE(g.totallostroids + (GREATEST(g.size - g.size, 0)), 0) AS totallostroids
+                                  COALESCE(g.totallostroids + (GREATEST(g.size - t.size, 0)), 0) AS totallostroids
                                 FROM galaxy AS g, galaxy_temp AS t
                                   WHERE g.id = t.id AND g.active = :true) AS t) AS t,
                                   (SELECT a.x, a.y, a.count, a.real_score,
