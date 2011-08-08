@@ -45,6 +45,16 @@
 
 <p>&nbsp;</p>
 
+<table cellspacing="1" cellpadding="3" class="black">
+    <tr class="header"><th colspan="2">Graphs</th></tr>
+    <tr class="datahigh" align="center">
+        <td><img src="{%url "galaxyG", "values", galaxy.x, galaxy.y%}" /></td>
+        <td><img src="{%url "galaxyG", "ranks", galaxy.x, galaxy.y%}" /></td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
 {% call exiletable(exiles) %}Recent Planet Movements <a href="{% url "galaxy_exiles", galaxy.x, galaxy.y %}">(View more)</a>{% endcall %}
 
 <p>&nbsp;</p>
