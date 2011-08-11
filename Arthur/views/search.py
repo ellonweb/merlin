@@ -72,7 +72,7 @@ class search(loadable):
                     "galvalue" : Galaxy.value,
                     "galsize" : Galaxy.size,
                     "galxp" : Galaxy.xp,
-#                    "idle" : Planet.idle,
+                    "idle" : Planet.idle,
                     "x" : Planet.x,
                     "y" : Planet.y,
                     "planets" : Galaxy.members,

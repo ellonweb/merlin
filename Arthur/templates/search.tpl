@@ -21,6 +21,7 @@
                     ("ticksroided", "[Ticks Roided]",),
                     ("tickroids", "[Tick-Roids]",),
                     ("avroids", "[Av. Roids]",),
+                    ("idle", "[Current Idle Ticks]",),
                     ("galsize", "[Galaxy] Size",),
                     ("galvalue", "[Galaxy] Value",),
                     ("galscore", "[Galaxy] Score",),

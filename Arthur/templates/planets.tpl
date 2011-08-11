@@ -108,7 +108,7 @@
         
         {% if showsort %}
         <td align="right" class="datahigh">
-        {% if sort in ("totalroundroids","totallostroids","ticksroiding","ticksroided","tickroids",) %}
+        {% if sort in ("totalroundroids","totallostroids","ticksroiding","ticksroided","tickroids","idle",) %}
         {{planet|attr(sort)|intcomma}}
         {% elif sort in ("avroids",) %}
         {{planet|attr(sort)|round|int|intcomma}}
