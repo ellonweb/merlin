@@ -83,6 +83,16 @@
         <td align="right">{{exile.tick}}</td>
     </tr>
     {% endfor %}
+    
+    {% if pages %}
+    <tr class="datahigh">
+        <td colspan="16">Pages:
+            {% for p in pages %}
+            {% if p != page %}<a href="{% url "exilesp", p %}">{% endif %}{{ p }}{% if p != page %}</a>{% endif %}
+            {% endfor %}
+        </td>
+    </tr>
+    {% endif %}
 
 </table>
 {% endmacro %}

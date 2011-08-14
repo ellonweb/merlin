@@ -22,7 +22,7 @@
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from sqlalchemy import and_, or_
-from sqlalchemy.sql import desc
+from sqlalchemy.sql import asc, desc
 from Core.db import session
 from Core.maps import Galaxy, Planet, PlanetExiles
 from Arthur.context import menu, render
@@ -31,8 +31,20 @@ from Arthur.loadable import loadable, load
 @menu("Tracker")
 @load
 class exiles(loadable):
-    def execute(self, request, user):
-        return render("exiles.tpl",  request, exiles = PlanetExiles.recent())
+    def execute(self, request, user, page="1"):
+        Q = session.query(PlanetExiles)
+        Q = Q.order_by(desc(PlanetExiles.tick),
+                        asc(PlanetExiles.oldx), asc(PlanetExiles.oldy), asc(PlanetExiles.oldz),
+                        asc(PlanetExiles.newx), asc(PlanetExiles.newy), asc(PlanetExiles.newz))
+        
+        page = int(page)
+        offset = (page - 1)*50
+        count = Q.count()
+        pages = count/50 + int(count%50 > 0)
+        pages = range(1, 1+pages)
+        Q = Q.limit(50).offset(offset)
+        
+        return render("exiles.tpl",  request, exiles = Q.all(), offset=offset, pages=pages, page=page)
 
 @load
 class galaxy(loadable):
