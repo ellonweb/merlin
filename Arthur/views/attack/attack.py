@@ -45,11 +45,30 @@ class attack(loadable):
         Q = Q.join(Target.user)
         Q = Q.filter(Planet.active == True)
         Q = Q.filter(Target.user == user)
-        Q = Q.filter(Target.tick > tick)
+        Q = Q.filter(Target.tick >= tick - Attack._active_ticks)
         Q = Q.order_by(asc(Target.tick), asc(Planet.x), asc(Planet.y), asc(Planet.z))
-        bookings = Q.all()
         
-        return render("attacks.tpl", request, message=message, attacks=attacks, bookings=bookings)
+        bookings = []
+        scans = []
+        for planet, tock in Q.all():
+            bookings.append((planet, tock, [],))
+            if planet.scan("P"):
+                bookings[-1][1].append(planet.scan("P"))
+                scans.append(planet.scan("P"))
+            
+            if planet.scan("D"):
+                bookings[-1][1].append(planet.scan("D"))
+                scans.append(planet.scan("D"))
+            
+            if planet.scan("A") or planet.scan("U"):
+                bookings[-1][1].append(planet.scan("A") or planet.scan("U"))
+                scans.append(planet.scan("A") or planet.scan("U"))
+            
+            if tock <= tick + Attack._active_ticks/3 and planet.scan("J"):
+                bookings[-1][1].append(planet.scan("J"))
+                scans.append(planet.scan("J"))
+        
+        return render("attacks.tpl", request, message=message, attacks=attacks, bookings=bookings, scans=scans)
 
 @load
 class view(loadable):

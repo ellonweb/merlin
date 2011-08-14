@@ -39,7 +39,7 @@
             <th width="18%">Score</th>
         </tr>
         
-        {% for planet, lt in bookings %}
+        {% for planet, lt, scans in bookings %}
         <tr class="{{ loop.cycle('odd', 'even') }}">
             <td class="center"><a {{galaxyscanslink(planet.galaxy)}}>{{ planet.x }}:{{ planet.y }}</a> <a {{planetlink(planet)}}>{{ planet.z }}</a></td>
             <td class="center">{{ lt - tick }}/{{ lt }}</td>
@@ -48,7 +48,24 @@
             <td class="right"> {{ planet.size|intcomma }} </td>
             <td class="right"> {{ planet.value|intcomma }} </td>
             <td class="right"> {{ planet.score|intcomma }} </td>
+            <td class="center">
+                {% for scan in scans %}
+                    <a href="#{{ scan.pa_id }}"
+                    onclick="return linkshift(event, '{{ scan.link|url }}');">{{ scan.scantype }}</a>
+                {% endfor %}
+            </td>
+            <td align="right">{{ planet|growth("size") }}</td>
+            <td align="right">{{ planet|growth("value") }}</td>
+            {% if user|intel %}
+            <td class="center">{%if planet.intel and planet.alliance %}<a {{alliancelink(planet.alliance.name)}}>{{ planet.alliance.name }}</a>{% endif %}</td>
+            <td class="center">{%if planet.intel.nick %}{{ planet.intel.nick }}{% endif %}</td>
+            {% endif %}
         </tr>
         {% endfor %}
     </table>
+    
+    {% for scan in scans %}
+    <p>&nbsp;</p>
+    {% include "scans/scan.tpl" %}
+    {% endfor %}
 {% endblock %}
