@@ -35,4 +35,4 @@ class ship(loadable):
         if ship is None:
             message.alert("No Ship called: %s" % (name,))
             return
-        message.reply(ship)
+        message.reply(str(ship))
