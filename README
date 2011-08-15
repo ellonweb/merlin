@@ -104,6 +104,13 @@ Configuring Apache and running Arthur: (Consult their respective websites for fu
                 Order allow,deny
                 Allow from all
             </Directory>
+            
+            Alias /graphs/ F:/Code/Git/merlin/Arthur/graphs/
+            <Directory F:/Code/Git/merlin/Arthur/graphs/>
+                Order allow,deny
+                Allow from all
+                ErrorDocument 404 /draw
+            </Directory>
        Make sure you edit all the paths!
    17) Open the arthur.wsgi file and edit the two paths in that file.
        Commit your changes!

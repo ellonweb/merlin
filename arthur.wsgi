@@ -26,5 +26,5 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'Arthur.settings'
 
 import Arthur
 
-import django.core.handlers.wsgi
-application = django.core.handlers.wsgi.WSGIHandler()
+from django.core.handlers.wsgi import WSGIRequest, WSGIHandler
+application = WSGIHandler()

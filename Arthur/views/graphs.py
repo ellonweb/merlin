@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
+import os
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.ticker import FuncFormatter
@@ -62,6 +63,12 @@ class graphs(loadable):
                                       (ax[2].plot(Q[0],Q[3],magenta), "Value",),
                                       ),
             }
+    
+    def process_request(self, request):
+        if request.path_info == "/draw":
+            if 'REDIRECT_URL' in request.META and request.META['REDIRECT_URL'].startswith("/graphs"):
+                request.path_info = request.META['REDIRECT_URL']
+                del request.META['REDIRECT_URL']
     
     def execute(self, request, user, type, x=None, y=None, z=None, name=None):
         width = self.width *(8.0/640)
@@ -132,12 +139,29 @@ class graphs(loadable):
             title = self.title(o) + (" Rank" if type == "ranks" else "") + " History"
             fig.suptitle(title, color=white, fontsize=18)
             
-            return self.render(fig)
+            return self.render(fig, self.cache(request, type))
         finally:
             plt.close(fig)
     
-    def render(self, fig):
+    def cache(self, request, type):
+        path = "Arthur"+request.path_info
+        dir = os.path.dirname(path)
+        if not os.path.exists(dir):
+            try:
+                os.makedirs(dir)
+            except OSError:
+                return ""
+        return path
+    
+    def render(self, fig, path=""):
         canvas = FigureCanvas(fig)
+        
+        try:
+            with open(path, "wb") as file:
+                canvas.print_png(file)
+        except IOError:
+            pass
+        
         response = HttpResponse(content_type='image/png')
         canvas.print_png(response)
         return response
