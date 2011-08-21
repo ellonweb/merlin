@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-import datetime, re, sys, time, traceback, urllib2
+import datetime, re, sys, time, traceback, urllib2, shutil
 from sqlalchemy.sql import text, bindparam
 from Core.config import Config
 from Core.paconf import PA
@@ -1023,3 +1023,13 @@ session.commit()
 t1=time.time()-t_start
 print "Total penis time: %.3f seconds" % (t1,)
 session.close()
+
+# Clean tick dependant graph cache
+try:
+    t_start=time.time()
+    shutil.rmtree("Arthur/graphs/values/")
+    shutil.rmtree("Arthur/graphs/ranks/")
+    t1=time.time()-t_start
+    excaliburlog("Clean tick dependant graph cache in %.3f seconds" % (t1,))
+except Exception, e:
+    excaliburlog("Something went wrong cleaning the tick dependant graph cache: %s" % (str(e),), traceback=True)
