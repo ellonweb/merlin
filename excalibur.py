@@ -991,10 +991,10 @@ t1=time.time()-t_start
 print "Total time taken: %.3f seconds" % (t1,)
 
 # Measure some dicks
+t_start=time.time()
 last_tick = Updates.current_tick()
 history_tick = bindparam("tick",max(last_tick-72, 1))
-t_start=time.time()
-t1=t_start
+t1=time.time()
 session.execute(epenis.__table__.delete())
 session.execute(text("SELECT setval('epenis_rank_seq', 1, :false);", bindparams=[false]))
 session.execute(text("INSERT INTO epenis (user_id, penis) SELECT users.id, planet.score - planet_history.score FROM users, planet, planet_history WHERE users.active = :true AND users.access >= :member AND planet.active = :true AND users.planet_id = planet.id AND planet.id = planet_history.id AND planet_history.tick = :tick ORDER BY planet.score - planet_history.score DESC;", bindparams=[bindparam("member",Config.getint("Access","member")), history_tick, true]))
