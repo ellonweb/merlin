@@ -23,14 +23,14 @@ import datetime, re, sys, time, traceback, urllib2
 from sqlalchemy.sql import text, bindparam
 from Core.config import Config
 from Core.paconf import PA
-from Core.string import decode
+from Core.string import decode, excaliburlog
 from Core.db import true, false, session
 from Core.maps import Updates, Cluster, Galaxy, Planet, Alliance, epenis, galpenis, apenis
 from Core.maps import galaxy_temp, planet_temp, alliance_temp, planet_new_id_search, planet_old_id_search
 
 if len(sys.argv) > 1:
     Config.set("URL", "dumps", sys.argv[1])
-print "Dumping from %s" %(Config.get("URL", "dumps"),)
+excaliburlog("Dumping from %s" %(Config.get("URL", "dumps"),))
 
 # Get the previous tick number!
 last_tick = Updates.current_tick()
@@ -47,9 +47,9 @@ while True:
         # How long has passed since starting?
         # If 55 mins, we're not likely getting dumps this tick, so quit
         if (time.time() - t_start) >= (55 * 60):
-            print "55 minutes without a successful dump, giving up!"
+            excaliburlog("55 minutes without a successful dump, giving up!")
             session.close()
-            exit()
+            sys.exit()
 
         # Open the dump files
         try:
@@ -57,8 +57,7 @@ while True:
             galaxies = urllib2.urlopen(Config.get("URL", "galaxies"))
             alliances = urllib2.urlopen(Config.get("URL", "alliances"))
         except Exception, e:
-            print "Failed gathering dump files."
-            print e.__str__()
+            excaliburlog("Failed gathering dump files.\n%s" % (str(e),))
             time.sleep(300)
             continue
 
@@ -68,11 +67,11 @@ while True:
         tick=planets.readline()
         m=re.search(r"tick:\s+(\d+)",tick,re.I)
         if not m:
-            print "Invalid tick: '%s'" % (tick,)
+            excaliburlog("Invalid tick: '%s'" % (tick,))
             time.sleep(120)
             continue
         planet_tick=int(m.group(1))
-        print "Planet dump for tick %s" % (planet_tick,)
+        excaliburlog("Planet dump for tick %s" % (planet_tick,))
         # Skip next three lines; two are junk, next is blank, data starts next
         planets.readline();planets.readline();planets.readline();
 
@@ -81,11 +80,11 @@ while True:
         tick=galaxies.readline()
         m=re.search(r"tick:\s+(\d+)",tick,re.I)
         if not m:
-            print "Invalid tick: '%s'" % (tick,)
+            excaliburlog("Invalid tick: '%s'" % (tick,))
             time.sleep(120)
             continue
         galaxy_tick=int(m.group(1))
-        print "Galaxy dump for tick %s" % (galaxy_tick,)
+        excaliburlog("Galaxy dump for tick %s" % (galaxy_tick,))
         galaxies.readline();galaxies.readline();galaxies.readline();
 
         # As above
@@ -93,27 +92,26 @@ while True:
         tick=alliances.readline()
         m=re.search(r"tick:\s+(\d+)",tick,re.I)
         if not m:
-            print "Invalid tick: '%s'" % (tick,)
+            excaliburlog("Invalid tick: '%s'" % (tick,))
             time.sleep(120)
             continue
         alliance_tick=int(m.group(1))
-        print "Alliance dump for tick %s" % (alliance_tick,)
+        excaliburlog("Alliance dump for tick %s" % (alliance_tick,))
         alliances.readline();alliances.readline();alliances.readline();
 
         # Check the ticks of the dumps are all the same and that it's
         #  greater than the previous tick, i.e. a new tick
         if not (planet_tick == galaxy_tick  == alliance_tick):
-            print "Varying ticks found, sleeping"
-            print "Planet: %s, Galaxy: %s, Alliance: %s" % (planet_tick,galaxy_tick,alliance_tick)
+            excaliburlog("Varying ticks found, sleeping\nPlanet: %s, Galaxy: %s, Alliance: %s" % (planet_tick,galaxy_tick,alliance_tick))
             time.sleep(30)
             continue
         if not planet_tick > last_tick:
-            print "Stale ticks found, sleeping"            
+            excaliburlog("Stale ticks found, sleeping")
             time.sleep(60)
             continue
 
         t2=time.time()-t1
-        print "Loaded dumps from webserver in %.3f seconds" % (t2,)
+        excaliburlog("Loaded dumps from webserver in %.3f seconds" % (t2,))
         t1=time.time()
 
         # Uncomment this line to allow ticking on the same data for debug
@@ -131,7 +129,7 @@ while True:
         # If the new tick is below the shuffle tick, empty out all the data
         #  and don't store anything from the dumps other than the tick itself
         if planet_tick <= PA.getint("numbers", "shuffle"):
-            print "Pre-shuffle dumps detected, emptying out the data"
+            excaliburlog("Pre-shuffle dumps detected, emptying out the data")
             planets = None
             galaxies = None
             alliances = None
@@ -174,7 +172,7 @@ while True:
                                                } for a in [decode(line).strip().split("\t") for line in alliances]]) if alliances else None
 
         t2=time.time()-t1
-        print "Inserted dumps in %.3f seconds" % (t2,)
+        excaliburlog("Inserted dumps in %.3f seconds" % (t2,))
         t1=time.time()
 
 # ########################################################################### #
@@ -194,7 +192,7 @@ while True:
         session.execute(text("UPDATE cluster SET active = :false WHERE x NOT IN (SELECT x FROM galaxy_temp);", bindparams=[false]))
 
         t2=time.time()-t1
-        print "Deactivate old clusters and generate new cluster ids in %.3f seconds" % (t2,)
+        excaliburlog("Deactivate old clusters and generate new cluster ids in %.3f seconds" % (t2,))
         t1=time.time()
 
         # Update everything from the temp table and generate ranks
@@ -299,7 +297,7 @@ while True:
                             ;""", bindparams=[tick, true]))
 
         t2=time.time()-t1
-        print "Update clusters from temp and generate ranks in %.3f seconds" % (t2,)
+        excaliburlog("Update clusters from temp and generate ranks in %.3f seconds" % (t2,))
         t1=time.time()
 
 # We do galaxies before planets now in order to satisfy the planet(x,y) FK
@@ -321,7 +319,7 @@ while True:
         session.execute(text("UPDATE galaxy SET active = :true;", bindparams=[true]))
 
         t2=time.time()-t1
-        print "Copy galaxy ids to temp and activate in %.3f seconds" % (t2,)
+        excaliburlog("Copy galaxy ids to temp and activate in %.3f seconds" % (t2,))
         t1=time.time()
 
         # Any galaxies in the temp table without an id are new
@@ -335,7 +333,7 @@ while True:
         session.execute(text("UPDATE galaxy SET active = :false WHERE id NOT IN (SELECT id FROM galaxy_temp WHERE id IS NOT NULL);", bindparams=[false]))
 
         t2=time.time()-t1
-        print "Deactivate old galaxies and generate new galaxy ids in %.3f seconds" % (t2,)
+        excaliburlog("Deactivate old galaxies and generate new galaxy ids in %.3f seconds" % (t2,))
         t1=time.time()
 
         # Update everything from the temp table and generate ranks
@@ -458,7 +456,7 @@ while True:
                             ;""", bindparams=[tick, true, bindparam("priv_gal",PA.getint("numbers", "priv_gal"))]))
 
         t2=time.time()-t1
-        print "Update galaxies from temp and generate ranks in %.3f seconds" % (t2,)
+        excaliburlog("Update galaxies from temp and generate ranks in %.3f seconds" % (t2,))
         t1=time.time()
 
 # ########################################################################### #
@@ -474,7 +472,7 @@ while True:
                             ;""", bindparams=[true]))
 
         t2=time.time()-t1
-        print "Copy planet ids to temp in %.3f seconds" % (t2,)
+        excaliburlog("Copy planet ids to temp in %.3f seconds" % (t2,))
         t1=time.time()
 
         while last_tick > PA.getint("numbers", "shuffle"): #looks are deceiving, this only runs once
@@ -563,7 +561,7 @@ while True:
             break
 
         t2=time.time()-t1
-        print "Lost planet ids match up in %.3f seconds" % (t2,)
+        excaliburlog("Lost planet ids match up in %.3f seconds" % (t2,))
         t1=time.time()
 
         # Any planets in the temp table without an id are new
@@ -573,7 +571,7 @@ while True:
         session.execute(text("UPDATE planet_temp SET id = (SELECT id FROM planet WHERE planet.rulername = planet_temp.rulername AND planet.planetname = planet_temp.planetname AND planet.active = :true ORDER BY planet.id DESC) WHERE id IS NULL;", bindparams=[true]))
 
         t2=time.time()-t1
-        print "Generate new planet ids in %.3f seconds" % (t2,)
+        excaliburlog("Generate new planet ids in %.3f seconds" % (t2,))
         t1=time.time()
 
         # Create records of new planets,
@@ -617,14 +615,14 @@ while True:
                             ;""", bindparams=[tick, hour, true]))
 
         t2=time.time()-t1
-        print "Track new/deleted/moved planets in %.3f seconds" % (t2,)
+        excaliburlog("Track new/deleted/moved planets in %.3f seconds" % (t2,))
         t1=time.time()
 
         # For planets that are no longer present in the new dump
         session.execute(text("UPDATE planet SET active = :false WHERE id NOT IN (SELECT id FROM planet_temp WHERE id IS NOT NULL);", bindparams=[false]))
 
         t2=time.time()-t1
-        print "Deactivate old planets in %.3f seconds" % (t2,)
+        excaliburlog("Deactivate old planets in %.3f seconds" % (t2,))
         t1=time.time()
 
         # Update everything from the temp table and generate ranks
@@ -742,7 +740,7 @@ while True:
                             ;""", bindparams=[tick, true]))
 
         t2=time.time()-t1
-        print "Update planets from temp and generate ranks in %.3f seconds" % (t2,)
+        excaliburlog("Update planets from temp and generate ranks in %.3f seconds" % (t2,))
         t1=time.time()
 
         # Idle data
@@ -780,7 +778,7 @@ while True:
                             ;""", bindparams=[tick, hour, true]))
 
         t2=time.time()-t1
-        print "Planet stats in in %.3f seconds" % (t2,)
+        excaliburlog("Planet stats in in %.3f seconds" % (t2,))
         t1=time.time()
 
 # ########################################################################### #
@@ -800,7 +798,7 @@ while True:
         session.execute(text("UPDATE alliance SET active = :true;", bindparams=[true]))
 
         t2=time.time()-t1
-        print "Copy alliance ids to temp and activate in %.3f seconds" % (t2,)
+        excaliburlog("Copy alliance ids to temp and activate in %.3f seconds" % (t2,))
         t1=time.time()
 
         # Any alliances in the temp table without an id are new
@@ -814,7 +812,7 @@ while True:
         session.execute(text("UPDATE alliance SET active = :false WHERE id NOT IN (SELECT id FROM alliance_temp WHERE id IS NOT NULL);", bindparams=[false]))
 
         t2=time.time()-t1
-        print "Deactivate old alliances and generate new alliance ids in %.3f seconds" % (t2,)
+        excaliburlog("Deactivate old alliances and generate new alliance ids in %.3f seconds" % (t2,))
         t1=time.time()
 
         # Update everything from the temp table and generate ranks
@@ -933,7 +931,7 @@ while True:
                             ;""", bindparams=[tick, true]))
 
         t2=time.time()-t1
-        print "Update alliances from temp and generate ranks in %.3f seconds" % (t2,)
+        excaliburlog("Update alliances from temp and generate ranks in %.3f seconds" % (t2,))
         t1=time.time()
 
 # ########################################################################### #
@@ -956,7 +954,7 @@ while True:
                             ;""", bindparams=[tick, true]))
 
         t2=time.time()-t1
-        print "Update stats in: %.3f seconds" % (t2,)
+        excaliburlog("Update stats in: %.3f seconds" % (t2,))
         t1=time.time()
 
         # Copy the dumps to their respective history tables
@@ -966,21 +964,19 @@ while True:
         session.execute(text("INSERT INTO alliance_history SELECT :tick, :hour, :timestamp, * FROM alliance ORDER BY id ASC;", bindparams=[tick, hour, timestamp]))
 
         t2=time.time()-t1
-        print "History in %.3f seconds" % (t2,)
+        excaliburlog("History in %.3f seconds" % (t2,))
         t1=time.time()
 
         # Finally we can commit!
         session.commit()
 
         t2=time.time()-t1
-        print "Final update in %.3f seconds" % (t2,)
+        excaliburlog("Final update in %.3f seconds" % (t2,))
         t1=time.time()
 
         break
     except Exception, e:
-        print "Something random went wrong, sleeping for 15 seconds to hope it improves"
-        print e.__str__()
-        traceback.print_exc()
+        excaliburlog("Something random went wrong, sleeping for 15 seconds to hope it improves: %s" % (str(e),), traceback=True)
         session.rollback()
         time.sleep(15)
         continue
@@ -988,7 +984,7 @@ while True:
 session.close()
 
 t1=time.time()-t_start
-print "Total time taken: %.3f seconds" % (t1,)
+excaliburlog("Total time taken: %.3f seconds" % (t1,))
 
 # Measure some dicks
 t_start=time.time()
@@ -999,20 +995,20 @@ session.execute(epenis.__table__.delete())
 session.execute(text("SELECT setval('epenis_rank_seq', 1, :false);", bindparams=[false]))
 session.execute(text("INSERT INTO epenis (user_id, penis) SELECT users.id, planet.score - planet_history.score FROM users, planet, planet_history WHERE users.active = :true AND users.access >= :member AND planet.active = :true AND users.planet_id = planet.id AND planet.id = planet_history.id AND planet_history.tick = :tick ORDER BY planet.score - planet_history.score DESC;", bindparams=[bindparam("member",Config.getint("Access","member")), history_tick, true]))
 t2=time.time()-t1
-print "epenis in %.3f seconds" % (t2,)
+excaliburlog("epenis in %.3f seconds" % (t2,))
 t1=time.time()
 session.execute(galpenis.__table__.delete())
 session.execute(text("SELECT setval('galpenis_rank_seq', 1, :false);", bindparams=[false]))
 session.execute(text("INSERT INTO galpenis (galaxy_id, penis) SELECT galaxy.id, galaxy.score - galaxy_history.score FROM galaxy, galaxy_history WHERE galaxy.active = :true AND galaxy.x != 200 AND galaxy.id = galaxy_history.id AND galaxy_history.tick = :tick ORDER BY galaxy.score - galaxy_history.score DESC;", bindparams=[history_tick, true]))
 t2=time.time()-t1
-print "galpenis in %.3f seconds" % (t2,)
+excaliburlog("galpenis in %.3f seconds" % (t2,))
 t1=time.time()
 session.execute(apenis.__table__.delete())
 session.execute(text("SELECT setval('apenis_rank_seq', 1, :false);", bindparams=[false]))
 session.execute(text("INSERT INTO apenis (alliance_id, penis) SELECT alliance.id, alliance.score - alliance_history.score FROM alliance, alliance_history WHERE alliance.active = :true AND alliance.id = alliance_history.id AND alliance_history.tick = :tick ORDER BY alliance.score - alliance_history.score DESC;", bindparams=[history_tick, true,]))
 t2=time.time()-t1
-print "apenis in %.3f seconds" % (t2,)
+excaliburlog("apenis in %.3f seconds" % (t2,))
 session.commit()
 t1=time.time()-t_start
-print "Total penis time: %.3f seconds" % (t1,)
+excaliburlog("Total penis time: %.3f seconds" % (t1,))
 session.close()
