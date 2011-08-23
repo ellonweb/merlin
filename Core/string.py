@@ -44,15 +44,20 @@ def encode(text):
     else:
         raise UnicodeError
 
-def log(f, log, traceback=True, spacing=True):
-    with (f if isinstance(f, file) else open(f,"a")) as f:
-        f.write(encode(log) + "\n")
+def log(file, log, traceback=True, spacing=True):
+    def _log(file):
+        file.write(encode(log) + "\n")
         if traceback is True:
-            f.write(format_exc() + "\n")
+            file.write(format_exc() + "\n")
         if spacing is True:
-            f.write("\n\n")
+            file.write("\n\n")
+    if file == "stdout":
+        _log(stdout)
+    else:
+        with open(file, "a") as file:
+            _log(file)
 
 errorlog = lambda text, traceback=True: log(Config.get("Misc","errorlog"), text, traceback=traceback)
 scanlog = lambda text, traceback=False, spacing=False: log(Config.get("Misc","scanlog"), text, traceback=traceback, spacing=spacing or traceback)
 arthurlog = lambda text, traceback=True: log(Config.get("Misc","arthurlog"), text, traceback=traceback)
-excaliburlog = lambda text, traceback=False, spacing=False: log(stdout if Config.get("Misc","excalibur") == "stdout" else Config.get("Misc","excalibur"), text, traceback=traceback, spacing=spacing or traceback)
+excaliburlog = lambda text, traceback=False, spacing=False: log(Config.get("Misc","excalibur"), text, traceback=traceback, spacing=spacing or traceback)
