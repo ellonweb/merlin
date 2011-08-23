@@ -19,7 +19,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
-from sys import stdout
 from traceback import format_exc
 from Core.config import Config
 
@@ -44,15 +43,14 @@ def encode(text):
     else:
         raise UnicodeError
 
-def log(f, log, traceback=True, spacing=True):
-    with (f if isinstance(f, file) else open(f,"a")) as f:
-        f.write(encode(log) + "\n")
+def log(file, log, traceback=True, spacing=True):
+    with open(file, "a") as file:
+        file.write(encode(log) + "\n")
         if traceback is True:
-            f.write(format_exc() + "\n")
+            file.write(format_exc() + "\n")
         if spacing is True:
-            f.write("\n\n")
+            file.write("\n\n")
 
 errorlog = lambda text, traceback=True: log(Config.get("Misc","errorlog"), text, traceback=traceback)
 scanlog = lambda text, traceback=False, spacing=False: log(Config.get("Misc","scanlog"), text, traceback=traceback, spacing=spacing or traceback)
 arthurlog = lambda text, traceback=True: log(Config.get("Misc","arthurlog"), text, traceback=traceback)
-excaliburlog = lambda text, traceback=False, spacing=False: log(stdout if Config.get("Misc","excalibur") == "stdout" else Config.get("Misc","excalibur"), text, traceback=traceback, spacing=spacing or traceback)
