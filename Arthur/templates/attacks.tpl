@@ -1,4 +1,4 @@
-{% from 'macros.tpl' import planetlink, galaxyscanslink with context %}
+{% from 'macros.tpl' import planetlink, galaxyscanslink, alliancelink with context %}
 {% extends "base.tpl" %}
 {% set cols = 10 %}
 {% if user|intel %}{% set cols = cols + 2 %}{% endif %}
