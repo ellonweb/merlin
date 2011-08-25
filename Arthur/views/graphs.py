@@ -20,6 +20,11 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import os
+try:
+    os.mkdir("Arthur/graphs/")
+except OSError:
+    pass
+
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
