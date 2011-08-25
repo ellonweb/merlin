@@ -56,13 +56,13 @@ class graphs(loadable):
     width = 500
     left, right = yellow, green
     
-    plot = {'values' : lambda ax, Q: ((ax[1].plot(Q[0],Q[1],yellow),  "Size",),
-                                      (ax[2].plot(Q[0],Q[2],green),   "Score",),
-                                      (ax[2].plot(Q[0],Q[3],magenta), "Value",),
+    plot = {'values' : lambda ax, Q: ((ax[1].plot(Q[0],Q[1],yellow)[0],  "Size",),
+                                      (ax[2].plot(Q[0],Q[2],green)[0],   "Score",),
+                                      (ax[2].plot(Q[0],Q[3],magenta)[0], "Value",),
                                       ),
-            'ranks' :  lambda ax, Q: ((ax[1].plot(Q[0],Q[1],yellow),  "Size",),
-                                      (ax[2].plot(Q[0],Q[2],green),   "Score",),
-                                      (ax[2].plot(Q[0],Q[3],magenta), "Value",),
+            'ranks' :  lambda ax, Q: ((ax[1].plot(Q[0],Q[1],yellow)[0],  "Size",),
+                                      (ax[2].plot(Q[0],Q[2],green)[0],   "Score",),
+                                      (ax[2].plot(Q[0],Q[3],magenta)[0], "Value",),
                                       ),
             }
     
@@ -195,12 +195,12 @@ class alliance(graphs):
     query = {'values' : session.query(AllianceHistory.tick, AllianceHistory.size, AllianceHistory.score, AllianceHistory.members),
              'ranks'  : session.query(AllianceHistory.tick, AllianceHistory.size_rank, AllianceHistory.score_rank, AllianceHistory.points_rank),
              }
-    plot = {'values' : lambda ax, Q: ((ax[1].plot(Q[0],Q[1],yellow),  "Size",),
-                                      (ax[2].plot(Q[0],Q[2],green),   "Score",),
-                                      (ax[0].plot(Q[0],Q[3],pink),    "Members",),
+    plot = {'values' : lambda ax, Q: ((ax[1].plot(Q[0],Q[1],yellow)[0],  "Size",),
+                                      (ax[2].plot(Q[0],Q[2],green)[0],   "Score",),
+                                      (ax[0].plot(Q[0],Q[3],pink)[0],    "Members",),
                                       ),
-            'ranks' :  lambda ax, Q: ((ax[1].plot(Q[0],Q[1],yellow),  "Size",),
-                                      (ax[2].plot(Q[0],Q[2],green),   "Score",),
-                                      (ax[0].plot(Q[0],Q[3],cyan),    "Points",),
+            'ranks' :  lambda ax, Q: ((ax[1].plot(Q[0],Q[1],yellow)[0],  "Size",),
+                                      (ax[2].plot(Q[0],Q[2],green)[0],   "Score",),
+                                      (ax[0].plot(Q[0],Q[3],cyan)[0],    "Points",),
                                       ),
             }
