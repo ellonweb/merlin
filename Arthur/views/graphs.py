@@ -104,7 +104,7 @@ class graphs(loadable):
             d = zip(*q.all())
             
             ## Plot the data and draw a legend
-            leg = ax[0].legend(zip(*self.plot[type](ax,d)), loc='upper left',
+            leg = ax[0].legend(*zip(*self.plot[type](ax,d)), loc='upper left',
                                 ncol=len(d)-1, columnspacing=1,
                                 handlelength=0.1, handletextpad=0.5)
             leg.get_frame().set_facecolor(black)
