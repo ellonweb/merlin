@@ -1029,7 +1029,8 @@ try:
     t_start=time.time()
     shutil.rmtree("Arthur/graphs/values/")
     shutil.rmtree("Arthur/graphs/ranks/")
+except OSError:
+    pass
+finally:
     t1=time.time()-t_start
     excaliburlog("Clean tick dependant graph cache in %.3f seconds" % (t1,))
-except Exception, e:
-    excaliburlog("Something went wrong cleaning the tick dependant graph cache: %s" % (str(e),), traceback=True)
