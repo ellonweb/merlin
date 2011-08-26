@@ -158,6 +158,16 @@
 
 <p>&nbsp;</p>
 
+<table cellspacing="1" cellpadding="3" class="black">
+    <tr class="header"><th colspan="2">Graphs</th></tr>
+    <tr class="datahigh" align="center">
+        <td><img src="{%url "planetG", "values", planet.x, planet.y, planet.z%}" /></td>
+        <td><img src="{%url "planetG", "ranks", planet.x, planet.y, planet.z%}" /></td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
 {% call hplanet(planet, history) %}Last 12 Ticks (<a href="{%url "hplanet", planet.x, planet.y, planet.z, 72%}">View more</a>){% endcall %}
 
 <p>&nbsp;</p>

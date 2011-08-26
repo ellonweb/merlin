@@ -53,14 +53,15 @@ class _base(object):
         else:
             return text
     
+    _num2short_scale = 10
     def num2short(self,num):
         prefix = ("","-",)[num<0]
         num = abs(num)
         flt2int = lambda x: int(x) if x.is_integer() else x
         try:
-            if num/10000000 >= 1:
+            if num/(1000000 * self._num2short_scale) >= 1:
                 return prefix+ str(flt2int(round(num/1000000.0,1)))+"m"
-            elif num/10000 >= 1:
+            elif num/(1000 * self._num2short_scale) >= 1:
                 return prefix+ str(flt2int(round(num/1000.0,1)))+"k"
             else:
                 return prefix+ str(flt2int(round(num)))

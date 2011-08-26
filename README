@@ -14,6 +14,20 @@ Additional Arthur requirements:
     Django
     Jinja2 2.6
 
+Additional Graphing requirements:
+    numpy 1.1
+    matplotlib 1.0
+
+Additional POSIX environment (e.g. Linux) requirements:
+    Create and chmod 777 these directories:
+        /var/www/.matplotlib
+        /merlin/Arthur/graphs
+    Create and chmod 666 these files:
+        /merlin/dumplog.txt
+        /merlin/errorlog.txt
+        /merlin/scanlog.txt
+        /merlin/arthurlog.txt
+
 Setting up Git: (Consult Git's website for full instructions)
     1) Navigate to the parent directory where you wish to install Merlin
     2) Use Git to download the code and create a branch to track your changes:
@@ -77,6 +91,7 @@ Configuring Excalibur:
         permission and insert the following commands:
             cd /path/to/merlin/
             python excalibur.py
+       Make sure to sudo your crontab
 
 Configuring Apache and running Arthur: (Consult their respective websites for full instructions)
    14) You should download the mod_wsgi .so file to your Apache's /modules/
@@ -97,6 +112,13 @@ Configuring Apache and running Arthur: (Consult their respective websites for fu
             <Directory /path/to/merlin/Arthur/static/>
                 Order allow,deny
                 Allow from all
+            </Directory>
+            
+            Alias /graphs/ F:/Code/Git/merlin/Arthur/graphs/
+            <Directory F:/Code/Git/merlin/Arthur/graphs/>
+                Order allow,deny
+                Allow from all
+                ErrorDocument 404 /draw
             </Directory>
        Make sure you edit all the paths!
    17) Open the arthur.wsgi file and edit the two paths in that file.

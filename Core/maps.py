@@ -931,7 +931,7 @@ class Alliance(Base):
         return self.history_loader.filter_by(tick=tick).first()
     
     @staticmethod
-    def load(name, alias=True, active=True):
+    def load(name, alias=True, active=True, exact=False):
         if not name:
             return None
         
@@ -947,7 +947,7 @@ class Alliance(Base):
         Q = session.query(Alliance).filter_by(active=True)
         for filter in filters:
             alliance = Q.filter(filter).first()
-            if alliance is not None:
+            if alliance is not None or exact is True:
                 break
         
         if alliance is not None or active == True:

@@ -116,6 +116,16 @@
 
 <p>&nbsp;</p>
 
+<table cellspacing="1" cellpadding="3" class="black">
+    <tr class="header"><th colspan="2">Graphs</th></tr>
+    <tr class="datahigh" align="center">
+        <td><img src="{%url "allianceG", "values", alliance.name%}" /></td>
+        <td><img src="{%url "allianceG", "ranks", alliance.name%}" /></td>
+    </tr>
+</table>
+
+<p>&nbsp;</p>
+
 {% call halliance(alliance, history) %}Last 12 Ticks (<a href="{%url "halliance", alliance.name, 72%}">View more</a>){% endcall %}
 
 <p>&nbsp;</p>

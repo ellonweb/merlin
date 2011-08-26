@@ -33,6 +33,7 @@ urlpatterns = patterns('Arthur.views',
     (r'', include('Arthur.views.exiles')),
     (r'', include('Arthur.views.attack')),
     (r'', include('Arthur.views.scans')),
+    (r'', include('Arthur.views.graphs')),
 )
 
 from Arthur.views import home

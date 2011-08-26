@@ -15,6 +15,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'Arthur.errors.exceptions',
     'Arthur.errors.db',
+    'Arthur.views.graphs.graphs',
 )
 
 APPEND_SLASH = True
