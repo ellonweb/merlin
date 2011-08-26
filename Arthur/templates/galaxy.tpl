@@ -45,6 +45,7 @@
 
 <p>&nbsp;</p>
 
+{%if graphs%}
 <table cellspacing="1" cellpadding="3" class="black">
     <tr class="header"><th colspan="2">Graphs</th></tr>
     <tr class="datahigh" align="center">
@@ -54,6 +55,7 @@
 </table>
 
 <p>&nbsp;</p>
+{%endif%}
 
 {% call exiletable(exiles) %}Recent Planet Movements <a href="{% url "galaxy_exiles", galaxy.x, galaxy.y %}">(View more)</a>{% endcall %}
 

@@ -78,6 +78,7 @@ def base_context(request):
                "slogan" : Config.get("Alliance", "name"),
                "tick"   : Updates.current_tick(),
                "update" : Updates.load(),
+               "graphs" : Config.get("Misc", "graphing") != "disabled",
                }
     if getattr(request, "user", None) is not None:
         context["user"] = request.user

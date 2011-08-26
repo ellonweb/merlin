@@ -20,16 +20,21 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import os
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.ticker import FuncFormatter
 from django.conf.urls.defaults import include, patterns, url
 from django.http import HttpResponse, HttpResponseNotFound
+from Core.config import Config
 from Core.db import session
 from Core.maps import Galaxy, GalaxyHistory, Planet, PlanetHistory, Alliance, AllianceHistory
 from Arthur.loadable import loadable, load
+
+graphing = Config.get("Misc", "graphing") != "disabled"
+caching  = Config.get("Misc", "graphing") == "cached"
+if graphing:
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    from matplotlib.ticker import FuncFormatter
 
 urlpatterns = patterns('',
   url(r'^graphs/(?P<type>values|ranks)/', include(patterns('Arthur.views.graphs',
@@ -37,7 +42,7 @@ urlpatterns = patterns('',
     url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)', 'galaxy', name="galaxyG"),
     url(r'^(?P<name>[^/]+)', 'alliance', name="allianceG"),
   ))),
-)
+) if graphing else ()
 
 white   = '#ffffff'
 black   = '#000000'
@@ -146,6 +151,8 @@ class graphs(loadable):
             plt.close(fig)
     
     def cache(self, request, type):
+        if not caching:
+            return ""
         path = "Arthur"+request.path_info
         dir = os.path.dirname(path)
         if not os.path.exists(dir):
@@ -159,6 +166,8 @@ class graphs(loadable):
         canvas = FigureCanvas(fig)
         
         try:
+            if not caching:
+                raise IOError
             with open(path, "wb") as file:
                 canvas.print_png(file)
         except IOError:
