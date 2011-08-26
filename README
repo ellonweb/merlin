@@ -18,14 +18,13 @@ Additional Graphing requirements:
     numpy 1.1 
     matplotlib 1.0 
 
-Additional Graphing requirements: ubuntu*
-    numpy
+For Nix* you will need to compile: 
     matplotlib (source) * http://matplotlib.sourceforge.net/faq/installing_faq.html#install-from-git
-    when installing from source you will need to manually create a few dir's these are -
-        /var/www/.matplotlib
-        /merlin/Arthur/graphs
-    you will also need to give them the correct permissions
-    so chmod 777 them both
+    
+Then create these dir's and chmod 777 them both
+    /var/www/.matplotlib
+    /merlin/Arthur/graphs
+
     
 
 
