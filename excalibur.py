@@ -1016,6 +1016,8 @@ session.close()
 # Clean tick dependant graph cache
 try:
     t_start=time.time()
+    if Config.get("Misc", "graphing") != "cached":
+        raise OSError
     shutil.rmtree("Arthur/graphs/values/")
     shutil.rmtree("Arthur/graphs/ranks/")
 except OSError:
