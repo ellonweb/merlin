@@ -6,7 +6,7 @@
     <tr class="header"><th colspan="10">Planet Info</th></tr>
     <tr class="datahigh">
         <th align="center" colspan="10">
-            <a class="{%if planet == user.planet %}myplanet{%else%}gray{%endif%}" {{planetlink(planet)}}>{{planet.rulername}}</a>
+            <a class="{%if planet == user.planet %}myplanet{%else%}gray{%endif%}" {{planetlink(planet)}}>{{planet.rulername|e}}</a>
                 <i>of</i>
             <a class="{%if planet == user.planet %}myplanet{%else%}gray{%endif%}" {{planetlink(planet)}}>{{planet.planetname}}</a>
             (<a {{galaxyscanslink(planet.galaxy)}}>{{ planet.x }}:{{ planet.y }}</a>

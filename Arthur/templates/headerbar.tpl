@@ -16,7 +16,7 @@
     <tr>
         <td align="center" colspan="3">
         <form method="post">
-        You are: <a class="myplanet" {{planetlink(planet)}}>{{ planet.rulername }}</a>
+        You are: <a class="myplanet" {{planetlink(planet)}}>{{ planet.rulername|e }}</a>
             (<a {{galaxyscanslink(planet.galaxy)}}>{{ planet.x }}:{{ planet.y }}</a>
             <a {{planetlink(planet)}}>{{ planet.z }}</a>)
             <span class="{{ planet.race }}">{{ planet.race }}</span>
