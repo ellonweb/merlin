@@ -1,0 +1,67 @@
+Note: "." refers to Merlin's base directory, i.e. /path/to/merlin. 
+
+If you've followed the original setup outlined in README, you will have two
+issues if you run Merlin with Arthur and graphing enabled on a POSIX system.
+
+In particular,
+
+1) The permissions on /var/www/.matplotlib and ./merlin/Arthur/graphs (777)
+   are potentially insecure as they make these directories writeable for any
+   user.
+   
+   To avoid confusion, "writable" means that any user can drop files into
+   this directory, it DOES NOT mean that any user can randomly delete files
+   from within this directory.
+   
+2) Clearing the graph cache at ./merlin/Arthur/graphs/* might fail because
+   Apache (which serves Arthur) runs as a different user than excalibur.py,
+   which should clear the cache upon running.
+
+3) The suggested permissions (666) on the four logfiles are potentially
+   insecure as they allow any user to overwrite these files.  
+   
+These issues can be addressed by implementing Access Control Lists (ACLs) in
+the following fashion.
+
+1) Make sure ACLs are enabled for your system. Usually, this requires mounting
+   the filesystem in question with the "acl" option. See /ets/fstab. Also make
+   sure ACL utilities are installed (e.g. "aptitude install acl" on Debian).
+
+2) In the following, we will assume that excalibur.py and merlin.py are running
+   as user "merlin" and that Apache is running as user "www-data".
+   
+3) Change permissions on on ./merlin/Arthur/graphs back to something sane, then
+   add an ACL record for the Apache user.
+   
+   $ chown 755 ./merlin/Arthur/graphs
+   $ setfacl -m u:www-data:rwx ./merlin/Arthur/graphs/
+   
+4) Any file created in the graphs directory will now be owned by "www-data". As
+   such, the excalibur.py script (running as "merlin") will not be able to
+   clear the cache. To rememdy this, add a default ACL record for "merlin" to
+   any files created within this directory
+   
+   $ setfacl -d --set u:merlin:rwx ./merlin/Arthur/graphs/
+   
+5) Rinse and repeat for /var/www/.matplotlib, except that "merlin" has no need
+   to delete this directory.
+   
+   $ chown 755 /var/www/.matplotlib
+   $ setfacl -m u:www-data:rwx /var/www/.matplotlib
+   
+6) Last but not least, the logfiles. First of all, dumplog.txt and errorlog.txt
+   need never be written to by any user other than "merlin". Therefore, do
+   
+   $ chmod 644 ./dumplog.txt
+   $ chmod 644 ./errorlog.txt
+   $ chmod 644 ./scanlog.txt
+   
+7) The logfile arthurlog.txt needs to be writable by "www-data". Again, using
+   permissions 666 makes the file WORLD WRITABLE. Instead, set it to 644 and
+   set up access for "www-data".
+   
+   $ chmod 644 ./arthurlog.txt
+   $ setfacl -m u:www-data:rw- ./arthurlog.txt
+   
+That's it. You're done! Note that, if you follow this guide when already
+running Merlin or Arthur, you should clean out the affected directories first.
