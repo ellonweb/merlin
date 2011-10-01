@@ -1025,3 +1025,6 @@ except OSError:
 finally:
     t1=time.time()-t_start
     excaliburlog("Clean tick dependant graph cache in %.3f seconds" % (t1,))
+    
+# Add a newline at the end
+excaliburlog("\n")
