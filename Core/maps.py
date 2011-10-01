@@ -1401,6 +1401,7 @@ class Attack(Base):
     comment = Column(Text)
     _waves = 5
     _active_ticks = 12
+    _show_jgp_ticks = 4
     
     def addPlanet(self, planet):
         if planet in self.planets:

@@ -64,7 +64,7 @@ class attack(loadable):
                 bookings[-1][2].append(planet.scan("A") or planet.scan("U"))
                 scans.append(planet.scan("A") or planet.scan("U"))
             
-            if tock <= tick + Attack._active_ticks/3 and planet.scan("J"):
+            if tock <= tick + Attack._show_jgp_ticks and planet.scan("J"):
                 bookings[-1][2].append(planet.scan("J"))
                 scans.append(planet.scan("J"))
         
@@ -80,7 +80,7 @@ class view(loadable):
             return HttpResponseRedirect(reverse("attacks"))
         
         waves = xrange(attack.landtick, attack.landtick + Attack._waves)
-        show_jgps = attack.landtick <= Updates.current_tick() + Attack._active_ticks/3
+        show_jgps = attack.landtick <= Updates.current_tick() + Attack._show_jgp_ticks
         
         group = []
         scans = []
