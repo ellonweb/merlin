@@ -183,7 +183,7 @@
             &nbsp;{{ ph.z }}
         </td>
         <td><a class="gray" {{planetlink(ph)}}>
-                {{ ph.rulername }}
+                {{ ph.rulername|e }}
         </a></td>
         <td><a class="gray" {{planetlink(ph)}}>
                 {{ ph.planetname }}

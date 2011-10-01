@@ -8,7 +8,7 @@
     
     <tr class="header right">
         <td> Ruler </td>
-        <td class="center"> {{ planet.rulername }} </td>
+        <td class="center"> {{ planet.rulername|e }} </td>
         <td> Planet </td>
         <td class="center"> {{ planet.planetname }} </td>
     </tr>

@@ -83,7 +83,7 @@
             <a {{planetlink(planet)}}>&nbsp;{{ planet.z }}</a>
         </td>
         <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" {{planetlink(planet)}}>
-                {{ planet.rulername }}
+                {{ planet.rulername|e }}
         </a></td>
         <td><a class="{% if planet == user.planet %}myplanet{% else %}gray{% endif %}" {{planetlink(planet)}}>
                 {{ planet.planetname }}

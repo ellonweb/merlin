@@ -63,7 +63,7 @@
         {%endif%}
         </td>
         
-        <td>{{ planet.rulername }}</td>
+        <td>{{ planet.rulername|e }}</td>
         <td>{{ planet.planetname }}</td>
         <td class="{{ planet.race }}">{{ planet.race }}</td>
         {%if not planet.active %}
