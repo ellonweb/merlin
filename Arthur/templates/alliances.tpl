@@ -12,10 +12,10 @@
     </tr>
     <tr class="header">
         <th>#</th>
-        <th>Score</th>
-        <th>Size</th>
-        <th>Av Score</th>
-        <th>Av Size</th>
+        <th><a href="{% url "alliances", "score", page|default(1) %}">Score</a></th>
+        <th><a href="{% url "alliances", "size", page|default(1) %}">Size</a></th>
+        <th><a href="{% url "alliances", "avg_score", page|default(1) %}">Av Score</a></th>
+        <th><a href="{% url "alliances", "avg_size", page|default(1) %}">Av Size</a></th>
         
         <th>Name</th>
         <th><a href="{% url "alliances", "members", page|default(1) %}">Members</a></th>

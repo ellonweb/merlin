@@ -12,10 +12,10 @@
     </tr>
     <tr class="header">
         <th>#</th>
-        <th>Score</th>
-        <th>Value</th>
-        <th>Size</th>
-        <th>XP</th>
+        <th><a href="{% url "galaxies", "score", page|default(1) %}">Score</a></th>
+        <th><a href="{% url "galaxies", "value", page|default(1) %}">Value</a></th>
+        <th><a href="{% url "galaxies", "size", page|default(1) %}">Size</a></th>
+        <th><a href="{% url "galaxies", "xp", page|default(1) %}">XP</a></th>
         
         <th align="right">X:Y</th>
         <th>Name</th>
