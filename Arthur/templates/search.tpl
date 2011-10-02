@@ -29,6 +29,7 @@
                 )
         %}
 {% block title %}Search Results{% endblock %}
+{% block sort_rank %}{{ order }}{% endblock %}
 {% block sort %}{{ order }}{% endblock %}
 {% block sort_growth %}{{ order }}{% endblock %}
 {% block showsort %}{%for opt, name in orders if sort==opt%}<th>{{name}}</th>{%else%}{{super()}}{%endfor%}{%endblock%}

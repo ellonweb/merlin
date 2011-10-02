@@ -17,6 +17,7 @@
     </tr>
     {%endif%}
 {% endblock %}
+{% block sort_rank %}{{ order }}{% endblock %}
 {% block sort %}{{ order }}{% endblock %}
 {% block sort_growth %}{{ order }}{% endblock %}
 {% block content %}
