@@ -31,10 +31,13 @@
     <tr class="header">
         {% if page %}<th>#</th>{% endif %}
         
-        <th><a href="{% url "planets", race|default("all"), "score", page|default(1) %}">Score</a></th>
-        <th><a href="{% url "planets", race|default("all"), "value", page|default(1) %}">Value</a></th>
-        <th><a href="{% url "planets", race|default("all"), "size", page|default(1) %}">Size</a></th>
-        <th><a href="{% url "planets", race|default("all"), "xp", page|default(1) %}">XP</a></th>
+        {% for order in ("Score", "Value", "Size", "XP",) -%}
+        <th>
+            {%- block sort_rank scoped -%}
+                <a href="{% url "planets", race|default("all"), order|lower, page|default(1) %}">{{ order }}</a>
+            {%- endblock -%}
+        </th>
+        {% endfor %}
         
         <th align="right">{% block xyz %}X:Y &nbsp;Z{% endblock %}</th>
         
@@ -42,7 +45,7 @@
         <th>Planet</th>
         {% for order, width in (("Race",0), ("Size",0,), ("Value",0,), ("Score",0,), ("Ratio",0,), ("XP",0,),) -%}
         <th width="{{ width }}">
-            {%- block sort_rank scoped -%}
+            {%- block sort scoped -%}
                 <a href="{% url "planets", race|default("all"), order|lower, page|default(1) %}">{{ order }}</a>
             {%- endblock -%}
         </th>
