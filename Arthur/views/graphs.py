@@ -59,7 +59,7 @@ axcolor = '#373B48'
 class graphs(loadable):
     _num2short_scale = 1
     width = 500
-    left, right = yellow, green
+    left, right = {'values': yellow, 'ranks': yellow}, {'values': green, 'ranks': green}
     
     plot = {'values' : lambda ax, Q: ((ax[1].plot(Q[0],Q[1],yellow)[0],  "Size",),
                                       (ax[2].plot(Q[0],Q[2],green)[0],   "Score",),
@@ -70,6 +70,10 @@ class graphs(loadable):
                                       (ax[2].plot(Q[0],Q[3],magenta)[0], "Value",),
                                       ),
             }
+    
+    ax = {'values' : lambda i, Q: [(0,), Q[1], Q[2]][i],
+          'ranks' :  lambda i, Q: [(0,), Q[1], Q[2]][i],
+          }
     
     def process_request(self, request):
         if request.path_info == "/draw":
@@ -120,23 +124,31 @@ class graphs(loadable):
             
             ## Sort out the axes
             ax[0].tick_params(labelcolor=white)
+            ax[1].tick_params(labelcolor=self.left[type])
+            ax[2].tick_params(labelcolor=self.right[type])
             
-            ax[1].tick_params(labelcolor=self.left)
-            ax[1].yaxis.set_major_formatter(FuncFormatter(lambda x,pos:self.num2short(x)))
-            
-            ax[2].tick_params(labelcolor=self.right)
-            ax[2].yaxis.set_major_formatter(FuncFormatter(lambda x,pos:self.num2short(x)))
-            
-            if type == "ranks":
-                # for ranks, invert axes, 0 at the top
-                ax[0].set_ylim(top=0, bottom=ax[0].get_ylim()[1])
-                ax[1].set_ylim(top=0, bottom=ax[1].get_ylim()[1])
-                ax[2].set_ylim(top=0, bottom=ax[2].get_ylim()[1])
+            if type == "values":
+                # pretty axis labels
+                ax[1].yaxis.set_major_formatter(FuncFormatter(lambda x,pos:self.num2short(x)))
+                ax[2].yaxis.set_major_formatter(FuncFormatter(lambda x,pos:self.num2short(x)))
             else:
-                # for values, scale all the way down to 0
-                ax[0].set_ylim(bottom=0)
-                ax[1].set_ylim(bottom=0)
-                ax[2].set_ylim(bottom=0)
+                ax[1].yaxis.set_major_formatter(FuncFormatter(self.rank_axis_format))
+                ax[2].yaxis.set_major_formatter(FuncFormatter(self.rank_axis_format))
+            
+            for i in (0,1,2,):
+                # axis scales
+                bottom, top = ax[i].get_ylim()
+                bottom = 0
+                peak = max(self.ax[type](i,d))
+                if peak >= top:
+                    top = peak + 1
+                
+                if type == "values":
+                    # for values, scale all the way down to 0
+                    ax[i].set_ylim(bottom, top)
+                else:
+                    # for ranks, invert axes, 0 at the top
+                    ax[i].set_ylim(top, bottom)
             
             ## Fix some odd behaviour
             ax[0].set_xlim(d[0][0], d[0][-1]) #align first tick to left
@@ -149,6 +161,13 @@ class graphs(loadable):
             return self.render(fig, self.cache(request, type))
         finally:
             plt.close(fig)
+    
+    def rank_axis_format(self, x, pos):
+        if x == 0:
+            return ""
+        if int(x) < x:
+            return ""
+        return int(x)
     
     def cache(self, request, type):
         if not caching:
@@ -201,6 +220,7 @@ class galaxy(graphs):
 class alliance(graphs):
     load = staticmethod(lambda x, y, z, name: Alliance.load(name, exact=True))
     title = staticmethod(lambda o: "%s" %(o.name,))
+    left, right = {'values': yellow, 'ranks': cyan}, {'values': green, 'ranks': green}
     query = {'values' : session.query(AllianceHistory.tick, AllianceHistory.size, AllianceHistory.score, AllianceHistory.members),
              'ranks'  : session.query(AllianceHistory.tick, AllianceHistory.size_rank, AllianceHistory.score_rank, AllianceHistory.points_rank),
              }
@@ -208,8 +228,12 @@ class alliance(graphs):
                                       (ax[2].plot(Q[0],Q[2],green)[0],   "Score",),
                                       (ax[0].plot(Q[0],Q[3],pink)[0],    "Members",),
                                       ),
-            'ranks' :  lambda ax, Q: ((ax[1].plot(Q[0],Q[1],yellow)[0],  "Size",),
+            'ranks' :  lambda ax, Q: ((ax[2].plot(Q[0],Q[1],yellow)[0],  "Size",),
                                       (ax[2].plot(Q[0],Q[2],green)[0],   "Score",),
-                                      (ax[0].plot(Q[0],Q[3],cyan)[0],    "Points",),
+                                      (ax[1].plot(Q[0],Q[3],cyan)[0],    "Points",),
                                       ),
             }
+    
+    ax = {'values' : lambda i, Q: [Q[3], Q[1], Q[2]][i],
+          'ranks' :  lambda i, Q: [(0,), Q[3], Q[2]][i],
+          }
