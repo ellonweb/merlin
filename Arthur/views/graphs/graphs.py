@@ -71,27 +71,10 @@ class graphs(loadable):
                 del request.META['REDIRECT_URL']
     
     def execute(self, request, user, type, x=None, y=None, z=None, name=None):
-        width = self.width *(8.0/640)
-        height = width *(6.0/8.0)
-        fig = plt.figure(figsize=(width,height,), facecolor=bgcolor, edgecolor=bgcolor)
+        fig = plt.figure()
         try:
             ## Set up the axes
-            fig.subplots_adjust(left=0.08,right=1-0.08,bottom=0.05,top=1-0.075)
-            ax = {}
-            
-            ax[0] = fig.add_subplot(111)
-            ax[0].yaxis.set_visible(False)
-            ax[0].set_axis_bgcolor(axcolor)
-            
-            ax[1] = fig.add_axes(ax[0].get_position(True), sharex=ax[0], frameon=False)
-            ax[1].yaxis.tick_left()
-            ax[1].yaxis.set_label_position('left')
-            ax[1].xaxis.set_visible(False)
-            
-            ax[2] = fig.add_axes(ax[0].get_position(True), sharex=ax[1], frameon=False)
-            ax[2].yaxis.tick_right()
-            ax[2].yaxis.set_label_position('right')
-            ax[2].xaxis.set_visible(False)
+            ax = self.configure_figure(fig)
             
             ## Load the data
             o = self.load(x,y,z,name)
@@ -150,6 +133,35 @@ class graphs(loadable):
             return self.render(fig, self.cache(request, type))
         finally:
             plt.close(fig)
+    
+    def configure_figure(self, fig):
+        width = self.width *(8.0/640)
+        height = width *(6.0/8.0)
+        try:
+            ## Set up the axes
+            fig.set_size_inches((width,height,))
+            fig.set_facecolor(bgcolor)
+            fig.set_edgecolor(bgcolor)
+            fig.subplots_adjust(left=0.08,right=1-0.08,bottom=0.05,top=1-0.075)
+            ax = {}
+            
+            ax[0] = fig.add_subplot(111)
+            ax[0].yaxis.set_visible(False)
+            ax[0].set_axis_bgcolor(axcolor)
+            
+            ax[1] = fig.add_axes(ax[0].get_position(True), sharex=ax[0], frameon=False)
+            ax[1].yaxis.tick_left()
+            ax[1].yaxis.set_label_position('left')
+            ax[1].xaxis.set_visible(False)
+            
+            ax[2] = fig.add_axes(ax[0].get_position(True), sharex=ax[1], frameon=False)
+            ax[2].yaxis.tick_right()
+            ax[2].yaxis.set_label_position('right')
+            ax[2].xaxis.set_visible(False)
+        finally:
+            pass
+        
+        return ax
     
     def rank_axis_format(self, x, pos):
         if x == 0:
