@@ -20,7 +20,6 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  
 import os
-from django.conf.urls.defaults import include, patterns, url
 from django.http import HttpResponse, HttpResponseNotFound
 from Core.config import Config
 from Core.db import session
@@ -30,19 +29,9 @@ from Arthur.loadable import loadable, load
 graphing = Config.get("Misc", "graphing") != "disabled"
 caching  = Config.get("Misc", "graphing") == "cached"
 if graphing:
-    import matplotlib
-    matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     from matplotlib.ticker import FuncFormatter
-
-urlpatterns = patterns('',
-  url(r'^graphs/(?P<type>values|ranks)/', include(patterns('Arthur.views.graphs',
-    url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)', 'planet', name="planetG"),
-    url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)', 'galaxy', name="galaxyG"),
-    url(r'^(?P<name>[^/]+)', 'alliance', name="allianceG"),
-  ))),
-) if graphing else ()
 
 white   = '#ffffff'
 black   = '#000000'
