@@ -30,9 +30,9 @@ if graphing:
 
 urlpatterns = patterns('',
   url(r'^graphs/(?P<type>values|ranks)/', include(patterns('Arthur.views.graphs.graphs',
-    url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)', 'planet', name="planetG"),
-    url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)', 'galaxy', name="galaxyG"),
-    url(r'^(?P<name>[^/]+)', 'alliance', name="allianceG"),
+    url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)[. :\-](?P<z>\d+)$', 'planet', name="planetG"),
+    url(r'^(?P<x>\d+)[. :\-](?P<y>\d+)$', 'galaxy', name="galaxyG"),
+    url(r'^(?P<name>[^/]+)$', 'alliance', name="allianceG"),
   ))),
 ) if graphing else ()
 
