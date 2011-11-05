@@ -199,9 +199,9 @@ class search(loadable):
                 search[param] = 'checked="checked"'
                 continue
             
-            if ":" not in param:
+            arg, sep, val = param.partition(":")
+            if not (arg and val):
                 continue
-            arg, val = param.split(":",1)
             
             if arg in filters:
                 one, two = "", ""
